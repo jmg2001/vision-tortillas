@@ -183,7 +183,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             m_Xfer.XferNotifyContext = this;
             StatusLabelInfo.Text = "Online... Waiting grabbed images";
 
-         
+
 
             if (!CreateObjects())
             {
@@ -318,12 +318,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         //
         //**********************************************************************************
 
-       protected override void OnResize(EventArgs argsPaint)
-       {
-          if (m_ImageBox != null)
-             m_ImageBox.OnSize();
-          base.OnResize(argsPaint);
-       }
+       //protected override void OnResize(EventArgs argsPaint)
+       //{
+       //   if (m_ImageBox != null)
+       //      m_ImageBox.OnSize();
+       //   base.OnResize(argsPaint);
+       //}
 
        private void GigECameraDemoDlg_FormClosed(object sender, FormClosedEventArgs e)
        {
@@ -551,13 +551,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // Call base class function
             base.WndProc(ref msg);
         }
+
         private void saveimg()
         {
             Txt_Threshold.Text = threshold.ToString(); // Convertir int a string y asignarlo al TextBox
             // Ruta de la imagen BMP
             //string imagePath = @"C:\Program Files\Teledyne DALSA\Sapera\Demos\NET\GigECameraDemo\CSharp\imagen_gatillo.bmp";
-            string imagePath = @"imagen_gatillo.bmp";
+            string imagePath = "imagen_gatillo.bmp";
+
+            // Aqui va a ir el trigger
             Console.WriteLine("Trigger.");
+
             m_Buffers.Save(imagePath, "-format bmp", -1, 0);
  
             // Cargar la imagen
@@ -1677,6 +1681,16 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         }
 
         private void groupBox2_Enter(object sender, EventArgs e)
+        {
+
+        }
+
+        private void BtnLocalRemote_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Txt_MaxDiameter_TextChanged(object sender, EventArgs e)
         {
 
         }

@@ -506,6 +506,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.BtnLocalRemote.TabIndex = 75;
             this.BtnLocalRemote.Text = "Toggle Mode";
             this.BtnLocalRemote.UseVisualStyleBackColor = false;
+            this.BtnLocalRemote.Click += new System.EventHandler(this.BtnLocalRemote_Click);
             // 
             // GroupBox17
             // 
@@ -595,6 +596,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Txt_MaxDiameter.Size = new System.Drawing.Size(63, 20);
             this.Txt_MaxDiameter.TabIndex = 87;
             this.Txt_MaxDiameter.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.Txt_MaxDiameter.TextChanged += new System.EventHandler(this.Txt_MaxDiameter_TextChanged);
             // 
             // GroupBox5
             // 
@@ -793,7 +795,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.avg_diameter.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.avg_diameter.Location = new System.Drawing.Point(81, 49);
             this.avg_diameter.Name = "avg_diameter";
-            this.avg_diameter.Size = new System.Drawing.Size(0, 25);
+            this.avg_diameter.Size = new System.Drawing.Size(24, 25);
             this.avg_diameter.TabIndex = 0;
             this.avg_diameter.Text = "0";
             // 
