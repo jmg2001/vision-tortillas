@@ -42,6 +42,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         int threshold = 140;
         bool auto_threshold = true;
 
+        // Creamos una lista de colores
+        List<Color> colorList = new List<Color>();
+
+        int colorIndex = 0;
+
         // Crear una DataTable para almacenar la información
         DataTable dataTable = new DataTable();
 
@@ -93,9 +98,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 });
             }
         }
-
-
-
 
         public GigECameraDemoDlg()
         {
@@ -712,12 +714,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 int diameterMin = 2;
                 int areaMax = 10000;
                 int areaMin = 2000;
-
                 
                 // Encontrar los objetos circulares y actualizar el texto en el Label
                 UpdateLabelWithCircularObjects(binarizedImage, areaMin, areaMax, diameterMin, gridRows, gridCols);
-
-                
 
                 //ProcessBlobsAsync(binarizedImage, 100, 20000, 65);
 
@@ -777,8 +776,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             dataTable.Columns.Add("Área");
             dataTable.Columns.Add("diametroIA");
             dataTable.Columns.Add("diametroTriangulos");
-            dataTable.Columns.Add("Diámetro Vertical");
-            dataTable.Columns.Add("Diámetro Horizontal");
+            //dataTable.Columns.Add("Diámetro Vertical");
+            //dataTable.Columns.Add("Diámetro Horizontal");
             dataTable.Columns.Add("Compacidad");
         }
 
@@ -794,7 +793,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             double avg_diam = 0;
             int n = 0;
-            int a = 0;
 
             // Filtros tempranos y obtener resultados para cada objeto
             foreach (List<Point> connectedComponent in connectedComponents)
@@ -841,7 +839,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 ColorizePixelsAroundObject(binarizedImage, perimeters[n], redColor);
 
                 // Añadir una nueva fila a la DataTable
-                dataTable.Rows.Add(sector + 1, area, Math.Round(diametroIA, 3),Math.Round(diameterTriangles,3), majorDiameter, minorDiameter, Math.Round(compactness, 3));
+                // dataTable.Rows.Add(sector + 1, area, Math.Round(diametroIA, 3),Math.Round(diameterTriangles,3), majorDiameter, minorDiameter, Math.Round(compactness, 3));
+                dataTable.Rows.Add(sector + 1, area, Math.Round(diametroIA, 3), diameterTriangles,Math.Round(compactness, 3));
 
                 n++;
 
@@ -923,7 +922,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             int[,] labels = new int[binarizedImage.Width, binarizedImage.Height];
             int currentLabel = 0;
-            int n = 0;
+
+            // Creamos una nueva imagen para poder colorear
+            Bitmap paintImage = new Bitmap(binarizedImage);
+
+            // Agregar colores a la lista
+            colorList.Add(Color.Red);
+            colorList.Add(Color.Blue);
+            colorList.Add(Color.Green);
+            colorList.Add(Color.Yellow);
+            colorList.Add(Color.Magenta);
+            colorList.Add(Color.Cyan);
 
             for (int x = 0; x < binarizedImage.Width; x++)
             {
@@ -939,6 +948,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                         DepthFirstSearch(x, y, binarizedImage, labels, ref currentLabel, connectedComponent, borderPoints, perimeter);
 
+                        ColorizePixelsAroundObject(paintImage,connectedComponent, colorList[colorIndex]);
+
                         int area = connectedComponent.Count;
 
                         if (area < areaMin || area > areaMax)
@@ -947,14 +958,23 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                             continue;
                         }
 
+                        colorIndex++;
+
+                        if (colorIndex >= colorList.Count)
+                        {
+                            colorIndex = 0;
+                        }
+
                         connectedComponents.Add(connectedComponent);
                         perimeters.Add(perimeter);
 
                         // Reiniciar el contador de etiquetas para el próximo conjunto de píxeles conectados
                         currentLabel = 0;
+                    }
                 }
             }
-            }
+
+            paintImage.Save("C:\\Users\\Jesús\\Desktop\\paintImage.bmp");
 
             return (connectedComponents, perimeters);
         }
@@ -1007,7 +1027,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private double calculateDiameterTriangles(List<Point> component, Point center, Bitmap binarizedImage)
         {
-            double diameter = 0;
+            double diameter;
 
             // Radial X&Y increments along the radial
             int[] deltaX = { 1, 4, 2, 1, 1, 1, 0, -1, -1, -1, -2, -4, -1, -4, -2, -1, -1, -1, 0, 1, 1, 1, 2, 4 };
@@ -1034,10 +1054,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     newY += deltaY[i];
                     pixelColor = binarizedImage.GetPixel(newX, newY);
                 }
-                //Console.WriteLine(newX);
-                //Console.WriteLine(newY);
-                //Console.WriteLine(center.X);
-                //Console.WriteLine(center.Y);
 
                 radialLenght[i] = Math.Sqrt( Math.Pow((x - newX),2) + Math.Pow((y - newY),2) ) + correction[i];
                 avg_diameter += radialLenght[i];
@@ -1048,53 +1064,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return diameter;
         }
 
-        //private double calculateDiameterTriangles()
-        //{
-        //    // Just indexes
-        //    int i, j;
-
-        //    // Average, Max, Min of 12 radials
-        //    double average = new double();
-
-        //    // Total Radials lengths
-        //    float[] radialsLength = new float[12];
-
-        //    // Radial X&Y increments along the radial
-        //    int[] deltaX = { 1, 4, 2, 1, 1, 1, 0, -1, -1, -1, -2, -4, -1, -4, -2, -1, -1, -1, 0, 1, 1, 1, 2, 4 };
-        //    int[] deltaY = { 0, 1, 1, 1, 2, 4, 1, 4, 2, 1, 1, 1, 0, -1, -1, -1, -2, -4, -1, -4, -2, -1, -1, -1 };
-        //    int[] correction = { 0, -2, -1, 0, -1, -2, 0, -2, -1, 0, -1, -2, 0, -2, -1, 0, -1, -2, 0, -2, -1, 0, -1, -2 };
-
-        //    // X&Y Coordinates along the radial
-        //    int newX, newY;
-
-        //    // Radial found length
-        //    float[] radialLength = new float[24];
-
-        //    for (i = 1; i <= Blobs_Count; i++)
-        //    {
-        //        // Initialize Average
-        //        average = 0;
-
-        //        // Scan all radials
-        //        for (j = 0; j < 24; j++)
-        //        {
-        //            newX = Blob[i].xc;
-        //            newY = Blob[i].yc;
-        //            while (Output_Image[newX, newY] != 0)
-        //            {
-        //                newX += deltaX[j];
-        //                newY += deltaY[j];
-        //            }
-        //            radialLength[j] = (float)Math.Sqrt(Math.Pow(Blob[i].xc - newX, 2) + Math.Pow(Blob[i].yc - newY, 2)) + correction[j];
-        //            average += radialLength[j];
-        //        }
-
-        //        // Radial Averages in pixels
-        //        average /= 12;
-
-        //    }
-        //    return average;
-        //}
 
         private double CalculateDiameterFromArea(int area)
         {

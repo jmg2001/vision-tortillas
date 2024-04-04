@@ -97,6 +97,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.tabControl2 = new System.Windows.Forms.TabControl();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.tabPage5 = new System.Windows.Forms.TabPage();
             this.GroupBox13 = new System.Windows.Forms.GroupBox();
@@ -144,7 +145,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Cmd_video = new System.Windows.Forms.Button();
             this.Cmd_Calibration = new System.Windows.Forms.Button();
             this.Cmd_Save = new System.Windows.Forms.Button();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.toolStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.groupBox_File_Control.SuspendLayout();
@@ -164,6 +164,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.tabPage2.SuspendLayout();
             this.tabControl2.SuspendLayout();
             this.tabPage3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.tabPage4.SuspendLayout();
             this.tabPage5.SuspendLayout();
             this.GroupBox13.SuspendLayout();
@@ -172,7 +173,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.TableLayoutPanel3.SuspendLayout();
             this.GroupBox10.SuspendLayout();
             this.GroupBox9.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // toolStrip1
@@ -781,7 +781,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.groupBox2.Size = new System.Drawing.Size(237, 111);
             this.groupBox2.TabIndex = 114;
             this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Promedio diametro ia";
+            this.groupBox2.Text = "Promedio diametro triangulos";
             this.groupBox2.Enter += new System.EventHandler(this.groupBox2_Enter);
             // 
             // avg_diameter
@@ -828,6 +828,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.tabPage3.Text = "Image";
             this.tabPage3.UseVisualStyleBackColor = true;
             this.tabPage3.Click += new System.EventHandler(this.tabPage3_Click);
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Location = new System.Drawing.Point(291, 137);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(425, 361);
+            this.pictureBox1.TabIndex = 0;
+            this.pictureBox1.TabStop = false;
+            this.pictureBox1.Visible = false;
             // 
             // tabPage4
             // 
@@ -1337,15 +1346,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Cmd_Save.Text = "Save";
             this.Cmd_Save.UseVisualStyleBackColor = false;
             // 
-            // pictureBox1
-            // 
-            this.pictureBox1.Location = new System.Drawing.Point(291, 137);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(425, 361);
-            this.pictureBox1.TabIndex = 0;
-            this.pictureBox1.TabStop = false;
-            this.pictureBox1.Visible = false;
-            // 
             // GigECameraDemoDlg
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1387,6 +1387,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.tabPage2.ResumeLayout(false);
             this.tabControl2.ResumeLayout(false);
             this.tabPage3.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.tabPage4.ResumeLayout(false);
             this.tabPage5.ResumeLayout(false);
             this.GroupBox13.ResumeLayout(false);
@@ -1399,7 +1400,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.GroupBox10.ResumeLayout(false);
             this.GroupBox9.ResumeLayout(false);
             this.GroupBox9.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
