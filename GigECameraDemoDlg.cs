@@ -34,7 +34,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
     public partial class GigECameraDemoDlg : Form
     {
         RECT UserROI = new RECT();
-        List<Component> Components = new List<Component>();
         long[] Histogram = new long[256];
         private DIP DIP = new DIP();
         public int Blobs_Count;
@@ -161,36 +160,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
              this.StatusLabelInfo.Text = str;
           }
        }
-
-        public struct Component
-        {
-            public int area;
-            public int perimeter;
-            public int xc;
-            public int yc;
-            public double m20;
-            public double m02;
-            public double m11;
-            public int sumx;
-            public double sumx2;
-            public int sumy;
-            public double sumy2;
-            public int sumxy;
-            public int npixels;
-            public double comp;
-            public double hu1;
-            public double hu2;
-            public double lambda1;
-            public double lambda2;
-            public double ratio;
-            public double dia1;
-            public double dia2;
-            public double spots;
-            public double diameter;
-            public double Max;
-            public double Min;
-            public double Stdev;
-        }
 
         //*****************************************************************************************
         //
@@ -807,6 +776,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             dataTable.Columns.Add("Número de Sector");
             dataTable.Columns.Add("Área");
             dataTable.Columns.Add("diametroIA");
+            dataTable.Columns.Add("diametroTriangulos");
             dataTable.Columns.Add("Diámetro Vertical");
             dataTable.Columns.Add("Diámetro Horizontal");
             dataTable.Columns.Add("Compacidad");
@@ -824,6 +794,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             double avg_diam = 0;
             int n = 0;
+            int a = 0;
 
             // Filtros tempranos y obtener resultados para cada objeto
             foreach (List<Point> connectedComponent in connectedComponents)
@@ -834,7 +805,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 // Este diamtro lo vamos a dejar para despues
                 double diametroIA = CalculateDiameterFromArea(area); 
-                avg_diam += diametroIA;
                 
                 // Calcular los diámetro mayor y menor del objeto
                 int majorDiameter = CalculateMajorDiameter(connectedComponent, 1);
@@ -847,6 +817,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 double perimeter = perimeters[n].Count;
 
                 Point center = CalculateCenter(connectedComponent);
+
+                // Calculamos el diametro
+                double diameterTriangles = calculateDiameterTriangles(connectedComponent, center, binarizedImage);
+                avg_diam += diametroIA;
 
                 // Calcular la compacidad
                 double compactness = CalculateCompactness(area, perimeter);
@@ -867,21 +841,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 ColorizePixelsAroundObject(binarizedImage, perimeters[n], redColor);
 
                 // Añadir una nueva fila a la DataTable
-                dataTable.Rows.Add(sector + 1, area, Math.Round(diametroIA, 3), majorDiameter, minorDiameter, Math.Round(compactness, 3));
+                dataTable.Rows.Add(sector + 1, area, Math.Round(diametroIA, 3),Math.Round(diameterTriangles,3), majorDiameter, minorDiameter, Math.Round(compactness, 3));
 
                 n++;
 
             }
 
             Console.WriteLine(perimeters.Count);
-
-            //foreach (List<Point> perimeter in perimeters)
-            //{
-            //    // Colorear píxeles alrededor del objeto con rojo
-            //    Color redColor = Color.Red;
-
-            //    ColorizePixelsAroundObject(binarizedImage, perimeter, redColor);
-            //}
 
             avg_diam /= n;
 
@@ -971,9 +937,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         List<Point> connectedComponent = new List<Point>();
                         List<Point> perimeter = new List<Point>();
 
-                        Component tempComponent = new Component();
-
-                        DepthFirstSearch(x, y, binarizedImage, labels, ref currentLabel, connectedComponent, borderPoints, perimeter, tempComponent);
+                        DepthFirstSearch(x, y, binarizedImage, labels, ref currentLabel, connectedComponent, borderPoints, perimeter);
 
                         int area = connectedComponent.Count;
 
@@ -982,29 +946,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                             currentLabel = 0;
                             continue;
                         }
-
-                        //tempComponent.area = area;
-                        //tempComponent.npixels = area;
-
-                        //tempComponent.xc = tempComponent.sumx / tempComponent.npixels;
-                        //tempComponent.yc = tempComponent.sumy / tempComponent.npixels;
-                        //tempComponent.m20 = tempComponent.sumx2 - tempComponent.xc * tempComponent.sumx;
-                        //tempComponent.m02 = tempComponent.sumy2 - tempComponent.yc * tempComponent.sumy;
-                        //tempComponent.m11 = tempComponent.sumxy - tempComponent.yc * tempComponent.sumx;
-                        //tempComponent.comp = tempComponent.perimeter ^ 2 / tempComponent.area;
-                        //tempComponent.hu1 = (tempComponent.m20 + tempComponent.m02) / Math.Pow(tempComponent.area,2);
-                        //tempComponent.hu2 = Math.Pow((tempComponent.m20 - tempComponent.m02) / Math.Pow(tempComponent.area, 2),2) + 4 * tempComponent.m11 / Math.Pow(tempComponent.area, 2);
-                        //tempComponent.lambda1 = 0.5 * ((tempComponent.m20 + tempComponent.m02) + Math.Sqrt(Math.Pow(tempComponent.m20 + tempComponent.m02,2) - 4 * (tempComponent.m02 * tempComponent.m20 - Math.Pow(tempComponent.m11,2))));
-                        //tempComponent.lambda2 = 0.5 * ((tempComponent.m20 + tempComponent.m02) - Math.Sqrt(Math.Pow(tempComponent.m20 + tempComponent.m02,2) - 4 * (tempComponent.m02 * tempComponent.m20 - Math.Pow(tempComponent.m11,2))));
-                        //tempComponent.dia1 = (4 * Math.Sqrt(tempComponent.lambda1 / (tempComponent.npixels - 1)));
-                        //tempComponent.dia2 = (4 * Math.Sqrt(tempComponent.lambda2 / (tempComponent.npixels - 1)));
-                        //tempComponent.ratio = tempComponent.dia2 / tempComponent.dia1;
-                        //tempComponent.spots = 100 * (tempComponent.spots / tempComponent.area);
-
-                        //Components[0] = tempComponent;
-
-                        //Console.WriteLine(tempComponent.dia1);
-                        //Console.WriteLine(tempComponent.dia2);
 
                         connectedComponents.Add(connectedComponent);
                         perimeters.Add(perimeter);
@@ -1018,18 +959,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return (connectedComponents, perimeters);
         }
 
-        private void DepthFirstSearch(int x, int y, Bitmap binarizedImage, int[,] labels, ref int currentLabel, List<Point> connectedComponent, List<Point> borderPoints, List<Point> perimeter, Component tempComponent)
+        private void DepthFirstSearch(int x, int y, Bitmap binarizedImage, int[,] labels, ref int currentLabel, List<Point> connectedComponent, List<Point> borderPoints, List<Point> perimeter)
         {
             if (x < 0 || x >= binarizedImage.Width || y < 0 || y >= binarizedImage.Height)
             {
                 return;
             }
-
-            //tempComponent.sumx += x + UserROI.Top;
-            //tempComponent.sumx += y + UserROI.Left;
-            //tempComponent.sumx2 += Math.Pow((x + UserROI.Top),2);
-            //tempComponent.sumy2 += Math.Pow((y + UserROI.Top), 2);
-            //tempComponent.sumxy += (x + UserROI.Top) * (y + UserROI.Left);
 
             Color pixelColor = binarizedImage.GetPixel(x, y);
 
@@ -1045,10 +980,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     perimeter.Add(new Point(x, y));
                 }
 
-                DepthFirstSearch(x + 1, y, binarizedImage, labels, ref currentLabel, connectedComponent, borderPoints, perimeter, tempComponent);
-                DepthFirstSearch(x - 1, y, binarizedImage, labels, ref currentLabel, connectedComponent, borderPoints, perimeter, tempComponent);
-                DepthFirstSearch(x, y + 1, binarizedImage, labels, ref currentLabel, connectedComponent, borderPoints, perimeter, tempComponent);
-                DepthFirstSearch(x, y - 1, binarizedImage, labels, ref currentLabel, connectedComponent, borderPoints, perimeter, tempComponent);
+                DepthFirstSearch(x + 1, y, binarizedImage, labels, ref currentLabel, connectedComponent, borderPoints, perimeter);
+                DepthFirstSearch(x - 1, y, binarizedImage, labels, ref currentLabel, connectedComponent, borderPoints, perimeter);
+                DepthFirstSearch(x, y + 1, binarizedImage, labels, ref currentLabel, connectedComponent, borderPoints, perimeter);
+                DepthFirstSearch(x, y - 1, binarizedImage, labels, ref currentLabel, connectedComponent, borderPoints, perimeter);
             }
         }
 
@@ -1070,6 +1005,48 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return false;
         }
 
+        private double calculateDiameterTriangles(List<Point> component, Point center, Bitmap binarizedImage)
+        {
+            double diameter = 0;
+
+            // Radial X&Y increments along the radial
+            int[] deltaX = { 1, 4, 2, 1, 1, 1, 0, -1, -1, -1, -2, -4, -1, -4, -2, -1, -1, -1, 0, 1, 1, 1, 2, 4 };
+            int[] deltaY = { 0, 1, 1, 1, 2, 4, 1, 4, 2, 1, 1, 1, 0, -1, -1, -1, -2, -4, -1, -4, -2, -1, -1, -1 };
+            int[] correction = { 0, -2, -1, 0, -1, -2, 0, -2, -1, 0, -1, -2, 0, -2, -1, 0, -1, -2, 0, -2, -1, 0, -1, -2 };
+
+            double avg_diameter = 0;
+
+            int x = center.X;
+            int y = center.Y;
+
+            int newX = x;
+            int newY = y;
+
+            double[] radialLenght = new double[24];
+
+            for (int i = 0; i<24; i++)
+            {
+                Color pixelColor = binarizedImage.GetPixel(newX, newY);
+
+                while (pixelColor.GetBrightness() != 1)
+                {
+                    newX += deltaX[i];
+                    newY += deltaY[i];
+                    pixelColor = binarizedImage.GetPixel(newX, newY);
+                }
+                //Console.WriteLine(newX);
+                //Console.WriteLine(newY);
+                //Console.WriteLine(center.X);
+                //Console.WriteLine(center.Y);
+
+                radialLenght[i] = Math.Sqrt( Math.Pow((x - newX),2) + Math.Pow((y - newY),2) ) + correction[i];
+                avg_diameter += radialLenght[i];
+            }
+
+            diameter =  avg_diameter / 12;
+
+            return diameter;
+        }
 
         //private double calculateDiameterTriangles()
         //{
