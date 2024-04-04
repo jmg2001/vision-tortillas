@@ -783,17 +783,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void UpdateLabelWithCircularObjects(Bitmap binarizedImage, int areaMin, int areaMax, double diameterMin, int gridRows, int gridCols)
         {
-            Stopwatch stopwatch = new Stopwatch();
-
             
             // Aplicar etiquetado de componentes conectados
             var result = LabelConnectedComponents(binarizedImage);
             List<List<Point>> connectedComponents = result.Item1;
-            List<Point> borderPoints = result.Item2;
-            // List<List<Point>> connectedComponents = LabelConnectedComponents(binarizedImage);
+            List<List<Point>> perimeters = result.Item2;
 
             dataTable.Clear();
-            
 
             double avg_diam = 0;
             int n = 0;
@@ -805,18 +801,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 // Calcular el área del objeto (cantidad de píxeles)
                 int area = connectedComponent.Count;
 
-                
-
                 // Verificar el filtro de área mínima y máxima
                 if (area < areaMin || area > areaMax)
                 {
+                    n++;
                     continue;
                 }
+                // Este diamtro lo vamos a dejar para despues
                 double diametroIA = CalculateDiameterFromArea(area); 
-
                 avg_diam += diametroIA;
-                n++;
-
                 
                 // Calcular los diámetro mayor y menor del objeto
                 int majorDiameter = CalculateMajorDiameter(connectedComponent, 1);
@@ -826,22 +819,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 double diameter = CalculateDiameter(connectedComponent, 1);
 
                 // Obtener el perímetro del objeto
-                double perimeter = CalculatePerimeter(diameter);
+                double perimeter = perimeters[n].Count;
 
                 Point center = CalculateCenter(connectedComponent);
 
                 // Calcular la compacidad
                 double compactness = CalculateCompactness(area, perimeter);
                 
-                
                 // En tu función ColorizePixelsAroundObject, después de colorear los píxeles, calcular el sector
                 int sector = CalculateSector(center, binarizedImage.Width, binarizedImage.Height, gridRows, gridCols);
-
-                stopwatch.Start();
-                // Colorear píxeles alrededor del objeto con rojo
-                Color redColor = Color.Red;
-                ColorizePixelsAroundObject(binarizedImage, borderPoints, redColor);
-                stopwatch.Stop();
 
                 // Dibujar un punto en el centro del objeto
                 DrawCenterPoint(binarizedImage, center);
@@ -852,15 +838,25 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 // Dibujar el numero del sector
                 DrawSectorNumber(binarizedImage, center, sector);
 
+                Color redColor = Color.Red;
+                ColorizePixelsAroundObject(binarizedImage, perimeters[n], redColor);
+
                 // Añadir una nueva fila a la DataTable
                 dataTable.Rows.Add(sector + 1, area, Math.Round(diametroIA, 3), majorDiameter, minorDiameter, Math.Round(compactness, 3));
 
-                
+                n++;
 
-                Console.WriteLine($"Tiempo transcurrido: {stopwatch.ElapsedMilliseconds} ms");
             }
 
-            
+            Console.WriteLine(perimeters.Count);
+
+            //foreach (List<Point> perimeter in perimeters)
+            //{
+            //    // Colorear píxeles alrededor del objeto con rojo
+            //    Color redColor = Color.Red;
+
+            //    ColorizePixelsAroundObject(binarizedImage, perimeter, redColor);
+            //}
 
             avg_diam /= n;
 
@@ -925,12 +921,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
-        private (List<List<Point>>, List<Point>) LabelConnectedComponents(Bitmap binarizedImage)
+        private (List<List<Point>>, List<List<Point>>) LabelConnectedComponents(Bitmap binarizedImage)
         {
+            // Listas para contar los puntos de las figuras y los puntos que son bordes
             List<List<Point>> connectedComponents = new List<List<Point>>();
             List<Point> borderPoints = new List<Point>();
+
             // Inicializar la lista de perímetros para evitar NullReferenceException
-            List<int> perimeters = new List<int>();
+            List<List<Point>> perimeters = new List<List<Point>>();
 
             int[,] labels = new int[binarizedImage.Width, binarizedImage.Height];
             int currentLabel = 0;
@@ -945,10 +943,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     if (pixelColor.GetBrightness() == 0 && labels[x, y] == 0)
                     {
                         List<Point> connectedComponent = new List<Point>();
+                        List<Point> perimeter = new List<Point>();
 
-                        DepthFirstSearch(x, y, binarizedImage, labels, ref currentLabel, connectedComponent, borderPoints);
+                        DepthFirstSearch(x, y, binarizedImage, labels, ref currentLabel, connectedComponent, borderPoints, perimeter);
 
                         connectedComponents.Add(connectedComponent);
+                        perimeters.Add(perimeter);
 
                         // Reiniciar el contador de etiquetas para el próximo conjunto de píxeles conectados
                         currentLabel = 0;
@@ -956,10 +956,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
             }
 
-            return (connectedComponents, borderPoints);
+            return (connectedComponents, perimeters);
         }
 
-        private void DepthFirstSearch(int x, int y, Bitmap binarizedImage, int[,] labels, ref int currentLabel, List<Point> connectedComponent, List<Point> borderPoints)
+        private void DepthFirstSearch(int x, int y, Bitmap binarizedImage, int[,] labels, ref int currentLabel, List<Point> connectedComponent, List<Point> borderPoints, List<Point> perimeter)
         {
             if (x < 0 || x >= binarizedImage.Width || y < 0 || y >= binarizedImage.Height)
             {
@@ -974,21 +974,16 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 connectedComponent.Add(new Point(x, y));
 
                 // Verificar si el punto es un borde de la forma encontrada
-                bool isBorder = false;
                 if (IsShapeBorder(x, y, binarizedImage))
                 {
-                    isBorder = true;
-                }
-
-                if (isBorder)
-                {
                     borderPoints.Add(new Point(x, y));
+                    perimeter.Add(new Point(x, y));
                 }
 
-                DepthFirstSearch(x + 1, y, binarizedImage, labels, ref currentLabel, connectedComponent, borderPoints);
-                DepthFirstSearch(x - 1, y, binarizedImage, labels, ref currentLabel, connectedComponent, borderPoints);
-                DepthFirstSearch(x, y + 1, binarizedImage, labels, ref currentLabel, connectedComponent, borderPoints);
-                DepthFirstSearch(x, y - 1, binarizedImage, labels, ref currentLabel, connectedComponent, borderPoints);
+                DepthFirstSearch(x + 1, y, binarizedImage, labels, ref currentLabel, connectedComponent, borderPoints, perimeter);
+                DepthFirstSearch(x - 1, y, binarizedImage, labels, ref currentLabel, connectedComponent, borderPoints, perimeter);
+                DepthFirstSearch(x, y + 1, binarizedImage, labels, ref currentLabel, connectedComponent, borderPoints, perimeter);
+                DepthFirstSearch(x, y - 1, binarizedImage, labels, ref currentLabel, connectedComponent, borderPoints, perimeter);
             }
         }
 
@@ -1128,15 +1123,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return diameter;
         }
 
-        private double CalculatePerimeter(double diameter)
-        {
-            const double pi = Math.PI;
+        //private double CalculatePerimeter(double diameter)
+        //{
+        //    const double pi = Math.PI;
 
-            // Calcular el perímetro usando la fórmula P = π * d
-            double perimeter = pi * diameter;
+        //    // Calcular el perímetro usando la fórmula P = π * d
+        //    double perimeter = pi * diameter;
 
-            return perimeter;
-        }
+        //    return perimeter;
+        //}
 
         private double CalculateCompactness(int area, double perimeter)
         {
