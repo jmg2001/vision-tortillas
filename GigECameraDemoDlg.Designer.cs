@@ -444,7 +444,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             this.Cmd_Process_Data.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.Cmd_Process_Data.BackColor = System.Drawing.Color.Silver;
-            this.Cmd_Process_Data.Location = new System.Drawing.Point(87, 10);
+            this.Cmd_Process_Data.Location = new System.Drawing.Point(90, 10);
             this.Cmd_Process_Data.Name = "Cmd_Process_Data";
             this.Cmd_Process_Data.Size = new System.Drawing.Size(70, 55);
             this.Cmd_Process_Data.TabIndex = 73;
@@ -456,7 +456,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             this.Cmd_Update_Viewport.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.Cmd_Update_Viewport.BackColor = System.Drawing.Color.Silver;
-            this.Cmd_Update_Viewport.Location = new System.Drawing.Point(160, 11);
+            this.Cmd_Update_Viewport.Location = new System.Drawing.Point(164, 11);
             this.Cmd_Update_Viewport.Name = "Cmd_Update_Viewport";
             this.Cmd_Update_Viewport.Size = new System.Drawing.Size(69, 55);
             this.Cmd_Update_Viewport.TabIndex = 72;
@@ -684,7 +684,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.grid_9.TabIndex = 70;
             this.grid_9.Text = "9 Grid";
             this.grid_9.UseVisualStyleBackColor = false;
-            this.grid_9.Click += new System.EventHandler(this.Cmd_Program_1_Click);
+            this.grid_9.Click += new System.EventHandler(this.grid_9_Click);
             // 
             // GB_Threshold
             // 

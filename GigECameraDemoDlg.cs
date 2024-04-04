@@ -774,10 +774,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             dataTable = new DataTable();
             dataTable.Columns.Add("Número de Sector");
             dataTable.Columns.Add("Área");
-            dataTable.Columns.Add("diametroIA");
-            dataTable.Columns.Add("diametroTriangulos");
-            //dataTable.Columns.Add("Diámetro Vertical");
-            //dataTable.Columns.Add("Diámetro Horizontal");
+            dataTable.Columns.Add("Diámetro AI");
+            dataTable.Columns.Add("Diámetro Triangulos");
+            dataTable.Columns.Add("Diámetro mayor (triangulos)");
+            dataTable.Columns.Add("Diámetro menor (triangulos)");
             dataTable.Columns.Add("Compacidad");
         }
 
@@ -817,8 +817,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 Point center = CalculateCenter(connectedComponent);
 
                 // Calculamos el diametro
-                double diameterTriangles = calculateDiameterTriangles(connectedComponent, center, binarizedImage);
-                avg_diam += diametroIA;
+                (double diameterTriangles, double maxDiameter, double minDiameter) = calculateDiameterTriangles(connectedComponent, center, binarizedImage);
+                avg_diam += diameterTriangles;
 
                 // Calcular la compacidad
                 double compactness = CalculateCompactness(area, perimeter);
@@ -840,7 +840,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 // Añadir una nueva fila a la DataTable
                 // dataTable.Rows.Add(sector + 1, area, Math.Round(diametroIA, 3),Math.Round(diameterTriangles,3), majorDiameter, minorDiameter, Math.Round(compactness, 3));
-                dataTable.Rows.Add(sector + 1, area, Math.Round(diametroIA, 3), diameterTriangles,Math.Round(compactness, 3));
+                dataTable.Rows.Add(sector + 1, area, Math.Round(diametroIA, 3), diameterTriangles, maxDiameter, minDiameter,Math.Round(compactness, 3));
 
                 n++;
 
@@ -1025,13 +1025,19 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return false;
         }
 
-        private double calculateDiameterTriangles(List<Point> component, Point center, Bitmap binarizedImage)
+        private (double, double, double) calculateDiameterTriangles(List<Point> component, Point center, Bitmap binarizedImage)
         {
-            double diameter;
+            double diameter, maxDiameter, minDiameter;
+
+            maxDiameter = 0; minDiameter = 0;
 
             // Radial X&Y increments along the radial
-            int[] deltaX = { 1, 4, 2, 1, 1, 1, 0, -1, -1, -1, -2, -4, -1, -4, -2, -1, -1, -1, 0, 1, 1, 1, 2, 4 };
-            int[] deltaY = { 0, 1, 1, 1, 2, 4, 1, 4, 2, 1, 1, 1, 0, -1, -1, -1, -2, -4, -1, -4, -2, -1, -1, -1 };
+            //int[] deltaX = { 1, 4, 2, 1, 1, 1, 0,       -1, -1, -1, -2, -4, -1, -4, -2, -1, -1, -1,  0,  1,  1,  1,  2,  4 };
+            //int[] deltaY = { 0, 1, 1, 1, 2, 4, 1,        4,  2,  1,  1,  1,  0, -1, -1, -1, -2, -4, -1, -4, -2, -1, -1, -1 };
+
+            int[] deltaX = { 1, 4, 2, 1, 1, 1,          0, -1, -1, -1, -2, -4,      -1, -4, -2, -1, -1, -1,          0,  1,  1,  1,  2,  4};
+            int[] deltaY = { 0, 1, 1, 1, 2, 4,          1,  4,  2,  1,  1,  1,       0, -1, -1, -1, -2, -4,         -1, -4, -2, -1, -1, -1};
+
             int[] correction = { 0, -2, -1, 0, -1, -2, 0, -2, -1, 0, -1, -2, 0, -2, -1, 0, -1, -2, 0, -2, -1, 0, -1, -2 };
 
             double avg_diameter = 0;
@@ -1061,7 +1067,18 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             diameter =  avg_diameter / 12;
 
-            return diameter;
+            List<double> diameters = new List<double>();
+
+            for (int i = 0; i < 12; i++)
+            {
+                double diam = radialLenght[i] + radialLenght[i+12];
+                diameters.Add(diam);
+            }
+
+            maxDiameter = diameters.Max();
+            minDiameter = diameters.Min();
+
+            return (diameter, maxDiameter, minDiameter);
         }
 
 
@@ -1530,25 +1547,26 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void grid_4_Click(object sender, EventArgs e)
         {
-            gridRows = 4;
-            gridCols = 4;
+            gridRows = 2;
+            gridCols = 2;
         }
 
         private void grid_5_Click(object sender, EventArgs e)
         {
-            gridRows = 5;
-            gridCols = 5;
+            gridRows = 3;
+            gridCols = 3;
         }
 
         private void grid_6_Click(object sender, EventArgs e)
         {
-            gridRows = 6;
-            gridCols = 6;
+            gridRows = 2;
+            gridCols = 3;
         }
 
-        private void Cmd_Program_1_Click(object sender, EventArgs e)
+        private void grid_9_Click(object sender, EventArgs e)
         {
-
+            gridRows = 3;
+            gridCols = 3;
         }
 
         private void Cmd_Program_5_Click(object sender, EventArgs e)
