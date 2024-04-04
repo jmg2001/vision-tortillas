@@ -9,7 +9,6 @@ using DALSA.SaperaLT.SapClassGui;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
-using System.Drawing;
 using AForge.Imaging;
 using AForge.Imaging.Filters;
 using System.IO;
@@ -21,6 +20,12 @@ using System.Data;
 using System.Drawing.Drawing2D;
 using System.Threading;
 using Emgu.CV.Ocl;
+using Emgu.CV;
+using Emgu.CV.CvEnum;
+using Emgu.CV.Structure;
+using Emgu.CV.Util;
+
+using System.Diagnostics;
 
 //using OpenCvSharp;
 
@@ -29,13 +34,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
     public partial class GigECameraDemoDlg : Form
     {
         RECT UserROI = new RECT();
-        private PictureBox pictureBox1;
         long[] Histogram = new long[256];
         private DIP DIP = new DIP();
         public int Blobs_Count;
         public int X_Lines;
         public int Y_Columns;
         int threshold = 140;
+        bool auto_threshold = true;
 
         // Crear una DataTable para almacenar la información
         DataTable dataTable = new DataTable();
@@ -45,8 +50,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         
         int ThresholdValue = 100;
         int Max_Threshold = 255;
-        int OffsetLeft = 2;
-        int OffsetTop = 2;
+        int OffsetLeft = 0;
+        int OffsetTop = 0;
         int gridRows = 3;
         int gridCols = 3;
         private bool isActivatedProcessData = false; // Variable de estado para el botón tipo toggle
@@ -57,6 +62,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         //
         // This function is called each time an image has been transferred into system memory by the transfer object
         //
+
         private void xfer_XferNotify(object sender, SapXferNotifyEventArgs argsNotify)
         {
             GigECameraDemoDlg GigeDlg = argsNotify.Context as GigECameraDemoDlg;
@@ -568,29 +574,90 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             Bitmap originalImage = new Bitmap(imagePath);
 
             //objeto ROI
-            UserROI.Top = 70;
-            UserROI.Left = 159;
-            UserROI.Right = 555;
-            UserROI.Bottom = 472;
+            UserROI.Top = 14;
+            UserROI.Left = 161;
+            UserROI.Right = 525;
+            UserROI.Bottom = 408;
 
-            // Aplicar la matriz de 0 a 255 y el umbral
-            Bitmap processedImage = ApplyMatrixAndThreshold(originalImage, UserROI); //aqui se guarda la imagen con filtro
+            //objeto ROI
+            UserROI.Top = 14;
+            UserROI.Left = 159;
+            UserROI.Right = 535;
+            UserROI.Bottom = 420;
 
             // Obtener BitsPerPixel y PixelPerLine
             int bitsPerPixel = System.Drawing.Image.GetPixelFormatSize(originalImage.PixelFormat);
             int pixelPerLine = originalImage.Width;
+
+            // Aplicar la matriz de 0 a 255 y el umbral
+            ImageHistogram(bitsPerPixel, pixelPerLine, originalImage);
+            Bitmap processedImage = ApplyMatrixAndThreshold(originalImage, UserROI); //aqui se guarda la imagen con filtro
+
             // Obtener líneas y columnas
             X_Lines = processedImage.Height;
             Y_Columns = processedImage.Width;
 
             // Liberar recursos de la imagen binarizada
             originalImage.Dispose();
+
             byte[,] Input_Image = new byte[X_Lines + 1, Y_Columns + 1];
-            byte[,] Output_Image = new byte[X_Lines + 1, Y_Columns + 1];
-            ImageHistogram(bitsPerPixel, pixelPerLine, processedImage);
-            ImageBinarize(Input_Image, processedImage);
+
+            // byte[,] Output_Image = new byte[X_Lines + 1, Y_Columns + 1];
+
+            // ImageBinarize(Input_Image, processedImage);
 
         }
+
+        private int CalculateOtsuThreshold()
+        {
+            long totalPixels = 0;
+            for (int i = 0; i < Histogram.Length; i++)
+            {
+                totalPixels += Histogram[i];
+            }
+
+            double sum = 0;
+            for (int i = 0; i < Histogram.Length; i++)
+            {
+                sum += i * Histogram[i];
+            }
+
+            double sumB = 0;
+            long wB = 0;
+            long wF = 0;
+
+            double varMax = 0;
+            int threshold = 0;
+
+            for (int i = 0; i < Histogram.Length; i++)
+            {
+                wB += Histogram[i];
+                if (wB == 0)
+                    continue;
+
+                wF = totalPixels - wB;
+                if (wF == 0)
+                    break;
+
+                sumB += i * Histogram[i];
+
+                double mB = sumB / wB;
+                double mF = (sum - sumB) / wF;
+
+                double varBetween = wB * wF * (mB - mF) * (mB - mF);
+
+                if (varBetween > varMax)
+                {
+                    varMax = varBetween;
+                    threshold = i;
+                }
+            }
+
+            return threshold;
+        }
+
+
+
         private void Cmd_Trigger_Click(object sender, EventArgs e)
         {
             this.StatusLabelInfo.Text = "";
@@ -602,7 +669,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     UpdateControls();
                     // Para activar el botón
                     Cmd_Trigger.BackColor = DefaultBackColor; // Restaurar el color de fondo predeterminado
-                    // Cmd_Trigger.Text = "Habilitado";
+                    Cmd_Trigger.Text = "Running...";
                 }
             }
            
@@ -617,7 +684,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     UpdateControls();
                     // Para desactivar el botón
                     Cmd_Trigger.BackColor = Color.Gray; // Cambiar el color de fondo a gris
-                    // Cmd_Trigger.Text = "Deshabilitado"; // Cambiar el texto cuando está desactivado
+                    Cmd_Trigger.Text = "Run"; // Cambiar el texto cuando está desactivado
                 }
             }
         }
@@ -635,17 +702,31 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 // Cargar la imagen
                 Bitmap originalImage = new Bitmap(imagePath);
 
-                // Configurar el PictureBox para ajustar automáticamente al tamaño de la imagen
+                //// Configurar el PictureBox para ajustar automáticamente al tamaño de la imagen
                 pictureBox1.SizeMode = PictureBoxSizeMode.AutoSize;
 
                 // Mostrar la imagen en el PictureBox
                 pictureBox1.Image = originalImage;
 
+                // originalImage.Save("C:\\Users\\Jesús\\Desktop\\miImagenGuardada.png");
+                // Console.WriteLine(originalImage.Size);
+
                 // Realizar la binarización con el color del fondo como parámetro
                 Bitmap binarizedImage = BinarizeImage(originalImage, backgroundColor);
 
+                // binarizedImage.Save("C:\\Users\\Jesús\\Desktop\\miImagenGuardada2.png");
+                // Console.WriteLine(binarizedImage.Size);
+
+                int diameterMin = 2;
+                int areaMax = 10000;
+                int areaMin = 2000;
+
+                
                 // Encontrar los objetos circulares y actualizar el texto en el Label
-                 UpdateLabelWithCircularObjects(binarizedImage,100,2000, 60, gridRows, gridCols);
+                UpdateLabelWithCircularObjects(binarizedImage, areaMin, areaMax, diameterMin, gridRows, gridCols);
+
+                
+
                 //ProcessBlobsAsync(binarizedImage, 100, 20000, 65);
 
                 // Liberar recursos de la imagen binarizada
@@ -658,10 +739,24 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
-
-   
         private Bitmap BinarizeImage(Bitmap originalImage, Color backgroundColor)
         {
+            try
+            {
+                if (auto_threshold)
+                {
+                    threshold = CalculateOtsuThreshold();
+                }
+                else
+                {
+                    threshold = int.Parse(Txt_Threshold.Text);
+                }
+            }
+            catch (FormatException)
+            {
+                // Manejar el error de formato incorrecto aquí
+            }
+
             Bitmap binarizedImage = new Bitmap(originalImage.Width, originalImage.Height);
 
             for (int x = 0; x < originalImage.Width; x++)
@@ -683,79 +778,79 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return binarizedImage;
         }
 
-        private async void ProcessBlobsAsync(Bitmap binarizedImage, int areaMin, int areaMax, double diameterMin)
-        {
-            // Aplicar etiquetado de componentes conectados
-            List<List<Point>> connectedComponents = LabelConnectedComponents(binarizedImage);
+        //private async void ProcessBlobsAsync(Bitmap binarizedImage, int areaMin, int areaMax, double diameterMin)
+        //{
+        //    // Aplicar etiquetado de componentes conectados
+        //    List<List<Point>> connectedComponents = LabelConnectedComponents(binarizedImage);
 
-            // Contador adicional para asignar números solo a los objetos que cumplen los criterios
-            int objetoNumero = 0;
+        //    // Contador adicional para asignar números solo a los objetos que cumplen los criterios
+        //    int objetoNumero = 0;
 
-            // Lista de tareas asincrónicas para el procesamiento de blobs
-            List<Task> processingTasks = new List<Task>();
+        //    // Lista de tareas asincrónicas para el procesamiento de blobs
+        //    List<Task> processingTasks = new List<Task>();
 
             
 
-            // Enlistar la información de los objetos circulares
-            for (int i = 0; i < connectedComponents.Count; i++)
-            {
-                List<Point> connectedComponent = connectedComponents[i];
+        //    // Enlistar la información de los objetos circulares
+        //    for (int i = 0; i < connectedComponents.Count; i++)
+        //    {
+        //        List<Point> connectedComponent = connectedComponents[i];
 
-                // Calcular el área del objeto (cantidad de píxeles)
-                int area = connectedComponent.Count;
+        //        // Calcular el área del objeto (cantidad de píxeles)
+        //        int area = connectedComponent.Count;
 
-                // Calcular el diámetro del objeto
-                double Diameter = CalculateDiameter(connectedComponent, 1);
+        //        // Calcular el diámetro del objeto
+        //        double Diameter = CalculateDiameter(connectedComponent, 1);
 
-                // Filtrar por área, diámetro mínimo y máximo
-                if (area >= areaMin && area <= areaMax && Diameter >= diameterMin)
-                {
-                    // Incrementar el contador auxiliar
-                    objetoNumero++;
+        //        // Filtrar por área, diámetro mínimo y máximo
+        //        if (area >= areaMin && area <= areaMax && Diameter >= diameterMin)
+        //        {
+        //            // Incrementar el contador auxiliar
+        //            objetoNumero++;
 
-                    // Iniciar el procesamiento del blob como tarea asincrónica
-                    Task processingTask = Task.Run(() => ProcessBlobasy(connectedComponent, objetoNumero, binarizedImage));
-                    processingTasks.Add(processingTask);
-                }
-            }
+        //            // Iniciar el procesamiento del blob como tarea asincrónica
+        //            Task processingTask = Task.Run(() => ProcessBlobasy(connectedComponent, objetoNumero, binarizedImage));
+        //            processingTasks.Add(processingTask);
+        //        }
+        //    }
 
-            // Esperar a que todas las tareas de procesamiento finalicen antes de continuar
-            await Task.WhenAll(processingTasks);
+        //    // Esperar a que todas las tareas de procesamiento finalicen antes de continuar
+        //    await Task.WhenAll(processingTasks);
 
-            // Puedes realizar otras acciones después de que se completen todas las tareas aquí
-        }
+        //    // Puedes realizar otras acciones después de que se completen todas las tareas aquí
+        //}
 
-        private void ProcessBlobasy(List<Point> connectedComponent, int objetoNumero, Bitmap binarizedImage)
-        {
-            // Calcular el diámetro mayor, menor y otros parámetros necesarios
-            double majorDiameter = CalculateMajorDiameter(connectedComponent, 1);
-            double minorDiameter = CalculateMinorDiameter(connectedComponent, 1);
-            Point center = CalculateCenter(connectedComponent);
+        //private void ProcessBlobasy(List<Point> connectedComponent, int objetoNumero, Bitmap binarizedImage)
+        //{
+        //    // Calcular el diámetro mayor, menor y otros parámetros necesarios
+        //    double majorDiameter = CalculateMajorDiameter(connectedComponent, 1);
+        //    double minorDiameter = CalculateMinorDiameter(connectedComponent, 1);
+        //    Point center = CalculateCenter(connectedComponent);
 
-            // Obtener el perímetro del objeto
-            double perimeter = CalculatePerimeter(minorDiameter);
+        //    // Obtener el perímetro del objeto
+        //    double perimeter = CalculatePerimeter(minorDiameter);
 
-            // Calcular la compacidad
-            double compactness = CalculateCompactness(connectedComponent.Count, perimeter);
+        //    // Calcular la compacidad
+        //    double compactness = CalculateCompactness(connectedComponent.Count, perimeter);
 
      
 
-            // Colorear píxeles alrededor del objeto con rojo
-            /* Color redColor = Color.Red;
-             ColorizePixelsAroundObject(binarizedImage, connectedComponent, redColor);
+        //    // Colorear píxeles alrededor del objeto con rojo
+        //    /* Color redColor = Color.Red;
+        //     ColorizePixelsAroundObject(binarizedImage, connectedComponent, redColor);
 
-             // Dibujar el número del objeto en la imagen
-             DrawObjectNumber(binarizedImage, objetoNumero, center);
+        //     // Dibujar el número del objeto en la imagen
+        //     DrawObjectNumber(binarizedImage, objetoNumero, center);
 
-             // Dibujar un punto en el centro del objeto
-             DrawCenterPoint(binarizedImage, center);
+        //     // Dibujar un punto en el centro del objeto
+        //     DrawCenterPoint(binarizedImage, center);
 
-             // Actualizar el texto en el Label con la información del objeto circular
-             label1.Invoke((MethodInvoker)delegate
-             {
-                 label1.Text += $"Objeto {objetoNumero}: Área: {connectedComponent.Count} píxeles, Diámetro: {CalculateDiameter(connectedComponent, 1)}, Tiempo de blob: {Stopwatch.GetTimestamp()} ticks\n";
-             });*/
-        }
+        //     // Actualizar el texto en el Label con la información del objeto circular
+        //     label1.Invoke((MethodInvoker)delegate
+        //     {
+        //         label1.Text += $"Objeto {objetoNumero}: Área: {connectedComponent.Count} píxeles, Diámetro: {CalculateDiameter(connectedComponent, 1)}, Tiempo de blob: {Stopwatch.GetTimestamp()} ticks\n";
+        //     });*/
+        //}
 
         // Inicializa la DataTable al principio
         private void InitializeDataTable()
@@ -769,16 +864,24 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             dataTable.Columns.Add("Compacidad");
         }
 
-        private void InitializeInterface()
-        {
-            Txt_Threshold.Text = threshold.ToString(); // Convertir int a string y asignarlo al TextBox
-        }
+        //private void InitializeInterface()
+        //{
+        //    Txt_Threshold.Text = threshold.ToString(); // Convertir int a string y asignarlo al TextBox
+        //}
 
         private void UpdateLabelWithCircularObjects(Bitmap binarizedImage, int areaMin, int areaMax, double diameterMin, int gridRows, int gridCols)
         {
+            Stopwatch stopwatch = new Stopwatch();
+
+            
             // Aplicar etiquetado de componentes conectados
-            List<List<Point>> connectedComponents = LabelConnectedComponents(binarizedImage);
+            var result = LabelConnectedComponents(binarizedImage);
+            List<List<Point>> connectedComponents = result.Item1;
+            List<Point> borderPoints = result.Item2;
+            // List<List<Point>> connectedComponents = LabelConnectedComponents(binarizedImage);
+
             dataTable.Clear();
+            
 
             double avg_diam = 0;
             int n = 0;
@@ -786,44 +889,50 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // Filtros tempranos y obtener resultados para cada objeto
             foreach (List<Point> connectedComponent in connectedComponents)
             {
+                
                 // Calcular el área del objeto (cantidad de píxeles)
                 int area = connectedComponent.Count;
+
+                
 
                 // Verificar el filtro de área mínima y máxima
                 if (area < areaMin || area > areaMax)
                 {
                     continue;
                 }
-                double diametroIA = CalculateDiameterFromArea(area);
+                double diametroIA = CalculateDiameterFromArea(area); 
 
                 avg_diam += diametroIA;
                 n++;
 
+                
                 // Calcular los diámetro mayor y menor del objeto
                 int majorDiameter = CalculateMajorDiameter(connectedComponent, 1);
                 int minorDiameter = CalculateMinorDiameter(connectedComponent, 1);
+                
                 // Obtener el diámetro del objeto
                 double diameter = CalculateDiameter(connectedComponent, 1);
+
                 // Obtener el perímetro del objeto
                 double perimeter = CalculatePerimeter(diameter);
 
                 Point center = CalculateCenter(connectedComponent);
 
-                
-
                 // Calcular la compacidad
                 double compactness = CalculateCompactness(area, perimeter);
-
+                
+                
                 // En tu función ColorizePixelsAroundObject, después de colorear los píxeles, calcular el sector
                 int sector = CalculateSector(center, binarizedImage.Width, binarizedImage.Height, gridRows, gridCols);
 
+                stopwatch.Start();
                 // Colorear píxeles alrededor del objeto con rojo
                 Color redColor = Color.Red;
-                //ColorizePixelsAroundObject(binarizedImage, connectedComponent, redColor);
+                ColorizePixelsAroundObject(binarizedImage, borderPoints, redColor);
+                stopwatch.Stop();
 
                 // Dibujar un punto en el centro del objeto
                 DrawCenterPoint(binarizedImage, center);
-
 
                 // Dibujar el sector al que pertenece el objeto
                 DrawSector(binarizedImage, center, gridRows, gridCols, sector);
@@ -833,7 +942,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 // Añadir una nueva fila a la DataTable
                 dataTable.Rows.Add(sector + 1, area, Math.Round(diametroIA, 3), majorDiameter, minorDiameter, Math.Round(compactness, 3));
+
+                
+
+                Console.WriteLine($"Tiempo transcurrido: {stopwatch.ElapsedMilliseconds} ms");
             }
+
+            
 
             avg_diam /= n;
 
@@ -901,9 +1016,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
 
 
-        private List<List<Point>> LabelConnectedComponents(Bitmap binarizedImage)
+        private (List<List<Point>>, List<Point>) LabelConnectedComponents(Bitmap binarizedImage)
         {
             List<List<Point>> connectedComponents = new List<List<Point>>();
+            List<Point> borderPoints = new List<Point>();
             // Inicializar la lista de perímetros para evitar NullReferenceException
             List<int> perimeters = new List<int>();
 
@@ -920,22 +1036,90 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     if (pixelColor.GetBrightness() == 0 && labels[x, y] == 0)
                     {
                         List<Point> connectedComponent = new List<Point>();
-                        DepthFirstSearch(x, y, binarizedImage, labels, ref currentLabel, connectedComponent);
+
+                        DepthFirstSearch(x, y, binarizedImage, labels, ref currentLabel, connectedComponent, borderPoints);
+
                         connectedComponents.Add(connectedComponent);
 
                         // Reiniciar el contador de etiquetas para el próximo conjunto de píxeles conectados
                         currentLabel = 0;
-                    }
                 }
             }
+            }
 
-            return connectedComponents;
+            return (connectedComponents, borderPoints);
         }
 
-        /*private void DepthFirstSearch(int x, int y, Bitmap binarizedImage, int[,] labels, ref int currentLabel, List<Point> connectedComponent)
+        //private void DepthFirstSearch(int x, int y, Bitmap binarizedImage, int[,] labels, ref int currentLabel, List<Point> connectedComponent)
+        //{
+        //    if (x < 0 || x >= binarizedImage.Width || y < 0 || y >= binarizedImage.Height)
+        //        return;
+
+        //    Color pixelColor = binarizedImage.GetPixel(x, y);
+
+        //    if (pixelColor.GetBrightness() == 0 && labels[x, y] == 0)
+        //    {
+        //        labels[x, y] = ++currentLabel;
+        //        connectedComponent.Add(new Point(x, y));
+
+        //        DepthFirstSearch(x + 1, y, binarizedImage, labels, ref currentLabel, connectedComponent);
+        //        DepthFirstSearch(x - 1, y, binarizedImage, labels, ref currentLabel, connectedComponent);
+        //        DepthFirstSearch(x, y + 1, binarizedImage, labels, ref currentLabel, connectedComponent);
+        //        DepthFirstSearch(x, y - 1, binarizedImage, labels, ref currentLabel, connectedComponent);
+        //    }
+        //}
+
+        //static void DepthFirstSearch(int x, int y, Bitmap binarizedImage, int[,] labels, ref int currentLabel, ref List<Point> connectedComponent, List<int> perimeters)
+        //{
+        //    if (x < 0 || x >= binarizedImage.Width || y < 0 || y >= binarizedImage.Height)
+        //        return;
+
+        //    Color pixelColor = binarizedImage.GetPixel(x, y);
+
+        //    if (pixelColor.GetBrightness() == 0 && labels[x, y] == 0)
+        //    {
+        //        int perimeter = 0;
+
+        //        labels[x, y] = ++currentLabel;
+        //        connectedComponent.Add(new Point(x, y));
+
+        //        DepthFirstSearch(x + 1, y, binarizedImage, labels, ref currentLabel, ref connectedComponent);
+        //        DepthFirstSearch(x - 1, y, binarizedImage, labels, ref currentLabel, ref connectedComponent);
+        //        DepthFirstSearch(x, y + 1, binarizedImage, labels, ref currentLabel, ref connectedComponent);
+        //        DepthFirstSearch(x, y - 1, binarizedImage, labels, ref currentLabel, ref connectedComponent);
+
+        //        // Almacenar información en la lista de perímetros
+        //        perimeters.Add(perimeter);
+        //    }
+        //}
+
+        //private void DepthFirstSearch(int x, int y, Bitmap binarizedImage, int[,] labels, ref int currentLabel, List<Point> connectedComponent)
+        //{
+        //    if (x < 0 || x >= binarizedImage.Width || y < 0 || y >= binarizedImage.Height)
+        //    {
+        //        return;
+        //    }
+
+        //    Color pixelColor = binarizedImage.GetPixel(x, y);
+
+        //    if (pixelColor.GetBrightness() == 0 && labels[x, y] == 0)
+        //    {
+        //        labels[x, y] = ++currentLabel;
+        //        connectedComponent.Add(new Point(x, y));
+
+        //        DepthFirstSearch(x + 1, y, binarizedImage, labels, ref currentLabel, connectedComponent);
+        //        DepthFirstSearch(x - 1, y, binarizedImage, labels, ref currentLabel, connectedComponent);
+        //        DepthFirstSearch(x, y + 1, binarizedImage, labels, ref currentLabel, connectedComponent);
+        //        DepthFirstSearch(x, y - 1, binarizedImage, labels, ref currentLabel, connectedComponent);
+        //    }
+        //}
+
+        private void DepthFirstSearch(int x, int y, Bitmap binarizedImage, int[,] labels, ref int currentLabel, List<Point> connectedComponent, List<Point> borderPoints)
         {
             if (x < 0 || x >= binarizedImage.Width || y < 0 || y >= binarizedImage.Height)
+            {
                 return;
+            }
 
             Color pixelColor = binarizedImage.GetPixel(x, y);
 
@@ -944,75 +1128,62 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 labels[x, y] = ++currentLabel;
                 connectedComponent.Add(new Point(x, y));
 
-                DepthFirstSearch(x + 1, y, binarizedImage, labels, ref currentLabel, connectedComponent);
-                DepthFirstSearch(x - 1, y, binarizedImage, labels, ref currentLabel, connectedComponent);
-                DepthFirstSearch(x, y + 1, binarizedImage, labels, ref currentLabel, connectedComponent);
-                DepthFirstSearch(x, y - 1, binarizedImage, labels, ref currentLabel, connectedComponent);
-            }
-        }*/
-
-        private void DepthFirstSearch(int x, int y, Bitmap binarizedImage, int[,] labels, ref int currentLabel, List<Point> connectedComponent, List<int> perimeters)
-        {
-            if (x < 0 || x >= binarizedImage.Width || y < 0 || y >= binarizedImage.Height)
-                return;
-
-            Color pixelColor = binarizedImage.GetPixel(x, y);
-
-            if (pixelColor.GetBrightness() == 0 && labels[x, y] == 0)
-            {
-                int perimeter = 0;
-
-                labels[x, y] = ++currentLabel;
-                connectedComponent.Add(new Point(x, y));
-
-                DepthFirstSearch(x + 1, y, binarizedImage, labels, ref currentLabel, connectedComponent);
-                DepthFirstSearch(x - 1, y, binarizedImage, labels, ref currentLabel, connectedComponent);
-                DepthFirstSearch(x, y + 1, binarizedImage, labels, ref currentLabel, connectedComponent);
-                DepthFirstSearch(x, y - 1, binarizedImage, labels, ref currentLabel, connectedComponent);
-
-                // Almacenar información en la lista de perímetros
-                perimeters.Add(perimeter);
-            }
-        }
-
-        private void DepthFirstSearch(int x, int y, Bitmap binarizedImage, int[,] labels, ref int currentLabel, List<Point> connectedComponent)
-        {
-            if (x < 0 || x >= binarizedImage.Width || y < 0 || y >= binarizedImage.Height)
-                return;
-
-            Color pixelColor = binarizedImage.GetPixel(x, y);
-
-            if (pixelColor.GetBrightness() == 0 && labels[x, y] == 0)
-            {
-                labels[x, y] = ++currentLabel;
-                connectedComponent.Add(new Point(x, y));
-
-                DepthFirstSearch(x + 1, y, binarizedImage, labels, ref currentLabel, connectedComponent);
-                DepthFirstSearch(x - 1, y, binarizedImage, labels, ref currentLabel, connectedComponent);
-                DepthFirstSearch(x, y + 1, binarizedImage, labels, ref currentLabel, connectedComponent);
-                DepthFirstSearch(x, y - 1, binarizedImage, labels, ref currentLabel, connectedComponent);
-            }
-        }
-
-        private bool IsBoundaryPixel(int x, int y, Bitmap binarizedImage, int[,] labels, int currentLabel)
-        {
-            for (int i = -1; i <= 1; i++)
-            {
-                for (int j = -1; j <= 1; j++)
+                // Verificar si el punto es un borde de la forma encontrada
+                bool isBorder = false;
+                if (IsShapeBorder(x, y, binarizedImage))
                 {
-                    if (x + i >= 0 && x + i < binarizedImage.Width && y + j >= 0 && y + j < binarizedImage.Height && (i != 0 || j != 0))
-                    {
-                        Color neighborColor = binarizedImage.GetPixel(x + i, y + j);
-                        if (labels[x + i, y + j] != currentLabel && neighborColor.GetBrightness() == 0 && neighborColor != Color.Red)
-                        {
-                            return true;
-                        }
-                    }
-
+                    isBorder = true;
                 }
+
+                if (isBorder)
+                {
+                    borderPoints.Add(new Point(x, y));
+                }
+
+                DepthFirstSearch(x + 1, y, binarizedImage, labels, ref currentLabel, connectedComponent, borderPoints);
+                DepthFirstSearch(x - 1, y, binarizedImage, labels, ref currentLabel, connectedComponent, borderPoints);
+                DepthFirstSearch(x, y + 1, binarizedImage, labels, ref currentLabel, connectedComponent, borderPoints);
+                DepthFirstSearch(x, y - 1, binarizedImage, labels, ref currentLabel, connectedComponent, borderPoints);
             }
+        }
+
+        private bool IsShapeBorder(int x, int y, Bitmap binarizedImage)
+        {
+            if (x == 0 || x == binarizedImage.Width - 1 || y == 0 || y == binarizedImage.Height - 1)
+            {
+                return true;
+            }
+
+            if (binarizedImage.GetPixel(x + 1, y).GetBrightness() == 1 ||
+                binarizedImage.GetPixel(x - 1, y).GetBrightness() == 1 ||
+                binarizedImage.GetPixel(x, y + 1).GetBrightness() == 1 ||
+                binarizedImage.GetPixel(x, y - 1).GetBrightness() == 1)
+            {
+                return true;
+            }
+
             return false;
         }
+
+        //private bool IsBoundaryPixel(int x, int y, Bitmap binarizedImage, int[,] labels, int currentLabel)
+        //{
+        //    for (int i = -1; i <= 1; i++)
+        //    {
+        //        for (int j = -1; j <= 1; j++)
+        //        {
+        //            if (x + i >= 0 && x + i < binarizedImage.Width && y + j >= 0 && y + j < binarizedImage.Height && (i != 0 || j != 0))
+        //            {
+        //                Color neighborColor = binarizedImage.GetPixel(x + i, y + j);
+        //                if (labels[x + i, y + j] != currentLabel && neighborColor.GetBrightness() == 0 && neighborColor != Color.Red)
+        //                {
+        //                    return true;
+        //                }
+        //            }
+
+        //        }
+        //    }
+        //    return false;
+        //}
 
         private double CalculateDiameterFromArea(int area)
         {
@@ -1142,11 +1313,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return perimeter;
         }
 
-        private double Distance(Point p1, Point p2)
-        {
-            // Calcular la distancia euclidiana entre dos puntos
-            return Math.Sqrt(Math.Pow(p2.X - p1.X, 2) + Math.Pow(p2.Y - p1.Y, 2));
-        }
+        //private double Distance(Point p1, Point p2)
+        //{
+        //    // Calcular la distancia euclidiana entre dos puntos
+        //    return Math.Sqrt(Math.Pow(p2.X - p1.X, 2) + Math.Pow(p2.Y - p1.Y, 2));
+        //}
 
 
         private double CalculateCompactness(int area, double perimeter)
@@ -1159,72 +1330,81 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return compactness;
         }
 
-        /* private int  ColorizePixelsAroundObject(Bitmap image, List<Point> objectPoints, Color color)
-         {
-             int radius = 1; // Puedes ajustar el grosor del borde 
-             int count = 0;
-             foreach (Point point in objectPoints)
-             {
-                 for (int x = Math.Max(0, point.X - radius); x < Math.Min(image.Width, point.X + radius + 1); x++)
-                 {
-                     for (int y = Math.Max(0, point.Y - radius); y < Math.Min(image.Height, point.Y + radius + 1); y++)
-                     {
-                         // Solo colorea los píxeles que no están en el objeto original
-                         if (!objectPoints.Contains(new Point(x, y)))
-                         {
-                             image.SetPixel(x, y, color);
-                             count++;
-                         }
-                     }
-                 }
-             }
-             return count;
-             // Actualizar el PictureBox con la imagen modificada
-             pictureBox1.Image = image;
-         }*/
+        //private int ColorizePixelsAroundObject(Bitmap image, List<Point> objectPoints, Color color)
+        //{
+        //    int radius = 1; // Puedes ajustar el grosor del borde 
+        //    int count = 0;
+        //    foreach (Point point in objectPoints)
+        //    {
+        //        for (int x = Math.Max(0, point.X - radius); x < Math.Min(image.Width, point.X + radius + 1); x++)
+        //        {
+        //            for (int y = Math.Max(0, point.Y - radius); y < Math.Min(image.Height, point.Y + radius + 1); y++)
+        //            {
+        //                // Solo colorea los píxeles que no están en el objeto original
+        //                if (!objectPoints.Contains(new Point(x, y)))
+        //                {
+        //                    image.SetPixel(x, y, color);
+        //                    count++;
+        //                }
+        //            }
+        //        }
+        //    }
+        //    return count;
+        //    // Actualizar el PictureBox con la imagen modificada
+        //    pictureBox1.Image = image;
+        //}
 
-        private int ColorizePixelsAroundObject(Bitmap image, List<Point> objectPoints, Color color)
+        private void ColorizePixelsAroundObject(Bitmap image, List<Point> objectPoints, Color color)
         {
-            int count = 0;
-
-            // Crear un path para la región del objeto
-            GraphicsPath path = new GraphicsPath();
-            path.AddPolygon(objectPoints.ToArray());
-
-            // Crear un contorno alrededor del objeto
-            GraphicsPath outlinePath = new GraphicsPath();
-            outlinePath.AddPath(path, true);  // True indica que se debe cerrar el contorno
-
-            // Obtener el perímetro del contorno
-            float perimeter = outlinePath.GetBounds().Width + outlinePath.GetBounds().Height;
-
-            // Ajustar el perímetro para tener una estimación más precisa
-            perimeter -= 4; // Restar 4 para ajuste de píxeles
-
-            HashSet<Point> countedPixels = new HashSet<Point>();
-
             foreach (Point point in objectPoints)
             {
-                for (int x = point.X - 1; x <= point.X + 1; x++)
-                {
-                    for (int y = point.Y - 1; y <= point.Y + 1; y++)
-                    {
-                        Point currentPixel = new Point(x, y);
-
-                        if (!objectPoints.Contains(currentPixel) && countedPixels.Add(currentPixel))
-                        {
-                            image.SetPixel(x, y, color);
-                            count++;
-                        }
-                    }
-                }
+                image.SetPixel(point.X, point.Y, color);
             }
-
-            // Actualizar el PictureBox con la imagen modificada
-            pictureBox1.Image = image;
-
-            return count;
+           
         }
+
+        //private int ColorizePixelsAroundObject(Bitmap image, List<Point> objectPoints, Color color)
+        //{
+        //    int count = 0;
+
+        //    // Crear un path para la región del objeto
+        //    GraphicsPath path = new GraphicsPath();
+        //    path.AddPolygon(objectPoints.ToArray());
+
+        //    // Crear un contorno alrededor del objeto
+        //    GraphicsPath outlinePath = new GraphicsPath();
+        //    outlinePath.AddPath(path, true);  // True indica que se debe cerrar el contorno
+
+        //    // Obtener el perímetro del contorno
+        //    float perimeter = outlinePath.GetBounds().Width + outlinePath.GetBounds().Height;
+
+        //    // Ajustar el perímetro para tener una estimación más precisa
+        //    perimeter -= 4; // Restar 4 para ajuste de píxeles
+
+        //    HashSet<Point> countedPixels = new HashSet<Point>();
+
+        //    foreach (Point point in objectPoints)
+        //    {
+        //        for (int x = point.X - 1; x <= point.X + 1; x++)
+        //        {
+        //            for (int y = point.Y - 1; y <= point.Y + 1; y++)
+        //            {
+        //                Point currentPixel = new Point(x, y);
+
+        //                if (!objectPoints.Contains(currentPixel) && countedPixels.Add(currentPixel))
+        //                {
+        //                    image.SetPixel(x, y, color);
+        //                    count++;
+        //                }
+        //            }
+        //        }
+        //    }
+
+        //    // Actualizar el PictureBox con la imagen modificada
+        //    pictureBox1.Image = image;
+
+        //    return count;
+        //}
 
 
         private void DrawSector(Bitmap image, Point center, int gridRows, int gridCols, int sector)
@@ -1249,21 +1429,21 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
 
 
-        private void DrawObjectNumber(Bitmap image, int objectNumber, Point center)
-        {
-            using (Graphics g = Graphics.FromImage(image))
-            {
-                // Define la fuente y el color del número del objeto
-                Font font = new Font("Arial", 13);
-                SolidBrush brush = new SolidBrush(Color.White);
+        //private void DrawObjectNumber(Bitmap image, int objectNumber, Point center)
+        //{
+        //    using (Graphics g = Graphics.FromImage(image))
+        //    {
+        //        // Define la fuente y el color del número del objeto
+        //        Font font = new Font("Arial", 13);
+        //        SolidBrush brush = new SolidBrush(Color.White);
 
-                // Dibuja el número del objeto en la posición del centro
-                g.DrawString(objectNumber.ToString(), font, brush, center.X, center.Y);
-            }
+        //        // Dibuja el número del objeto en la posición del centro
+        //        g.DrawString(objectNumber.ToString(), font, brush, center.X, center.Y);
+        //    }
 
-            // Actualiza el PictureBox con la imagen modificada
-            pictureBox1.Image = image;
-        }
+        //    // Actualiza el PictureBox con la imagen modificada
+        //    pictureBox1.Image = image;
+        //}
 
         private void DrawCenterPoint(Bitmap image, Point center)
         {
@@ -1281,23 +1461,30 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             pictureBox1.Image = image;
         }
 
-        private double CalculateAspectRatio(double majorDiameter, double minorDiameter)
-        {
-            if (minorDiameter == 0)
-            {
-                // Evitar la división por cero
-                return 0;
-            }
+        //private double CalculateAspectRatio(double majorDiameter, double minorDiameter)
+        //{
+        //    if (minorDiameter == 0)
+        //    {
+        //        // Evitar la división por cero
+        //        return 0;
+        //    }
 
-            return majorDiameter / minorDiameter;
-        }
+        //    return majorDiameter / minorDiameter;
+        //}
 
 
         Bitmap ApplyMatrixAndThreshold(Bitmap original, RECT roi)
         {
             try
             {
-                threshold = int.Parse(Txt_Threshold.Text);
+                if (auto_threshold)
+                {
+                    threshold = CalculateOtsuThreshold();
+                }
+                else
+                {
+                    threshold = int.Parse(Txt_Threshold.Text);
+                }
             }
             catch (FormatException)
             {
@@ -1338,7 +1525,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             Bitmap roiImage = processed.Clone(new Rectangle(roi.Left, roi.Top, roi.Right - roi.Left, roi.Bottom - roi.Top), processed.PixelFormat);
 
             // Guardar la imagen del ROI (puedes ajustar la ruta y el formato según tus necesidades)
-            roiImage.Save("imagen_roi.bmp");
+            roiImage.Save("imagen_ROI.bmp");
 
             return processed;
         }
@@ -1355,17 +1542,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 Cmd_Process_Data.BackColor = DefaultBackColor; // Restaurar el color de fondo predeterminado
                // Cmd_Process_Data.Text = "Habilitado";// Cambiar el texto cuando está habilitado
-                pictureBox1.Visible = true; // Mostrar el PictureBox
+                // pictureBox1.Visible = true; // Mostrar el PictureBox
                 // Mostrar el cuadro de diálogo si el botón está activado
-                isActivatedProcessData = true;
+                // isActivatedProcessData = true;
                 //MessageBox.Show("El botón está activado.", "Activado", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
                 Cmd_Process_Data.BackColor = Color.Gray; // Cambiar el color de fondo a gris
                // Cmd_Process_Data.Text = "Deshabilitado"; // Cambiar el texto cuando está desactivado
-                pictureBox1.Visible = false; // Ocultar el PictureBox
-                isActivatedProcessData = false;
+                // pictureBox1.Visible = false; // Ocultar el PictureBox
+                // isActivatedProcessData = false;
                 // No hacer nada si el botón está desactivado
             }
         }
@@ -1374,49 +1561,49 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
 
         }
-        static void DrawMatrixOnImage(string inputPath, string outputPath)
-        {
-            try
-            {
-                // Cargar la imagen
-                Bitmap originalImage = new Bitmap(inputPath);
+        //static void DrawMatrixOnImage(string inputPath, string outputPath)
+        //{
+        //    try
+        //    {
+        //        // Cargar la imagen
+        //        Bitmap originalImage = new Bitmap(inputPath);
 
-                // Crear una copia con formato compatible
-                Bitmap newImage = new Bitmap(originalImage);
+        //        // Crear una copia con formato compatible
+        //        Bitmap newImage = new Bitmap(originalImage);
 
-                // Crear un gráfico a partir de la nueva imagen
-                using (Graphics g = Graphics.FromImage(newImage))
-                {
-                    // Definir el tamaño y posición de la matriz roja
-                    int matrixSize = 3;
-                    int boxWidth = originalImage.Width / matrixSize;
-                    int boxHeight = originalImage.Height / matrixSize;
+        //        // Crear un gráfico a partir de la nueva imagen
+        //        using (Graphics g = Graphics.FromImage(newImage))
+        //        {
+        //            // Definir el tamaño y posición de la matriz roja
+        //            int matrixSize = 3;
+        //            int boxWidth = originalImage.Width / matrixSize;
+        //            int boxHeight = originalImage.Height / matrixSize;
 
-                    // Definir el color y el grosor del borde rojo
-                    Pen redPen = new Pen(Color.Red, 2);
+        //            // Definir el color y el grosor del borde rojo
+        //            Pen redPen = new Pen(Color.Red, 2);
 
-                    // Dibujar la matriz roja
-                    for (int i = 0; i < matrixSize; i++)
-                    {
-                        for (int j = 0; j < matrixSize; j++)
-                        {
-                            int x = j * boxWidth;
-                            int y = i * boxHeight;
+        //            // Dibujar la matriz roja
+        //            for (int i = 0; i < matrixSize; i++)
+        //            {
+        //                for (int j = 0; j < matrixSize; j++)
+        //                {
+        //                    int x = j * boxWidth;
+        //                    int y = i * boxHeight;
 
-                            // Dibujar el borde rojo
-                            g.DrawRectangle(redPen, x, y, boxWidth, boxHeight);
-                        }
-                    }
-                }
+        //                    // Dibujar el borde rojo
+        //                    g.DrawRectangle(redPen, x, y, boxWidth, boxHeight);
+        //                }
+        //            }
+        //        }
 
-                // Guardar la imagen resultante
-                newImage.Save(outputPath);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error: {ex.Message}");
-            }
-        }
+        //        // Guardar la imagen resultante
+        //        newImage.Save(outputPath);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine($"Error: {ex.Message}");
+        //    }
+        //}
 
   
 
@@ -1425,8 +1612,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             int x, y;
             int BytesPerLine;
             int PixelValue;
-
-          
 
             // Initialize Histogram array
             for (int i = 0; i < 256; i++)
@@ -1521,55 +1706,55 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 }
             }
         }
-        void ImageBlobSearch(byte[,] Input_Image, byte[,] Output_Image)
-        {
-            byte number = DIP.Initial_Blob_Number;
+        //void ImageBlobSearch(byte[,] Input_Image, byte[,] Output_Image)
+        //{
+        //    byte number = DIP.Initial_Blob_Number;
 
-            DIP.Clear_Blob_Metrics();
+        //    DIP.Clear_Blob_Metrics();
 
-            // Non Recursive Blob Search
-            // BlobsCount = CountBlobs(UserROI.Top, UserROI.Left, UserROI.Bottom, UserROI.Right, MaximumObjects, number, scaleFactor);
+        //    // Non Recursive Blob Search
+        //    // BlobsCount = CountBlobs(UserROI.Top, UserROI.Left, UserROI.Bottom, UserROI.Right, MaximumObjects, number, scaleFactor);
 
-            // Digital Knife
-            //Digital_Knife();
-            // Recursive Blob Search
-            Blobs_Count = DIP.Grass_label_Blobs(UserROI.Top, UserROI.Left, UserROI.Bottom, UserROI.Right, DIP.Maximum_Objects, number, DIP.scale_factor);
-            Console.WriteLine($"Blobs_Count: {Blobs_Count}");
-            // Check if jointed blobs
-            // JointBlobs = BlobSplit(UserROI.Top, UserROI.Left, UserROI.Bottom, UserROI.Right, MaximumObjects);
-            // if (JointBlobs)
-            // {
-            //     ClearBlobMetrics();
-            //     Recursive Blob Search
-            //     BlobsCount = GrassLabelBlobs(UserROI.Top, UserROI.Left, UserROI.Bottom, UserROI.Right, MaximumObjects, number, scaleFactor);
-            // }
+        //    // Digital Knife
+        //    //Digital_Knife();
+        //    // Recursive Blob Search
+        //    Blobs_Count = DIP.Grass_label_Blobs(UserROI.Top, UserROI.Left, UserROI.Bottom, UserROI.Right, DIP.Maximum_Objects, number, DIP.scale_factor);
+        //    Console.WriteLine($"Blobs_Count: {Blobs_Count}");
+        //    // Check if jointed blobs
+        //    // JointBlobs = BlobSplit(UserROI.Top, UserROI.Left, UserROI.Bottom, UserROI.Right, MaximumObjects);
+        //    // if (JointBlobs)
+        //    // {
+        //    //     ClearBlobMetrics();
+        //    //     Recursive Blob Search
+        //    //     BlobsCount = GrassLabelBlobs(UserROI.Top, UserROI.Left, UserROI.Bottom, UserROI.Right, MaximumObjects, number, scaleFactor);
+        //    // }
 
-            // New Digital Knife Idea
-        }
+        //    // New Digital Knife Idea
+        //}
 
-        private void obtenerROI(int centerX, int centerY, int rectangleWidth, int rectangleHeight)
-        {
-            int halfWidth = rectangleWidth / 2;
-            int halfHeight = rectangleHeight / 2;
+        //private void obtenerROI(int centerX, int centerY, int rectangleWidth, int rectangleHeight)
+        //{
+        //    int halfWidth = rectangleWidth / 2;
+        //    int halfHeight = rectangleHeight / 2;
 
-            int topLeftX = centerX - halfWidth;
-            int topLeftY = centerY - halfHeight;
+        //    int topLeftX = centerX - halfWidth;
+        //    int topLeftY = centerY - halfHeight;
 
-            int topRightX = centerX + halfWidth;
-            int topRightY = centerY - halfHeight;
+        //    int topRightX = centerX + halfWidth;
+        //    int topRightY = centerY - halfHeight;
 
-            int bottomLeftX = centerX - halfWidth;
-            int bottomLeftY = centerY + halfHeight;
+        //    int bottomLeftX = centerX - halfWidth;
+        //    int bottomLeftY = centerY + halfHeight;
 
-            int bottomRightX = centerX + halfWidth;
-            int bottomRightY = centerY + halfHeight;
+        //    int bottomRightX = centerX + halfWidth;
+        //    int bottomRightY = centerY + halfHeight;
 
-            Console.WriteLine("Coordenadas de las esquinas del rectángulo:");
-            Console.WriteLine($"Superior izquierda: ({topLeftX}, {topLeftY})");
-            Console.WriteLine($"Superior derecha: ({topRightX}, {topRightY})");
-            Console.WriteLine($"Inferior izquierda: ({bottomLeftX}, {bottomLeftY})");
-            Console.WriteLine($"Inferior derecha: ({bottomRightX}, {bottomRightY})");
-        }
+        //    Console.WriteLine("Coordenadas de las esquinas del rectángulo:");
+        //    Console.WriteLine($"Superior izquierda: ({topLeftX}, {topLeftY})");
+        //    Console.WriteLine($"Superior derecha: ({topRightX}, {topRightY})");
+        //    Console.WriteLine($"Inferior izquierda: ({bottomLeftX}, {bottomLeftY})");
+        //    Console.WriteLine($"Inferior derecha: ({bottomRightX}, {bottomRightY})");
+        //}
 
 
         private void videoSettingsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1624,18 +1809,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         }
 
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            /*string inputImagePath = @"C:\Program Files\Teledyne DALSA\Sapera\Demos\NET\GigECameraDemo\CSharp\imagen_gatillo.bmp";
-            string outputImagePath = @"C:\Program Files\Teledyne DALSA\Sapera\Demos\NET\GigECameraDemo\CSharp\imagen_gatillo_resultado.bmp";
-            DrawMatrixOnImage(inputImagePath, outputImagePath);
-            Console.WriteLine("Matrix drawn and saved successfully.");*/
-            SetPictureBoxPositionAndSize(UserROI, 2, 2);
-            blobProces();
-           
-
-
-        }
+        //private void button1_Click(object sender, EventArgs e)
+        //{
+        //    /*string inputImagePath = @"C:\Program Files\Teledyne DALSA\Sapera\Demos\NET\GigECameraDemo\CSharp\imagen_gatillo.bmp";
+        //    string outputImagePath = @"C:\Program Files\Teledyne DALSA\Sapera\Demos\NET\GigECameraDemo\CSharp\imagen_gatillo_resultado.bmp";
+        //    DrawMatrixOnImage(inputImagePath, outputImagePath);
+        //    Console.WriteLine("Matrix drawn and saved successfully.");*/
+        //    SetPictureBoxPositionAndSize(UserROI, 2, 2);
+        //    blobProces();
+        //}
 
         private void btnsave_Click(object sender, EventArgs e)
         {
@@ -1694,5 +1876,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
 
         }
+
+        private void Chk_Threshold_Mode_CheckedChanged(object sender, EventArgs e)
+        {
+            auto_threshold = !auto_threshold;
+        }
+
+
     }
 }
