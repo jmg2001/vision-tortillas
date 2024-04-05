@@ -6,48 +6,46 @@ using Microsoft.Win32;
 
 using DALSA.SaperaLT.SapClassBasic;
 using DALSA.SaperaLT.SapClassGui;
-using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
-using System.Collections.Generic;
-using AForge.Imaging;
-using AForge.Imaging.Filters;
 using System.IO;
-using System.Reflection.Emit;
 using System.Linq;
-using System.Diagnostics;
-using System.Threading.Tasks;
 using System.Data;
-using System.Drawing.Drawing2D;
-using System.Threading;
-using Emgu.CV.Ocl;
-using Emgu.CV;
-using Emgu.CV.CvEnum;
-using Emgu.CV.Structure;
-using Emgu.CV.Util;
 
-using System.Diagnostics;
-using static System.Net.Mime.MediaTypeNames;
-
-//using OpenCvSharp;
+[StructLayout(LayoutKind.Sequential)]
+public struct RECT
+{
+    public int Left;
+    public int Top;
+    public int Right;
+    public int Bottom;
+}
 
 namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 {
     public partial class GigECameraDemoDlg : Form
     {
-        RECT UserROI = new RECT();
+        // Variables globales
+        public RECT UserROI = new RECT();
         long[] Histogram = new long[256];
         private DIP DIP = new DIP();
         public int Blobs_Count;
         public int X_Lines;
         public int Y_Columns;
+
+        // Creadas por mi
+
+        //Threshold
         int threshold = 140;
         bool auto_threshold = true;
+
+
         bool trigger = false;
 
         // Creamos una lista de colores
         List<Color> colorList = new List<Color>();
-
         int colorIndex = 0;
+
+        // Hasta aqui las creadas por mi
 
         // Crear una DataTable para almacenar la información
         DataTable dataTable = new DataTable();
@@ -62,6 +60,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         int gridRows = 3;
         int gridCols = 3;
         private bool isActivatedProcessData = false; // Variable de estado para el botón tipo toggle
+
+        public Bitmap originalImage { get; private set; }
+
 
         // Delegate to display number of frame acquired 
         // Delegate is needed because .NEt framework does not support  cross thread control modification
@@ -84,19 +85,50 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 GigeDlg.Invoke((MethodInvoker)delegate
                 {
+                    // Al parecer esto es lo que sucede al tomar la captura, ya sea con el trigger o en vivo
+                    // Se muestra la imagen en el Form
                     GigeDlg.m_View.Show();
-                    saveimg();
+
+                    //objeto ROI
+                    UserROI.Top = 14;
+                    UserROI.Left = 161;
+                    UserROI.Right = 525;
+                    UserROI.Bottom = 408;
+
+                    //objeto ROI
+                    UserROI.Top = 14;
+                    UserROI.Left = 159;
+                    UserROI.Right = 535;
+                    UserROI.Bottom = 408;
+
+                    // Se guarda la imagen tomada por la camara y se carga a la variable
+                    originalImage = loadImage();
+
+                    // Se crea el histograma de la imagen
+                    ImageHistogram();
+
+                    
+                    Bitmap processedImage = ApplyMatrixAndThreshold(originalImage, UserROI); //aqui se guarda la imagen con filtro
+
+                    // Obtener líneas y columnas
+                    X_Lines = processedImage.Height;
+                    Y_Columns = processedImage.Width;
+
+                    // Liberar recursos de la imagen binarizada
+                    originalImage.Dispose();
+
+                    byte[,] Input_Image = new byte[X_Lines + 1, Y_Columns + 1];
+
                     if (isActivatedProcessData)
                     {
-                        pictureBox1.Visible = true; // Mostrar el PictureBox
+                        processROIBox.Visible = true; // Mostrar el PictureBox ROI
                         SetPictureBoxPositionAndSize(UserROI, OffsetLeft, OffsetTop);
                         blobProces();
                     }
                     else
                     {
-                        pictureBox1.Visible = false; // Ocultar el PictureBox
+                        processROIBox.Visible = false; // Ocultar el PictureBox
                     }
-                   
                 });
             }
         }
@@ -562,54 +594,23 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             base.WndProc(ref msg);
         }
 
-        private void saveimg()
+        private Bitmap loadImage()
         {
             Txt_Threshold.Text = threshold.ToString(); // Convertir int a string y asignarlo al TextBox
-            // Ruta de la imagen BMP
-            //string imagePath = @"C:\Program Files\Teledyne DALSA\Sapera\Demos\NET\GigECameraDemo\CSharp\imagen_gatillo.bmp";
-            string imagePath = "imagen_gatillo.bmp";
+            
+            string imagePath = "imagenOrigen.bmp";
 
             // Aqui va a ir el trigger
             trigger = true;
             Console.WriteLine("Trigger.");
 
+            // Se guarda la imagen
             m_Buffers.Save(imagePath, "-format bmp", -1, 0);
  
             // Cargar la imagen
             Bitmap originalImage = new Bitmap(imagePath);
 
-            //objeto ROI
-            UserROI.Top = 14;
-            UserROI.Left = 161;
-            UserROI.Right = 525;
-            UserROI.Bottom = 408;
-
-            //objeto ROI
-            UserROI.Top = 14;
-            UserROI.Left = 159;
-            UserROI.Right = 535;
-            UserROI.Bottom = 408;
-
-            // Obtener BitsPerPixel y PixelPerLine
-            int bitsPerPixel = System.Drawing.Image.GetPixelFormatSize(originalImage.PixelFormat);
-            int pixelPerLine = originalImage.Width;
-
-            // Aplicar la matriz de 0 a 255 y el umbral
-            ImageHistogram(bitsPerPixel, pixelPerLine, originalImage);
-            Bitmap processedImage = ApplyMatrixAndThreshold(originalImage, UserROI); //aqui se guarda la imagen con filtro
-
-            // Obtener líneas y columnas
-            X_Lines = processedImage.Height;
-            Y_Columns = processedImage.Width;
-
-            // Liberar recursos de la imagen binarizada
-            originalImage.Dispose();
-
-            byte[,] Input_Image = new byte[X_Lines + 1, Y_Columns + 1];
-
-            // byte[,] Output_Image = new byte[X_Lines + 1, Y_Columns + 1];
-
-            // ImageBinarize(Input_Image, processedImage);
+            return originalImage;
 
         }
 
@@ -706,10 +707,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 Bitmap originalImage = new Bitmap(imagePath);
 
                 //// Configurar el PictureBox para ajustar automáticamente al tamaño de la imagen
-                pictureBox1.SizeMode = PictureBoxSizeMode.AutoSize;
+                processROIBox.SizeMode = PictureBoxSizeMode.AutoSize;
 
                 // Mostrar la imagen en el PictureBox
-                pictureBox1.Image = originalImage;
+                processROIBox.Image = originalImage;
 
                 // Realizar la binarización con el color del fondo como parámetro
                 Bitmap binarizedImage = BinarizeImage(originalImage, backgroundColor);
@@ -1341,7 +1342,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
 
             // Actualiza el PictureBox con la imagen modificada
-            pictureBox1.Image = image;
+            processROIBox.Image = image;
         }
 
         Bitmap ApplyMatrixAndThreshold(Bitmap original, RECT roi)
@@ -1434,11 +1435,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         }
   
 
-        void ImageHistogram(int BitsPerPixel,int PixelPerLine, Bitmap grayscaleImage)
+        void ImageHistogram()
         {
             int x, y;
             int BytesPerLine;
             int PixelValue;
+
+            // Obtener BitsPerPixel y PixelPerLine
+            int bitsPerPixel = System.Drawing.Image.GetPixelFormatSize(originalImage.PixelFormat);
+            int pixelPerLine = originalImage.Width;
 
             // Initialize Histogram array
             for (int i = 0; i < 256; i++)
@@ -1465,15 +1470,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     Histogram[PixelValue] = Histogram[PixelValue] + 1;
                 }
             }
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct RECT
-        {
-            public int Left;
-            public int Top;
-            public int Right;
-            public int Bottom;
         }
 
         private void Txt_Threshold_KeyPress(object sender, KeyPressEventArgs e)
@@ -1597,17 +1593,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             int imageHeight = roi.Bottom - roi.Top;
 
             // Configurar el PictureBox para ajustar automáticamente al tamaño de la imagen
-            pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
+            processROIBox.SizeMode = PictureBoxSizeMode.StretchImage;
 
             // Establecer el tamaño del PictureBox
-            pictureBox1.Size = new Size(imageWidth, imageHeight);
+            processROIBox.Size = new Size(imageWidth, imageHeight);
 
             // Ubicar el PictureBox en la posición del ROI
-            pictureBox1.Location = new Point(roi.Left + OffsetLeft, roi.Top + OffsetTop);
+            processROIBox.Location = new Point(roi.Left + OffsetLeft, roi.Top + OffsetTop);
 
             // Agregar el PictureBox a la misma TabPage que m_ImageBox
-            tabPage3.Controls.Add(pictureBox1);
-            tabPage3.Controls.SetChildIndex(pictureBox1, 0); // Colocar pictureBox1 al frente
+            tabPage3.Controls.Add(processROIBox);
+            tabPage3.Controls.SetChildIndex(processROIBox, 0); // Colocar pictureBox1 al frente
 
             // Colocar m_ImageBox detrás de pictureBox1
             tabPage3.Controls.SetChildIndex(m_ImageBox, 1); // Asegurar que m_ImageBox esté detrás de pictureBox1
