@@ -26,6 +26,7 @@ using Emgu.CV.Structure;
 using Emgu.CV.Util;
 
 using System.Diagnostics;
+using static System.Net.Mime.MediaTypeNames;
 
 //using OpenCvSharp;
 
@@ -41,6 +42,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         public int Y_Columns;
         int threshold = 140;
         bool auto_threshold = true;
+        bool trigger = false;
 
         // Creamos una lista de colores
         List<Color> colorList = new List<Color>();
@@ -402,7 +404,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     if (!CreateNewObjects(null, true))
                     {
                         MessageBox.Show("Original object creation has failed. Closing application ");
-                        Application.Exit();
+                        System.Windows.Forms.Application.Exit();
                     }
                 }
             }
@@ -442,7 +444,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     if(!CreateNewObjects(null, true))
                     {
                         MessageBox.Show("Original object creation has failed. Closing application ");
-                        Application.Exit();
+                        System.Windows.Forms.Application.Exit();
                     }
                 }
             }
@@ -490,7 +492,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void button_Exit_Click(object sender, EventArgs e)
         {
-            Application.Exit();
+            System.Windows.Forms.Application.Exit();
         }
 
         //*****************************************************************************************
@@ -568,6 +570,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             string imagePath = "imagen_gatillo.bmp";
 
             // Aqui va a ir el trigger
+            trigger = true;
             Console.WriteLine("Trigger.");
 
             m_Buffers.Save(imagePath, "-format bmp", -1, 0);
@@ -585,7 +588,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             UserROI.Top = 14;
             UserROI.Left = 159;
             UserROI.Right = 535;
-            UserROI.Bottom = 420;
+            UserROI.Bottom = 408;
 
             // Obtener BitsPerPixel y PixelPerLine
             int bitsPerPixel = System.Drawing.Image.GetPixelFormatSize(originalImage.PixelFormat);
@@ -820,11 +823,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 int sector = CalculateSector(center, binarizedImage.Width, binarizedImage.Height, gridRows, gridCols);
 
                 // Calculamos el diametro
-                (double diameterTriangles, double maxDiameter, double minDiameter) = calculateDiameterTriangles(connectedComponent, center, binarizedImage, sector);
+                (double diameterTriangles, double maxDiameter, double minDiameter) = calculateAndDrawDiameterTrianglesAlghoritm(connectedComponent, center, binarizedImage, sector);
+
+                avg_diam += diameterTriangles;
 
                 // Calcular la compacidad
                 double compactness = CalculateCompactness(area, perimeter);
-                
 
                 // Dibujar un punto en el centro del objeto
                 DrawCenterPoint(binarizedImage, center);
@@ -837,6 +841,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 Color redColor = Color.Red;
                 ColorizePixelsAroundObject(binarizedImage, perimeters[n], redColor);
+
+                List<double> data = new List<double>();
+                data.Add(diameter); data.Add(maxDiameter); data.Add(minDiameter);
+
+                // Poner los datos
+                // drawData(binarizedImage, data);
 
                 // Añadir una nueva fila a la DataTable
                 // dataTable.Rows.Add(sector + 1, area, Math.Round(diametroIA, 3),Math.Round(diameterTriangles,3), majorDiameter, minorDiameter, Math.Round(compactness, 3));
@@ -859,6 +869,38 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             SaveResultsToTxt(dataTable);
         }
 
+        private void drawData(Bitmap image, List<double> data)
+        {
+            int width = image.Width;
+            int height = image.Height;
+
+            int xOffset = 5;
+            int yOffset = 10;
+
+            int x = 0; int y = 0;
+
+            using (Graphics g = Graphics.FromImage(image))
+            {
+                using (Font font = new Font("Arial", 8))
+                {
+                    for (int i = 0; i < gridRows; i++)
+                    {
+                        for (int j = 1; j <= gridCols; j++)
+                        {
+                            x = (width / gridCols) * i;
+                            y = (height / gridRows) * j;
+
+                            // Dibujar el número del sector en la imagen ajustando el índice
+                            g.DrawString("Dm = " + Math.Round(data[2],2), font, Brushes.Black, x + xOffset, y - yOffset * 2);
+                            g.DrawString("DM = " + Math.Round(data[1],2), font, Brushes.Black, x + xOffset, y - yOffset * 3);
+                            g.DrawString("D = " + Math.Round(data[0],2), font, Brushes.Black, x + xOffset, y - yOffset * 4);
+
+                        }
+                    }
+                }
+            }
+        }
+
         private void DrawSectorNumber(Bitmap image, Point center, int sector)
         {
             using (Graphics g = Graphics.FromImage(image))
@@ -870,8 +912,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     int yOffset = 5;
 
                     // Dibujar el número del sector en la imagen ajustando el índice
-            g.DrawString((sector + 1).ToString(), font, Brushes.Red, center.X + xOffset, center.Y + yOffset);
-        }
+                    g.DrawString((sector + 1).ToString(), font, Brushes.Red, center.X + xOffset, center.Y + yOffset);
+                }
             }
         }
 
@@ -1025,7 +1067,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return false;
         }
 
-        private (double, double, double) calculateDiameterTriangles(List<Point> component, Point center, Bitmap binarizedImage, int sector)
+        private (double, double, double) calculateAndDrawDiameterTrianglesAlghoritm(List<Point> component, Point center, Bitmap binarizedImage, int sector, bool draw = true)
         {
             double diameter, maxDiameter, minDiameter;
             Point pointDM = new Point();
@@ -1034,8 +1076,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             maxDiameter = 0; minDiameter = 0;
 
-            int[] deltaX = { 1, 4, 2, 1, 1, 1, 0, -1, -1, -1, -2, -4,-1, -4, -2, -1, -1, -1,  0,  1,  1,  1,  2,  4};
-            int[] deltaY = { 0, 1, 1, 1, 2, 4, 1,  4,  2,  1,  1,  1, 0, -1, -1, -1, -2, -4, -1, -4, -2, -1, -1, -1};
+            int[] deltaX = { 1, 4, 2, 1, 1, 1, 0, -1, -1, -1, -2, -4, -1, -4, -2, -1, -1, -1, 0, 1, 1, 1, 2, 4 };
+            int[] deltaY = { 0, 1, 1, 1, 2, 4, 1, 4, 2, 1, 1, 1, 0, -1, -1, -1, -2, -4, -1, -4, -2, -1, -1, -1 };
 
             int[] correction = { 0, -2, -1, 0, -1, -2, 0, -2, -1, 0, -1, -2, 0, -2, -1, 0, -1, -2, 0, -2, -1, 0, -1, -2 };
 
@@ -1049,7 +1091,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             double[] radialLenght = new double[24];
 
-            for (int i = 0; i<24; i++)
+            for (int i = 0; i < 24; i++)
             {
                 Color pixelColor = binarizedImage.GetPixel(newX, newY);
 
@@ -1057,51 +1099,63 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 {
                     newX += deltaX[i];
                     newY += deltaY[i];
+
+                    if (newX > binarizedImage.Width || newX < 0)
+                    {
+                        newX -= deltaX[i];
+                    }
+
+                    if (newY > binarizedImage.Height || newY < 0)
+                    {
+                        newY -= deltaY[i];
+                    }
+
                     pixelColor = binarizedImage.GetPixel(newX, newY);
+
                 }
 
                 listXY.Add(new Point(newX, newY));
 
-                radialLenght[i] = Math.Sqrt(Math.Pow((x - newX), 2) + Math.Pow((y - newY), 2)); // + correction[i];
-
-                Console.WriteLine("Radio:" + radialLenght[i]);
+                radialLenght[i] = Math.Sqrt(Math.Pow((x - newX), 2) + Math.Pow((y - newY), 2)) + correction[i];
 
                 avg_diameter += radialLenght[i];
-
                 newX = x; newY = y;
             }
 
-            diameter =  avg_diameter / 12;
+            diameter = avg_diameter / 12;
 
             List<double> diameters = new List<double>();
 
             for (int i = 0; i < 12; i++)
             {
-                double diam = radialLenght[i] + radialLenght[i+12];
+                double diam = radialLenght[i] + radialLenght[i + 12];
                 diameters.Add(diam);
             }
 
             maxDiameter = diameters.Max();
             minDiameter = diameters.Min();
 
-            int maxIndex = diameters.IndexOf(maxDiameter);
-            int minIndex = diameters.IndexOf(minDiameter);
 
-            using (Graphics g = Graphics.FromImage(binarizedImage))
+            if (draw)
             {
-                // Definir el color y el grosor de las líneas
-                Pen pen1 = new Pen(Color.Red, 2);
-                Pen pen2 = new Pen(Color.Yellow, 2);
+                int maxIndex = diameters.IndexOf(maxDiameter);
+                int minIndex = diameters.IndexOf(minDiameter);
 
-                // Dibujar diámetro máximo
-                g.DrawLine(pen1, center , listXY[maxIndex]);
-                g.DrawLine(pen1, center, listXY[maxIndex+12]);
+                using (Graphics g = Graphics.FromImage(binarizedImage))
+                {
+                    // Definir el color y el grosor de las líneas
+                    Pen pen1 = new Pen(Color.Cyan, 2);
+                    Pen pen2 = new Pen(Color.Yellow, 2);
 
-                // Dibujar diámetro mínimo
-                g.DrawLine(pen2, center, listXY[minIndex]);
-                g.DrawLine(pen2, center, listXY[minIndex+12]);
+                    // Dibujar diámetro máximo
+                    g.DrawLine(pen1, center, listXY[maxIndex]);
+                    g.DrawLine(pen1, center, listXY[maxIndex + 12]);
+
+                    // Dibujar el diámetro mínimo
+                    g.DrawLine(pen2, center, listXY[minIndex]);
+                    g.DrawLine(pen2, center, listXY[minIndex + 12]);
+                }
             }
-
             return (diameter, maxDiameter, minDiameter);
         }
 
@@ -1525,7 +1579,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     if (!CreateNewObjects(null, true))
                     {
                         MessageBox.Show("Original object creation has failed. Closing application ");
-                        Application.Exit();
+                        System.Windows.Forms.Application.Exit();
                     }
                 }
             }
@@ -1623,6 +1677,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             auto_threshold = !auto_threshold;
         }
 
+        private void avg_diameter_Click(object sender, EventArgs e)
+        {
 
+        }
     }
 }

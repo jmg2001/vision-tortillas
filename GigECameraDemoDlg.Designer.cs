@@ -793,6 +793,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.avg_diameter.Size = new System.Drawing.Size(24, 25);
             this.avg_diameter.TabIndex = 0;
             this.avg_diameter.Text = "0";
+            this.avg_diameter.Click += new System.EventHandler(this.avg_diameter_Click);
             // 
             // tabPage2
             // 
@@ -831,9 +832,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Location = new System.Drawing.Point(291, 137);
+            this.pictureBox1.Location = new System.Drawing.Point(0, 235);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(425, 361);
+            this.pictureBox1.Size = new System.Drawing.Size(716, 263);
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             this.pictureBox1.Visible = false;
