@@ -10,6 +10,7 @@ using System.Runtime.InteropServices;
 using System.IO;
 using System.Linq;
 using System.Data;
+using System.Diagnostics;
 
 [StructLayout(LayoutKind.Sequential)]
 public struct RECT
@@ -105,14 +106,24 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     originalImage = loadImage();
 
                     // Se crea el histograma de la imagen
-                    ImageHistogram();
+                    ImageHistogram(originalImage);
 
-                    
-                    Bitmap processedImage = ApplyMatrixAndThreshold(originalImage, UserROI); //aqui se guarda la imagen con filtro
+                    Bitmap binarizedImage = binarizeImage(originalImage); //aqui se guarda la imagen con filtro
+
+                    // Guardar la imagen procesada (puedes ajustar la ruta y el formato según tus necesidades)
+                    binarizedImage.Save("imagenBinarizada.bmp");
+
+                    // Dibujamos el ROI en la imagen
+                    drawROI(binarizedImage);
+
+                    Bitmap roiImage = extractROI(binarizedImage);
+
+                    // Guardar la imagen del ROI (puedes ajustar la ruta y el formato según tus necesidades)
+                    roiImage.Save("imagen_ROI.bmp");
 
                     // Obtener líneas y columnas
-                    X_Lines = processedImage.Height;
-                    Y_Columns = processedImage.Width;
+                    X_Lines = roiImage.Height;
+                    Y_Columns = roiImage.Width;
 
                     // Liberar recursos de la imagen binarizada
                     originalImage.Dispose();
@@ -130,6 +141,24 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         processROIBox.Visible = false; // Ocultar el PictureBox
                     }
                 });
+            }
+        }
+
+        private Bitmap extractROI(Bitmap image)
+        {
+            // Extraer la región del ROI
+            Bitmap roiImage = image.Clone(new Rectangle(UserROI.Left, UserROI.Top, UserROI.Right - UserROI.Left, UserROI.Bottom - UserROI.Top), image.PixelFormat);
+
+            return roiImage;
+        }
+
+        private void drawROI(Bitmap image)
+        {
+            // Crear un objeto Graphics a partir de la imagen procesada para extraer el ROI
+            using (Graphics g = Graphics.FromImage(image))
+            {
+                // Dibuja un rectángulo que representa el ROI
+                g.DrawRectangle(new Pen(Color.Red, 2), UserROI.Left, UserROI.Top, UserROI.Right - UserROI.Left, UserROI.Bottom - UserROI.Top);
             }
         }
 
@@ -1345,7 +1374,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             processROIBox.Image = image;
         }
 
-        Bitmap ApplyMatrixAndThreshold(Bitmap original, RECT roi)
+        private Bitmap binarizeImage(Bitmap original)
         {
             try
             {
@@ -1383,22 +1412,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 }
             }
 
-            // Guardar la imagen procesada (puedes ajustar la ruta y el formato según tus necesidades)
-            processed.Save("imagen_filtro.bmp");
-
-            // Crear un objeto Graphics a partir de la imagen procesada para extraer el ROI
-            using (Graphics g = Graphics.FromImage(processed))
-            {
-                // Dibuja un rectángulo que representa el ROI
-                g.DrawRectangle(new Pen(Color.Red, 2), roi.Left, roi.Top, roi.Right - roi.Left, roi.Bottom - roi.Top);
-            }
-
-            // Extraer la región del ROI
-            Bitmap roiImage = processed.Clone(new Rectangle(roi.Left, roi.Top, roi.Right - roi.Left, roi.Bottom - roi.Top), processed.PixelFormat);
-
-            // Guardar la imagen del ROI (puedes ajustar la ruta y el formato según tus necesidades)
-            roiImage.Save("imagen_ROI.bmp");
-
             return processed;
         }
 
@@ -1433,9 +1446,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
 
         }
-  
 
-        void ImageHistogram()
+        void ImageHistogram(Bitmap originalImage)
         {
             int x, y;
             int BytesPerLine;
@@ -1453,7 +1465,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             // Calculate the count of bytes per line using the color format and the
             // pixels per line of the image buffer.
-            BytesPerLine = BitsPerPixel / 8 * PixelPerLine - 1;
+            BytesPerLine = bitsPerPixel / 8 * pixelPerLine - 1;
 
             // For y = 0 To ImgBuffer.Lines - 1
             // For x = 0 To BytesPerLine
@@ -1462,7 +1474,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 for (x = UserROI.Left; x <= UserROI.Right; x++)
                 {
                     // Assuming 8 bits per pixel (grayscale)
-                    Color pixelColor = grayscaleImage.GetPixel(x, y);
+                    Color pixelColor = originalImage.GetPixel(x, y);
 
                     // Get the grayscale value directly
                     PixelValue = pixelColor.R;
