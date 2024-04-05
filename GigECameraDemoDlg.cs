@@ -37,8 +37,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         //Threshold
         int threshold = 140;
-        bool auto_threshold = true;
-
+        bool autoThreshold = true;
 
         bool trigger = false;
 
@@ -54,7 +53,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         // Variable para almacenar el color del fondo
         Color backgroundColor = Color.Black;
         
-        int ThresholdValue = 100;
         int Max_Threshold = 255;
         int OffsetLeft = 0;
         int OffsetTop = 0;
@@ -121,20 +119,16 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     // Guardar la imagen del ROI (puedes ajustar la ruta y el formato según tus necesidades)
                     roiImage.Save("imagen_ROI.bmp");
 
-                    // Obtener líneas y columnas
-                    X_Lines = roiImage.Height;
-                    Y_Columns = roiImage.Width;
-
                     // Liberar recursos de la imagen binarizada
                     originalImage.Dispose();
-
-                    byte[,] Input_Image = new byte[X_Lines + 1, Y_Columns + 1];
 
                     if (isActivatedProcessData)
                     {
                         processROIBox.Visible = true; // Mostrar el PictureBox ROI
-                        SetPictureBoxPositionAndSize(UserROI, OffsetLeft, OffsetTop);
-                        blobProces();
+
+                        SetPictureBoxPositionAndSize(processROIBox, tabPage3);
+
+                        blobProces(roiImage, processROIBox);
                     }
                     else
                     {
@@ -723,7 +717,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         }
 
 
-        private void blobProces()
+        private void blobProces(Bitmap image, PictureBox pictureBox)
         {
 
             // Combinar la ruta del directorio actual con el nombre del archivo
@@ -733,23 +727,24 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             if (File.Exists(imagePath))
             {
                 // Cargar la imagen
-                Bitmap originalImage = new Bitmap(imagePath);
+                // Bitmap originalImage = new Bitmap(imagePath);
+                Bitmap imageToProcess = image;
 
                 //// Configurar el PictureBox para ajustar automáticamente al tamaño de la imagen
-                processROIBox.SizeMode = PictureBoxSizeMode.AutoSize;
+                pictureBox.SizeMode = PictureBoxSizeMode.AutoSize;
 
                 // Mostrar la imagen en el PictureBox
-                processROIBox.Image = originalImage;
+                pictureBox.Image = imageToProcess;
 
                 // Realizar la binarización con el color del fondo como parámetro
-                Bitmap binarizedImage = BinarizeImage(originalImage, backgroundColor);
+                Bitmap reBinarizedImage = BinarizeImage(imageToProcess, backgroundColor);
 
                 int diameterMin = 2;
                 int areaMax = 10000;
                 int areaMin = 2000;
                 
                 // Encontrar los objetos circulares y actualizar el texto en el Label
-                UpdateLabelWithCircularObjects(binarizedImage, areaMin, areaMax, diameterMin, gridRows, gridCols);
+                UpdateLabelWithCircularObjects(reBinarizedImage, areaMin, areaMax, diameterMin, gridRows, gridCols);
 
                 //ProcessBlobsAsync(binarizedImage, 100, 20000, 65);
 
@@ -767,7 +762,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             try
             {
-                if (auto_threshold)
+                if (autoThreshold)
                 {
                     threshold = CalculateOtsuThreshold();
                 }
@@ -987,7 +982,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             // Listas para contar los puntos de las figuras y los puntos que son bordes
             List<List<Point>> connectedComponents = new List<List<Point>>();
-            List<Point> borderPoints = new List<Point>();
 
             // Inicializar la lista de perímetros para evitar NullReferenceException
             List<List<Point>> perimeters = new List<List<Point>>();
@@ -997,6 +991,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             // Creamos una nueva imagen para poder colorear
             Bitmap paintImage = new Bitmap(binarizedImage);
+
+            binarizedImage.Save("C:\\Users\\Jesús\\Desktop\\test.png");
 
             // Agregar colores a la lista
             colorList.Add(Color.Red);
@@ -1018,9 +1014,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         List<Point> connectedComponent = new List<Point>();
                         List<Point> perimeter = new List<Point>();
 
-                        DepthFirstSearch(x, y, binarizedImage, labels, ref currentLabel, connectedComponent, borderPoints, perimeter);
+                        DepthFirstSearch(x, y, binarizedImage, labels, ref currentLabel, connectedComponent, perimeter);
 
-                        ColorizePixelsAroundObject(paintImage,connectedComponent, colorList[colorIndex]);
+                        ColorizePixelsAroundObject(paintImage, connectedComponent, colorList[colorIndex]);
 
                         int area = connectedComponent.Count;
 
@@ -1051,7 +1047,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return (connectedComponents, perimeters);
         }
 
-        private void DepthFirstSearch(int x, int y, Bitmap binarizedImage, int[,] labels, ref int currentLabel, List<Point> connectedComponent, List<Point> borderPoints, List<Point> perimeter)
+        private void DepthFirstSearch(int x, int y, Bitmap binarizedImage, int[,] labels, ref int currentLabel, List<Point> connectedComponent, List<Point> perimeter)
         {
             if (x < 0 || x >= binarizedImage.Width || y < 0 || y >= binarizedImage.Height)
             {
@@ -1068,14 +1064,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 // Verificar si el punto es un borde de la forma encontrada
                 if (IsShapeBorder(x, y, binarizedImage))
                 {
-                    borderPoints.Add(new Point(x, y));
                     perimeter.Add(new Point(x, y));
                 }
 
-                DepthFirstSearch(x + 1, y, binarizedImage, labels, ref currentLabel, connectedComponent, borderPoints, perimeter);
-                DepthFirstSearch(x - 1, y, binarizedImage, labels, ref currentLabel, connectedComponent, borderPoints, perimeter);
-                DepthFirstSearch(x, y + 1, binarizedImage, labels, ref currentLabel, connectedComponent, borderPoints, perimeter);
-                DepthFirstSearch(x, y - 1, binarizedImage, labels, ref currentLabel, connectedComponent, borderPoints, perimeter);
+                DepthFirstSearch(x + 1, y, binarizedImage, labels, ref currentLabel, connectedComponent, perimeter);
+                DepthFirstSearch(x - 1, y, binarizedImage, labels, ref currentLabel, connectedComponent, perimeter);
+                DepthFirstSearch(x, y + 1, binarizedImage, labels, ref currentLabel, connectedComponent, perimeter);
+                DepthFirstSearch(x, y - 1, binarizedImage, labels, ref currentLabel, connectedComponent, perimeter);
             }
         }
 
@@ -1378,7 +1373,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             try
             {
-                if (auto_threshold)
+                if (autoThreshold)
                 {
                     threshold = CalculateOtsuThreshold();
                 }
@@ -1503,45 +1498,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
-        void ImageBinarize(byte[,] Input_Image, Bitmap inputBitmap)
-        {
-            int x, y;
-
-            try
-            {
-                threshold = int.Parse(Txt_Threshold.Text);
-            }
-            catch (FormatException)
-            {
-                // Manejar el error de formato incorrecto aquí
-            }
-
-            // Crear una copia del bitmap de entrada para evitar modificar el original
-            Bitmap imgBuffer = new Bitmap(inputBitmap);
-
-            // For y = 0 To imgBuffer.Height - 1
-            for (y = UserROI.Top; y <= UserROI.Bottom; y++)
-            {
-                // For x = 0 To imgBuffer.Width - 1
-                for (x = UserROI.Left; x <= UserROI.Right; x++)
-                {
-                    Color pixelColor = imgBuffer.GetPixel(x, y);
-                    int intensity = (int)(0.299 * pixelColor.R + 0.587 * pixelColor.G + 0.114 * pixelColor.B);
-
-                    if (intensity >= ThresholdValue && intensity <= Max_Threshold)
-                    {
-                        imgBuffer.SetPixel(x, y, Color.FromArgb(255, 255, 255));
-                        Input_Image[y, x] = 1;
-                    }
-                    else
-                    {
-                        imgBuffer.SetPixel(x, y, Color.FromArgb(0, 0, 0));
-                        Input_Image[y, x] = 0;
-                    }
-                }
-            }
-        }
-
         //    // New Digital Knife Idea
         //}
 
@@ -1598,27 +1554,27 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             m_ImageBox.Refresh();
         }
 
-        private void SetPictureBoxPositionAndSize(RECT roi, int OffsetLeft, int OffsetTop)
+        private void SetPictureBoxPositionAndSize(PictureBox pictureBox, TabPage tabPage)
         {
             // Calcular el tamaño de la imagen
-            int imageWidth = roi.Right - roi.Left;
-            int imageHeight = roi.Bottom - roi.Top;
+            int imageWidth = UserROI.Right - UserROI.Left;
+            int imageHeight = UserROI.Bottom - UserROI.Top;
 
             // Configurar el PictureBox para ajustar automáticamente al tamaño de la imagen
-            processROIBox.SizeMode = PictureBoxSizeMode.StretchImage;
+            pictureBox.SizeMode = PictureBoxSizeMode.StretchImage;
 
             // Establecer el tamaño del PictureBox
-            processROIBox.Size = new Size(imageWidth, imageHeight);
+            pictureBox.Size = new Size(imageWidth, imageHeight);
 
             // Ubicar el PictureBox en la posición del ROI
-            processROIBox.Location = new Point(roi.Left + OffsetLeft, roi.Top + OffsetTop);
+            pictureBox.Location = new Point(UserROI.Left + OffsetLeft, UserROI.Top + OffsetTop);
 
             // Agregar el PictureBox a la misma TabPage que m_ImageBox
-            tabPage3.Controls.Add(processROIBox);
-            tabPage3.Controls.SetChildIndex(processROIBox, 0); // Colocar pictureBox1 al frente
+            tabPage.Controls.Add(pictureBox);
+            tabPage.Controls.SetChildIndex(pictureBox, 0); // Colocar pictureBox1 al frente
 
-            // Colocar m_ImageBox detrás de pictureBox1
-            tabPage3.Controls.SetChildIndex(m_ImageBox, 1); // Asegurar que m_ImageBox esté detrás de pictureBox1
+            // Colocar m_ImageBox (Imagen original) detrás de pictureBox
+            tabPage.Controls.SetChildIndex(m_ImageBox, 1); // Asegurar que m_ImageBox esté detrás de pictureBox1
         }
 
         private void btnsave_Click(object sender, EventArgs e)
@@ -1682,7 +1638,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void Chk_Threshold_Mode_CheckedChanged(object sender, EventArgs e)
         {
-            auto_threshold = !auto_threshold;
+            autoThreshold = !autoThreshold;
         }
 
         private void avg_diameter_Click(object sender, EventArgs e)
