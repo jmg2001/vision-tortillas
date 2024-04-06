@@ -35,6 +35,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         // Creadas por mi
 
+        // Color de la tortilla en la imagen binarizada
+        int tortillaColor = 1; // 1 - Blanco, 0 - Negro
+
         //Threshold
         int threshold = 140;
         bool autoThreshold = true;
@@ -721,14 +724,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
 
             // Combinar la ruta del directorio actual con el nombre del archivo
-            string imagePath = "imagen_ROI.bmp";
+            string imagePath = "C:\\Users\\Jesús\\Desktop\\miImagenGuardada.png";
 
             // Verificar si la imagen existe en la ruta especificada
             if (File.Exists(imagePath))
             {
                 // Cargar la imagen
-                // Bitmap originalImage = new Bitmap(imagePath);
-                Bitmap imageToProcess = image;
+                Bitmap imageToProcess = new Bitmap(imagePath);
+                // Bitmap imageToProcess = image;
 
                 //// Configurar el PictureBox para ajustar automáticamente al tamaño de la imagen
                 pictureBox.SizeMode = PictureBoxSizeMode.AutoSize;
@@ -737,14 +740,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 pictureBox.Image = imageToProcess;
 
                 // Realizar la binarización con el color del fondo como parámetro
-                Bitmap reBinarizedImage = BinarizeImage(imageToProcess, backgroundColor);
+                // Bitmap reBinarizedImage = BinarizeImage(imageToProcess, backgroundColor);
 
                 int diameterMin = 2;
                 int areaMax = 10000;
                 int areaMin = 2000;
                 
                 // Encontrar los objetos circulares y actualizar el texto en el Label
-                UpdateLabelWithCircularObjects(reBinarizedImage, areaMin, areaMax, diameterMin, gridRows, gridCols);
+                UpdateLabelWithCircularObjects(imageToProcess, areaMin, areaMax, diameterMin, gridRows, gridCols);
 
                 //ProcessBlobsAsync(binarizedImage, 100, 20000, 65);
 
@@ -1008,8 +1011,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 {
                     Color pixelColor = binarizedImage.GetPixel(x, y);
 
-                    // Verificar si el píxel es negro
-                    if (pixelColor.GetBrightness() == 0 && labels[x, y] == 0)
+                    // Verificar si el píxel es del color de la tortilla
+                    if (pixelColor.GetBrightness() == tortillaColor && labels[x, y] == 0)
                     {
                         List<Point> connectedComponent = new List<Point>();
                         List<Point> perimeter = new List<Point>();
@@ -1056,7 +1059,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             Color pixelColor = binarizedImage.GetPixel(x, y);
 
-            if (pixelColor.GetBrightness() == 0 && labels[x, y] == 0)
+            if (pixelColor.GetBrightness() == tortillaColor && labels[x, y] == 0)
             {
                 labels[x, y] = ++currentLabel;
                 connectedComponent.Add(new Point(x, y));
@@ -1081,10 +1084,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 return true;
             }
 
-            if (binarizedImage.GetPixel(x + 1, y).GetBrightness() == 1 ||
-                binarizedImage.GetPixel(x - 1, y).GetBrightness() == 1 ||
-                binarizedImage.GetPixel(x, y + 1).GetBrightness() == 1 ||
-                binarizedImage.GetPixel(x, y - 1).GetBrightness() == 1)
+            if (binarizedImage.GetPixel(x + 1, y).GetBrightness() != tortillaColor ||
+                binarizedImage.GetPixel(x - 1, y).GetBrightness() != tortillaColor ||
+                binarizedImage.GetPixel(x, y + 1).GetBrightness() != tortillaColor ||
+                binarizedImage.GetPixel(x, y - 1).GetBrightness() != tortillaColor)
             {
                 return true;
             }
@@ -1120,7 +1123,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 Color pixelColor = binarizedImage.GetPixel(newX, newY);
 
-                while (pixelColor.GetBrightness() != 1)
+                while (pixelColor.GetBrightness() == tortillaColor)
                 {
                     newX += deltaX[i];
                     newY += deltaY[i];
