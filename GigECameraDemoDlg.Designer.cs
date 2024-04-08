@@ -97,6 +97,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.tabControl2 = new System.Windows.Forms.TabControl();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.originalBox = new System.Windows.Forms.PictureBox();
             this.processROIBox = new System.Windows.Forms.PictureBox();
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.tabPage5 = new System.Windows.Forms.TabPage();
@@ -145,7 +146,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Cmd_video = new System.Windows.Forms.Button();
             this.Cmd_Calibration = new System.Windows.Forms.Button();
             this.Cmd_Save = new System.Windows.Forms.Button();
-            this.originalBox = new System.Windows.Forms.PictureBox();
             this.toolStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.groupBox_File_Control.SuspendLayout();
@@ -165,6 +165,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.tabPage2.SuspendLayout();
             this.tabControl2.SuspendLayout();
             this.tabPage3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.originalBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.processROIBox)).BeginInit();
             this.tabPage4.SuspendLayout();
             this.tabPage5.SuspendLayout();
@@ -174,7 +175,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.TableLayoutPanel3.SuspendLayout();
             this.GroupBox10.SuspendLayout();
             this.GroupBox9.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.originalBox)).BeginInit();
             this.SuspendLayout();
             // 
             // toolStrip1
@@ -448,9 +448,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Cmd_Process_Data.BackColor = System.Drawing.Color.Silver;
             this.Cmd_Process_Data.Location = new System.Drawing.Point(90, 10);
             this.Cmd_Process_Data.Name = "Cmd_Process_Data";
-            this.Cmd_Process_Data.Size = new System.Drawing.Size(70, 55);
+            this.Cmd_Process_Data.Size = new System.Drawing.Size(83, 55);
             this.Cmd_Process_Data.TabIndex = 73;
-            this.Cmd_Process_Data.Text = "Process Frame";
+            this.Cmd_Process_Data.Text = "Process Image DISABLED";
             this.Cmd_Process_Data.UseVisualStyleBackColor = false;
             this.Cmd_Process_Data.Click += new System.EventHandler(this.Cmd_Process_Data_Click);
             // 
@@ -458,7 +458,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             this.Cmd_Update_Viewport.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.Cmd_Update_Viewport.BackColor = System.Drawing.Color.Silver;
-            this.Cmd_Update_Viewport.Location = new System.Drawing.Point(164, 11);
+            this.Cmd_Update_Viewport.Location = new System.Drawing.Point(176, 10);
             this.Cmd_Update_Viewport.Name = "Cmd_Update_Viewport";
             this.Cmd_Update_Viewport.Size = new System.Drawing.Size(69, 55);
             this.Cmd_Update_Viewport.TabIndex = 72;
@@ -474,7 +474,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Cmd_Trigger.Name = "Cmd_Trigger";
             this.Cmd_Trigger.Size = new System.Drawing.Size(77, 55);
             this.Cmd_Trigger.TabIndex = 69;
-            this.Cmd_Trigger.Text = "Run";
+            this.Cmd_Trigger.Text = "Trigger ENABLED";
             this.Cmd_Trigger.UseVisualStyleBackColor = false;
             this.Cmd_Trigger.Click += new System.EventHandler(this.Cmd_Trigger_Click);
             // 
@@ -832,6 +832,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.tabPage3.Text = "Image";
             this.tabPage3.UseVisualStyleBackColor = true;
             this.tabPage3.Click += new System.EventHandler(this.tabPage3_Click);
+            // 
+            // originalBox
+            // 
+            this.originalBox.Location = new System.Drawing.Point(0, 0);
+            this.originalBox.Name = "originalBox";
+            this.originalBox.Size = new System.Drawing.Size(716, 239);
+            this.originalBox.TabIndex = 1;
+            this.originalBox.TabStop = false;
+            this.originalBox.Visible = false;
             // 
             // processROIBox
             // 
@@ -1350,15 +1359,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Cmd_Save.Text = "Save";
             this.Cmd_Save.UseVisualStyleBackColor = false;
             // 
-            // originalBox
-            // 
-            this.originalBox.Location = new System.Drawing.Point(0, 0);
-            this.originalBox.Name = "originalBox";
-            this.originalBox.Size = new System.Drawing.Size(716, 239);
-            this.originalBox.TabIndex = 1;
-            this.originalBox.TabStop = false;
-            this.originalBox.Visible = false;
-            // 
             // GigECameraDemoDlg
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1400,6 +1400,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.tabPage2.ResumeLayout(false);
             this.tabControl2.ResumeLayout(false);
             this.tabPage3.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.originalBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.processROIBox)).EndInit();
             this.tabPage4.ResumeLayout(false);
             this.tabPage5.ResumeLayout(false);
@@ -1413,7 +1414,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.GroupBox10.ResumeLayout(false);
             this.GroupBox9.ResumeLayout(false);
             this.GroupBox9.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.originalBox)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
