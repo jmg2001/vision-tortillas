@@ -48,6 +48,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         List<Color> colorList = new List<Color>();
         int colorIndex = 0;
 
+        int maxIteration = 30000;
+        int iteration = 0;
+
         // Hasta aqui las creadas por mi
 
         // Crear una DataTable para almacenar la información
@@ -106,16 +109,30 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     // Se guarda la imagen tomada por la camara y se carga a la variable
                     originalImage = loadImage();
 
+                    // La pictureBox se ajusta al tamaño de la imagen
+                    originalBox.SizeMode = PictureBoxSizeMode.AutoSize;
+
+                    // Agregar el PictureBox a la misma TabPage que m_ImageBox
+                    tabPage3.Controls.Add(originalBox);
+                    tabPage3.Controls.SetChildIndex(originalBox, 0); // Colocar pictureBox1 al frente
+
+                    // Colocar m_ImageBox (Imagen original) detrás de pictureBox
+                    tabPage3.Controls.SetChildIndex(m_ImageBox, 1); // Asegurar que m_ImageBox esté detrás de pictureBox1
+
                     // Se crea el histograma de la imagen
                     ImageHistogram(originalImage);
 
-                    Bitmap binarizedImage = binarizeImage(originalImage); //aqui se guarda la imagen con filtro
+                    Bitmap binarizedImage = binarizeImage(originalImage); // Aqui se crea la imagen con filtro
 
                     // Guardar la imagen procesada (puedes ajustar la ruta y el formato según tus necesidades)
                     binarizedImage.Save("imagenBinarizada.bmp");
 
                     // Dibujamos el ROI en la imagen
                     drawROI(binarizedImage);
+
+                    originalBox.Image = binarizedImage;
+
+                    originalBox.Visible = true;
 
                     Bitmap roiImage = extractROI(binarizedImage);
 
@@ -730,8 +747,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             if (File.Exists(imagePath))
             {
                 // Cargar la imagen
-                Bitmap imageToProcess = new Bitmap(imagePath);
-                // Bitmap imageToProcess = image;
+                // Bitmap imageToProcess = new Bitmap(imagePath);
+                Bitmap imageToProcess = image;
 
                 //// Configurar el PictureBox para ajustar automáticamente al tamaño de la imagen
                 pictureBox.SizeMode = PictureBoxSizeMode.AutoSize;

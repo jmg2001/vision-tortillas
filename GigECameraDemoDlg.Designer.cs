@@ -145,6 +145,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Cmd_video = new System.Windows.Forms.Button();
             this.Cmd_Calibration = new System.Windows.Forms.Button();
             this.Cmd_Save = new System.Windows.Forms.Button();
+            this.originalBox = new System.Windows.Forms.PictureBox();
             this.toolStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.groupBox_File_Control.SuspendLayout();
@@ -173,6 +174,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.TableLayoutPanel3.SuspendLayout();
             this.GroupBox10.SuspendLayout();
             this.GroupBox9.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.originalBox)).BeginInit();
             this.SuspendLayout();
             // 
             // toolStrip1
@@ -820,6 +822,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.originalBox);
             this.tabPage3.Controls.Add(this.processROIBox);
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
@@ -1347,6 +1350,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Cmd_Save.Text = "Save";
             this.Cmd_Save.UseVisualStyleBackColor = false;
             // 
+            // originalBox
+            // 
+            this.originalBox.Location = new System.Drawing.Point(0, 0);
+            this.originalBox.Name = "originalBox";
+            this.originalBox.Size = new System.Drawing.Size(716, 239);
+            this.originalBox.TabIndex = 1;
+            this.originalBox.TabStop = false;
+            this.originalBox.Visible = false;
+            // 
             // GigECameraDemoDlg
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1401,6 +1413,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.GroupBox10.ResumeLayout(false);
             this.GroupBox9.ResumeLayout(false);
             this.GroupBox9.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.originalBox)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1532,6 +1545,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         internal GroupBox groupBox2;
         private Label avg_diameter;
         private PictureBox processROIBox;
+        private PictureBox originalBox;
     }
 }
 
