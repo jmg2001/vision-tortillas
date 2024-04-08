@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Data;
 using System.Diagnostics;
+using System.Drawing.Imaging;
 
 [StructLayout(LayoutKind.Sequential)]
 public struct RECT
@@ -109,15 +110,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     // Se guarda la imagen tomada por la camara y se carga a la variable
                     originalImage = loadImage();
 
+                    // originalImage.Save("imagenOrigen.png");
+
+                    // Bitmap auxOriginalImage = new Bitmap("imagenOrigen.bmp");
+
                     // La pictureBox se ajusta al tamaño de la imagen
-                    originalBox.SizeMode = PictureBoxSizeMode.AutoSize;
+                    // originalBox.SizeMode = PictureBoxSizeMode.AutoSize;
 
-                    // Agregar el PictureBox a la misma TabPage que m_ImageBox
-                    tabPage3.Controls.Add(originalBox);
-                    tabPage3.Controls.SetChildIndex(originalBox, 0); // Colocar pictureBox1 al frente
-
-                    // Colocar m_ImageBox (Imagen original) detrás de pictureBox
-                    tabPage3.Controls.SetChildIndex(m_ImageBox, 1); // Asegurar que m_ImageBox esté detrás de pictureBox1
 
                     // Se crea el histograma de la imagen
                     ImageHistogram(originalImage);
@@ -129,10 +128,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                     // Dibujamos el ROI en la imagen
                     drawROI(binarizedImage);
-
-                    originalBox.Image = binarizedImage;
-
-                    originalBox.Visible = true;
 
                     Bitmap roiImage = extractROI(binarizedImage);
 
@@ -146,12 +141,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     {
                         processROIBox.Visible = true; // Mostrar el PictureBox ROI
 
+                        // originalBox.Visible = false;
+
                         SetPictureBoxPositionAndSize(processROIBox, tabPage3);
 
                         blobProces(roiImage, processROIBox);
                     }
                     else
                     {
+                        // originalBox.Visible = true;
                         processROIBox.Visible = false; // Ocultar el PictureBox
                     }
                 });
@@ -1591,10 +1589,18 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             // Agregar el PictureBox a la misma TabPage que m_ImageBox
             tabPage.Controls.Add(pictureBox);
-            tabPage.Controls.SetChildIndex(pictureBox, 0); // Colocar pictureBox1 al frente
+
+            m_ImageBox.SendToBack();
+            originalBox.SendToBack();
+            pictureBox.BringToFront();
+
+            // tabPage.Controls.SetChildIndex(pictureBox, 0); // Colocar pictureBox1 al frente
 
             // Colocar m_ImageBox (Imagen original) detrás de pictureBox
-            tabPage.Controls.SetChildIndex(m_ImageBox, 1); // Asegurar que m_ImageBox esté detrás de pictureBox1
+            // tabPage.Controls.SetChildIndex(m_ImageBox, 1); // Asegurar que m_ImageBox esté detrás de pictureBox1
+
+            
+            // tabPage.Controls.SetChildIndex(originalBox, 2);
         }
 
         private void btnsave_Click(object sender, EventArgs e)
