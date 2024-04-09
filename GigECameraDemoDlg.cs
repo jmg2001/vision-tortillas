@@ -12,6 +12,9 @@ using System.Linq;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing.Imaging;
+
+using EasyModbus;
+
 using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
@@ -80,6 +83,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         Mat auxImage = new Mat();
         Mat originalImageCV = new Mat();
+
+        // Configurar el servidor Modbus TCP
+        ModbusServer modbusServer = new ModbusServer();
 
         // Delegate to display number of frame acquired 
         // Delegate is needed because .NEt framework does not support  cross thread control modification
@@ -259,6 +265,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 InitializeComponent();
                 InitializeDataTable();
+
+                modbusServer.Listen();
+
+                Console.WriteLine("Servidor Modbus TCP en ejecución...");
 
                 //InitializeInterface();
                 // Suscribir al evento KeyPress del TextBox
@@ -900,6 +910,20 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                         // Agregamos el elemento a la lista
                         Blobs.Add(blob);
+
+                        // Configurar los datos que quieres publicar
+                        ushort[] dataToPublish = new ushort[] { (ushort)blob.Diametro, (ushort)blob.Area, (ushort)blob.Perimetro };
+                        // int startingAddress = 0;
+
+                        Console.WriteLine((short)dataToPublish[0]);
+                        int index = 0;
+
+                        for (int h = (sector-1)*3; h < ((sector-1)*3)+3; h++)
+                        {
+                            // Publicar los datos en direcciones Modbus
+                            modbusServer.holdingRegisters[h+1] = (short)dataToPublish[index];
+                            index++;
+                        }
 
                         // Escribimos los datos en la imagen
                         // drawData(imageCV,blob);

@@ -90,6 +90,18 @@
     </dependentAssembly>
   </dependency>
   <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="EasyModbus.dll" size="72704">
+      <assemblyIdentity name="EasyModbus" version="5.6.0.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>g7ytCCXKURJAzL2Q95+qB7wm/Pb7GvU7c13A5115X4k=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
     <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Emgu.CV.Bitmap.dll" size="14336">
       <assemblyIdentity name="Emgu.CV.Bitmap" version="4.4.0.4099" publicKeyToken="7281126722AB4438" language="neutral" processorArchitecture="msil" />
       <hash>
@@ -126,14 +138,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="SapNETCSharpGigECameraDemo.exe" size="193488">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="SapNETCSharpGigECameraDemo.exe" size="194000">
       <assemblyIdentity name="SapNETCSharpGigECameraDemo" version="8.70.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>55e6mvObErcvJvw6VLnHaQIbJ1VNRTff6Xrvwt17/1E=</dsig:DigestValue>
+        <dsig:DigestValue>PtDFzkTU/yQY0+FI2yEQbHl2KsAScAU0Wn49hrAlho0=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
