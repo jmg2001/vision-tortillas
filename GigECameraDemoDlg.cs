@@ -17,6 +17,7 @@ using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using Emgu.CV.Util;
 using System.Net;
+using System.Threading;
 
 [StructLayout(LayoutKind.Sequential)]
 public struct RECT
@@ -70,7 +71,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         int OffsetTop = 0;
         int gridRows = 3;
         int gridCols = 3;
-        private bool isActivatedProcessData = false; // Variable de estado para el botón tipo toggle
+        public bool isActivatedProcessData = false; // Variable de estado para el botón tipo toggle
 
         public Bitmap originalImage { get; private set; }
 
@@ -131,8 +132,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     // Se muestra la imagen en el Form
                     GigeDlg.m_View.Show();
 
-                    
-
                     try
                     {
                         auxImage.Dispose();
@@ -149,13 +148,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     UserROI.Right = 535;
                     UserROI.Bottom = 408;
 
-                    originalImage = saveImage();
-                    originalImageCV = CvInvoke.Imread("C:\\Users\\Jesús\\Documents\\vision-tortillas\\images\\imagenOrigen.bmp");
-
                     if (isActivatedProcessData)
                     {
+                        originalImage = saveImage();
+                        originalImageCV = CvInvoke.Imread("C:\\Users\\Jesús\\Documents\\vision-tortillas\\images\\imagenOrigen.bmp");
+
                         // Creamos la imagen para trabajar con OpenCV
                         // originalImageCV = new Mat();
+                        // originalImage = new Bitmap("C:\\Users\\Jesús\\Documents\\vision - tortillas\\images\\imagenOrigen.bmp");
 
                         originalBox.Visible = false;
                         processROIBox.Visible = true; // Mostrar el PictureBox ROI
@@ -722,8 +722,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // Aqui va a ir el trigger
             Console.WriteLine("Trigger.");
 
-            // Se guarda la imagen
-            m_Buffers.Save(imagePath, "-format bmp", -1, 0);
+            try
+            {
+                // Se guarda la imagen
+                m_Buffers.Save(imagePath, "-format bmp", -1, 0);
+            }
+            catch
+            {
+                Console.WriteLine("Atrapado");
+            }
  
             // Cargar la imagen
             Bitmap originalImage = new Bitmap(imagePath);
@@ -805,7 +812,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         m_Xfer.Abort();
                     UpdateControls();
                     // Para desactivar el botón
-                    Cmd_Trigger.BackColor = Color.Gray; // Cambiar el color de fondo a gris
+                    Cmd_Trigger.BackColor = Color.Silver; // Cambiar el color de fondo a gris
                     Cmd_Trigger.Text = "Run"; // Cambiar el texto cuando está desactivado
                 }
             }
@@ -1545,42 +1552,87 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 }
                 else
                 {
-                    Cmd_Process_Data.BackColor = Color.Gray; // Cambiar el color de fondo a gris
+                    Cmd_Process_Data.BackColor = Color.Silver; // Cambiar el color de fondo a gris
                     Cmd_Process_Data.Text = "Process Image DISABLED"; // Cambiar el texto cuando está desactivado
                     // pictureBox1.Visible = false; // Ocultar el PictureBox
                     // isActivatedProcessData = false;
                     // No hacer nada si el botón está desactivado
                 }
+
             }
             
         }
 
-        private void Cmd_Update_Viewport_Click(object sender, EventArgs e)
+        public void run()
         {
-            if (m_Xfer.Grabbing)
+            this.StatusLabelInfo.Text = "";
+            this.StatusLabelInfoTrash.Text = "";
+            if (!m_Xfer.Grabbing)
             {
-                MessageBox.Show("Stop the camera");
+                if (m_Xfer.Grab())
+                {
+                    UpdateControls();
+                    // Para activar el botón
+                    Cmd_Trigger.BackColor = DefaultBackColor; // Restaurar el color de fondo predeterminado
+                    Cmd_Trigger.Text = "Running...";
+                }
             }
+
             else
             {
+                AbortDlg abort = new AbortDlg(m_Xfer);
+
+                if (m_Xfer.Freeze())
+                {
+                    if (abort.ShowDialog() != DialogResult.OK)
+                        m_Xfer.Abort();
+                    UpdateControls();
+                    // Para desactivar el botón
+                    Cmd_Trigger.BackColor = Color.Silver; // Cambiar el color de fondo a gris
+                    Cmd_Trigger.Text = "Run"; // Cambiar el texto cuando está desactivado
+                }
+            }
+        }
+
+        private void Cmd_Update_Viewport_Click(object sender, EventArgs e)
+        {
+
                 trigger = !trigger;
                 if (trigger)
                 {
                     Cmd_Update_Viewport.BackColor = DefaultBackColor;
-                    Cmd_Update_Viewport.Text = "Trigger ON";
-                    virtualTriggerBtn.Enabled = true;
+                    Cmd_Update_Viewport.Text = "Trigger AUTO";
+                    virtualTriggerBtn.Enabled = false;
+                    run();
                     m_AcqDevice.LoadFeatures("C:\\Users\\Jesús\\Documents\\T_Calibir_GXM640_TriggerON_Default.ccf");
 
                 }
                 else
                 {
                     m_AcqDevice.LoadFeatures("C:\\Users\\Jesús\\Documents\\T_Calibir_GXM640_TriggerOFF_Default.ccf");
-                    Cmd_Update_Viewport.BackColor = Color.Gray;
-                    virtualTriggerBtn.Enabled = false;
-                    Cmd_Process_Data.Click += Cmd_Process_Data_Click;
-                    Cmd_Update_Viewport.Text = "Trigger OFF";
+                    Cmd_Update_Viewport.BackColor = Color.Silver;
+                    virtualTriggerBtn.Enabled = true;
+
+                    AbortDlg abort = new AbortDlg(m_Xfer);
+
+                    if (m_Xfer.Freeze())
+                    {
+                        if (abort.ShowDialog() != DialogResult.OK)
+                            m_Xfer.Abort();
+                        UpdateControls();
+                        // Para desactivar el botón
+                        Cmd_Trigger.BackColor = Color.Silver; // Cambiar el color de fondo a gris
+                        Cmd_Trigger.Text = "Run"; // Cambiar el texto cuando está desactivado
+                    }
+
+                    Cmd_Update_Viewport.Text = "Trigger MANUAL";
                 }
-            }                
+             
+        }
+
+        private void Cmd_Trigger_Click1(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         void ImageHistogram(Bitmap originalImage)

@@ -460,11 +460,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             this.Cmd_Update_Viewport.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.Cmd_Update_Viewport.BackColor = System.Drawing.Color.Silver;
-            this.Cmd_Update_Viewport.Location = new System.Drawing.Point(164, 11);
+            this.Cmd_Update_Viewport.Location = new System.Drawing.Point(160, 10);
             this.Cmd_Update_Viewport.Name = "Cmd_Update_Viewport";
-            this.Cmd_Update_Viewport.Size = new System.Drawing.Size(69, 55);
+            this.Cmd_Update_Viewport.Size = new System.Drawing.Size(68, 55);
             this.Cmd_Update_Viewport.TabIndex = 72;
-            this.Cmd_Update_Viewport.Text = "Trigger OFF";
+            this.Cmd_Update_Viewport.Text = "Trigger MANUAL";
             this.Cmd_Update_Viewport.UseVisualStyleBackColor = false;
             this.Cmd_Update_Viewport.Click += new System.EventHandler(this.Cmd_Update_Viewport_Click);
             // 
@@ -782,7 +782,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             this.virtualTriggerBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.virtualTriggerBtn.BackColor = System.Drawing.Color.Silver;
-            this.virtualTriggerBtn.Enabled = false;
             this.virtualTriggerBtn.Location = new System.Drawing.Point(231, 13);
             this.virtualTriggerBtn.Name = "virtualTriggerBtn";
             this.virtualTriggerBtn.Size = new System.Drawing.Size(69, 55);
