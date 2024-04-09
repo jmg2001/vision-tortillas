@@ -95,51 +95,53 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     // Se muestra la imagen en el Form
                     GigeDlg.m_View.Show();
 
-                    //objeto ROI
-                    UserROI.Top = 14;
-                    UserROI.Left = 161;
-                    UserROI.Right = 525;
-                    UserROI.Bottom = 408;
-
-                    //objeto ROI
-                    UserROI.Top = 14;
-                    UserROI.Left = 159;
-                    UserROI.Right = 535;
-                    UserROI.Bottom = 408;
-
                     // Se guarda la imagen tomada por la camara y se carga a la variable
                     originalImage = loadImage();
-
-                    // originalImage.Save("imagenOrigen.png");
-
-                    // Bitmap auxOriginalImage = new Bitmap("imagenOrigen.bmp");
-
-                    // La pictureBox se ajusta al tamaño de la imagen
-                    // originalBox.SizeMode = PictureBoxSizeMode.AutoSize;
-
-
-                    // Se crea el histograma de la imagen
-                    ImageHistogram(originalImage);
-
-                    Bitmap binarizedImage = binarizeImage(originalImage); // Aqui se crea la imagen con filtro
-
-                    // Guardar la imagen procesada (puedes ajustar la ruta y el formato según tus necesidades)
-                    binarizedImage.Save("imagenBinarizada.bmp");
-
-                    // Dibujamos el ROI en la imagen
-                    drawROI(binarizedImage);
-
-                    Bitmap roiImage = extractROI(binarizedImage);
-
-                    // Guardar la imagen del ROI (puedes ajustar la ruta y el formato según tus necesidades)
-                    roiImage.Save("imagen_ROI.bmp");
-
-                    // Liberar recursos de la imagen binarizada
-                    originalImage.Dispose();
 
                     if (isActivatedProcessData)
                     {
                         processROIBox.Visible = true; // Mostrar el PictureBox ROI
+
+                        //objeto ROI
+                        UserROI.Top = 14;
+                        UserROI.Left = 161;
+                        UserROI.Right = 525;
+                        UserROI.Bottom = 408;
+
+                        //objeto ROI
+                        UserROI.Top = 14;
+                        UserROI.Left = 159;
+                        UserROI.Right = 535;
+                        UserROI.Bottom = 408;
+
+                        
+
+                        // originalImage.Save("imagenOrigen.png");
+
+                        // Bitmap auxOriginalImage = new Bitmap("imagenOrigen.bmp");
+
+                        // La pictureBox se ajusta al tamaño de la imagen
+                        // originalBox.SizeMode = PictureBoxSizeMode.AutoSize;
+
+
+                        // Se crea el histograma de la imagen
+                        ImageHistogram(originalImage);
+
+                        Bitmap binarizedImage = binarizeImage(originalImage); // Aqui se crea la imagen con filtro
+
+                        // Guardar la imagen procesada (puedes ajustar la ruta y el formato según tus necesidades)
+                        binarizedImage.Save("imagenBinarizada.bmp");
+
+                        // Dibujamos el ROI en la imagen
+                        drawROI(binarizedImage);
+
+                        Bitmap roiImage = extractROI(binarizedImage);
+
+                        // Guardar la imagen del ROI (puedes ajustar la ruta y el formato según tus necesidades)
+                        roiImage.Save("imagen_ROI.bmp");
+
+                        // Liberar recursos de la imagen binarizada
+                        originalImage.Dispose();
 
                         // originalBox.Visible = false;
 
@@ -213,8 +215,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 this.m_ImageBox.View = null;
                 tabPage3.Controls.Add(this.m_ImageBox);
 
+                
+
                 if (!CreateNewObjects(acConfigDlg, false))
                     this.Close();
+
+                // Cargamos la configuracion por default
+                m_AcqDevice.LoadFeatures("C:\\Users\\Jesús\\Documents\\T_Calibir_GXM640_TriggerOFF_Default.ccf");
             }
             else
             {
@@ -642,7 +649,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             string imagePath = "imagenOrigen.bmp";
 
             // Aqui va a ir el trigger
-            trigger = true;
             Console.WriteLine("Trigger.");
 
             // Se guarda la imagen
@@ -1433,31 +1439,62 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void Cmd_Process_Data_Click(object sender, EventArgs e)
         {
-            // Cambiar el estado del botón tipo toggle
-            isActivatedProcessData = !isActivatedProcessData;
-
-            if (isActivatedProcessData)
+            if (!trigger)
             {
-                Cmd_Process_Data.BackColor = DefaultBackColor; // Restaurar el color de fondo predeterminado
-               // Cmd_Process_Data.Text = "Habilitado";// Cambiar el texto cuando está habilitado
-                // pictureBox1.Visible = true; // Mostrar el PictureBox
-                // Mostrar el cuadro de diálogo si el botón está activado
-                // isActivatedProcessData = true;
-                //MessageBox.Show("El botón está activado.", "Activado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Activate trigger mode");
             }
             else
             {
-                Cmd_Process_Data.BackColor = Color.Gray; // Cambiar el color de fondo a gris
-               // Cmd_Process_Data.Text = "Deshabilitado"; // Cambiar el texto cuando está desactivado
-                // pictureBox1.Visible = false; // Ocultar el PictureBox
-                // isActivatedProcessData = false;
-                // No hacer nada si el botón está desactivado
+                // Cambiar el estado del botón tipo toggle
+                isActivatedProcessData = !isActivatedProcessData;
+
+                if (isActivatedProcessData)
+                {
+                    Cmd_Process_Data.BackColor = DefaultBackColor; // Restaurar el color de fondo predeterminado
+                    Cmd_Process_Data.Text = "Process Image ENABLED";// Cambiar el texto cuando está habilitado
+                    // pictureBox1.Visible = true; // Mostrar el PictureBox
+                    // Mostrar el cuadro de diálogo si el botón está activado
+                    // isActivatedProcessData = true;
+                    //MessageBox.Show("El botón está activado.", "Activado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    Cmd_Process_Data.BackColor = Color.Gray; // Cambiar el color de fondo a gris
+                    Cmd_Process_Data.Text = "Process Image DISABLED"; // Cambiar el texto cuando está desactivado
+                    // pictureBox1.Visible = false; // Ocultar el PictureBox
+                    // isActivatedProcessData = false;
+                    // No hacer nada si el botón está desactivado
+                }
             }
+            
         }
 
         private void Cmd_Update_Viewport_Click(object sender, EventArgs e)
         {
+            if (m_Xfer.Grabbing)
+            {
+                MessageBox.Show("Stop the camera");
+            }
+            else
+            {
+                trigger = !trigger;
+                if (trigger)
+                {
+                    Cmd_Update_Viewport.BackColor = DefaultBackColor;
+                    Cmd_Update_Viewport.Text = "Trigger ON";
+                    virtualTriggerBtn.Enabled = true;
+                    m_AcqDevice.LoadFeatures("C:\\Users\\Jesús\\Documents\\T_Calibir_GXM640_TriggerON_Default.ccf");
 
+                }
+                else
+                {
+                    m_AcqDevice.LoadFeatures("C:\\Users\\Jesús\\Documents\\T_Calibir_GXM640_TriggerOFF_Default.ccf");
+                    Cmd_Update_Viewport.BackColor = Color.Gray;
+                    virtualTriggerBtn.Enabled = false;
+                    Cmd_Process_Data.Click += Cmd_Process_Data_Click;
+                    Cmd_Update_Viewport.Text = "Trigger OFF";
+                }
+            }                
         }
 
         void ImageHistogram(Bitmap originalImage)
@@ -1670,6 +1707,18 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private void avg_diameter_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void virtualTriggerBtn_Click(object sender, EventArgs e)
+        {
+            AbortDlg abort = new AbortDlg(m_Xfer);
+
+            if (m_Xfer.Snap())
+            {
+                if (abort.ShowDialog() != DialogResult.OK)
+                    m_Xfer.Abort();
+                UpdateControls();
+            }
         }
     }
 }
