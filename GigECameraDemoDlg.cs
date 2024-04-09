@@ -29,30 +29,6 @@ public struct RECT
 
 namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 {
-    public class Blob
-    {
-        // Propiedades de la estructura Blob
-        public double Area { get; set; }
-        public double Perimetro { get; set; }
-        public double Diametro { get; set; }
-        public double DMayor { get; set; }
-        public double DMenor { get; set; }
-        public double Sector { get; set; }
-        public double Compacidad { get; set; }
-
-        // Constructor de la clase Blob
-        public Blob(double area, double perimetro, double diametro, double dMayor, double dMenor, double sector, double compacidad)
-        {
-            Area = area;
-            Perimetro = perimetro;
-            Diametro = diametro;
-            DMayor = dMayor;
-            DMenor = dMenor;
-            Sector = sector;
-            Compacidad = compacidad;
-        }
-    }
-
     public partial class GigECameraDemoDlg : Form
     {
         // Variables globales
@@ -101,12 +77,41 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         // Crear una lista de blobs
         List<Blob> Blobs = new List<Blob>();
 
+        Mat auxImage = new Mat();
+        Mat originalImageCV = new Mat();
+
         // Delegate to display number of frame acquired 
         // Delegate is needed because .NEt framework does not support  cross thread control modification
         private delegate void DisplayFrameAcquired(int number, bool trash);
         //
         // This function is called each time an image has been transferred into system memory by the transfer object
         //
+
+        public class Blob
+        {
+            // Propiedades de la estructura Blob
+            public double Area { get; set; }
+            public double Perimetro { get; set; }
+            public double Diametro { get; set; }
+            public Point Centro { get; set; }
+            public double DMayor { get; set; }
+            public double DMenor { get; set; }
+            public double Sector { get; set; }
+            public double Compacidad { get; set; }
+
+            // Constructor de la clase Blob
+            public Blob(double area, double perimetro, double diametro, Point centro, double dMayor, double dMenor, double sector, double compacidad)
+            {
+                Area = area;
+                Perimetro = perimetro;
+                Diametro = diametro;
+                Centro = centro;
+                DMayor = dMayor;
+                DMenor = dMenor;
+                Sector = sector;
+                Compacidad = compacidad;
+            }
+        }
 
         private void xfer_XferNotify(object sender, SapXferNotifyEventArgs argsNotify)
         {
@@ -126,18 +131,34 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     // Se muestra la imagen en el Form
                     GigeDlg.m_View.Show();
 
-                    // Se guarda la imagen tomada por la camara y se carga a la variable
+                    
+
+                    try
+                    {
+                        auxImage.Dispose();
+                        originalImageCV.Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Atrapado");
+                    }
+
+                    //objeto ROI
+                    UserROI.Top = 14;
+                    UserROI.Left = 159;
+                    UserROI.Right = 535;
+                    UserROI.Bottom = 408;
+
                     originalImage = saveImage();
+                    originalImageCV = CvInvoke.Imread("C:\\Users\\Jesús\\Documents\\vision-tortillas\\images\\imagenOrigen.bmp");
 
                     if (isActivatedProcessData)
                     {
-                        processROIBox.Visible = true; // Mostrar el PictureBox ROI
+                        // Creamos la imagen para trabajar con OpenCV
+                        // originalImageCV = new Mat();
 
-                        //objeto ROI
-                        UserROI.Top = 14;
-                        UserROI.Left = 159;
-                        UserROI.Right = 535;
-                        UserROI.Bottom = 408;
+                        originalBox.Visible = false;
+                        processROIBox.Visible = true; // Mostrar el PictureBox ROI
 
                         // Se crea el histograma de la imagen
                         ImageHistogram(originalImage);
@@ -146,10 +167,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         originalImage.Dispose();
 
                         // OPEN CV
-
-                        // Creamos la imagen para trabajar con OpenCV
-                        Mat originalImageCV = new Mat();
-                        originalImageCV = CvInvoke.Imread("imagenOrigen.bmp");
 
                         // Verificar si la imagen se ha cargado correctamente
                         if (originalImageCV.IsEmpty)
@@ -177,13 +194,40 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         // Procesamos el ROI
                         blobProces(roiImage, processROIBox);
 
-                        // Liberamos la imagen ROI
+                        // Liberamos las imagenes
                         roiImage.Dispose();
+                        originalImageCV.Dispose();
+
                     }
                     else
                     {
-                        // originalBox.Visible = true;
-                        processROIBox.Visible = false; // Ocultar el PictureBox
+                        //originalImageCV = new Mat();
+                        //// Creamos la imagen para trabajar con OpenCV
+                        //originalImageCV = CvInvoke.Imread("C:\\Users\\Jesús\\Documents\\vision-tortillas\\images\\imagenOrigen.bmp");
+
+                        processROIBox.Visible = false;
+                        //originalBox.Visible = true;
+
+                        ////// Agregar el PictureBox a la misma TabPage que m_ImageBox
+                        ////tabPage3.Controls.Add(processROIBox);
+                        ////tabPage3.Controls.Add(originalBox);
+
+                        ////m_ImageBox.SendToBack();
+                        ////processROIBox.SendToBack();
+                        //originalBox.BringToFront();
+
+                        //auxImage = new Mat();
+                        //CvInvoke.CvtColor(originalImageCV, auxImage, ColorConversion.Bgr2Rgb); // Convertir a escala de grises
+
+                        //drawROI(ref auxImage);
+                        //// auxImage.ToBitmap().Save("C:\\Users\\Jesús\\Documents\\vision-tortillas\\images\\imagenOrigenROI.bmp");
+
+                        //originalBox.SizeMode = PictureBoxSizeMode.AutoSize;
+
+                        ////auxImage.ToBitmap().Save("hh.bmp");
+                        //originalBox.Image = auxImage.ToBitmap();
+                        //// auxImage.Dispose(); 
+                        //originalImageCV.Dispose();
                     }
                 });
             }
@@ -197,14 +241,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return roiImage;
         }
 
-        private void drawROI(Bitmap image)
+        private void drawROI(ref Mat image)
         {
-            // Crear un objeto Graphics a partir de la imagen procesada para extraer el ROI
-            using (Graphics g = Graphics.FromImage(image))
-            {
-                // Dibuja un rectángulo que representa el ROI
-                g.DrawRectangle(new Pen(Color.Red, 2), UserROI.Left, UserROI.Top, UserROI.Right - UserROI.Left, UserROI.Bottom - UserROI.Top);
-            }
+            Rectangle rect = new Rectangle(UserROI.Left, UserROI.Top, UserROI.Right - UserROI.Left, UserROI.Bottom - UserROI.Top);
+            CvInvoke.Rectangle(image, rect, new MCvScalar(255,255,0), 5);
         }
 
         public GigECameraDemoDlg()
@@ -677,7 +717,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             Txt_Threshold.Text = threshold.ToString(); // Convertir int a string y asignarlo al TextBox
             
-            string imagePath = "imagenOrigen.bmp";
+            string imagePath = "C:\\Users\\Jesús\\Documents\\vision-tortillas\\images\\imagenOrigen.bmp";
 
             // Aqui va a ir el trigger
             Console.WriteLine("Trigger.");
@@ -786,9 +826,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 // Mostrar la imagen en el PictureBox
                 pictureBox.Image = image;
 
+                image.Save("roi.bmp");
+
                 // Creamos el objeto para poder trabajar con OpenCV
                 Mat imageCV = new Mat();
-                imageCV = CvInvoke.Imread("imagen_ROI.bmp");
+                imageCV = CvInvoke.Imread("roi.bmp");
 
                 // Encontramos las figuras en la imagen
                 VectorOfVectorOfPoint contours = findContours(imageCV);
@@ -847,8 +889,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         // Agregamos los datos a la tabla
                         dataTable.Rows.Add(sector, area, Math.Round(diametroIA, 3), Math.Round(diameterTriangles, 3), Math.Round(maxDiameter, 3), Math.Round(minDiameter, 3), Math.Round(compactness, 3));
 
+                        Blob blob = new Blob(area, perimeter, diameterTriangles, center, maxDiameter, minDiameter, sector, compactness);
+
                         // Agregamos el elemento a la lista
-                        Blobs.Add(new Blob(area, perimeter,diameterTriangles,maxDiameter,minDiameter,sector,compactness));
+                        Blobs.Add(blob);
+
+                        // Escribimos los datos en la imagen
+                        // drawData(imageCV,blob);
 
                         // Aumentamos el numero de elementos para promediar
                         n++;
@@ -1011,7 +1058,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         //    SaveResultsToTxt(dataTable);
         //}
 
-        private void drawData(Bitmap image, List<double> data)
+        private void drawData(Mat image, Blob blob)
         {
             int width = image.Width;
             int height = image.Height;
@@ -1021,24 +1068,25 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             int x = 0; int y = 0;
 
-            using (Graphics g = Graphics.FromImage(image))
+            for (int i = 0; i < gridRows; i++)
             {
-                using (Font font = new Font("Arial", 8))
+                for (int j = 1; j <= gridCols; j++)
                 {
-                    for (int i = 0; i < gridRows; i++)
-                    {
-                        for (int j = 1; j <= gridCols; j++)
-                        {
-                            x = (width / gridCols) * i;
-                            y = (height / gridRows) * j;
+                    x = (width / gridCols) * i;
+                    y = (height / gridRows) * j;
 
-                            // Dibujar el número del sector en la imagen ajustando el índice
-                            g.DrawString("Dm = " + Math.Round(data[2],2), font, Brushes.Black, x + xOffset, y - yOffset * 2);
-                            g.DrawString("DM = " + Math.Round(data[1],2), font, Brushes.Black, x + xOffset, y - yOffset * 3);
-                            g.DrawString("D = " + Math.Round(data[0],2), font, Brushes.Black, x + xOffset, y - yOffset * 4);
+                    Point textPosition = new Point((int)(x + xOffset), (int)(y - (yOffset * 2)));
+                    string text = "Dm = " + Math.Round(blob.DMenor, 2).ToString();
+                    CvInvoke.PutText(image, text, textPosition, FontFace.HersheySimplex, 0.2, new MCvScalar(255), 1);
+                            
+                    textPosition = new Point((int)(x + xOffset), (int)(y - (yOffset * 3)));
+                    text = "DM = " + Math.Round(blob.DMayor, 2).ToString();
+                    CvInvoke.PutText(image, text, textPosition, FontFace.HersheySimplex, 0.2, new MCvScalar(255), 1);
+                            
+                    textPosition = new Point((int)(x + xOffset), (int)(y - (yOffset * 4)));
+                    text = "D = " + Math.Round(blob.Diametro, 2).ToString();
+                    CvInvoke.PutText(image, text, textPosition, FontFace.HersheySimplex, 0.2, new MCvScalar(255), 1);
 
-                        }
-                    }
                 }
             }
         }
@@ -1234,12 +1282,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     newX += deltaX[i];
                     newY += deltaY[i];
 
-                    if (newX > image.Width || newX < 0)
+                    if (newX >= image.Width || newX < 0)
                     {
                         newX -= deltaX[i];
                     }
 
-                    if (newY > image.Height || newY < 0)
+                    if (newY >= image.Height || newY < 0)
                     {
                         newY -= deltaY[i];
                     }
@@ -1477,7 +1525,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void Cmd_Process_Data_Click(object sender, EventArgs e)
         {
-            if (!trigger)
+            if (false)
             {
                 MessageBox.Show("Activate trigger mode");
             }
@@ -1761,81 +1809,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void button1_Click(object sender, EventArgs e)
         {
-            dataTable = new DataTable();
-            dataTable.Columns.Add("Número de Sector");
-            dataTable.Columns.Add("Área");
-            dataTable.Columns.Add("Diámetro AI");
-            dataTable.Columns.Add("Diámetro Triangulos");
-            dataTable.Columns.Add("Diámetro mayor (triangulos)");
-            dataTable.Columns.Add("Diámetro menor (triangulos)");
-            dataTable.Columns.Add("Compacidad");
 
-            dataTable.Rows.Add(1, 1, 1, 1, 1, 1, 1);
-
-            //originalBox.SizeMode = PictureBoxSizeMode.AutoSize;
-            //originalBox.Location = new Point(0, 0);
-            //originalBox.Visible = true;
-            
-            //originalBox.SizeMode = PictureBoxSizeMode.AutoSize;
-
-            //// Ruta de la imagen
-            //string imagePath = "C:\\Users\\Jesús\\Documents\\C#\\testApp\\testApp\\test2.bmp";
-
-            //// Leer la imagen con OpenCV
-            //Mat image = CvInvoke.Imread(imagePath);
-
-            //// Verificar si la imagen se ha cargado correctamente
-            //if (image.IsEmpty)
-            //{
-            //    Console.WriteLine("No se pudo cargar la imagen.");
-            //    return;
-            //}
-
-            //originalBox.Image = image.ToBitmap();
-
-            //Mat grayImage = new Mat();
-            //CvInvoke.CvtColor(image, grayImage, ColorConversion.Bgr2Gray); // Convertir a escala de grises
-            //Mat binaryImage = new Mat();
-            //CvInvoke.Threshold(grayImage, binaryImage, 127, 255, ThresholdType.Binary); // Binarizar la imagen
-
-            //// Definir el área mínima y máxima permitida para los contornos
-            //double areaMin = 0; // Área mínima
-            //double areaMax = 10000; // Área máxima
-
-            //// Buscar contornos
-            //VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint();
-            //Mat hierarchy = new Mat();
-            //CvInvoke.FindContours(binaryImage, contours, hierarchy, RetrType.List, ChainApproxMethod.ChainApproxSimple);
-
-            //// Iterar sobre los contornos para calcular el área y dibujarlos
-            //for (int i = 0; i < contours.Size; i++)
-            //{
-
-            //    double area = CvInvoke.ContourArea(contours[i]);
-            //    // Verificar si el área del contorno está dentro del rango especificado
-            //    if (area >= areaMin && area <= areaMax)
-            //    {
-            //        // Calcular el perímetro del contorno
-            //        // int perimeter = CalcularPerimetro(contours[i]);
-            //        double perimeter = CvInvoke.ArcLength(contours[i], true);
-            //        // Imprimir el área del contorno
-            //        Console.WriteLine("Contorno {0}: Área = {1}", i + 1, area);
-
-            //        // Dibujar el contorno
-            //        CvInvoke.DrawContours(image, contours, i, new MCvScalar(255), 2);
-
-            //        // Obtener el centro del contorno para colocar el texto
-            //        Point center = new Point((contours[i][0].X + contours[i][contours[i].Size - 1].X) / 2, (contours[i][0].Y + contours[i][contours[i].Size - 1].Y) / 2);
-            //        // CvInvoke.Circle(image, center, new Point(contours[i][0].X, contours[i][0].Y), new MCvScalar(0, 0, 255), -1);
-
-            //        // Dibujar el texto del área y el perímetro en la imagen
-            //        CvInvoke.PutText(image, "Area: " + area.ToString() + ", Perimetro: " + ((int)perimeter).ToString(), center, FontFace.HersheySimplex, 0.5, new MCvScalar(255), 1);
-            //    }
-            //}
-
-            //Console.WriteLine("Contornos Encontrados");
-
-            //originalBox.Image = image.ToBitmap();
         }
     }
 }

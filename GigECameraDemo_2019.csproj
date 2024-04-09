@@ -186,7 +186,9 @@
       <DependentUpon>BufDlg.cs</DependentUpon>
     </Compile>
     <Compile Include="DIP.cs" />
-    <Compile Include="GigECameraDemoDlg.cs" />
+    <Compile Include="GigECameraDemoDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="GigECameraDemoDlg.Designer.cs">
       <DependentUpon>GigECameraDemoDlg.cs</DependentUpon>
     </Compile>
