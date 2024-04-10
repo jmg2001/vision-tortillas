@@ -168,101 +168,66 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     // Se muestra la imagen en el Form
                     GigeDlg.m_View.Show();
 
-                    // m_ImageBox.BringToFront();
-
-                    try
+                    if (triggerPLC)
                     {
-                        auxImage.Dispose();
-                        originalImageCV.Dispose();
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("Atrapado");
-                    }
-
-                    if (isActivatedProcessData)
-                    {
-                        originalImage = saveImage();
-                        originalImageCV = CvInvoke.Imread(imagesPath + "imagenOrigen.bmp");
-
-                        // Creamos la imagen para trabajar con OpenCV
-                        // originalImageCV = new Mat();
-                        // originalImage = new Bitmap("C:\\Users\\Jesús\\Documents\\vision - tortillas\\images\\imagenOrigen.bmp");
-
-                        originalBox.Visible = false;
-                        processROIBox.Visible = true; // Mostrar el PictureBox ROI
-
-                        // Se crea el histograma de la imagen
-                        ImageHistogram(originalImage);
-
-                        // Liberamos la imagen original
-                        originalImage.Dispose();
-
-                        // OPEN CV
-
-                        // Verificar si la imagen se ha cargado correctamente
-                        if (originalImageCV.IsEmpty)
-                        {
-                            Console.WriteLine("No se pudo cargar la imagen.");
-                            return;
-                        }
-
-                        // Binarizamos la imagen
-                        Mat binarizedImageCV = new Mat();
-                        binarizedImageCV = binarizeImage(originalImageCV);
-                        Bitmap binarizedImage = binarizedImageCV.ToBitmap();
-
-                        // Guardamos la imagen binarizada
-                        // binarizedImage.Save("imagenBinarizada.bmp");
-
-                        Bitmap roiImage = extractROI(binarizedImage);
-
-                        // Liberamos la imagen binarizada
-                        binarizedImage.Dispose();
-
-                        // Colocamos el picturebox del ROI
-                        SetPictureBoxPositionAndSize(processROIBox, imagePage);
-
-                        // Procesamos el ROI
-                        blobProces(roiImage, processROIBox);
-
-                        // Liberamos las imagenes
-                        roiImage.Dispose();
-                        originalImageCV.Dispose();
-
-                    }
-                    else
-                    {
-                        //originalImageCV = new Mat();
-                        //// Creamos la imagen para trabajar con OpenCV
-                        //originalImageCV = CvInvoke.Imread("C:\\Users\\Jesús\\Documents\\vision-tortillas\\images\\imagenOrigen.bmp");
-
-                        processROIBox.Visible = false;
-                        //originalBox.Visible = true;
-
-                        ////// Agregar el PictureBox a la misma TabPage que m_ImageBox
-                        ////tabPage3.Controls.Add(processROIBox);
-                        ////tabPage3.Controls.Add(originalBox);
-
-                        ////m_ImageBox.SendToBack();
-                        ////processROIBox.SendToBack();
-                        //originalBox.BringToFront();
-
-                        //auxImage = new Mat();
-                        //CvInvoke.CvtColor(originalImageCV, auxImage, ColorConversion.Bgr2Rgb); // Convertir a escala de grises
-
-                        //drawROI(ref auxImage);
-                        //// auxImage.ToBitmap().Save("C:\\Users\\Jesús\\Documents\\vision-tortillas\\images\\imagenOrigenROI.bmp");
-
-                        //originalBox.SizeMode = PictureBoxSizeMode.AutoSize;
-
-                        ////auxImage.ToBitmap().Save("hh.bmp");
-                        //originalBox.Image = auxImage.ToBitmap();
-                        //// auxImage.Dispose(); 
-                        //originalImageCV.Dispose();
+                        process();
                     }
                 });
             }
+        }
+
+        private void process()
+        {
+            try
+            {
+                auxImage.Dispose();
+                originalImageCV.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Atrapado");
+            }
+
+            originalImage = saveImage();
+            originalImageCV = CvInvoke.Imread(imagesPath + "imagenOrigen.bmp");
+
+            originalBox.Visible = false;
+            processROIBox.Visible = true; // Mostrar el PictureBox ROI
+
+            // Se crea el histograma de la imagen
+            ImageHistogram(originalImage);
+
+            // Liberamos la imagen original
+            originalImage.Dispose();
+
+            // OPEN CV
+
+            // Verificar si la imagen se ha cargado correctamente
+            if (originalImageCV.IsEmpty)
+            {
+                Console.WriteLine("No se pudo cargar la imagen.");
+                return;
+            }
+
+            // Binarizamos la imagen
+            Mat binarizedImageCV = new Mat();
+            binarizedImageCV = binarizeImage(originalImageCV);
+            Bitmap binarizedImage = binarizedImageCV.ToBitmap();
+
+            Bitmap roiImage = extractROI(binarizedImage);
+
+            // Liberamos la imagen binarizada
+            binarizedImage.Dispose();
+
+            // Colocamos el picturebox del ROI
+            SetPictureBoxPositionAndSize(processROIBox, imagePage);
+
+            // Procesamos el ROI
+            blobProces(roiImage, processROIBox);
+
+            // Liberamos las imagenes
+            roiImage.Dispose();
+            originalImageCV.Dispose();
         }
 
         private Bitmap extractROI(Bitmap image)
@@ -300,10 +265,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 Console.WriteLine("Servidor Modbus TCP en ejecución...");
 
-                imagesPath = Directory.GetParent(executablePath).FullName;
-                imagesPath = Directory.GetParent(imagesPath).FullName;
-                imagesPath = Directory.GetParent(imagesPath).FullName;
-                imagesPath = imagesPath + "\\images\\";
+                imagesPath = Path.GetTempPath();
+                //Console.WriteLine(imagesPath);
+                //imagesPath = Directory.GetParent(executablePath).FullName;
+                //imagesPath = Directory.GetParent(imagesPath).FullName;
+                //imagesPath = Directory.GetParent(imagesPath).FullName;
+                //imagesPath = imagesPath + "\\images\\";
                 Console.WriteLine(imagesPath);
 
                 sizes.Add("Normal");
@@ -973,49 +940,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void Cmd_Trigger_Click(object sender, EventArgs e)
         {
-            this.StatusLabelInfo.Text = "";
-            this.StatusLabelInfoTrash.Text = "";
-            if (!m_Xfer.Grabbing)
-            {
-                if (m_Xfer.Grab())
-                {
-                    UpdateControls();
-                    // Para activar el botón
-                    modeBtn.BackColor = DefaultBackColor; // Restaurar el color de fondo predeterminado
-                    modeBtn.Text = "LIVE";
-                    mode = 1;
-
-                    if (isActivatedProcessData)
-                    {
-                        processImageBtn.PerformClick();
-                    }
-
-                    processImageBtn.Enabled = false;
-                    virtualTriggerBtn.Enabled = false;
-                }
-            }
-           
-            else
-            {
-                AbortDlg abort = new AbortDlg(m_Xfer);
-
-                if (m_Xfer.Freeze())
-                {
-                    if (abort.ShowDialog() != DialogResult.OK)
-                        m_Xfer.Abort();
-                    UpdateControls();
-                    // Para desactivar el botón
-                    modeBtn.BackColor = Color.Silver; // Cambiar el color de fondo a gris
-                    modeBtn.Text = "FRAME"; // Cambiar el texto cuando está desactivado
-                    mode = 0;
-
-                    if (!triggerPLC)
-                    {
-                        processImageBtn.Enabled = true;
-                        virtualTriggerBtn.Enabled = true;
-                    }
-                }
-            }
+            startStop();
         }
 
 
@@ -1533,24 +1458,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void processImageBtn_Click(object sender, EventArgs e)
         {
-
-            // Cambiar el estado del botón tipo toggle
-            isActivatedProcessData = !isActivatedProcessData;
-
-            if (isActivatedProcessData)
-            {
-                processImageBtn.BackColor = DefaultBackColor; // Restaurar el color de fondo predeterminado
-                processImageBtn.Text = "ENABLED";// Cambiar el texto cuando está habilitado
-            }
-            else
-            {
-                processImageBtn.BackColor = Color.Silver; // Cambiar el color de fondo a gris
-                processImageBtn.Text = "DISABLED"; // Cambiar el texto cuando está desactivado
-            }
-            
+            process();
         }
 
-        public void run()
+        public void startStop()
         {
             this.StatusLabelInfo.Text = "";
             this.StatusLabelInfoTrash.Text = "";
@@ -1560,8 +1471,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 {
                     UpdateControls();
                     // Para activar el botón
-                    modeBtn.BackColor = DefaultBackColor; // Restaurar el color de fondo predeterminado
-                    modeBtn.Text = "FRAME";
+                    viewModeBtn.BackColor = DefaultBackColor; // Restaurar el color de fondo predeterminado
+                    viewModeBtn.Text = "FRAME";
                     mode = 0;
                 }
             }
@@ -1576,8 +1487,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         m_Xfer.Abort();
                     UpdateControls();
                     // Para desactivar el botón
-                    modeBtn.BackColor = Color.Silver; // Cambiar el color de fondo a gris
-                    modeBtn.Text = "LIVE"; // Cambiar el texto cuando está desactivado
+                    viewModeBtn.BackColor = Color.Silver; // Cambiar el color de fondo a gris
+                    viewModeBtn.Text = "LIVE"; // Cambiar el texto cuando está desactivado
                     mode = 1;
                 }
             }
@@ -1589,7 +1500,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             if (m_Xfer.Grabbing)
             {
-                modeBtn.PerformClick();
+                viewModeBtn.PerformClick();
                 processImageBtn.Enabled = true;
             }
 
@@ -1598,16 +1509,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 triggerModeBtn.BackColor = DefaultBackColor;
                 triggerModeBtn.Text = "PLC";
                 virtualTriggerBtn.Enabled = false;
-                run();
+
+                startStop();
+
                 m_AcqDevice.LoadFeatures("C:\\Users\\Jesús\\Documents\\T_Calibir_GXM640_TriggerON_Default.ccf");
 
-                if (!isActivatedProcessData)
-                {
-                    processImageBtn.PerformClick();
-                }
-
-                modeBtn.Enabled = false;
+                viewModeBtn.Enabled = false;
                 processImageBtn.Enabled = false;
+                processImageBtn.Text = "PROCESSING";
 
             }
             else
@@ -1616,7 +1525,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 triggerModeBtn.BackColor = Color.Silver;
                 virtualTriggerBtn.Enabled = true;
 
-                modeBtn.Enabled = true;
+                viewModeBtn.Enabled = true;
                 processImageBtn.Enabled = true;
 
                 AbortDlg abort = new AbortDlg(m_Xfer);
@@ -1626,12 +1535,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     if (abort.ShowDialog() != DialogResult.OK)
                         m_Xfer.Abort();
                     UpdateControls();
-                    // Para desactivar el botón
-                    modeBtn.BackColor = Color.Silver; // Cambiar el color de fondo a gris
-                    // Cmd_Trigger.Text = "Frame"; // Cambiar el texto cuando está desactivado
+                    viewModeBtn.BackColor = Color.Silver; // Cambiar el color de fondo a gris
                 }
 
                 triggerModeBtn.Text = "SOFTWARE";
+                processImageBtn.Text = "PROCESS FRAME";
             }
              
         }
@@ -1775,13 +1683,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             originalBox.SendToBack();
             pictureBox.BringToFront();
 
-            // tabPage.Controls.SetChildIndex(pictureBox, 0); // Colocar pictureBox1 al frente
-
-            // Colocar m_ImageBox (Imagen original) detrás de pictureBox
-            // tabPage.Controls.SetChildIndex(m_ImageBox, 1); // Asegurar que m_ImageBox esté detrás de pictureBox1
-
-            
-            // tabPage.Controls.SetChildIndex(originalBox, 2);
         }
 
         private void btnsave_Click(object sender, EventArgs e)
@@ -1855,6 +1756,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void virtualTriggerBtn_Click(object sender, EventArgs e)
         {
+            m_ImageBox.BringToFront();
+            processROIBox.Visible = false;
+            
             AbortDlg abort = new AbortDlg(m_Xfer);
 
             if (m_Xfer.Snap())
