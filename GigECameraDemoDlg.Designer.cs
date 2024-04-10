@@ -148,6 +148,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Cmd_Calibration = new System.Windows.Forms.Button();
             this.Cmd_Save = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             this.toolStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.groupBox_File_Control.SuspendLayout();
@@ -859,7 +860,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             // processROIBox
             // 
-            this.processROIBox.Location = new System.Drawing.Point(0, 235);
+            this.processROIBox.Location = new System.Drawing.Point(0, 284);
             this.processROIBox.Name = "processROIBox";
             this.processROIBox.Size = new System.Drawing.Size(716, 263);
             this.processROIBox.TabIndex = 0;
@@ -868,6 +869,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             // tabPage4
             // 
+            this.tabPage4.Controls.Add(this.textBox1);
             this.tabPage4.Controls.Add(this.dataGridView1);
             this.tabPage4.Location = new System.Drawing.Point(4, 22);
             this.tabPage4.Name = "tabPage4";
@@ -1384,6 +1386,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(42, 426);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(496, 20);
+            this.textBox1.TabIndex = 118;
+            // 
             // GigECameraDemoDlg
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1429,6 +1438,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             ((System.ComponentModel.ISupportInitialize)(this.originalBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.processROIBox)).EndInit();
             this.tabPage4.ResumeLayout(false);
+            this.tabPage4.PerformLayout();
             this.tabPage5.ResumeLayout(false);
             this.GroupBox13.ResumeLayout(false);
             this.GroupBox13.PerformLayout();
@@ -1574,6 +1584,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private PictureBox originalBox;
         internal Button virtualTriggerBtn;
         private Button button1;
+        private TextBox textBox1;
     }
 }
 

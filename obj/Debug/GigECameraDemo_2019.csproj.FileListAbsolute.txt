@@ -73,3 +73,5 @@ C:\Users\Jesús\Documents\vision-tortillas\bin\Debug\Emgu.CV.Platform.NetStandar
 C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.GigECameraDemoDlg.resources
 C:\Users\Jesús\Documents\vision-tortillas\bin\Debug\EasyModbus.dll
 C:\Users\Jesús\Documents\vision-tortillas\bin\Debug\EasyModbus.xml
+C:\Users\Jesús\Documents\vision-tortillas\bin\Debug\Newtonsoft.Json.dll
+C:\Users\Jesús\Documents\vision-tortillas\bin\Debug\Newtonsoft.Json.xml

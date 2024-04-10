@@ -21,6 +21,12 @@ using Emgu.CV.Structure;
 using Emgu.CV.Util;
 using System.Net;
 using System.Threading;
+using System.Threading.Tasks;
+using System.Net.Http;
+using Newtonsoft.Json;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using Newtonsoft.Json.Linq;
+
 
 [StructLayout(LayoutKind.Sequential)]
 public struct RECT
@@ -78,6 +84,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         public Bitmap originalImage { get; private set; }
 
+        string executablePath = System.Reflection.Assembly.GetEntryAssembly().Location;
+
+        string imagesPath = "";
+
         // Crear una lista de blobs
         List<Blob> Blobs = new List<Blob>();
 
@@ -85,7 +95,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         Mat originalImageCV = new Mat();
 
         // Configurar el servidor Modbus TCP
-        ModbusServer modbusServer = new ModbusServer();
+        ModbusServer modbusServer = new ModbusServer(); 
 
         // Delegate to display number of frame acquired 
         // Delegate is needed because .NEt framework does not support  cross thread control modification
@@ -138,6 +148,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     // Se muestra la imagen en el Form
                     GigeDlg.m_View.Show();
 
+                    // m_ImageBox.BringToFront();
+
                     try
                     {
                         auxImage.Dispose();
@@ -148,16 +160,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         Console.WriteLine("Atrapado");
                     }
 
-                    //objeto ROI
-                    UserROI.Top = 14;
-                    UserROI.Left = 159;
-                    UserROI.Right = 535;
-                    UserROI.Bottom = 408;
-
                     if (isActivatedProcessData)
                     {
                         originalImage = saveImage();
-                        originalImageCV = CvInvoke.Imread("C:\\Users\\Jesús\\Documents\\vision-tortillas\\images\\imagenOrigen.bmp");
+                        originalImageCV = CvInvoke.Imread(imagesPath + "imagenOrigen.bmp");
 
                         // Creamos la imagen para trabajar con OpenCV
                         // originalImageCV = new Mat();
@@ -266,9 +272,25 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 InitializeComponent();
                 InitializeDataTable();
 
+                // Suscribir al evento SelectedIndexChanged del TabControl
+                tabControl2.SelectedIndexChanged += TabControl2_SelectedIndexChanged;
+
+                modbusServer.Port = 502;
                 modbusServer.Listen();
 
                 Console.WriteLine("Servidor Modbus TCP en ejecución...");
+
+                imagesPath = Directory.GetParent(executablePath).FullName;
+                imagesPath = Directory.GetParent(imagesPath).FullName;
+                imagesPath = Directory.GetParent(imagesPath).FullName;
+                imagesPath = imagesPath + "\\images\\";
+                Console.WriteLine(imagesPath);
+
+                //objeto ROI
+                UserROI.Top = 14;
+                UserROI.Left = 159;
+                UserROI.Right = 535;
+                UserROI.Bottom = 408;
 
                 //InitializeInterface();
                 // Suscribir al evento KeyPress del TextBox
@@ -311,7 +333,45 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
-       private void ShowFrameNumber(int number, bool trash)
+        private async void TabControl2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // Verificar si la pestaña seleccionada es la que deseas
+            if (tabControl2.SelectedTab == tabPage5) // Cambia tabPage1 al nombre real de tu pestaña
+            {
+                // Llamar a la función request y esperar a que devuelva el resultado
+                string query = "SELECT * FROM productos";
+                string resultado = await request(query);
+
+                // Convertir la cadena JSON a un objeto JSON
+                JObject jsonResult = JObject.Parse(resultado);
+
+                Console.WriteLine(jsonResult["result"]);
+
+                foreach (JArray result in jsonResult["result"])
+                {
+                    CmbProducts.Items.Add(result[1]);
+                }
+
+                // Procesar el resultado (en este caso, supondremos que el resultado es una lista de nombres separados por comas)
+                // string[] nombres = resultado.Split(',');
+                
+
+                //// Agregar los nombres al ComboBox
+                //foreach (string nombre in nombres)
+                //{
+                //    // Deserializar el JSON en un objeto anónimo
+                //    dynamic jsonObject = JsonConvert.DeserializeObject(nombre);
+
+                //    // Obtener el valor del campo "nombre"
+                //    string NOMBRE = jsonObject.nombre;
+
+                //    Console.WriteLine(NOMBRE);
+                //    // comboBox1.Items.Add(nombre);
+                //}
+            }
+        }
+
+        private void ShowFrameNumber(int number, bool trash)
        {
           String str;
           if (trash)
@@ -726,8 +786,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private Bitmap saveImage()
         {
             Txt_Threshold.Text = threshold.ToString(); // Convertir int a string y asignarlo al TextBox
-            
-            string imagePath = "C:\\Users\\Jesús\\Documents\\vision-tortillas\\images\\imagenOrigen.bmp";
+
+            string imagePath = imagesPath + "imagenOrigen.bmp";
+            // string imagePath = "C:\\Users\\Jesús\\Documents\\vision-tortillas\\images\\imagenOrigen.bmp";
 
             // Aqui va a ir el trigger
             Console.WriteLine("Trigger.");
@@ -843,11 +904,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 // Mostrar la imagen en el PictureBox
                 pictureBox.Image = image;
 
-                image.Save("roi.bmp");
+                image.Save(imagesPath + "roi.bmp");
 
                 // Creamos el objeto para poder trabajar con OpenCV
                 Mat imageCV = new Mat();
-                imageCV = CvInvoke.Imread("roi.bmp");
+                imageCV = CvInvoke.Imread(imagesPath + "roi.bmp");
 
                 // Encontramos las figuras en la imagen
                 VectorOfVectorOfPoint contours = findContours(imageCV);
@@ -915,7 +976,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         ushort[] dataToPublish = new ushort[] { (ushort)blob.Diametro, (ushort)blob.Area, (ushort)blob.Perimetro };
                         // int startingAddress = 0;
 
-                        Console.WriteLine((short)dataToPublish[0]);
                         int index = 0;
 
                         for (int h = (sector-1)*3; h < ((sector-1)*3)+3; h++)
@@ -1885,7 +1945,46 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void button1_Click(object sender, EventArgs e)
         {
+            request(textBox1.Text);
+        }
 
+        static async Task<string> request(string query)
+        {
+            // URL del servidor donde está alojada la ruta para recibir consultas SQL
+            string serverUrl = "http://localhost:5000/query"; // Cambia la dirección y el puerto según corresponda
+
+            // Consulta SQL que deseas enviar al servidor
+            // string query = "SELECT * FROM usuarios";
+
+            try
+            {
+                // Crear un cliente HTTP
+                using (HttpClient client = new HttpClient())
+                {
+                    // Crear un objeto JSON con la consulta
+                    var json = new { query = query };
+
+                    // Convertir el objeto JSON a una cadena y crear una solicitud HTTP POST
+                    var content = new StringContent(JsonConvert.SerializeObject(json), System.Text.Encoding.UTF8, "application/json");
+
+                    // Enviar la solicitud HTTP POST al servidor
+                    var response = await client.PostAsync(serverUrl, content);
+
+                    // Leer la respuesta del servidor
+                    string responseContent = await response.Content.ReadAsStringAsync();
+
+                    // Imprimir la respuesta del servidor
+                    // Console.WriteLine("Respuesta del servidor:");
+                    // Console.WriteLine(responseContent);
+
+                    return responseContent;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error al enviar la solicitud: " + ex.Message);
+                return string.Empty;
+            }
         }
     }
 }
