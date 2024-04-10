@@ -150,14 +150,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="SapNETCSharpGigECameraDemo.exe" size="199120">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="SapNETCSharpGigECameraDemo.exe" size="200656">
       <assemblyIdentity name="SapNETCSharpGigECameraDemo" version="8.70.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>6Izsa/zauF+5ztn+MisF758cJAHH4EkGQN3u3DW3n/4=</dsig:DigestValue>
+        <dsig:DigestValue>YnpauXxhOJar6KFMHWIfCBsKeDhPAGkOw/48L827rTg=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -276,6 +276,24 @@
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
       <dsig:DigestValue>HhFUmYM1tV04M/LuClT0TWzrc8jk67/TkRsrMOVv2cs=</dsig:DigestValue>
+    </hash>
+  </file>
+  <file name="x64\sqlite3.dll" size="1680384">
+    <hash>
+      <dsig:Transforms>
+        <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+      </dsig:Transforms>
+      <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+      <dsig:DigestValue>zdbEB7YTcSgOScmis0r07AawGRmT5u3o77kjWZCDeXc=</dsig:DigestValue>
+    </hash>
+  </file>
+  <file name="x86\sqlite3.dll" size="826775">
+    <hash>
+      <dsig:Transforms>
+        <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+      </dsig:Transforms>
+      <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+      <dsig:DigestValue>bersL5bIocIGmKk93UaNVEe1WsQm3Dge712RsZlTu3s=</dsig:DigestValue>
     </hash>
   </file>
 </asmv1:assembly>

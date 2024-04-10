@@ -75,3 +75,5 @@ C:\Users\Jesús\Documents\vision-tortillas\bin\Debug\EasyModbus.dll
 C:\Users\Jesús\Documents\vision-tortillas\bin\Debug\EasyModbus.xml
 C:\Users\Jesús\Documents\vision-tortillas\bin\Debug\Newtonsoft.Json.dll
 C:\Users\Jesús\Documents\vision-tortillas\bin\Debug\Newtonsoft.Json.xml
+C:\Users\Jesús\Documents\vision-tortillas\bin\Debug\x86\sqlite3.dll
+C:\Users\Jesús\Documents\vision-tortillas\bin\Debug\x64\sqlite3.dll

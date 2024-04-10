@@ -101,6 +101,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.originalBox = new System.Windows.Forms.PictureBox();
             this.processROIBox = new System.Windows.Forms.PictureBox();
             this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             this.tabPage5 = new System.Windows.Forms.TabPage();
             this.GroupBox13 = new System.Windows.Forms.GroupBox();
             this.Label47 = new System.Windows.Forms.Label();
@@ -148,7 +149,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Cmd_Calibration = new System.Windows.Forms.Button();
             this.Cmd_Save = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
-            this.textBox1 = new System.Windows.Forms.TextBox();
             this.toolStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.groupBox_File_Control.SuspendLayout();
@@ -571,9 +571,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Label53.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Label53.Location = new System.Drawing.Point(19, 60);
             this.Label53.Name = "Label53";
-            this.Label53.Size = new System.Drawing.Size(87, 16);
+            this.Label53.Size = new System.Drawing.Size(91, 16);
             this.Label53.TabIndex = 90;
-            this.Label53.Text = "Min Ovality:";
+            this.Label53.Text = "Max Ovality:";
             // 
             // Label54
             // 
@@ -724,6 +724,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Txt_Threshold.TabIndex = 12;
             this.Txt_Threshold.Text = "0";
             this.Txt_Threshold.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.Txt_Threshold.TextChanged += new System.EventHandler(this.Txt_Threshold_TextChanged);
             // 
             // label1
             // 
@@ -749,7 +750,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridView1.Location = new System.Drawing.Point(0, 1);
             this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.Size = new System.Drawing.Size(650, 349);
+            this.dataGridView1.Size = new System.Drawing.Size(713, 416);
             this.dataGridView1.TabIndex = 117;
             // 
             // tabControl1
@@ -776,7 +777,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage1.Size = new System.Drawing.Size(303, 596);
             this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "MainControl";
+            this.tabPage1.Text = " ";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
             // virtualTriggerBtn
@@ -806,7 +807,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             this.avg_diameter.AutoSize = true;
             this.avg_diameter.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.avg_diameter.Location = new System.Drawing.Point(152, 49);
+            this.avg_diameter.Location = new System.Drawing.Point(124, 49);
             this.avg_diameter.Name = "avg_diameter";
             this.avg_diameter.Size = new System.Drawing.Size(24, 25);
             this.avg_diameter.TabIndex = 0;
@@ -860,7 +861,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             // processROIBox
             // 
-            this.processROIBox.Location = new System.Drawing.Point(0, 284);
+            this.processROIBox.Location = new System.Drawing.Point(0, 235);
             this.processROIBox.Name = "processROIBox";
             this.processROIBox.Size = new System.Drawing.Size(716, 263);
             this.processROIBox.TabIndex = 0;
@@ -878,6 +879,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.tabPage4.TabIndex = 1;
             this.tabPage4.Text = "Table";
             this.tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(83, 457);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(496, 20);
+            this.textBox1.TabIndex = 118;
             // 
             // tabPage5
             // 
@@ -1385,13 +1393,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.button1.Text = "button1";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
-            // 
-            // textBox1
-            // 
-            this.textBox1.Location = new System.Drawing.Point(42, 426);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(496, 20);
-            this.textBox1.TabIndex = 118;
             // 
             // GigECameraDemoDlg
             // 

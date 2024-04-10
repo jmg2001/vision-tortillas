@@ -19,6 +19,7 @@ using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using Emgu.CV.Util;
+
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,6 +27,7 @@ using System.Net.Http;
 using Newtonsoft.Json;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Newtonsoft.Json.Linq;
+using System.Security.Policy;
 
 
 [StructLayout(LayoutKind.Sequential)]
@@ -64,8 +66,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         List<Color> colorList = new List<Color>();
         int colorIndex = 0;
 
+        // Control de recursion
         int maxIteration = 30000;
         int iteration = 0;
+
+        // Parametros para el tamaño de la tortilla
+        float maxD = 88;
+        float minD = 72;
+        double maxCompactness = 16;
+        double maxOvality = 0.5;
+
+        List<string> sizes = new List<string>();
 
         // Hasta aqui las creadas por mi
 
@@ -115,9 +126,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             public double DMenor { get; set; }
             public double Sector { get; set; }
             public double Compacidad { get; set; }
+            public double Ovalidad { get; set; }
+            public ushort Size { get; set; }
 
             // Constructor de la clase Blob
-            public Blob(double area, double perimetro, double diametro, Point centro, double dMayor, double dMenor, double sector, double compacidad)
+            public Blob(double area, double perimetro, double diametro, Point centro, double dMayor, double dMenor, double sector, double compacidad, ushort size, double ovalidad)
             {
                 Area = area;
                 Perimetro = perimetro;
@@ -127,6 +140,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 DMenor = dMenor;
                 Sector = sector;
                 Compacidad = compacidad;
+                Size = size;
+                Ovalidad = ovalidad;
             }
         }
 
@@ -286,15 +301,30 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 imagesPath = imagesPath + "\\images\\";
                 Console.WriteLine(imagesPath);
 
+                sizes.Add("Normal");
+                sizes.Add("Big");
+                sizes.Add("Small");
+                sizes.Add("Incomplete");
+                sizes.Add("Oval");
+
                 //objeto ROI
                 UserROI.Top = 14;
                 UserROI.Left = 159;
                 UserROI.Right = 535;
                 UserROI.Bottom = 408;
 
+                Txt_MaxDiameter.Text = maxD.ToString();
+                Txt_MinDiameter.Text = minD.ToString();
+                Txt_MaxCompacity.Text = maxCompactness.ToString();
+                Txt_MaxOvality.Text = maxOvality.ToString();
+
                 //InitializeInterface();
                 // Suscribir al evento KeyPress del TextBox
                 Txt_Threshold.KeyPress += Txt_Threshold_KeyPress;
+                Txt_MaxDiameter.KeyPress += Txt_MaxDiameter_KeyPress;
+                Txt_MinDiameter.KeyPress += Txt_MinDiameter_KeyPress;
+                Txt_MaxCompacity.KeyPress += Txt_MaxCompacity_KeyPress;
+                Txt_MaxOvality.KeyPress += Txt_MaxOvality_KeyPress;
                 
                 // Crear un TabControl
                 TabControl tabControl1 = new TabControl();
@@ -330,6 +360,82 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 MessageBox.Show("No cameras found or selected");
                 this.Close();
+            }
+        }
+
+        private void Txt_MaxOvality_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Verificar si la tecla presionada es "Enter" (código ASCII 13)
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                // Intentar convertir el texto del TextBox a un número entero
+                if (double.TryParse(Txt_MaxOvality.Text, out maxOvality))
+                {
+                    // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
+                    MessageBox.Show("Se ha guardado la cantidad modificada: " + maxOvality, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    // Manejar el caso en que el texto no sea un número válido
+                    MessageBox.Show("Por favor ingresa un número válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void Txt_MaxCompacity_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Verificar si la tecla presionada es "Enter" (código ASCII 13)
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                // Intentar convertir el texto del TextBox a un número entero
+                if (double.TryParse(Txt_MaxCompacity.Text, out maxCompactness))
+                {
+                    // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
+                    MessageBox.Show("Se ha guardado la cantidad modificada: " + maxCompactness, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    // Manejar el caso en que el texto no sea un número válido
+                    MessageBox.Show("Por favor ingresa un número válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void Txt_MinDiameter_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Verificar si la tecla presionada es "Enter" (código ASCII 13)
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                // Intentar convertir el texto del TextBox a un número entero
+                if (float.TryParse(Txt_MinDiameter.Text, out minD))
+                {
+                    // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
+                    MessageBox.Show("Se ha guardado la cantidad modificada: " + minD, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    // Manejar el caso en que el texto no sea un número válido
+                    MessageBox.Show("Por favor ingresa un número válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void Txt_MaxDiameter_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Verificar si la tecla presionada es "Enter" (código ASCII 13)
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                // Intentar convertir el texto del TextBox a un número entero
+                if (float.TryParse(Txt_MaxDiameter.Text, out maxD))
+                {
+                    // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
+                    MessageBox.Show("Se ha guardado la cantidad modificada: " + maxD, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    // Manejar el caso en que el texto no sea un número válido
+                    MessageBox.Show("Por favor ingresa un número válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
@@ -896,6 +1002,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             double areaMin = 2000; // Área mínima
             double areaMax = 10000; // Área máxima
 
+            Blobs = new List<Blob>();
+
             if (true)
             {
                 // Configurar el PictureBox para ajustar automáticamente al tamaño de la imagen
@@ -964,10 +1072,16 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         // Dibujar el numero de sector
                         drawSectorNumber(ref imageCV, center, sector);
 
+                        double ovalidad = calculateOvality(maxDiameter, minDiameter);
+
+                        ushort size = calculateSize(maxDiameter, minDiameter, compactness, ovalidad);
+
                         // Agregamos los datos a la tabla
                         dataTable.Rows.Add(sector, area, Math.Round(diametroIA, 3), Math.Round(diameterTriangles, 3), Math.Round(maxDiameter, 3), Math.Round(minDiameter, 3), Math.Round(compactness, 3));
 
-                        Blob blob = new Blob(area, perimeter, diameterTriangles, center, maxDiameter, minDiameter, sector, compactness);
+                        Blob blob = new Blob(area, perimeter, diameterTriangles, center, maxDiameter, minDiameter, sector, compactness, size, ovalidad);
+
+                        drawData(imageCV, blob);
 
                         // Agregamos el elemento a la lista
                         Blobs.Add(blob);
@@ -984,13 +1098,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                             modbusServer.holdingRegisters[h+1] = (short)dataToPublish[index];
                             index++;
                         }
-
-                        // Escribimos los datos en la imagen
-                        // drawData(imageCV,blob);
-
                         // Aumentamos el numero de elementos para promediar
                         n++;
                     }
+
+                    //foreach (Blob blob in Blobs)
+                    //{
+                    //    drawData(imageCV, blob);
+                    //}
                 }
 
                 // Calculamos el promedio de los diametros
@@ -1006,6 +1121,36 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 processROIBox.Image = imageCV.ToBitmap();
 
             }
+        }
+
+        private double calculateOvality(double maxDiameter, double minDiameter)
+        {
+            double ovality = Math.Sqrt((1 - (Math.Pow(minDiameter, 2) / Math.Pow(maxDiameter, 2))));
+            return ovality;
+        }
+
+        private ushort calculateSize(double dMayor, double dMenor, double compacidad, double ovalidad)
+        {
+            ushort size = 0;
+
+            if (dMayor > maxD)
+            {
+                size = 1; // Grande
+            }
+            if (dMenor < minD) 
+            {
+                size = 2; // Pequeña
+            }
+            if (compacidad > maxCompactness)
+            {
+                size = 3; // Con hueco
+            }
+            if (ovalidad > maxOvality)
+            {
+                size = 4; // Ovalada
+            }
+
+            return size;
         }
 
         private VectorOfVectorOfPoint findContours(Mat imageCV)
@@ -1154,32 +1299,41 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             int width = image.Width;
             int height = image.Height;
 
+            // Límites de la cuadrícula
+            double xMin = 0;
+            double xMax = width;
+            double yMin = 0;
+            double yMax = height;
+
+            // Tamaño de cada cuadro de la cuadrícula
+            double cuadroAncho = width/gridCols;
+            double cuadroAlto = height/gridRows;
+
+            // Determinar en qué cuadro de la cuadrícula se encuentra el punto
+            int x = (int)((blob.Centro.X - xMin) / cuadroAncho);
+            int y = (int)((blob.Centro.Y - yMin) / cuadroAlto) + 1;
+
+            //Console.WriteLine("Sector: " + blob.Sector);
+            //Console.WriteLine(x);
+            //Console.WriteLine(y);
+
             int xOffset = 5;
             int yOffset = 10;
 
-            int x = 0; int y = 0;
+            x = (width / gridCols) * x;
+            y = (height / gridRows) * y;
 
-            for (int i = 0; i < gridRows; i++)
-            {
-                for (int j = 1; j <= gridCols; j++)
-                {
-                    x = (width / gridCols) * i;
-                    y = (height / gridRows) * j;
+            Point textPosition = new Point((int)(x + xOffset), (int)(y - (yOffset)));
+            string text = "Dm = " + Math.Round(blob.DMenor, 2).ToString();
+            CvInvoke.PutText(image, text, textPosition, FontFace.HersheySimplex, 0.4, new MCvScalar(215, 234, 0), 1);
 
-                    Point textPosition = new Point((int)(x + xOffset), (int)(y - (yOffset * 2)));
-                    string text = "Dm = " + Math.Round(blob.DMenor, 2).ToString();
-                    CvInvoke.PutText(image, text, textPosition, FontFace.HersheySimplex, 0.2, new MCvScalar(255), 1);
-                            
-                    textPosition = new Point((int)(x + xOffset), (int)(y - (yOffset * 3)));
-                    text = "DM = " + Math.Round(blob.DMayor, 2).ToString();
-                    CvInvoke.PutText(image, text, textPosition, FontFace.HersheySimplex, 0.2, new MCvScalar(255), 1);
-                            
-                    textPosition = new Point((int)(x + xOffset), (int)(y - (yOffset * 4)));
-                    text = "D = " + Math.Round(blob.Diametro, 2).ToString();
-                    CvInvoke.PutText(image, text, textPosition, FontFace.HersheySimplex, 0.2, new MCvScalar(255), 1);
+            textPosition = new Point((int)(x + xOffset), (int)(y - (yOffset * 2)));
+            text = "DM = " + Math.Round(blob.DMayor, 2).ToString();
+            CvInvoke.PutText(image, text, textPosition, FontFace.HersheySimplex, 0.4, new MCvScalar(215, 234, 0), 1);
 
-                }
-            }
+            textPosition = new Point((int)(x + xOffset), (int)(y - (yOffset * 12)));
+            text = sizes[blob.Size];
+            CvInvoke.PutText(image, text, textPosition, FontFace.HersheySimplex, 0.4, new MCvScalar(215, 234, 0), 1);
         }
 
         private void drawSectorNumber(ref Mat imageCV, Point center, int sector)
@@ -1551,7 +1705,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             // Lógica para calcular la compacidad
             // Se asume que el área y el perímetro son mayores que cero para evitar divisiones por cero
-
             double compactness = (perimeter * perimeter) / (double)area;
 
             return compactness;
@@ -1985,6 +2138,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 Console.WriteLine("Error al enviar la solicitud: " + ex.Message);
                 return string.Empty;
             }
+        }
+
+        private void Txt_Threshold_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
