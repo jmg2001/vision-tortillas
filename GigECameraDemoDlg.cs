@@ -60,7 +60,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         int threshold = 140;
         bool autoThreshold = true;
 
-        bool trigger = false;
+        bool txtDiameters = true;
+
+        bool triggerPLC = false;
+        int mode = 0;
 
         // Creamos una lista de colores
         List<Color> colorList = new List<Color>();
@@ -216,7 +219,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         binarizedImage.Dispose();
 
                         // Colocamos el picturebox del ROI
-                        SetPictureBoxPositionAndSize(processROIBox, tabPage3);
+                        SetPictureBoxPositionAndSize(processROIBox, imagePage);
 
                         // Procesamos el ROI
                         blobProces(roiImage, processROIBox);
@@ -288,7 +291,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 InitializeDataTable();
 
                 // Suscribir al evento SelectedIndexChanged del TabControl
-                tabControl2.SelectedIndexChanged += TabControl2_SelectedIndexChanged;
+                mainTabs.SelectedIndexChanged += TabControl2_SelectedIndexChanged;
 
                 modbusServer.Port = 502;
                 modbusServer.Listen();
@@ -346,7 +349,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 this.m_ImageBox.TabIndex = 12;
                 this.m_ImageBox.TrackerEnable = false;
                 this.m_ImageBox.View = null;
-                tabPage3.Controls.Add(this.m_ImageBox);
+                imagePage.Controls.Add(this.m_ImageBox);
 
                 
 
@@ -442,38 +445,28 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private async void TabControl2_SelectedIndexChanged(object sender, EventArgs e)
         {
             // Verificar si la pestaña seleccionada es la que deseas
-            if (tabControl2.SelectedTab == tabPage5) // Cambia tabPage1 al nombre real de tu pestaña
+            if (mainTabs.SelectedTab == productsPage) // Cambia tabPage1 al nombre real de tu pestaña
             {
                 // Llamar a la función request y esperar a que devuelva el resultado
                 string query = "SELECT * FROM productos";
                 string resultado = await request(query);
-
-                // Convertir la cadena JSON a un objeto JSON
-                JObject jsonResult = JObject.Parse(resultado);
-
-                Console.WriteLine(jsonResult["result"]);
-
-                foreach (JArray result in jsonResult["result"])
-                {
-                    CmbProducts.Items.Add(result[1]);
-                }
-
-                // Procesar el resultado (en este caso, supondremos que el resultado es una lista de nombres separados por comas)
-                // string[] nombres = resultado.Split(',');
                 
+                try
+                {
+                    // Convertir la cadena JSON a un objeto JSON
+                    JObject jsonResult = JObject.Parse(resultado);
 
-                //// Agregar los nombres al ComboBox
-                //foreach (string nombre in nombres)
-                //{
-                //    // Deserializar el JSON en un objeto anónimo
-                //    dynamic jsonObject = JsonConvert.DeserializeObject(nombre);
+                    Console.WriteLine(jsonResult["result"]);
 
-                //    // Obtener el valor del campo "nombre"
-                //    string NOMBRE = jsonObject.nombre;
-
-                //    Console.WriteLine(NOMBRE);
-                //    // comboBox1.Items.Add(nombre);
-                //}
+                    foreach (JArray result in jsonResult["result"])
+                    {
+                        CmbProducts.Items.Add(result[1]);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("No se pudo formatear la respuesta");
+                }
             }
         }
 
@@ -974,8 +967,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 {
                     UpdateControls();
                     // Para activar el botón
-                    Cmd_Trigger.BackColor = DefaultBackColor; // Restaurar el color de fondo predeterminado
-                    Cmd_Trigger.Text = "Running...";
+                    modeBtn.BackColor = DefaultBackColor; // Restaurar el color de fondo predeterminado
+                    modeBtn.Text = "LIVE";
+                    mode = 1;
+
+                    if (isActivatedProcessData)
+                    {
+                        processImageBtn.PerformClick();
+                    }
+
+                    processImageBtn.Enabled = false;
+                    virtualTriggerBtn.Enabled = false;
                 }
             }
            
@@ -989,8 +991,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         m_Xfer.Abort();
                     UpdateControls();
                     // Para desactivar el botón
-                    Cmd_Trigger.BackColor = Color.Silver; // Cambiar el color de fondo a gris
-                    Cmd_Trigger.Text = "Run"; // Cambiar el texto cuando está desactivado
+                    modeBtn.BackColor = Color.Silver; // Cambiar el color de fondo a gris
+                    modeBtn.Text = "FRAME"; // Cambiar el texto cuando está desactivado
+                    mode = 0;
+
+                    if (!triggerPLC)
+                    {
+                        processImageBtn.Enabled = true;
+                        virtualTriggerBtn.Enabled = true;
+                    }
                 }
             }
         }
@@ -1101,11 +1110,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         // Aumentamos el numero de elementos para promediar
                         n++;
                     }
-
-                    //foreach (Blob blob in Blobs)
-                    //{
-                    //    drawData(imageCV, blob);
-                    //}
                 }
 
                 // Calculamos el promedio de los diametros
@@ -1207,93 +1211,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             dataTable.Columns.Add("Compacidad");
         }
 
-        //private void UpdateLabelWithCircularObjects(Bitmap binarizedImage, int areaMin, int areaMax, double diameterMin, int gridRows, int gridCols)
-        //{
-            
-        //    // Aplicar etiquetado de componentes conectados
-        //    var result = LabelConnectedComponents(binarizedImage, areaMin, areaMax);
-        //    List<List<Point>> connectedComponents = result.Item1;
-        //    List<List<Point>> perimeters = result.Item2;
-
-        //    dataTable.Clear();
-
-        //    double avg_diam = 0;
-        //    int n = 0;
-
-        //    // Filtros tempranos y obtener resultados para cada objeto
-        //    foreach (List<Point> connectedComponent in connectedComponents)
-        //    {
-                
-        //        // Calcular el área del objeto (cantidad de píxeles)
-        //        int area = connectedComponent.Count;
-
-        //        // Este diamtro lo vamos a dejar para despues
-        //        double diametroIA = CalculateDiameterFromArea(area); 
-                
-        //        // Calcular los diámetro mayor y menor del objeto
-        //        int majorDiameter = CalculateMajorDiameter(connectedComponent, 1);
-        //        int minorDiameter = CalculateMinorDiameter(connectedComponent, 1);
-                
-        //        // Obtener el diámetro del objeto
-        //        double diameter = CalculateDiameter(connectedComponent, 1);
-
-        //        // Obtener el perímetro del objeto
-        //        double perimeter = perimeters[n].Count;
-
-        //        Point center = CalculateCenter(connectedComponent);
-
-        //        // En tu función ColorizePixelsAroundObject, después de colorear los píxeles, calcular el sector
-        //        int sector = CalculateSector(center, binarizedImage.Width, binarizedImage.Height, gridRows, gridCols);
-
-        //        Mat hola = new Mat();
-
-        //        // Calculamos el diametro
-        //        (double diameterTriangles, double maxDiameter, double minDiameter) = calculateAndDrawDiameterTrianglesAlghoritm(center, binarizedImage, ref hola , sector);
-
-        //        avg_diam += diameterTriangles;
-
-        //        // Calcular la compacidad
-        //        double compactness = CalculateCompactness(area, perimeter);
-
-        //        // Dibujar un punto en el centro del objeto
-        //        DrawCenterPoint(binarizedImage, center);
-
-        //        // Dibujar el sector al que pertenece el objeto
-        //        DrawSector(binarizedImage, center, gridRows, gridCols, sector);
-
-        //        // Dibujar el numero del sector
-        //        DrawSectorNumber(binarizedImage, center, sector);
-
-        //        Color redColor = Color.Red;
-        //        ColorizePixelsAroundObject(binarizedImage, perimeters[n], redColor);
-
-        //        List<double> data = new List<double>();
-        //        data.Add(diameter); data.Add(maxDiameter); data.Add(minDiameter);
-
-        //        // Poner los datos
-        //        // drawData(binarizedImage, data);
-
-        //        // Añadir una nueva fila a la DataTable
-        //        // dataTable.Rows.Add(sector + 1, area, Math.Round(diametroIA, 3),Math.Round(diameterTriangles,3), majorDiameter, minorDiameter, Math.Round(compactness, 3));
-        //        dataTable.Rows.Add(sector + 1, area, Math.Round(diametroIA, 3), Math.Round(diameterTriangles,3), Math.Round(maxDiameter,3), Math.Round(minDiameter, 3),Math.Round(compactness, 3));
-
-        //        n++;
-
-        //    }
-
-        //    Console.WriteLine(perimeters.Count);
-
-        //    avg_diam /= n;
-
-        //    avg_diameter.Text = Math.Round(avg_diam, 3).ToString();
-
-        //    // Asignar la DataTable al DataGridView
-        //    dataGridView1.DataSource = dataTable;
-
-        //    // Guardar los resultados en un archivo de texto
-        //    SaveResultsToTxt(dataTable);
-        //}
-
         private void drawData(Mat image, Blob blob)
         {
             int width = image.Width;
@@ -1323,17 +1240,28 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             x = (width / gridCols) * x;
             y = (height / gridRows) * y;
 
-            Point textPosition = new Point((int)(x + xOffset), (int)(y - (yOffset)));
-            string text = "Dm = " + Math.Round(blob.DMenor, 2).ToString();
-            CvInvoke.PutText(image, text, textPosition, FontFace.HersheySimplex, 0.4, new MCvScalar(215, 234, 0), 1);
+            Point textPosition = new Point();
+            string text = string.Empty;
 
-            textPosition = new Point((int)(x + xOffset), (int)(y - (yOffset * 2)));
-            text = "DM = " + Math.Round(blob.DMayor, 2).ToString();
-            CvInvoke.PutText(image, text, textPosition, FontFace.HersheySimplex, 0.4, new MCvScalar(215, 234, 0), 1);
+            if (txtDiameters)
+            {
+                Rectangle rect = new Rectangle(x + xOffset, (int)(y - yOffset * 3), (int)(width * 0.22), (int)(height * 0.06));
+
+                // Dibujar el rectángulo negro en la imagen
+                CvInvoke.Rectangle(image, rect, new MCvScalar(0, 0, 0), -1);
+
+                textPosition = new Point((int)(x + xOffset), (int)(y - (yOffset)));
+                text = "Dm = " + Math.Round(blob.DMenor, 2).ToString();
+                CvInvoke.PutText(image, text, textPosition, FontFace.HersheySimplex, 0.4, new MCvScalar(255, 255, 255), 1);
+
+                textPosition = new Point((int)(x + xOffset), (int)(y - (yOffset * 2)));
+                text = "DM = " + Math.Round(blob.DMayor, 2).ToString();
+                CvInvoke.PutText(image, text, textPosition, FontFace.HersheySimplex, 0.4, new MCvScalar(255, 255, 255), 1);
+            }
 
             textPosition = new Point((int)(x + xOffset), (int)(y - (yOffset * 12)));
             text = sizes[blob.Size];
-            CvInvoke.PutText(image, text, textPosition, FontFace.HersheySimplex, 0.4, new MCvScalar(215, 234, 0), 1);
+            CvInvoke.PutText(image, text, textPosition, FontFace.HersheySimplex, 0.4, new MCvScalar(255, 255, 255), 1);
         }
 
         private void drawSectorNumber(ref Mat imageCV, Point center, int sector)
@@ -1379,120 +1307,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 }
             }
         }
-
-        //private (List<List<Point>>, List<List<Point>>) LabelConnectedComponents(Bitmap binarizedImage, int areaMin, int areaMax)
-        //{
-        //    // Listas para contar los puntos de las figuras y los puntos que son bordes
-        //    List<List<Point>> connectedComponents = new List<List<Point>>();
-
-        //    // Inicializar la lista de perímetros para evitar NullReferenceException
-        //    List<List<Point>> perimeters = new List<List<Point>>();
-
-        //    int[,] labels = new int[binarizedImage.Width, binarizedImage.Height];
-        //    int currentLabel = 0;
-
-        //    // Creamos una nueva imagen para poder colorear
-        //    Bitmap paintImage = new Bitmap(binarizedImage);
-
-        //    binarizedImage.Save("C:\\Users\\Jesús\\Desktop\\test.png");
-
-        //    // Agregar colores a la lista
-        //    colorList.Add(Color.Red);
-        //    colorList.Add(Color.Blue);
-        //    colorList.Add(Color.Green);
-        //    colorList.Add(Color.Yellow);
-        //    colorList.Add(Color.Magenta);
-        //    colorList.Add(Color.Cyan);
-
-        //    for (int x = 0; x < binarizedImage.Width; x++)
-        //    {
-        //        for (int y = 0; y < binarizedImage.Height; y++)
-        //        {
-        //            Color pixelColor = binarizedImage.GetPixel(x, y);
-
-        //            // Verificar si el píxel es del color de la tortilla
-        //            if (pixelColor.GetBrightness() == tortillaColor && labels[x, y] == 0)
-        //            {
-        //                List<Point> connectedComponent = new List<Point>();
-        //                List<Point> perimeter = new List<Point>();
-
-        //                DepthFirstSearch(x, y, binarizedImage, labels, ref currentLabel, connectedComponent, perimeter);
-
-        //                ColorizePixelsAroundObject(paintImage, connectedComponent, colorList[colorIndex]);
-
-        //                int area = connectedComponent.Count;
-
-        //                if (area < areaMin || area > areaMax)
-        //                {
-        //                    currentLabel = 0;
-        //                    continue;
-        //                }
-
-        //                colorIndex++;
-
-        //                if (colorIndex >= colorList.Count)
-        //                {
-        //                    colorIndex = 0;
-        //                }
-
-        //                connectedComponents.Add(connectedComponent);
-        //                perimeters.Add(perimeter);
-
-        //                // Reiniciar el contador de etiquetas para el próximo conjunto de píxeles conectados
-        //                currentLabel = 0;
-        //            }
-        //        }
-        //    }
-
-        //    paintImage.Save("C:\\Users\\Jesús\\Desktop\\paintImage.bmp");
-
-        //    return (connectedComponents, perimeters);
-        //}
-
-        //private void DepthFirstSearch(int x, int y, Bitmap binarizedImage, int[,] labels, ref int currentLabel, List<Point> connectedComponent, List<Point> perimeter)
-        //{
-        //    if (x < 0 || x >= binarizedImage.Width || y < 0 || y >= binarizedImage.Height)
-        //    {
-        //        return;
-        //    }
-
-        //    Color pixelColor = binarizedImage.GetPixel(x, y);
-
-        //    if (pixelColor.GetBrightness() == tortillaColor && labels[x, y] == 0)
-        //    {
-        //        labels[x, y] = ++currentLabel;
-        //        connectedComponent.Add(new Point(x, y));
-
-        //        // Verificar si el punto es un borde de la forma encontrada
-        //        if (IsShapeBorder(x, y, binarizedImage))
-        //        {
-        //            perimeter.Add(new Point(x, y));
-        //        }
-
-        //        DepthFirstSearch(x + 1, y, binarizedImage, labels, ref currentLabel, connectedComponent, perimeter);
-        //        DepthFirstSearch(x - 1, y, binarizedImage, labels, ref currentLabel, connectedComponent, perimeter);
-        //        DepthFirstSearch(x, y + 1, binarizedImage, labels, ref currentLabel, connectedComponent, perimeter);
-        //        DepthFirstSearch(x, y - 1, binarizedImage, labels, ref currentLabel, connectedComponent, perimeter);
-        //    }
-        //}
-
-        //private bool IsShapeBorder(int x, int y, Bitmap binarizedImage)
-        //{
-        //    if (x == 0 || x == binarizedImage.Width - 1 || y == 0 || y == binarizedImage.Height - 1)
-        //    {
-        //        return true;
-        //    }
-
-        //    if (binarizedImage.GetPixel(x + 1, y).GetBrightness() != tortillaColor ||
-        //        binarizedImage.GetPixel(x - 1, y).GetBrightness() != tortillaColor ||
-        //        binarizedImage.GetPixel(x, y + 1).GetBrightness() != tortillaColor ||
-        //        binarizedImage.GetPixel(x, y - 1).GetBrightness() != tortillaColor)
-        //    {
-        //        return true;
-        //    }
-
-        //    return false;
-        //}
 
         private (double, double, double) calculateAndDrawDiameterTrianglesAlghoritm(Point center, Bitmap image, ref Mat imageCV, int sector, bool draw = true)
         {
@@ -1595,67 +1409,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return diameter;
         }
 
-        //private int CalculateMajorDiameter(List<Point> connectedComponent, int offset)
-        //{
-        //    // Lógica para calcular el diámetro mayor
-        //    // Puedes adaptar esto según tus necesidades específicas
-
-        //    // Encuentra los puntos extremos en la dirección horizontal
-        //    int maxX = connectedComponent.Max(point => point.X);
-        //    int minX = connectedComponent.Min(point => point.X);
-
-        //    // Calcula el diámetro mayor en la dirección horizontal
-        //    int majorDiameterX = maxX - minX;
-
-        //    // Encuentra los puntos extremos en la dirección vertical
-        //    int maxY = connectedComponent.Max(point => point.Y);
-        //    int minY = connectedComponent.Min(point => point.Y);
-
-        //    // Calcula el diámetro mayor en la dirección vertical
-        //    int majorDiameterY = maxY - minY;
-
-        //    // Usa el mayor de los diámetros calculados
-        //    int majorDiameter = Math.Max(majorDiameterX, majorDiameterY);
-
-        //    // Agrega el offset
-        //    majorDiameter += offset;
-
-        //    return majorDiameter;
-        //}
-
-        //private int CalculateMinorDiameter(List<Point> connectedComponent, int offset)
-        //{
-        //    // Lógica para calcular el diámetro menor
-        //    // Puedes adaptar esto según tus necesidades específicas
-
-        //    // Encuentra los puntos extremos en la dirección horizontal
-        //    int maxX = connectedComponent.Max(point => point.X);
-        //    int minX = connectedComponent.Min(point => point.X);
-
-        //    // Calcula el diámetro menor en la dirección horizontal
-        //    int minorDiameterX = maxX - minX;
-
-        //    // Encuentra los puntos extremos en la dirección vertical
-        //    int maxY = connectedComponent.Max(point => point.Y);
-        //    int minY = connectedComponent.Min(point => point.Y);
-
-        //    // Calcula el diámetro menor en la dirección vertical
-        //    int minorDiameterY = maxY - minY;
-
-        //    // Usa el menor de los diámetros calculados
-        //    int minorDiameter = Math.Min(minorDiameterX, minorDiameterY);
-
-        //    // Agrega el offset
-        //    minorDiameter += offset;
-
-        //    return minorDiameter;
-        //}
-
-        //private Point CalculateCenter(List<Point> connectedComponent)
-        //{
-            
-        //}
-
         private double CalculateDiameter(List<Point> connectedComponent, double offset)
         {
             if (connectedComponent.Count < 2)
@@ -1691,16 +1444,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return diameter;
         }
 
-        //private double CalculatePerimeter(double diameter)
-        //{
-        //    const double pi = Math.PI;
-
-        //    // Calcular el perímetro usando la fórmula P = π * d
-        //    double perimeter = pi * diameter;
-
-        //    return perimeter;
-        //}
-
         private double CalculateCompactness(int area, double perimeter)
         {
             // Lógica para calcular la compacidad
@@ -1709,16 +1452,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             return compactness;
         }
-
-        //private void ColorizePixelsAroundObject(Bitmap image, List<Point> objectPoints, Color color)
-        //{
-        //    foreach (Point point in objectPoints)
-        //    {
-        //        image.SetPixel(point.X, point.Y, color);
-        //    }
-           
-        //}
-
 
         private void drawSector(Bitmap image, ref Mat imageCV, int sector)
         {
@@ -1733,11 +1466,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             Rectangle rect = new Rectangle(sectorX, sectorY, sectorWidth, sectorHeight);
 
             CvInvoke.Rectangle(imageCV, rect, new MCvScalar(255, 0, 0), 2);
-        }
-
-        private void DrawCenterPoint(Bitmap image, Point center)
-        {
-
         }
 
         private Bitmap binarizeImage(Bitmap original)
@@ -1764,38 +1492,21 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return processed;
         }
 
-
-
-
-        private void Cmd_Process_Data_Click(object sender, EventArgs e)
+        private void processImageBtn_Click(object sender, EventArgs e)
         {
-            if (false)
+
+            // Cambiar el estado del botón tipo toggle
+            isActivatedProcessData = !isActivatedProcessData;
+
+            if (isActivatedProcessData)
             {
-                MessageBox.Show("Activate trigger mode");
+                processImageBtn.BackColor = DefaultBackColor; // Restaurar el color de fondo predeterminado
+                processImageBtn.Text = "ENABLED";// Cambiar el texto cuando está habilitado
             }
             else
             {
-                // Cambiar el estado del botón tipo toggle
-                isActivatedProcessData = !isActivatedProcessData;
-
-                if (isActivatedProcessData)
-                {
-                    Cmd_Process_Data.BackColor = DefaultBackColor; // Restaurar el color de fondo predeterminado
-                    Cmd_Process_Data.Text = "Process Image ENABLED";// Cambiar el texto cuando está habilitado
-                    // pictureBox1.Visible = true; // Mostrar el PictureBox
-                    // Mostrar el cuadro de diálogo si el botón está activado
-                    // isActivatedProcessData = true;
-                    //MessageBox.Show("El botón está activado.", "Activado", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                else
-                {
-                    Cmd_Process_Data.BackColor = Color.Silver; // Cambiar el color de fondo a gris
-                    Cmd_Process_Data.Text = "Process Image DISABLED"; // Cambiar el texto cuando está desactivado
-                    // pictureBox1.Visible = false; // Ocultar el PictureBox
-                    // isActivatedProcessData = false;
-                    // No hacer nada si el botón está desactivado
-                }
-
+                processImageBtn.BackColor = Color.Silver; // Cambiar el color de fondo a gris
+                processImageBtn.Text = "DISABLED"; // Cambiar el texto cuando está desactivado
             }
             
         }
@@ -1810,8 +1521,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 {
                     UpdateControls();
                     // Para activar el botón
-                    Cmd_Trigger.BackColor = DefaultBackColor; // Restaurar el color de fondo predeterminado
-                    Cmd_Trigger.Text = "Running...";
+                    modeBtn.BackColor = DefaultBackColor; // Restaurar el color de fondo predeterminado
+                    modeBtn.Text = "FRAME";
+                    mode = 0;
                 }
             }
 
@@ -1825,45 +1537,63 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         m_Xfer.Abort();
                     UpdateControls();
                     // Para desactivar el botón
-                    Cmd_Trigger.BackColor = Color.Silver; // Cambiar el color de fondo a gris
-                    Cmd_Trigger.Text = "Run"; // Cambiar el texto cuando está desactivado
+                    modeBtn.BackColor = Color.Silver; // Cambiar el color de fondo a gris
+                    modeBtn.Text = "LIVE"; // Cambiar el texto cuando está desactivado
+                    mode = 1;
                 }
             }
         }
 
-        private void Cmd_Update_Viewport_Click(object sender, EventArgs e)
+        private void triggerModeBtn_Click(object sender, EventArgs e)
         {
+            triggerPLC = !triggerPLC;
 
-                trigger = !trigger;
-                if (trigger)
+            if (m_Xfer.Grabbing)
+            {
+                modeBtn.PerformClick();
+                processImageBtn.Enabled = true;
+            }
+
+            if (triggerPLC)
+            {
+                triggerModeBtn.BackColor = DefaultBackColor;
+                triggerModeBtn.Text = "PLC";
+                virtualTriggerBtn.Enabled = false;
+                run();
+                m_AcqDevice.LoadFeatures("C:\\Users\\Jesús\\Documents\\T_Calibir_GXM640_TriggerON_Default.ccf");
+
+                if (!isActivatedProcessData)
                 {
-                    Cmd_Update_Viewport.BackColor = DefaultBackColor;
-                    Cmd_Update_Viewport.Text = "Trigger AUTO";
-                    virtualTriggerBtn.Enabled = false;
-                    run();
-                    m_AcqDevice.LoadFeatures("C:\\Users\\Jesús\\Documents\\T_Calibir_GXM640_TriggerON_Default.ccf");
-
+                    processImageBtn.PerformClick();
                 }
-                else
+
+                modeBtn.Enabled = false;
+                processImageBtn.Enabled = false;
+
+            }
+            else
+            {
+                m_AcqDevice.LoadFeatures("C:\\Users\\Jesús\\Documents\\T_Calibir_GXM640_TriggerOFF_Default.ccf");
+                triggerModeBtn.BackColor = Color.Silver;
+                virtualTriggerBtn.Enabled = true;
+
+                modeBtn.Enabled = true;
+                processImageBtn.Enabled = true;
+
+                AbortDlg abort = new AbortDlg(m_Xfer);
+
+                if (m_Xfer.Freeze())
                 {
-                    m_AcqDevice.LoadFeatures("C:\\Users\\Jesús\\Documents\\T_Calibir_GXM640_TriggerOFF_Default.ccf");
-                    Cmd_Update_Viewport.BackColor = Color.Silver;
-                    virtualTriggerBtn.Enabled = true;
-
-                    AbortDlg abort = new AbortDlg(m_Xfer);
-
-                    if (m_Xfer.Freeze())
-                    {
-                        if (abort.ShowDialog() != DialogResult.OK)
-                            m_Xfer.Abort();
-                        UpdateControls();
-                        // Para desactivar el botón
-                        Cmd_Trigger.BackColor = Color.Silver; // Cambiar el color de fondo a gris
-                        Cmd_Trigger.Text = "Run"; // Cambiar el texto cuando está desactivado
-                    }
-
-                    Cmd_Update_Viewport.Text = "Trigger MANUAL";
+                    if (abort.ShowDialog() != DialogResult.OK)
+                        m_Xfer.Abort();
+                    UpdateControls();
+                    // Para desactivar el botón
+                    modeBtn.BackColor = Color.Silver; // Cambiar el color de fondo a gris
+                    // Cmd_Trigger.Text = "Frame"; // Cambiar el texto cuando está desactivado
                 }
+
+                triggerModeBtn.Text = "SOFTWARE";
+            }
              
         }
 
@@ -2143,6 +1873,26 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private void Txt_Threshold_TextChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label3_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label4_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void diametersTxtCheck_CheckedChanged(object sender, EventArgs e)
+        {
+            txtDiameters = !txtDiameters;
         }
     }
 }
