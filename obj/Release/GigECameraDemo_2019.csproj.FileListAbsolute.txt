@@ -1,0 +1,15 @@
+C:\Users\Jesús\Documents\vision-tortillas\obj\Release\GigECameraDemo_2019.csproj.AssemblyReference.cache
+C:\Users\Jesús\Documents\vision-tortillas\obj\Release\DALSA.SaperaLT.SapClassGui.AbortDlg.resources
+C:\Users\Jesús\Documents\vision-tortillas\obj\Release\DALSA.SaperaLT.SapClassGui.AboutBox.resources
+C:\Users\Jesús\Documents\vision-tortillas\obj\Release\DALSA.SaperaLT.SapClassGui.AcqConfigDlg.resources
+C:\Users\Jesús\Documents\vision-tortillas\obj\Release\DALSA.SaperaLT.SapClassGui.AviFileDlg.resources
+C:\Users\Jesús\Documents\vision-tortillas\obj\Release\DALSA.SaperaLT.SapClassGui.BayerDlg.resources
+C:\Users\Jesús\Documents\vision-tortillas\obj\Release\DALSA.SaperaLT.SapClassGui.BufferDlg.resources
+C:\Users\Jesús\Documents\vision-tortillas\obj\Release\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.GigECameraDemoDlg.resources
+C:\Users\Jesús\Documents\vision-tortillas\obj\Release\DALSA.SaperaLT.SapClassGui.ImageBox.resources
+C:\Users\Jesús\Documents\vision-tortillas\obj\Release\DALSA.SaperaLT.SapClassGui.JpegFileDlg.resources
+C:\Users\Jesús\Documents\vision-tortillas\obj\Release\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Properties.Resources.resources
+C:\Users\Jesús\Documents\vision-tortillas\obj\Release\DALSA.SaperaLT.SapClassGui.RawFileDlg.resources
+C:\Users\Jesús\Documents\vision-tortillas\obj\Release\DALSA.SaperaLT.SapClassGui.TiffFileDlg.resources
+C:\Users\Jesús\Documents\vision-tortillas\obj\Release\DALSA.SaperaLT.SapClassGui.ViewDlg.resources
+C:\Users\Jesús\Documents\vision-tortillas\obj\Release\GigECameraDemo_2019.csproj.GenerateResource.cache

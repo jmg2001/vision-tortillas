@@ -12,12 +12,23 @@ using System.Linq;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing.Imaging;
+
+using EasyModbus;
+
 using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using Emgu.CV.Util;
+
 using System.Net;
 using System.Threading;
+using System.Threading.Tasks;
+using System.Net.Http;
+using Newtonsoft.Json;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using Newtonsoft.Json.Linq;
+using System.Security.Policy;
+
 
 [StructLayout(LayoutKind.Sequential)]
 public struct RECT
@@ -55,8 +66,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         List<Color> colorList = new List<Color>();
         int colorIndex = 0;
 
+        // Control de recursion
         int maxIteration = 30000;
         int iteration = 0;
+
+        // Parametros para el tamaño de la tortilla
+        float maxD = 88;
+        float minD = 72;
+        double maxCompactness = 16;
+        double maxOvality = 0.5;
+
+        List<string> sizes = new List<string>();
 
         // Hasta aqui las creadas por mi
 
@@ -75,11 +95,18 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         public Bitmap originalImage { get; private set; }
 
+        string executablePath = System.Reflection.Assembly.GetEntryAssembly().Location;
+
+        string imagesPath = "";
+
         // Crear una lista de blobs
         List<Blob> Blobs = new List<Blob>();
 
         Mat auxImage = new Mat();
         Mat originalImageCV = new Mat();
+
+        // Configurar el servidor Modbus TCP
+        ModbusServer modbusServer = new ModbusServer(); 
 
         // Delegate to display number of frame acquired 
         // Delegate is needed because .NEt framework does not support  cross thread control modification
@@ -99,9 +126,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             public double DMenor { get; set; }
             public double Sector { get; set; }
             public double Compacidad { get; set; }
+            public double Ovalidad { get; set; }
+            public ushort Size { get; set; }
 
             // Constructor de la clase Blob
-            public Blob(double area, double perimetro, double diametro, Point centro, double dMayor, double dMenor, double sector, double compacidad)
+            public Blob(double area, double perimetro, double diametro, Point centro, double dMayor, double dMenor, double sector, double compacidad, ushort size, double ovalidad)
             {
                 Area = area;
                 Perimetro = perimetro;
@@ -111,6 +140,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 DMenor = dMenor;
                 Sector = sector;
                 Compacidad = compacidad;
+                Size = size;
+                Ovalidad = ovalidad;
             }
         }
 
@@ -132,6 +163,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     // Se muestra la imagen en el Form
                     GigeDlg.m_View.Show();
 
+                    // m_ImageBox.BringToFront();
+
                     try
                     {
                         auxImage.Dispose();
@@ -142,16 +175,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         Console.WriteLine("Atrapado");
                     }
 
-                    //objeto ROI
-                    UserROI.Top = 14;
-                    UserROI.Left = 159;
-                    UserROI.Right = 535;
-                    UserROI.Bottom = 408;
-
                     if (isActivatedProcessData)
                     {
                         originalImage = saveImage();
-                        originalImageCV = CvInvoke.Imread("C:\\Users\\Jesús\\Documents\\vision-tortillas\\images\\imagenOrigen.bmp");
+                        originalImageCV = CvInvoke.Imread(imagesPath + "imagenOrigen.bmp");
 
                         // Creamos la imagen para trabajar con OpenCV
                         // originalImageCV = new Mat();
@@ -260,9 +287,44 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 InitializeComponent();
                 InitializeDataTable();
 
+                // Suscribir al evento SelectedIndexChanged del TabControl
+                tabControl2.SelectedIndexChanged += TabControl2_SelectedIndexChanged;
+
+                modbusServer.Port = 502;
+                modbusServer.Listen();
+
+                Console.WriteLine("Servidor Modbus TCP en ejecución...");
+
+                imagesPath = Directory.GetParent(executablePath).FullName;
+                imagesPath = Directory.GetParent(imagesPath).FullName;
+                imagesPath = Directory.GetParent(imagesPath).FullName;
+                imagesPath = imagesPath + "\\images\\";
+                Console.WriteLine(imagesPath);
+
+                sizes.Add("Normal");
+                sizes.Add("Big");
+                sizes.Add("Small");
+                sizes.Add("Incomplete");
+                sizes.Add("Oval");
+
+                //objeto ROI
+                UserROI.Top = 14;
+                UserROI.Left = 159;
+                UserROI.Right = 535;
+                UserROI.Bottom = 408;
+
+                Txt_MaxDiameter.Text = maxD.ToString();
+                Txt_MinDiameter.Text = minD.ToString();
+                Txt_MaxCompacity.Text = maxCompactness.ToString();
+                Txt_MaxOvality.Text = maxOvality.ToString();
+
                 //InitializeInterface();
                 // Suscribir al evento KeyPress del TextBox
                 Txt_Threshold.KeyPress += Txt_Threshold_KeyPress;
+                Txt_MaxDiameter.KeyPress += Txt_MaxDiameter_KeyPress;
+                Txt_MinDiameter.KeyPress += Txt_MinDiameter_KeyPress;
+                Txt_MaxCompacity.KeyPress += Txt_MaxCompacity_KeyPress;
+                Txt_MaxOvality.KeyPress += Txt_MaxOvality_KeyPress;
                 
                 // Crear un TabControl
                 TabControl tabControl1 = new TabControl();
@@ -301,7 +363,121 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
-       private void ShowFrameNumber(int number, bool trash)
+        private void Txt_MaxOvality_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Verificar si la tecla presionada es "Enter" (código ASCII 13)
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                // Intentar convertir el texto del TextBox a un número entero
+                if (double.TryParse(Txt_MaxOvality.Text, out maxOvality))
+                {
+                    // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
+                    MessageBox.Show("Se ha guardado la cantidad modificada: " + maxOvality, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    // Manejar el caso en que el texto no sea un número válido
+                    MessageBox.Show("Por favor ingresa un número válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void Txt_MaxCompacity_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Verificar si la tecla presionada es "Enter" (código ASCII 13)
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                // Intentar convertir el texto del TextBox a un número entero
+                if (double.TryParse(Txt_MaxCompacity.Text, out maxCompactness))
+                {
+                    // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
+                    MessageBox.Show("Se ha guardado la cantidad modificada: " + maxCompactness, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    // Manejar el caso en que el texto no sea un número válido
+                    MessageBox.Show("Por favor ingresa un número válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void Txt_MinDiameter_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Verificar si la tecla presionada es "Enter" (código ASCII 13)
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                // Intentar convertir el texto del TextBox a un número entero
+                if (float.TryParse(Txt_MinDiameter.Text, out minD))
+                {
+                    // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
+                    MessageBox.Show("Se ha guardado la cantidad modificada: " + minD, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    // Manejar el caso en que el texto no sea un número válido
+                    MessageBox.Show("Por favor ingresa un número válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void Txt_MaxDiameter_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Verificar si la tecla presionada es "Enter" (código ASCII 13)
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                // Intentar convertir el texto del TextBox a un número entero
+                if (float.TryParse(Txt_MaxDiameter.Text, out maxD))
+                {
+                    // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
+                    MessageBox.Show("Se ha guardado la cantidad modificada: " + maxD, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    // Manejar el caso en que el texto no sea un número válido
+                    MessageBox.Show("Por favor ingresa un número válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private async void TabControl2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // Verificar si la pestaña seleccionada es la que deseas
+            if (tabControl2.SelectedTab == tabPage5) // Cambia tabPage1 al nombre real de tu pestaña
+            {
+                // Llamar a la función request y esperar a que devuelva el resultado
+                string query = "SELECT * FROM productos";
+                string resultado = await request(query);
+
+                // Convertir la cadena JSON a un objeto JSON
+                JObject jsonResult = JObject.Parse(resultado);
+
+                Console.WriteLine(jsonResult["result"]);
+
+                foreach (JArray result in jsonResult["result"])
+                {
+                    CmbProducts.Items.Add(result[1]);
+                }
+
+                // Procesar el resultado (en este caso, supondremos que el resultado es una lista de nombres separados por comas)
+                // string[] nombres = resultado.Split(',');
+                
+
+                //// Agregar los nombres al ComboBox
+                //foreach (string nombre in nombres)
+                //{
+                //    // Deserializar el JSON en un objeto anónimo
+                //    dynamic jsonObject = JsonConvert.DeserializeObject(nombre);
+
+                //    // Obtener el valor del campo "nombre"
+                //    string NOMBRE = jsonObject.nombre;
+
+                //    Console.WriteLine(NOMBRE);
+                //    // comboBox1.Items.Add(nombre);
+                //}
+            }
+        }
+
+        private void ShowFrameNumber(int number, bool trash)
        {
           String str;
           if (trash)
@@ -716,8 +892,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private Bitmap saveImage()
         {
             Txt_Threshold.Text = threshold.ToString(); // Convertir int a string y asignarlo al TextBox
-            
-            string imagePath = "C:\\Users\\Jesús\\Documents\\vision-tortillas\\images\\imagenOrigen.bmp";
+
+            string imagePath = imagesPath + "imagenOrigen.bmp";
+            // string imagePath = "C:\\Users\\Jesús\\Documents\\vision-tortillas\\images\\imagenOrigen.bmp";
 
             // Aqui va a ir el trigger
             Console.WriteLine("Trigger.");
@@ -825,6 +1002,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             double areaMin = 2000; // Área mínima
             double areaMax = 10000; // Área máxima
 
+            Blobs = new List<Blob>();
+
             if (true)
             {
                 // Configurar el PictureBox para ajustar automáticamente al tamaño de la imagen
@@ -833,11 +1012,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 // Mostrar la imagen en el PictureBox
                 pictureBox.Image = image;
 
-                image.Save("roi.bmp");
+                image.Save(imagesPath + "roi.bmp");
 
                 // Creamos el objeto para poder trabajar con OpenCV
                 Mat imageCV = new Mat();
-                imageCV = CvInvoke.Imread("roi.bmp");
+                imageCV = CvInvoke.Imread(imagesPath + "roi.bmp");
 
                 // Encontramos las figuras en la imagen
                 VectorOfVectorOfPoint contours = findContours(imageCV);
@@ -893,20 +1072,40 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         // Dibujar el numero de sector
                         drawSectorNumber(ref imageCV, center, sector);
 
+                        double ovalidad = calculateOvality(maxDiameter, minDiameter);
+
+                        ushort size = calculateSize(maxDiameter, minDiameter, compactness, ovalidad);
+
                         // Agregamos los datos a la tabla
                         dataTable.Rows.Add(sector, area, Math.Round(diametroIA, 3), Math.Round(diameterTriangles, 3), Math.Round(maxDiameter, 3), Math.Round(minDiameter, 3), Math.Round(compactness, 3));
 
-                        Blob blob = new Blob(area, perimeter, diameterTriangles, center, maxDiameter, minDiameter, sector, compactness);
+                        Blob blob = new Blob(area, perimeter, diameterTriangles, center, maxDiameter, minDiameter, sector, compactness, size, ovalidad);
+
+                        drawData(imageCV, blob);
 
                         // Agregamos el elemento a la lista
                         Blobs.Add(blob);
 
-                        // Escribimos los datos en la imagen
-                        // drawData(imageCV,blob);
+                        // Configurar los datos que quieres publicar
+                        ushort[] dataToPublish = new ushort[] { (ushort)blob.Diametro, (ushort)blob.Area, (ushort)blob.Perimetro };
+                        // int startingAddress = 0;
 
+                        int index = 0;
+
+                        for (int h = (sector-1)*3; h < ((sector-1)*3)+3; h++)
+                        {
+                            // Publicar los datos en direcciones Modbus
+                            modbusServer.holdingRegisters[h+1] = (short)dataToPublish[index];
+                            index++;
+                        }
                         // Aumentamos el numero de elementos para promediar
                         n++;
                     }
+
+                    //foreach (Blob blob in Blobs)
+                    //{
+                    //    drawData(imageCV, blob);
+                    //}
                 }
 
                 // Calculamos el promedio de los diametros
@@ -922,6 +1121,36 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 processROIBox.Image = imageCV.ToBitmap();
 
             }
+        }
+
+        private double calculateOvality(double maxDiameter, double minDiameter)
+        {
+            double ovality = Math.Sqrt((1 - (Math.Pow(minDiameter, 2) / Math.Pow(maxDiameter, 2))));
+            return ovality;
+        }
+
+        private ushort calculateSize(double dMayor, double dMenor, double compacidad, double ovalidad)
+        {
+            ushort size = 0;
+
+            if (dMayor > maxD)
+            {
+                size = 1; // Grande
+            }
+            if (dMenor < minD) 
+            {
+                size = 2; // Pequeña
+            }
+            if (compacidad > maxCompactness)
+            {
+                size = 3; // Con hueco
+            }
+            if (ovalidad > maxOvality)
+            {
+                size = 4; // Ovalada
+            }
+
+            return size;
         }
 
         private VectorOfVectorOfPoint findContours(Mat imageCV)
@@ -1070,32 +1299,41 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             int width = image.Width;
             int height = image.Height;
 
+            // Límites de la cuadrícula
+            double xMin = 0;
+            double xMax = width;
+            double yMin = 0;
+            double yMax = height;
+
+            // Tamaño de cada cuadro de la cuadrícula
+            double cuadroAncho = width/gridCols;
+            double cuadroAlto = height/gridRows;
+
+            // Determinar en qué cuadro de la cuadrícula se encuentra el punto
+            int x = (int)((blob.Centro.X - xMin) / cuadroAncho);
+            int y = (int)((blob.Centro.Y - yMin) / cuadroAlto) + 1;
+
+            //Console.WriteLine("Sector: " + blob.Sector);
+            //Console.WriteLine(x);
+            //Console.WriteLine(y);
+
             int xOffset = 5;
             int yOffset = 10;
 
-            int x = 0; int y = 0;
+            x = (width / gridCols) * x;
+            y = (height / gridRows) * y;
 
-            for (int i = 0; i < gridRows; i++)
-            {
-                for (int j = 1; j <= gridCols; j++)
-                {
-                    x = (width / gridCols) * i;
-                    y = (height / gridRows) * j;
+            Point textPosition = new Point((int)(x + xOffset), (int)(y - (yOffset)));
+            string text = "Dm = " + Math.Round(blob.DMenor, 2).ToString();
+            CvInvoke.PutText(image, text, textPosition, FontFace.HersheySimplex, 0.4, new MCvScalar(215, 234, 0), 1);
 
-                    Point textPosition = new Point((int)(x + xOffset), (int)(y - (yOffset * 2)));
-                    string text = "Dm = " + Math.Round(blob.DMenor, 2).ToString();
-                    CvInvoke.PutText(image, text, textPosition, FontFace.HersheySimplex, 0.2, new MCvScalar(255), 1);
-                            
-                    textPosition = new Point((int)(x + xOffset), (int)(y - (yOffset * 3)));
-                    text = "DM = " + Math.Round(blob.DMayor, 2).ToString();
-                    CvInvoke.PutText(image, text, textPosition, FontFace.HersheySimplex, 0.2, new MCvScalar(255), 1);
-                            
-                    textPosition = new Point((int)(x + xOffset), (int)(y - (yOffset * 4)));
-                    text = "D = " + Math.Round(blob.Diametro, 2).ToString();
-                    CvInvoke.PutText(image, text, textPosition, FontFace.HersheySimplex, 0.2, new MCvScalar(255), 1);
+            textPosition = new Point((int)(x + xOffset), (int)(y - (yOffset * 2)));
+            text = "DM = " + Math.Round(blob.DMayor, 2).ToString();
+            CvInvoke.PutText(image, text, textPosition, FontFace.HersheySimplex, 0.4, new MCvScalar(215, 234, 0), 1);
 
-                }
-            }
+            textPosition = new Point((int)(x + xOffset), (int)(y - (yOffset * 12)));
+            text = sizes[blob.Size];
+            CvInvoke.PutText(image, text, textPosition, FontFace.HersheySimplex, 0.4, new MCvScalar(215, 234, 0), 1);
         }
 
         private void drawSectorNumber(ref Mat imageCV, Point center, int sector)
@@ -1467,7 +1705,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             // Lógica para calcular la compacidad
             // Se asume que el área y el perímetro son mayores que cero para evitar divisiones por cero
-
             double compactness = (perimeter * perimeter) / (double)area;
 
             return compactness;
@@ -1860,6 +2097,50 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         }
 
         private void button1_Click(object sender, EventArgs e)
+        {
+            request(textBox1.Text);
+        }
+
+        static async Task<string> request(string query)
+        {
+            // URL del servidor donde está alojada la ruta para recibir consultas SQL
+            string serverUrl = "http://localhost:5000/query"; // Cambia la dirección y el puerto según corresponda
+
+            // Consulta SQL que deseas enviar al servidor
+            // string query = "SELECT * FROM usuarios";
+
+            try
+            {
+                // Crear un cliente HTTP
+                using (HttpClient client = new HttpClient())
+                {
+                    // Crear un objeto JSON con la consulta
+                    var json = new { query = query };
+
+                    // Convertir el objeto JSON a una cadena y crear una solicitud HTTP POST
+                    var content = new StringContent(JsonConvert.SerializeObject(json), System.Text.Encoding.UTF8, "application/json");
+
+                    // Enviar la solicitud HTTP POST al servidor
+                    var response = await client.PostAsync(serverUrl, content);
+
+                    // Leer la respuesta del servidor
+                    string responseContent = await response.Content.ReadAsStringAsync();
+
+                    // Imprimir la respuesta del servidor
+                    // Console.WriteLine("Respuesta del servidor:");
+                    // Console.WriteLine(responseContent);
+
+                    return responseContent;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error al enviar la solicitud: " + ex.Message);
+                return string.Empty;
+            }
+        }
+
+        private void Txt_Threshold_TextChanged(object sender, EventArgs e)
         {
 
         }

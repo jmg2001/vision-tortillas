@@ -7,14 +7,14 @@
     <framework targetVersion="4.8" profile="Full" supportedRuntime="4.0.30319" />
   </compatibleFrameworks>
   <dependency>
-    <dependentAssembly dependencyType="install" codebase="SapNETCSharpGigECameraDemo.exe.manifest" size="14751">
+    <dependentAssembly dependencyType="install" codebase="SapNETCSharpGigECameraDemo.exe.manifest" size="16864">
       <assemblyIdentity name="SapNETCSharpGigECameraDemo.exe" version="1.0.0.2" publicKeyToken="0000000000000000" language="neutral" processorArchitecture="msil" type="win32" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>ufVCNg9VkaaSg2OK4yIkbgHn3GNasALG79kRBbq7VmI=</dsig:DigestValue>
+        <dsig:DigestValue>Xo4ILugQvbBBPTL1XVALmXeUqux6oZrqD69A5HiR/0A=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
