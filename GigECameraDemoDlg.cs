@@ -72,7 +72,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         int colorIndex = 0;
 
         // Control de recursion
-        int maxIteration = 30000;
+        int maxIteration = 10000;
         int iteration = 0;
 
         // Parametros para el tamaño de la tortilla
@@ -313,10 +313,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 sizes.Add("Oval");
 
                 //objeto ROI
-                UserROI.Top = 60;
+                UserROI.Top = 68;
                 UserROI.Left = 159;
                 UserROI.Right = 531;
-                UserROI.Bottom = 437;
+                UserROI.Bottom = 430;
 
                 Txt_MaxDiameter.Text = maxD.ToString();
                 Txt_MinDiameter.Text = minD.ToString();
@@ -1339,6 +1339,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private (double, double, double) calculateAndDrawDiameterTrianglesAlghoritm(Point center, Bitmap image, ref Mat imageCV, int sector, bool draw = true)
         {
+            
             double diameter, maxDiameter, minDiameter;
             Point pointDM = new Point();
             Point pointDm = new Point();
@@ -1363,10 +1364,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             for (int i = 0; i < 24; i++)
             {
+                iteration = 0;
                 Color pixelColor = image.GetPixel(newX, newY);
 
                 while (pixelColor.GetBrightness() == tortillaColor)
                 {
+                    iteration++;
+
                     newX += deltaX[i];
                     newY += deltaY[i];
 
@@ -1381,6 +1385,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     }
 
                     pixelColor = image.GetPixel(newX, newY);
+
+                    if (iteration >= maxIteration)
+                    {
+                        iteration = 0;
+                        break;
+                    }
 
                 }
 
@@ -1922,6 +1932,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private void diametersTxtCheck_CheckedChanged(object sender, EventArgs e)
         {
             txtDiameters = !txtDiameters;
+        }
+
+        private void GroupBox1_Enter(object sender, EventArgs e)
+        {
+
         }
     }
 }

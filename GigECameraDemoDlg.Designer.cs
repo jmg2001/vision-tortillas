@@ -454,12 +454,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.GroupBox1.TabIndex = 66;
             this.GroupBox1.TabStop = false;
             this.GroupBox1.Text = "Manual Commands";
+            this.GroupBox1.Enter += new System.EventHandler(this.GroupBox1_Enter);
             // 
             // virtualTriggerBtn
             // 
             this.virtualTriggerBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.virtualTriggerBtn.BackColor = System.Drawing.Color.Silver;
-            this.virtualTriggerBtn.Location = new System.Drawing.Point(245, 32);
+            this.virtualTriggerBtn.Location = new System.Drawing.Point(172, 31);
             this.virtualTriggerBtn.Name = "virtualTriggerBtn";
             this.virtualTriggerBtn.Size = new System.Drawing.Size(69, 55);
             this.virtualTriggerBtn.TabIndex = 74;
@@ -470,7 +471,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(85, 17);
+            this.label4.Location = new System.Drawing.Point(238, 16);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(77, 13);
             this.label4.TabIndex = 76;
@@ -490,7 +491,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(166, 16);
+            this.label2.Location = new System.Drawing.Point(93, 16);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(77, 13);
             this.label2.TabIndex = 74;
@@ -500,7 +501,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // processImageBtn
             // 
             this.processImageBtn.BackColor = System.Drawing.Color.Silver;
-            this.processImageBtn.Location = new System.Drawing.Point(90, 33);
+            this.processImageBtn.Location = new System.Drawing.Point(238, 31);
             this.processImageBtn.Name = "processImageBtn";
             this.processImageBtn.Size = new System.Drawing.Size(74, 55);
             this.processImageBtn.TabIndex = 73;
@@ -512,7 +513,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             this.triggerModeBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.triggerModeBtn.BackColor = System.Drawing.Color.Silver;
-            this.triggerModeBtn.Location = new System.Drawing.Point(164, 32);
+            this.triggerModeBtn.Location = new System.Drawing.Point(91, 32);
             this.triggerModeBtn.Name = "triggerModeBtn";
             this.triggerModeBtn.Size = new System.Drawing.Size(81, 55);
             this.triggerModeBtn.TabIndex = 72;
