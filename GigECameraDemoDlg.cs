@@ -65,6 +65,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         bool triggerPLC = false;
         int mode = 0;
 
+        bool updateImages = true;
+
         // Creamos una lista de colores
         List<Color> colorList = new List<Color>();
         int colorIndex = 0;
@@ -311,10 +313,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 sizes.Add("Oval");
 
                 //objeto ROI
-                UserROI.Top = 14;
+                UserROI.Top = 60;
                 UserROI.Left = 159;
-                UserROI.Right = 535;
-                UserROI.Bottom = 408;
+                UserROI.Right = 531;
+                UserROI.Bottom = 437;
 
                 Txt_MaxDiameter.Text = maxD.ToString();
                 Txt_MinDiameter.Text = minD.ToString();
@@ -444,6 +446,16 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private async void TabControl2_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (mainTabs.SelectedTab != imagePage)
+            {
+                updateImages = false;
+            }
+            else
+            {
+                processROIBox.Image = new Bitmap(imagesPath + "final.bmp");
+                processROIBox.Refresh();
+                updateImages = true;
+            }
             // Verificar si la pestaña seleccionada es la que deseas
             if (mainTabs.SelectedTab == productsPage) // Cambia tabPage1 al nombre real de tu pestaña
             {
@@ -468,6 +480,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     Console.WriteLine("No se pudo formatear la respuesta");
                 }
             }
+
+
         }
 
         private void ShowFrameNumber(int number, bool trash)
@@ -1092,6 +1106,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                         drawData(imageCV, blob);
 
+                        if (blob.Sector == 5)
+                        {
+                            Console.WriteLine(blob.Centro.X + UserROI.Left);
+                            Console.WriteLine(blob.Centro.Y + UserROI.Top);
+                        }
+
                         // Agregamos el elemento a la lista
                         Blobs.Add(blob);
 
@@ -1120,6 +1140,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 // Asignar la DataTable al DataGridView
                 dataGridView1.DataSource = dataTable;
+
+                try
+                {
+                    if (!updateImages) imageCV.ToBitmap().Save(imagesPath + "final.bmp");
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
 
                 // Colocamos la imagen con todos los dibujos en el picturebox
                 processROIBox.Image = imageCV.ToBitmap();
@@ -1259,7 +1288,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 CvInvoke.PutText(image, text, textPosition, FontFace.HersheySimplex, 0.4, new MCvScalar(255, 255, 255), 1);
             }
 
-            textPosition = new Point((int)(x + xOffset), (int)(y - (yOffset * 12)));
+            textPosition = new Point((int)(x + xOffset), (int)(y - (yOffset * 10.5)));
             text = sizes[blob.Size];
             CvInvoke.PutText(image, text, textPosition, FontFace.HersheySimplex, 0.4, new MCvScalar(255, 255, 255), 1);
         }
@@ -1357,7 +1386,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 listXY.Add(new Point(newX, newY));
 
-                radialLenght[i] = Math.Sqrt(Math.Pow((x - newX), 2) + Math.Pow((y - newY), 2)) + correction[i];
+                radialLenght[i] = Math.Sqrt(Math.Pow((x - newX), 2) + Math.Pow((y - newY), 2));// + correction[i];
 
                 avg_diameter += radialLenght[i];
                 newX = x; newY = y;
