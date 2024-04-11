@@ -113,7 +113,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         Mat originalImageCV = new Mat();
 
         // Configurar el servidor Modbus TCP
-        ModbusServer modbusServer = new ModbusServer(); 
+        ModbusServer modbusServer = new ModbusServer();
+
+        int calibrationTarget = 120;
+        string units = "mm";
+        bool calibrating = false;
+        double euFactor = 1.399063;
 
         // Delegate to display number of frame acquired 
         // Delegate is needed because .NEt framework does not support  cross thread control modification
@@ -170,14 +175,132 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     // Se muestra la imagen en el Form
                     GigeDlg.m_View.Show();
 
+                    processImageBtn.Enabled = true;
                     originalImage = saveImage();
 
-                    if (triggerPLC)
+                    if (triggerPLC && !calibrating)
                     {
                         process();
                     }
+
+                    if (calibrating)
+                    {
+                        // Se crea el histograma de la imagen
+                        ImageHistogram(originalImage);
+
+                        // Se binariza la imagen
+                        Bitmap binarizedImage = binarizeImage(originalImage);
+
+                        Bitmap roiImage = extractROI(binarizedImage);
+
+                        int sectorSel = calculateCentralSector();
+
+                        // Se extrae el sector central
+                        Bitmap centralSector = extractSector(roiImage ,sectorSel);
+
+                        // Definir el área mínima y máxima permitida para los contornos
+                        int areaMin = 2000; // Área mínima
+                        int areaMax = 10000; // Área máxima
+
+                        float diametroIA = 0;
+                        bool calibrationValidate = false;
+
+                        centralSector.Save(imagesPath + "centralSector.bmp");
+
+                        var (contoursNCV, edgesNCV, centersNCV) = FindContoursWithEdgesAndCenters(centralSector, areaMin, areaMax);
+
+                        for (int i = 0; i < contoursNCV.Count; i++)
+                        {
+                            int area = contoursNCV[i].Count;
+
+                            if (area >= areaMin && area <= areaMax)
+                            {
+                                int perimeter = edgesNCV[i].Count;
+                                Point centro = centersNCV[i];
+
+                                if (itsInCenter(centralSector,centro,10))
+                                {
+                                    // Este diametro lo vamos a dejar para despues
+                                    diametroIA = (float)CalculateDiameterFromArea(area);
+                                    calibrationValidate = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if ( calibrationValidate)
+                        {
+                            euFactor = int.Parse(txtCalibrationTarget.Text) / diametroIA; // unit/pixels
+
+                            Console.WriteLine(euFactor);
+
+                            MessageBox.Show("Calibration Succesful, Factor: " + euFactor);
+                        }
+                        else
+                        {
+                            MessageBox.Show("Place the calibration target in the middle");
+                        }
+
+                        // Liberamos las imagenes
+                        binarizedImage.Dispose();
+                        roiImage.Dispose();
+                        originalImage.Dispose();
+                        centralSector.Dispose();
+
+                        processImageBtn.Enabled = false;
+                    }
                 });
             }
+        }
+
+        private bool itsInCenter(Bitmap image,Point center, int margin)
+        {
+            // Obtener las coordenadas del centro de la imagen
+            int centroX = image.Width / 2;
+            int centroY = image.Height / 2;
+
+            // Verificar si el punto está dentro del área central definida por el margen de error
+            if (Math.Abs(center.X - centroX) <= margin && Math.Abs(center.Y - centroY) <= margin)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private Bitmap extractSector(Bitmap binarizedImage, int sectorSel)
+        {
+            // Calcular el tamaño de cada sector
+            int anchoSector = binarizedImage.Width / gridCols;
+            int altoSector = binarizedImage.Height / gridRows;
+
+            // Calcular las coordenadas del ROI del sector central
+            int x = 1 * anchoSector;
+            int y = 1 * altoSector;
+            int anchoROI = anchoSector;
+            int altoROI = altoSector;
+
+            // Crear y devolver el rectángulo del ROI
+            Rectangle sectorRoi = new Rectangle(x, y, anchoROI, altoROI);
+
+            Bitmap roiImage = binarizedImage.Clone(sectorRoi, binarizedImage.PixelFormat);
+
+            
+            return roiImage;
+        }
+
+        private int calculateCentralSector()
+        {
+            // Calcular el índice del sector central
+            int indiceFilaCentral = gridRows / 2;
+            int indiceColumnaCentral = gridCols / 2;
+
+            // Calcular el número del sector central
+            int numeroSectorCentral = indiceFilaCentral * gridCols + indiceColumnaCentral + 1;
+
+            return numeroSectorCentral;
         }
 
         private void process()
@@ -204,6 +327,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             binarizedImage.Dispose();
             roiImage.Dispose();
             originalImage.Dispose();
+
+            processImageBtn.Enabled = false;
         }
 
         private Bitmap extractROI(Bitmap image)
@@ -236,6 +361,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 // Suscribir al evento SelectedIndexChanged del TabControl
                 mainTabs.SelectedIndexChanged += TabControl2_SelectedIndexChanged;
 
+                euListSelection.SelectedItem = "mm";
+
                 modbusServer.Port = 502;
                 modbusServer.Listen();
                 Console.WriteLine("Servidor Modbus TCP en ejecución...");
@@ -260,6 +387,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 Txt_MaxCompacity.Text = maxCompactness.ToString();
                 Txt_MaxOvality.Text = maxOvality.ToString();
 
+                txtCalibrationTarget.Text = calibrationTarget.ToString();
+
                 //InitializeInterface();
                 // Suscribir al evento KeyPress del TextBox
                 Txt_Threshold.KeyPress += Txt_Threshold_KeyPress;
@@ -267,7 +396,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 Txt_MinDiameter.KeyPress += Txt_MinDiameter_KeyPress;
                 Txt_MaxCompacity.KeyPress += Txt_MaxCompacity_KeyPress;
                 Txt_MaxOvality.KeyPress += Txt_MaxOvality_KeyPress;
-                
+                txtCalibrationTarget.KeyPress += calibrationTarget_KeyPress;
+
+                // Suscribir la función al evento SelectedIndexChanged del ComboBox
+                euListSelection.SelectedIndexChanged += euListSelection_SelectedIndexChanged;
+
                 // Crear un TabControl
                 TabControl tabControl1 = new TabControl();
                 tabControl1.Location = new Point(10, 10);
@@ -302,6 +435,36 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 MessageBox.Show("No cameras found or selected");
                 this.Close();
+            }
+        }
+
+        private void euListSelection_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            units = (string)euListSelection.SelectedItem;
+            updateUnits();
+        }
+
+        private void updateUnits()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void calibrationTarget_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Verificar si la tecla presionada es "Enter" (código ASCII 13)
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                // Intentar convertir el texto del TextBox a un número entero
+                if (int.TryParse(txtCalibrationTarget.Text, out calibrationTarget))
+                {
+                    // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
+                    MessageBox.Show("Se ha guardado la cantidad modificada: " + calibrationTarget, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    // Manejar el caso en que el texto no sea un número válido
+                    MessageBox.Show("Por favor ingresa un número válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
@@ -739,18 +902,18 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             bool bAcqGrab = (m_Xfer != null) && (m_Xfer.Grabbing == true);
             bool bNoGrab = (m_Xfer == null) || (m_Xfer.Grabbing == false);
 
-            // Acquisition Control
-            button_Grab.Enabled = bAcqNoGrab;
-            button_Snap.Enabled = bAcqNoGrab;
-            button_Freeze.Enabled = bAcqGrab;
+            //// Acquisition Control
+            //button_Grab.Enabled = bAcqNoGrab;
+            //button_Snap.Enabled = bAcqNoGrab;
+            //button_Freeze.Enabled = bAcqGrab;
 
-            // File Options
-            button_New.Enabled = bNoGrab;
-            button_Load.Enabled = bNoGrab;
-            button_Save.Enabled = bNoGrab;
+            //// File Options
+            //button_New.Enabled = bNoGrab;
+            //button_Load.Enabled = bNoGrab;
+            //button_Save.Enabled = bNoGrab;
 
-            button_Load_Config.Enabled = bAcqNoGrab;
-            button_Buffer.Enabled = bNoGrab;
+            //button_Load_Config.Enabled = bAcqNoGrab;
+            //button_Buffer.Enabled = bNoGrab;
         }
 
         private void SystemEvents_SessionEnded(object sender, SessionEndedEventArgs e)
@@ -947,20 +1110,38 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 int area = contoursNCV[i].Count;
                 if (area >= areaMin && area <= areaMax)
                 {
+                    // Calcular el sector del contorno
+                    int sector = CalculateSector(centersNCV[i], image.Width, image.Height, gridRows, gridCols) + 1;
+
+                    double tempFactor = euFactor;
+
+                    //List<int> cruz = new List<int>() { 2, 4, 6, 8 };
+
+                    //if (cruz.Contains(sector))
+                    //{
+                    //    tempFactor = (euFactor * 1.0742);
+                    //}
+
+                    //List<int> corners = new List<int>() { 1, 3, 7, 9 };
+
+                    //if (corners.Contains(sector))
+                    //{
+                    //    tempFactor = (euFactor * 1.1427);
+                    //}
+
                     int perimeter = edgesNCV[i].Count;
                     Point centro = centersNCV[i];
 
                     // Este diametro lo vamos a dejar para despues
                     double diametroIA = CalculateDiameterFromArea(area);
 
-                    // Calcular el sector del contorno
-                    int sector = CalculateSector(centersNCV[i], image.Width, image.Height, gridRows, gridCols) + 1;
-
                     // Calculamos el diametro
                     (double diameterTriangles, double maxDiameter, double minDiameter) = calculateAndDrawDiameterTrianglesAlghoritm(centersNCV[i], image, sector, true);
 
                     // Sumamos para promediar
-                    avg_diam += diameterTriangles;
+                    avg_diam += (diametroIA*tempFactor);
+                    // Aumentamos el numero de elementos para promediar
+                    n++;
 
                     // Calcular la compacidad
                     double compactness = CalculateCompactness(area, perimeter);
@@ -970,7 +1151,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     ushort size = calculateSize(maxDiameter, minDiameter, compactness, ovalidad);
 
                     // Agregamos los datos a la tabla
-                    dataTable.Rows.Add(sector, area, Math.Round(diametroIA, 3), Math.Round(diameterTriangles, 3), Math.Round(maxDiameter, 3), Math.Round(minDiameter, 3), Math.Round(compactness, 3));
+                    dataTable.Rows.Add(sector, area, Math.Round(diametroIA * tempFactor, 3), Math.Round(diameterTriangles * tempFactor, 3), Math.Round(maxDiameter * tempFactor, 3), Math.Round(minDiameter * tempFactor, 3), Math.Round(compactness, 3));
 
                     Blob blob = new Blob(area, perimeter, diameterTriangles, centersNCV[i], maxDiameter, minDiameter, sector, compactness, size, ovalidad);
 
@@ -1009,8 +1190,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         // Dibujamos el numero del sector
                         drawSectorNumber(image, centersNCV[i], sector-1);
                     }
-                    // Aumentamos el numero de elementos para promediar
-                    n++;
+                    
                 }
             }
 
@@ -1990,6 +2170,42 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
 
             return compatibleBitmap;
+        }
+
+        private void label4_Click_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            calibrate();
+        }
+
+        private void calibrate()
+        {
+            calibrating = true;
+            if (!m_Xfer.Grabbing)
+            {
+                AbortDlg abort = new AbortDlg(m_Xfer);
+
+                if (m_Xfer.Snap())
+                {
+                    if (abort.ShowDialog() != DialogResult.OK)
+                        m_Xfer.Abort();
+                    UpdateControls();
+                }
+            }
+            else
+            {
+                MessageBox.Show("Change the view mode");
+            }
+            calibrating = false;
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

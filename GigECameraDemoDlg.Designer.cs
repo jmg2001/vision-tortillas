@@ -41,21 +41,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.PixelLabel = new System.Windows.Forms.ToolStripLabel();
             this.PixelDataValue = new System.Windows.Forms.ToolStripLabel();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.groupBox_File_Control = new System.Windows.Forms.GroupBox();
-            this.button_Save = new System.Windows.Forms.Button();
-            this.button_Load = new System.Windows.Forms.Button();
-            this.button_New = new System.Windows.Forms.Button();
-            this.groupBox_General_Options = new System.Windows.Forms.GroupBox();
-            this.button_View = new System.Windows.Forms.Button();
-            this.button_Buffer = new System.Windows.Forms.Button();
-            this.groupBox_Acquisition_Options = new System.Windows.Forms.GroupBox();
-            this.button_Load_Config = new System.Windows.Forms.Button();
-            this.groupBox_Acquisition_Control = new System.Windows.Forms.GroupBox();
-            this.button_Freeze = new System.Windows.Forms.Button();
-            this.button_Grab = new System.Windows.Forms.Button();
-            this.button_Snap = new System.Windows.Forms.Button();
-            this.button_Exit = new System.Windows.Forms.Button();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.videoSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loginToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -153,12 +138,16 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Cmd_video = new System.Windows.Forms.Button();
             this.Cmd_Calibration = new System.Windows.Forms.Button();
             this.Cmd_Save = new System.Windows.Forms.Button();
+            this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.euListSelection = new System.Windows.Forms.ComboBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.txtCalibrationTarget = new System.Windows.Forms.TextBox();
+            this.calibrateBtn = new System.Windows.Forms.Button();
+            this.targetUnitsTxt = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.unitsTxt = new System.Windows.Forms.Label();
             this.toolStrip1.SuspendLayout();
-            this.panel1.SuspendLayout();
-            this.groupBox_File_Control.SuspendLayout();
-            this.groupBox_General_Options.SuspendLayout();
-            this.groupBox_Acquisition_Options.SuspendLayout();
-            this.groupBox_Acquisition_Control.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.GroupBox1.SuspendLayout();
             this.GroupBox8.SuspendLayout();
@@ -183,6 +172,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.TableLayoutPanel3.SuspendLayout();
             this.GroupBox10.SuspendLayout();
             this.GroupBox9.SuspendLayout();
+            this.groupBox4.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStrip1
@@ -239,165 +229,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.PixelDataValue.Name = "PixelDataValue";
             this.PixelDataValue.Size = new System.Drawing.Size(92, 22);
             this.PixelDataValue.Text = "Data not avaible";
-            // 
-            // panel1
-            // 
-            this.panel1.BackColor = System.Drawing.SystemColors.Control;
-            this.panel1.Controls.Add(this.groupBox_File_Control);
-            this.panel1.Controls.Add(this.groupBox_General_Options);
-            this.panel1.Controls.Add(this.groupBox_Acquisition_Options);
-            this.panel1.Controls.Add(this.groupBox_Acquisition_Control);
-            this.panel1.Controls.Add(this.button_Exit);
-            this.panel1.Location = new System.Drawing.Point(17, 3);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(169, 503);
-            this.panel1.TabIndex = 11;
-            // 
-            // groupBox_File_Control
-            // 
-            this.groupBox_File_Control.Controls.Add(this.button_Save);
-            this.groupBox_File_Control.Controls.Add(this.button_Load);
-            this.groupBox_File_Control.Controls.Add(this.button_New);
-            this.groupBox_File_Control.Location = new System.Drawing.Point(17, 203);
-            this.groupBox_File_Control.Name = "groupBox_File_Control";
-            this.groupBox_File_Control.Size = new System.Drawing.Size(142, 132);
-            this.groupBox_File_Control.TabIndex = 11;
-            this.groupBox_File_Control.TabStop = false;
-            this.groupBox_File_Control.Text = "File Control";
-            // 
-            // button_Save
-            // 
-            this.button_Save.Location = new System.Drawing.Point(22, 97);
-            this.button_Save.Name = "button_Save";
-            this.button_Save.Size = new System.Drawing.Size(104, 23);
-            this.button_Save.TabIndex = 2;
-            this.button_Save.Text = "Save";
-            this.button_Save.UseVisualStyleBackColor = true;
-            this.button_Save.Click += new System.EventHandler(this.button_Save_Click);
-            // 
-            // button_Load
-            // 
-            this.button_Load.Location = new System.Drawing.Point(22, 60);
-            this.button_Load.Name = "button_Load";
-            this.button_Load.Size = new System.Drawing.Size(104, 23);
-            this.button_Load.TabIndex = 1;
-            this.button_Load.Text = "Load";
-            this.button_Load.UseVisualStyleBackColor = true;
-            this.button_Load.Click += new System.EventHandler(this.button_Load_Click);
-            // 
-            // button_New
-            // 
-            this.button_New.Location = new System.Drawing.Point(22, 24);
-            this.button_New.Name = "button_New";
-            this.button_New.Size = new System.Drawing.Size(104, 23);
-            this.button_New.TabIndex = 0;
-            this.button_New.Text = "New";
-            this.button_New.UseVisualStyleBackColor = true;
-            this.button_New.Click += new System.EventHandler(this.button_New_Click);
-            // 
-            // groupBox_General_Options
-            // 
-            this.groupBox_General_Options.Controls.Add(this.button_View);
-            this.groupBox_General_Options.Controls.Add(this.button_Buffer);
-            this.groupBox_General_Options.Location = new System.Drawing.Point(17, 341);
-            this.groupBox_General_Options.Name = "groupBox_General_Options";
-            this.groupBox_General_Options.Size = new System.Drawing.Size(142, 88);
-            this.groupBox_General_Options.TabIndex = 12;
-            this.groupBox_General_Options.TabStop = false;
-            this.groupBox_General_Options.Text = "General Options";
-            // 
-            // button_View
-            // 
-            this.button_View.Location = new System.Drawing.Point(22, 53);
-            this.button_View.Name = "button_View";
-            this.button_View.Size = new System.Drawing.Size(104, 23);
-            this.button_View.TabIndex = 1;
-            this.button_View.Text = "View";
-            this.button_View.UseVisualStyleBackColor = true;
-            this.button_View.Click += new System.EventHandler(this.button_View_Click);
-            // 
-            // button_Buffer
-            // 
-            this.button_Buffer.Location = new System.Drawing.Point(22, 20);
-            this.button_Buffer.Name = "button_Buffer";
-            this.button_Buffer.Size = new System.Drawing.Size(104, 23);
-            this.button_Buffer.TabIndex = 0;
-            this.button_Buffer.Text = "Buffer";
-            this.button_Buffer.UseVisualStyleBackColor = true;
-            this.button_Buffer.Click += new System.EventHandler(this.button_Buffer_Click);
-            // 
-            // groupBox_Acquisition_Options
-            // 
-            this.groupBox_Acquisition_Options.Controls.Add(this.button_Load_Config);
-            this.groupBox_Acquisition_Options.Location = new System.Drawing.Point(17, 435);
-            this.groupBox_Acquisition_Options.Name = "groupBox_Acquisition_Options";
-            this.groupBox_Acquisition_Options.Size = new System.Drawing.Size(142, 54);
-            this.groupBox_Acquisition_Options.TabIndex = 13;
-            this.groupBox_Acquisition_Options.TabStop = false;
-            this.groupBox_Acquisition_Options.Text = "Acquisition Options";
-            // 
-            // button_Load_Config
-            // 
-            this.button_Load_Config.Location = new System.Drawing.Point(22, 20);
-            this.button_Load_Config.Name = "button_Load_Config";
-            this.button_Load_Config.Size = new System.Drawing.Size(104, 23);
-            this.button_Load_Config.TabIndex = 0;
-            this.button_Load_Config.Text = "Load Config";
-            this.button_Load_Config.UseVisualStyleBackColor = true;
-            this.button_Load_Config.Click += new System.EventHandler(this.button_Load_Config_Click);
-            // 
-            // groupBox_Acquisition_Control
-            // 
-            this.groupBox_Acquisition_Control.Controls.Add(this.button_Freeze);
-            this.groupBox_Acquisition_Control.Controls.Add(this.button_Grab);
-            this.groupBox_Acquisition_Control.Controls.Add(this.button_Snap);
-            this.groupBox_Acquisition_Control.Location = new System.Drawing.Point(17, 53);
-            this.groupBox_Acquisition_Control.Name = "groupBox_Acquisition_Control";
-            this.groupBox_Acquisition_Control.Size = new System.Drawing.Size(142, 144);
-            this.groupBox_Acquisition_Control.TabIndex = 9;
-            this.groupBox_Acquisition_Control.TabStop = false;
-            this.groupBox_Acquisition_Control.Text = "Acquisition Control";
-            // 
-            // button_Freeze
-            // 
-            this.button_Freeze.Location = new System.Drawing.Point(22, 104);
-            this.button_Freeze.Name = "button_Freeze";
-            this.button_Freeze.Size = new System.Drawing.Size(104, 23);
-            this.button_Freeze.TabIndex = 2;
-            this.button_Freeze.Text = "Freeze";
-            this.button_Freeze.UseVisualStyleBackColor = true;
-            this.button_Freeze.Click += new System.EventHandler(this.button_Freeze_Click);
-            // 
-            // button_Grab
-            // 
-            this.button_Grab.Location = new System.Drawing.Point(22, 62);
-            this.button_Grab.Name = "button_Grab";
-            this.button_Grab.Size = new System.Drawing.Size(104, 23);
-            this.button_Grab.TabIndex = 1;
-            this.button_Grab.Text = "Grab";
-            this.button_Grab.UseVisualStyleBackColor = true;
-            this.button_Grab.Click += new System.EventHandler(this.button_Grab_Click);
-            // 
-            // button_Snap
-            // 
-            this.button_Snap.Location = new System.Drawing.Point(22, 23);
-            this.button_Snap.Name = "button_Snap";
-            this.button_Snap.Size = new System.Drawing.Size(104, 23);
-            this.button_Snap.TabIndex = 0;
-            this.button_Snap.Text = "Snap";
-            this.button_Snap.UseVisualStyleBackColor = true;
-            this.button_Snap.Click += new System.EventHandler(this.button_Snap_Click);
-            // 
-            // button_Exit
-            // 
-            this.button_Exit.ForeColor = System.Drawing.Color.Black;
-            this.button_Exit.Location = new System.Drawing.Point(39, 11);
-            this.button_Exit.Name = "button_Exit";
-            this.button_Exit.Size = new System.Drawing.Size(104, 35);
-            this.button_Exit.TabIndex = 10;
-            this.button_Exit.Text = "Exit";
-            this.button_Exit.UseVisualStyleBackColor = true;
-            this.button_Exit.Click += new System.EventHandler(this.button_Exit_Click);
             // 
             // menuStrip1
             // 
@@ -777,7 +608,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // btnsave
             // 
             this.btnsave.AllowDrop = true;
-            this.btnsave.Location = new System.Drawing.Point(17, 512);
+            this.btnsave.Location = new System.Drawing.Point(69, 305);
             this.btnsave.Name = "btnsave";
             this.btnsave.Size = new System.Drawing.Size(169, 23);
             this.btnsave.TabIndex = 116;
@@ -807,6 +638,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             // commandsPage
             // 
+            this.commandsPage.Controls.Add(this.unitsTxt);
+            this.commandsPage.Controls.Add(this.label6);
             this.commandsPage.Controls.Add(this.GroupBox5);
             this.commandsPage.Controls.Add(this.groupBox3);
             this.commandsPage.Controls.Add(this.groupBox2);
@@ -859,7 +692,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             this.avg_diameter.AutoSize = true;
             this.avg_diameter.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.avg_diameter.Location = new System.Drawing.Point(125, 30);
+            this.avg_diameter.Location = new System.Drawing.Point(119, 19);
             this.avg_diameter.Name = "avg_diameter";
             this.avg_diameter.Size = new System.Drawing.Size(24, 25);
             this.avg_diameter.TabIndex = 0;
@@ -868,14 +701,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             // cameraControlPage
             // 
-            this.cameraControlPage.Controls.Add(this.panel1);
+            this.cameraControlPage.Controls.Add(this.groupBox4);
             this.cameraControlPage.Controls.Add(this.btnsave);
             this.cameraControlPage.Location = new System.Drawing.Point(4, 22);
             this.cameraControlPage.Name = "cameraControlPage";
             this.cameraControlPage.Padding = new System.Windows.Forms.Padding(3);
             this.cameraControlPage.Size = new System.Drawing.Size(325, 617);
             this.cameraControlPage.TabIndex = 1;
-            this.cameraControlPage.Text = "CameraControl";
+            this.cameraControlPage.Text = "Configuration";
             this.cameraControlPage.UseVisualStyleBackColor = true;
             // 
             // mainTabs
@@ -1450,6 +1283,103 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Cmd_Save.Text = "Save";
             this.Cmd_Save.UseVisualStyleBackColor = false;
             // 
+            // groupBox4
+            // 
+            this.groupBox4.Controls.Add(this.targetUnitsTxt);
+            this.groupBox4.Controls.Add(this.calibrateBtn);
+            this.groupBox4.Controls.Add(this.txtCalibrationTarget);
+            this.groupBox4.Controls.Add(this.label5);
+            this.groupBox4.Controls.Add(this.label4);
+            this.groupBox4.Controls.Add(this.euListSelection);
+            this.groupBox4.Location = new System.Drawing.Point(6, 98);
+            this.groupBox4.Name = "groupBox4";
+            this.groupBox4.Size = new System.Drawing.Size(313, 172);
+            this.groupBox4.TabIndex = 117;
+            this.groupBox4.TabStop = false;
+            this.groupBox4.Text = "Calibration";
+            // 
+            // euListSelection
+            // 
+            this.euListSelection.FormattingEnabled = true;
+            this.euListSelection.Items.AddRange(new object[] {
+            "mm",
+            "inch"});
+            this.euListSelection.Location = new System.Drawing.Point(82, 26);
+            this.euListSelection.Name = "euListSelection";
+            this.euListSelection.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.euListSelection.Size = new System.Drawing.Size(68, 21);
+            this.euListSelection.TabIndex = 0;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label4.Location = new System.Drawing.Point(15, 26);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(36, 20);
+            this.label4.TabIndex = 1;
+            this.label4.Text = "EU:";
+            this.label4.Click += new System.EventHandler(this.label4_Click_1);
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label5.Location = new System.Drawing.Point(15, 57);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(59, 20);
+            this.label5.TabIndex = 2;
+            this.label5.Text = "Target:";
+            // 
+            // txtCalibrationTarget
+            // 
+            this.txtCalibrationTarget.Location = new System.Drawing.Point(81, 56);
+            this.txtCalibrationTarget.Name = "txtCalibrationTarget";
+            this.txtCalibrationTarget.Size = new System.Drawing.Size(69, 20);
+            this.txtCalibrationTarget.TabIndex = 3;
+            this.txtCalibrationTarget.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtCalibrationTarget.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
+            // 
+            // calibrateBtn
+            // 
+            this.calibrateBtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.calibrateBtn.Location = new System.Drawing.Point(44, 98);
+            this.calibrateBtn.Name = "calibrateBtn";
+            this.calibrateBtn.Size = new System.Drawing.Size(84, 27);
+            this.calibrateBtn.TabIndex = 4;
+            this.calibrateBtn.Text = "Calibrate";
+            this.calibrateBtn.UseVisualStyleBackColor = true;
+            this.calibrateBtn.Click += new System.EventHandler(this.button2_Click);
+            // 
+            // targetUnitsTxt
+            // 
+            this.targetUnitsTxt.AutoSize = true;
+            this.targetUnitsTxt.Location = new System.Drawing.Point(157, 63);
+            this.targetUnitsTxt.Name = "targetUnitsTxt";
+            this.targetUnitsTxt.Size = new System.Drawing.Size(23, 13);
+            this.targetUnitsTxt.TabIndex = 5;
+            this.targetUnitsTxt.Text = "mm";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label6.Location = new System.Drawing.Point(77, 555);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(73, 29);
+            this.label6.TabIndex = 115;
+            this.label6.Text = "Units:";
+            // 
+            // unitsTxt
+            // 
+            this.unitsTxt.AutoSize = true;
+            this.unitsTxt.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.unitsTxt.Location = new System.Drawing.Point(155, 555);
+            this.unitsTxt.Name = "unitsTxt";
+            this.unitsTxt.Size = new System.Drawing.Size(53, 29);
+            this.unitsTxt.TabIndex = 116;
+            this.unitsTxt.Text = "mm";
+            // 
             // GigECameraDemoDlg
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1468,11 +1398,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Load += new System.EventHandler(this.GigECameraDemoDlg_Load);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
-            this.panel1.ResumeLayout(false);
-            this.groupBox_File_Control.ResumeLayout(false);
-            this.groupBox_General_Options.ResumeLayout(false);
-            this.groupBox_Acquisition_Options.ResumeLayout(false);
-            this.groupBox_Acquisition_Control.ResumeLayout(false);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.GroupBox1.ResumeLayout(false);
@@ -1487,6 +1412,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.controlsTabs.ResumeLayout(false);
             this.commandsPage.ResumeLayout(false);
+            this.commandsPage.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             this.groupBox2.ResumeLayout(false);
@@ -1510,6 +1436,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.GroupBox10.ResumeLayout(false);
             this.GroupBox9.ResumeLayout(false);
             this.GroupBox9.PerformLayout();
+            this.groupBox4.ResumeLayout(false);
+            this.groupBox4.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1523,21 +1451,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private System.Windows.Forms.ToolStripLabel PixelLabel;
         private System.Windows.Forms.ToolStripLabel PixelDataValue;
         private System.Windows.Forms.ToolStripLabel StatusLabelInfoTrash;
-        private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.GroupBox groupBox_File_Control;
-        private System.Windows.Forms.Button button_Save;
-        private System.Windows.Forms.Button button_Load;
-        private System.Windows.Forms.Button button_New;
-        private System.Windows.Forms.GroupBox groupBox_General_Options;
-        private System.Windows.Forms.Button button_View;
-        private System.Windows.Forms.Button button_Buffer;
-        private System.Windows.Forms.GroupBox groupBox_Acquisition_Options;
-        private System.Windows.Forms.Button button_Load_Config;
-        private System.Windows.Forms.GroupBox groupBox_Acquisition_Control;
-        private System.Windows.Forms.Button button_Freeze;
-        private System.Windows.Forms.Button button_Grab;
-        private System.Windows.Forms.Button button_Snap;
-        private System.Windows.Forms.Button button_Exit;
         private ImageBox m_ImageBox;
 
         private SapAcqDevice m_AcqDevice;
@@ -1649,6 +1562,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private Label label3;
         internal GroupBox groupBox3;
         internal CheckBox diametersTxtCheck;
+        private GroupBox groupBox4;
+        private Label label4;
+        private ComboBox euListSelection;
+        private Label label5;
+        private Button calibrateBtn;
+        private TextBox txtCalibrationTarget;
+        private Label targetUnitsTxt;
+        private Label unitsTxt;
+        private Label label6;
     }
 }
 
