@@ -525,7 +525,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             this.GroupBox8.Controls.Add(this.Txt_mode);
             this.GroupBox8.Controls.Add(this.BtnLocalRemote);
-            this.GroupBox8.Location = new System.Drawing.Point(3, 395);
+            this.GroupBox8.Location = new System.Drawing.Point(15, 239);
             this.GroupBox8.Name = "GroupBox8";
             this.GroupBox8.Size = new System.Drawing.Size(293, 49);
             this.GroupBox8.TabIndex = 112;
@@ -564,7 +564,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.GroupBox17.Controls.Add(this.Label54);
             this.GroupBox17.Controls.Add(this.Label55);
             this.GroupBox17.Controls.Add(this.Txt_MaxDiameter);
-            this.GroupBox17.Location = new System.Drawing.Point(3, 450);
+            this.GroupBox17.Location = new System.Drawing.Point(15, 303);
             this.GroupBox17.Name = "GroupBox17";
             this.GroupBox17.Size = new System.Drawing.Size(293, 108);
             this.GroupBox17.TabIndex = 111;
@@ -652,7 +652,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.GroupBox5.Controls.Add(this.grid_5);
             this.GroupBox5.Controls.Add(this.grid_4);
             this.GroupBox5.Controls.Add(this.grid_9);
-            this.GroupBox5.Location = new System.Drawing.Point(3, 169);
+            this.GroupBox5.Location = new System.Drawing.Point(15, 417);
             this.GroupBox5.Name = "GroupBox5";
             this.GroupBox5.Size = new System.Drawing.Size(297, 111);
             this.GroupBox5.TabIndex = 109;
@@ -807,11 +807,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             // commandsPage
             // 
+            this.commandsPage.Controls.Add(this.GroupBox5);
             this.commandsPage.Controls.Add(this.groupBox3);
             this.commandsPage.Controls.Add(this.groupBox2);
             this.commandsPage.Controls.Add(this.GroupBox1);
             this.commandsPage.Controls.Add(this.GB_Threshold);
-            this.commandsPage.Controls.Add(this.GroupBox5);
             this.commandsPage.Controls.Add(this.GroupBox8);
             this.commandsPage.Controls.Add(this.GroupBox17);
             this.commandsPage.Location = new System.Drawing.Point(4, 22);
@@ -847,19 +847,19 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.avg_diameter);
-            this.groupBox2.Location = new System.Drawing.Point(4, 308);
+            this.groupBox2.Location = new System.Drawing.Point(15, 181);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(296, 80);
+            this.groupBox2.Size = new System.Drawing.Size(287, 58);
             this.groupBox2.TabIndex = 114;
             this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Promedio diametro triangulos";
+            this.groupBox2.Text = "Equivalent Diameter";
             this.groupBox2.Enter += new System.EventHandler(this.groupBox2_Enter);
             // 
             // avg_diameter
             // 
             this.avg_diameter.AutoSize = true;
             this.avg_diameter.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.avg_diameter.Location = new System.Drawing.Point(133, 36);
+            this.avg_diameter.Location = new System.Drawing.Point(125, 30);
             this.avg_diameter.Name = "avg_diameter";
             this.avg_diameter.Size = new System.Drawing.Size(24, 25);
             this.avg_diameter.TabIndex = 0;

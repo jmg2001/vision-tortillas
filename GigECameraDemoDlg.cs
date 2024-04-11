@@ -28,6 +28,8 @@ using Newtonsoft.Json;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Newtonsoft.Json.Linq;
 using System.Security.Policy;
+using static Emgu.Util.Platform;
+using System.Runtime.ConstrainedExecution;
 
 
 [StructLayout(LayoutKind.Sequential)]
@@ -168,6 +170,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     // Se muestra la imagen en el Form
                     GigeDlg.m_View.Show();
 
+                    originalImage = saveImage();
+
                     if (triggerPLC)
                     {
                         process();
@@ -178,46 +182,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void process()
         {
-            try
-            {
-                auxImage.Dispose();
-                originalImageCV.Dispose();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Atrapado");
-            }
-
-            originalImage = saveImage();
-            originalImageCV = CvInvoke.Imread(imagesPath + "imagenOrigen.bmp");
-
             originalBox.Visible = false;
             processROIBox.Visible = true; // Mostrar el PictureBox ROI
 
             // Se crea el histograma de la imagen
             ImageHistogram(originalImage);
+            
+            // Se binariza la imagen
+            Bitmap binarizedImage = binarizeImage(originalImage);
 
-            // Liberamos la imagen original
-            originalImage.Dispose();
-
-            // OPEN CV
-
-            // Verificar si la imagen se ha cargado correctamente
-            if (originalImageCV.IsEmpty)
-            {
-                Console.WriteLine("No se pudo cargar la imagen.");
-                return;
-            }
-
-            // Binarizamos la imagen
-            Mat binarizedImageCV = new Mat();
-            binarizedImageCV = binarizeImage(originalImageCV);
-            Bitmap binarizedImage = binarizedImageCV.ToBitmap();
-
+            // Se extrae el ROI de la imagen binarizada
             Bitmap roiImage = extractROI(binarizedImage);
-
-            // Liberamos la imagen binarizada
-            binarizedImage.Dispose();
 
             // Colocamos el picturebox del ROI
             SetPictureBoxPositionAndSize(processROIBox, imagePage);
@@ -226,8 +201,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             blobProces(roiImage, processROIBox);
 
             // Liberamos las imagenes
+            binarizedImage.Dispose();
             roiImage.Dispose();
-            originalImageCV.Dispose();
+            originalImage.Dispose();
         }
 
         private Bitmap extractROI(Bitmap image)
@@ -238,11 +214,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return roiImage;
         }
 
-        private void drawROI(ref Mat image)
-        {
-            Rectangle rect = new Rectangle(UserROI.Left, UserROI.Top, UserROI.Right - UserROI.Left, UserROI.Bottom - UserROI.Top);
-            CvInvoke.Rectangle(image, rect, new MCvScalar(255,255,0), 5);
-        }
+        //private void drawROI(ref Mat image)
+        //{
+        //    Rectangle rect = new Rectangle(UserROI.Left, UserROI.Top, UserROI.Right - UserROI.Left, UserROI.Bottom - UserROI.Top);
+        //    CvInvoke.Rectangle(image, rect, new MCvScalar(255,255,0), 5);
+        //}
 
         public GigECameraDemoDlg()
         {
@@ -262,15 +238,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 modbusServer.Port = 502;
                 modbusServer.Listen();
-
                 Console.WriteLine("Servidor Modbus TCP en ejecución...");
 
                 imagesPath = Path.GetTempPath();
-                //Console.WriteLine(imagesPath);
-                //imagesPath = Directory.GetParent(executablePath).FullName;
-                //imagesPath = Directory.GetParent(imagesPath).FullName;
-                //imagesPath = Directory.GetParent(imagesPath).FullName;
-                //imagesPath = imagesPath + "\\images\\";
                 Console.WriteLine(imagesPath);
 
                 sizes.Add("Normal");
@@ -877,6 +847,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 // Se guarda la imagen
                 m_Buffers.Save(imagePath, "-format bmp", -1, 0);
+                Console.WriteLine("Imagen guardada en :" + imagePath); 
             }
             catch
             {
@@ -947,137 +918,152 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private void blobProces(Bitmap image, PictureBox pictureBox)
         {
             // Definir el área mínima y máxima permitida para los contornos
-            double areaMin = 2000; // Área mínima
-            double areaMax = 10000; // Área máxima
+            int areaMin = 2000; // Área mínima
+            int areaMax = 10000; // Área máxima
 
             Blobs = new List<Blob>();
 
-            if (true)
+            // Configurar el PictureBox para ajustar automáticamente al tamaño de la imagen
+            pictureBox.SizeMode = PictureBoxSizeMode.AutoSize;
+
+            // Mostrar la imagen en el PictureBox
+            pictureBox.Image = image;
+
+            image.Save(imagesPath + "roi.bmp");
+
+            var (contoursNCV, edgesNCV, centersNCV) = FindContoursWithEdgesAndCenters(image, areaMin, areaMax);
+
+            image = ConvertToCompatibleFormat(image);
+
+            // Limpiamos la tabla
+            dataTable.Clear();
+
+            // Inicializamos variables
+            double avg_diam = 0;
+            int n = 0;
+
+            for (int i = 0; i < contoursNCV.Count; i++)
             {
-                // Configurar el PictureBox para ajustar automáticamente al tamaño de la imagen
-                pictureBox.SizeMode = PictureBoxSizeMode.AutoSize;
-
-                // Mostrar la imagen en el PictureBox
-                pictureBox.Image = image;
-
-                image.Save(imagesPath + "roi.bmp");
-
-                // Creamos el objeto para poder trabajar con OpenCV
-                Mat imageCV = new Mat();
-                imageCV = CvInvoke.Imread(imagesPath + "roi.bmp");
-
-                // Encontramos las figuras en la imagen
-                VectorOfVectorOfPoint contours = findContours(imageCV);
-
-                // Limpiamos la tabla
-                dataTable.Clear();
-
-                // Inicializamos variables
-                double avg_diam = 0;
-                int n = 0;
-
-                // Iterar sobre los contornos para calcular el área y dibujarlos
-                for (int i = 0; i < contours.Size; i++)
+                int area = contoursNCV[i].Count;
+                if (area >= areaMin && area <= areaMax)
                 {
-                    // Calculamos el area
-                    double area = CvInvoke.ContourArea(contours[i]);
+                    int perimeter = edgesNCV[i].Count;
+                    Point centro = centersNCV[i];
 
-                    // Verificar si el área del contorno está dentro del rango especificado
-                    if (area >= areaMin && area <= areaMax)
+                    // Este diametro lo vamos a dejar para despues
+                    double diametroIA = CalculateDiameterFromArea(area);
+
+                    // Calcular el sector del contorno
+                    int sector = CalculateSector(centersNCV[i], image.Width, image.Height, gridRows, gridCols) + 1;
+
+                    // Calculamos el diametro
+                    (double diameterTriangles, double maxDiameter, double minDiameter) = calculateAndDrawDiameterTrianglesAlghoritm(centersNCV[i], image, sector, true);
+
+                    // Sumamos para promediar
+                    avg_diam += diameterTriangles;
+
+                    // Calcular la compacidad
+                    double compactness = CalculateCompactness(area, perimeter);
+
+                    double ovalidad = calculateOvality(maxDiameter, minDiameter);
+
+                    ushort size = calculateSize(maxDiameter, minDiameter, compactness, ovalidad);
+
+                    // Agregamos los datos a la tabla
+                    dataTable.Rows.Add(sector, area, Math.Round(diametroIA, 3), Math.Round(diameterTriangles, 3), Math.Round(maxDiameter, 3), Math.Round(minDiameter, 3), Math.Round(compactness, 3));
+
+                    Blob blob = new Blob(area, perimeter, diameterTriangles, centersNCV[i], maxDiameter, minDiameter, sector, compactness, size, ovalidad);
+
+                    if (blob.Sector == 5)
                     {
-                        // Calcular el perímetro del contorno
-                        double perimeter = CvInvoke.ArcLength(contours[i], true);
+                        Console.WriteLine(blob.Centro.X + UserROI.Left);
+                        Console.WriteLine(blob.Centro.Y + UserROI.Top);
+                    }
 
-                        // Dibujar el contorno
-                        CvInvoke.DrawContours(imageCV, contours, i, new MCvScalar(255), 2);
+                    // Agregamos el elemento a la lista
+                    Blobs.Add(blob);
 
-                        // Obtener el centro del contorno para colocar el texto
-                        CircleF centerF = new CircleF();
-                        centerF = CvInvoke.MinEnclosingCircle(new VectorOfPoint(contours[i].ToArray()));
-                        Point center = Point.Round(centerF.Center);
+                    // Configurar los datos que quieres publicar
+                    ushort[] dataToPublish = new ushort[] { (ushort)blob.Diametro, (ushort)blob.Area, (ushort)blob.Perimetro };
 
-                        // Dibujar el centro
-                        CvInvoke.Circle(imageCV, center, 5, new MCvScalar(255, 0, 0));
+                    int index = 0;
+                    for (int h = (sector - 1) * 3; h < ((sector - 1) * 3) + 3; h++)
+                    {
+                        // Publicar los datos en direcciones Modbus
+                        modbusServer.holdingRegisters[h + 1] = (short)dataToPublish[index];
+                        index++;
+                    }
 
-                        // Este diametro lo vamos a dejar para despues
-                        double diametroIA = CalculateDiameterFromArea((int)area);
+                    // Crear un objeto Graphics a partir del Bitmap
+                    using (Graphics g = Graphics.FromImage(image))
+                    {
+                        // Dibujamos el perimetro
+                        drawPerimeter(image, edgesNCV[i], 1, Color.Red);
 
-                        // Calcular el sector del contorno
-                        int sector = CalculateSector(center, image.Width, image.Height, gridRows, gridCols) + 1;
-
-                        // Calculamos el diametro
-                        (double diameterTriangles, double maxDiameter, double minDiameter) = calculateAndDrawDiameterTrianglesAlghoritm(center, image, ref imageCV ,sector);
-
-                        // Sumamos para promediar
-                        avg_diam += diameterTriangles;
-
-                        // Calcular la compacidad
-                        double compactness = CalculateCompactness((int)area, perimeter);
+                        // Dibujamos el centro
+                        drawCenter(centro,2,g);
 
                         // Dibujamos el sector
-                        drawSector(image, ref imageCV, sector);
+                        drawSector(image, sector, g);
 
-                        // Dibujar el numero de sector
-                        drawSectorNumber(ref imageCV, center, sector);
+                        // Dibujamos el numero del sector
+                        drawSectorNumber(image, centersNCV[i], sector-1);
+                    }
+                    // Aumentamos el numero de elementos para promediar
+                    n++;
+                }
+            }
 
-                        double ovalidad = calculateOvality(maxDiameter, minDiameter);
+            // Calculamos el promedio de los diametros
+            avg_diam /= n;
 
-                        ushort size = calculateSize(maxDiameter, minDiameter, compactness, ovalidad);
+            // Asignamos el texto del promedio de los diametros
+            avg_diameter.Text = Math.Round(avg_diam, 3).ToString();
 
-                        // Agregamos los datos a la tabla
-                        dataTable.Rows.Add(sector, area, Math.Round(diametroIA, 3), Math.Round(diameterTriangles, 3), Math.Round(maxDiameter, 3), Math.Round(minDiameter, 3), Math.Round(compactness, 3));
+            // Asignar la DataTable al DataGridView
+            dataGridView1.DataSource = dataTable;
 
-                        Blob blob = new Blob(area, perimeter, diameterTriangles, center, maxDiameter, minDiameter, sector, compactness, size, ovalidad);
+            try
+            {
+                image.Save(imagesPath + "final.bmp");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
 
-                        drawData(imageCV, blob);
+            // Colocamos la imagen con todos los dibujos en el picturebox
+            processROIBox.Image = image;
 
-                        if (blob.Sector == 5)
+        }
+
+        private void drawCenter(Point centro, int thickness, Graphics g)
+        {
+            Rectangle rect = new Rectangle(centro.X - thickness, centro.Y - thickness, thickness* 2, thickness* 2);
+
+            // Crear un pincel para el relleno del círculo (en este caso, color azul)
+            using (Brush brush = new SolidBrush(Color.Blue))
+            {
+                // Dibujar el círculo relleno en el Bitmap
+                g.FillEllipse(brush, rect);
+            }
+        }
+
+        // Función para dibujar un punto con un grosor dado
+        void drawPerimeter(Bitmap bitmap, List<Point> perimeter, int thickness, Color color)
+        {
+            foreach (Point point in perimeter)
+            {
+                for (int i = point.X - thickness / 2; i <= point.X + thickness / 2; i++)
+                {
+                    for (int j = point.Y - thickness / 2; j <= point.Y + thickness / 2; j++)
+                    {
+                        if (i >= 0 && i < bitmap.Width && j >= 0 && j < bitmap.Height)
                         {
-                            Console.WriteLine(blob.Centro.X + UserROI.Left);
-                            Console.WriteLine(blob.Centro.Y + UserROI.Top);
+                            bitmap.SetPixel(i, j, color);
                         }
-
-                        // Agregamos el elemento a la lista
-                        Blobs.Add(blob);
-
-                        // Configurar los datos que quieres publicar
-                        ushort[] dataToPublish = new ushort[] { (ushort)blob.Diametro, (ushort)blob.Area, (ushort)blob.Perimetro };
-                        // int startingAddress = 0;
-
-                        int index = 0;
-
-                        for (int h = (sector-1)*3; h < ((sector-1)*3)+3; h++)
-                        {
-                            // Publicar los datos en direcciones Modbus
-                            modbusServer.holdingRegisters[h+1] = (short)dataToPublish[index];
-                            index++;
-                        }
-                        // Aumentamos el numero de elementos para promediar
-                        n++;
                     }
                 }
-
-                // Calculamos el promedio de los diametros
-                avg_diam /= n;
-
-                // Asignamos el texto del promedio de los diametros
-                avg_diameter.Text = Math.Round(avg_diam, 3).ToString();
-
-                // Asignar la DataTable al DataGridView
-                dataGridView1.DataSource = dataTable;
-
-                try
-                {
-                    if (!updateImages) imageCV.ToBitmap().Save(imagesPath + "final.bmp");
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                }
-
-                // Colocamos la imagen con todos los dibujos en el picturebox
-                processROIBox.Image = imageCV.ToBitmap();
-
             }
         }
 
@@ -1125,10 +1111,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return contours;
         }
 
-        private Mat binarizeImage(Mat originalImageCV)
+        private Bitmap binarizeImage(Bitmap image)
         {
-            Mat grayImage = new Mat();
-            CvInvoke.CvtColor(originalImageCV, grayImage, ColorConversion.Bgr2Gray); // Convertir a escala de grises
 
             try
             {
@@ -1145,13 +1129,58 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
 
             }
+            // Crear un nuevo mapa de bits para la imagen procesada
+            Bitmap processed = new Bitmap(image.Width, image.Height);
 
-            Mat binaryImage = new Mat();
+            for (int y = 0; y < image.Height; y++)
+            {
+                for (int x = 0; x < image.Width; x++)
+                {
+                    Color originalColor = image.GetPixel(x, y);
 
-            CvInvoke.Threshold(grayImage, binaryImage, (double)threshold, 255, ThresholdType.Binary); // Binarizar la imagen
+                    // Aplicar la matriz de 0 a 255
+                    int newValue = (originalColor.R + originalColor.G + originalColor.B) / 3;
 
-            return binaryImage;
+                    // Aplicar el umbral
+                    int processedValue = (newValue > threshold) ? 255 : 0;
+
+                    // Crear el nuevo color y establecerlo en la imagen procesada
+                    Color processedColor = Color.FromArgb(processedValue, processedValue, processedValue);
+                    processed.SetPixel(x, y, processedColor);
+                }
+            }
+
+            return processed;
+
         }
+
+        //private Mat binarizeImage(Mat originalImageCV)
+        //{
+        //    Mat grayImage = new Mat();
+        //    CvInvoke.CvtColor(originalImageCV, grayImage, ColorConversion.Bgr2Gray); // Convertir a escala de grises
+
+        //    try
+        //    {
+        //        if (autoThreshold)
+        //        {
+        //            threshold = CalculateOtsuThreshold();
+        //        }
+        //        else
+        //        {
+        //            threshold = int.Parse(Txt_Threshold.Text);
+        //        }
+        //    }
+        //    catch (FormatException)
+        //    {
+
+        //    }
+
+        //    Mat binaryImage = new Mat();
+
+        //    CvInvoke.Threshold(grayImage, binaryImage, (double)threshold, 255, ThresholdType.Binary); // Binarizar la imagen
+
+        //    return binaryImage;
+        //}
 
         private void InitializeDataTable()
         {
@@ -1218,12 +1247,28 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             CvInvoke.PutText(image, text, textPosition, FontFace.HersheySimplex, 0.4, new MCvScalar(255, 255, 255), 1);
         }
 
-        private void drawSectorNumber(ref Mat imageCV, Point center, int sector)
+        //private void drawSectorNumber(ref Mat imageCV, Point center, int sector)
+        //{
+        //    int offsetX = 5;
+        //    int offsetY = 5;
+        //    Point textPosition = new Point((int)(center.X + offsetX), (int)(center.Y + offsetY));
+        //    CvInvoke.PutText(imageCV, sector.ToString(), textPosition, FontFace.HersheySimplex, 0.6, new MCvScalar(255), 1);
+        //}
+
+        private void drawSectorNumber(Bitmap image, Point center, int sector)
         {
-            int offsetX = 5;
-            int offsetY = 5;
-            Point textPosition = new Point((int)(center.X + offsetX), (int)(center.Y + offsetY));
-            CvInvoke.PutText(imageCV, sector.ToString(), textPosition, FontFace.HersheySimplex, 0.6, new MCvScalar(255), 1);
+            using (Graphics g = Graphics.FromImage(image))
+            {
+                using (Font font = new Font("Arial", 15))
+                {
+                    // Seleccionar la esquina donde se mostrará el número del sector (puedes ajustar según tus necesidades)
+                    int xOffset = 5;
+                    int yOffset = 5;
+
+                    // Dibujar el número del sector en la imagen ajustando el índice
+                    g.DrawString((sector + 1).ToString(), font, Brushes.Red, center.X + xOffset, center.Y + yOffset);
+                }
+            }
         }
 
         private int CalculateSector(Point objectCenter, int imageWidth, int imageHeight, int gridRows, int gridCols)
@@ -1262,12 +1307,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
-        private (double, double, double) calculateAndDrawDiameterTrianglesAlghoritm(Point center, Bitmap image, ref Mat imageCV, int sector, bool draw = true)
+        private (double, double, double) calculateAndDrawDiameterTrianglesAlghoritm(Point center, Bitmap image, int sector, bool draw = true)
         {
             
             double diameter, maxDiameter, minDiameter;
-            Point pointDM = new Point();
-            Point pointDm = new Point();
+            //Point pointDM = new Point();
+            //Point pointDm = new Point();
             List<Point> listXY = new List<Point>();
 
             maxDiameter = 0; minDiameter = 0;
@@ -1346,17 +1391,19 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 int maxIndex = diameters.IndexOf(maxDiameter);
                 int minIndex = diameters.IndexOf(minDiameter);
 
-                // Definir el color y el grosor de las líneas
-                MCvScalar pen1 = new MCvScalar(0,255,0);
-                MCvScalar pen2 = new MCvScalar(0,0,255);
+                using (Graphics g = Graphics.FromImage(image))
+                {
+                    Pen pen1 = new Pen(Color.Green,2);
+                    Pen pen2 = new Pen(Color.Red,2);
 
-                // Dibujar diámetro máximo
-                CvInvoke.Line(imageCV, center, listXY[maxIndex], pen1, 2);
-                CvInvoke.Line(imageCV, center, listXY[maxIndex+12], pen1, 2);
+                    // Dibujar diámetro máximo
+                    g.DrawLine(pen1, new Point(center.X, center.Y), listXY[maxIndex]);
+                    g.DrawLine(pen1, new Point(center.X, center.Y), listXY[maxIndex+12]);
 
-                // Dibujar el diámetro mínimo
-                CvInvoke.Line(imageCV, center, listXY[minIndex], pen2, 2);
-                CvInvoke.Line(imageCV, center, listXY[minIndex + 12], pen2, 2);
+                    // Dibujar diámetro minimo
+                    g.DrawLine(pen2, new Point(center.X, center.Y), listXY[minIndex]);
+                    g.DrawLine(pen2, new Point(center.X, center.Y), listXY[minIndex + 12]);
+                }
 
             }
             return (diameter, maxDiameter, minDiameter);
@@ -1417,7 +1464,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return compactness;
         }
 
-        private void drawSector(Bitmap image, ref Mat imageCV, int sector)
+        private void drawSector(Bitmap image, int sector, Graphics g)
         {
             // Calcular el ancho y alto de cada sector
             int sectorWidth = image.Width / gridCols;
@@ -1427,33 +1474,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             int sectorX = ((sector - 1) % gridCols) * sectorWidth;
             int sectorY = ((sector - 1) / gridCols) * sectorHeight;
 
+            // Definir el rectángulo (x, y, ancho, alto)
             Rectangle rect = new Rectangle(sectorX, sectorY, sectorWidth, sectorHeight);
 
-            CvInvoke.Rectangle(imageCV, rect, new MCvScalar(255, 0, 0), 2);
-        }
-
-        private Bitmap binarizeImage(Bitmap original)
-        {
-            try
+            // Crear un lápiz para el borde del rectángulo (en este caso, color rojo y grosor 2)
+            using (Pen pen = new Pen(Color.Blue, 2))
             {
-                if (autoThreshold)
-                {
-                    threshold = CalculateOtsuThreshold();
-                }
-                else
-                {
-                    threshold = int.Parse(Txt_Threshold.Text);
-                }
+                // Dibujar el rectángulo en el Bitmap
+                g.DrawRectangle(pen, rect);
             }
-            catch (FormatException)
-            {
-                // Manejar el error de formato incorrecto aquí
-            }
-            // Crear un nuevo mapa de bits para la imagen procesada
-            Bitmap processed = new Bitmap(original.Width, original.Height);
-
-
-            return processed;
         }
 
         private void processImageBtn_Click(object sender, EventArgs e)
@@ -1472,7 +1501,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     UpdateControls();
                     // Para activar el botón
                     viewModeBtn.BackColor = DefaultBackColor; // Restaurar el color de fondo predeterminado
-                    viewModeBtn.Text = "FRAME";
+                    viewModeBtn.Text = "LIVE";
+                    virtualTriggerBtn.Enabled = false;
+                    processImageBtn.Enabled = false;
+                    if (triggerPLC)
+                    {
+                        viewModeBtn.Text = "FRAME";
+                    }
                     mode = 0;
                 }
             }
@@ -1488,8 +1523,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     UpdateControls();
                     // Para desactivar el botón
                     viewModeBtn.BackColor = Color.Silver; // Cambiar el color de fondo a gris
-                    viewModeBtn.Text = "LIVE"; // Cambiar el texto cuando está desactivado
+                    viewModeBtn.Text = "FRAME"; // Cambiar el texto cuando está desactivado
                     mode = 1;
+                    processImageBtn.Enabled = true;
+                    virtualTriggerBtn.Enabled = true;
                 }
             }
         }
@@ -1841,6 +1878,118 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private void GroupBox1_Enter(object sender, EventArgs e)
         {
 
+        }
+
+        public static (List<List<Point>>, List<List<Point>>, List<Point>) FindContoursWithEdgesAndCenters(Bitmap binaryImage, int minArea, int maxArea)
+        {
+            List<List<Point>> contours = new List<List<Point>>();
+            List<List<Point>> edges = new List<List<Point>>();
+            List<Point> centers = new List<Point>();
+            var visited = new HashSet<(int, int)>();
+
+            int height = binaryImage.Height;
+            int width = binaryImage.Width;
+
+            // Función para verificar si un píxel está dentro de los límites de la imagen
+            bool IsWithinBounds(int x, int y)
+            {
+                return 0 <= x && x < width && 0 <= y && y < height;
+            }
+
+            // Encontrar todos los contornos y bordes en la imagen utilizando DFS
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    if (visited.Contains((x, y)) || binaryImage.GetPixel(x, y).GetBrightness() == 0)
+                    {
+                        continue;
+                    }
+
+                    var contour = new List<Point>();
+                    var edge = new List<Point>();
+                    var stack = new Stack<(int, int)>();
+                    bool isOnEdge = false;
+
+                    stack.Push((x, y));
+
+                    while (stack.Count > 0)
+                    {
+                        var (cx, cy) = stack.Pop();
+                        if (visited.Contains((cx, cy)) || binaryImage.GetPixel(cx, cy).GetBrightness() == 0)
+                        {
+                            continue;
+                        }
+
+                        contour.Add(new Point(cx, cy));
+                        visited.Add((cx, cy));
+
+                        if (isOnEdge)
+                        {
+                            edge.Add(new Point(cx, cy));
+                            isOnEdge = false;
+                        }
+
+                        foreach (var (dx, dy) in new (int, int)[] { (1, 0), (0, 1), (-1, 0), (0, -1) })
+                        {
+                            int nx = cx + dx;
+                            int ny = cy + dy;
+                            if (IsWithinBounds(nx, ny) && !visited.Contains((nx, ny)))
+                            {
+                                stack.Push((nx, ny));
+                                if (binaryImage.GetPixel(nx, ny).GetBrightness() == 0)
+                                {
+                                    isOnEdge = true;
+                                }
+                            }
+                        }
+                    }
+
+                    if (contour.Count > minArea && contour.Count < maxArea)
+                    {
+                        contours.Add(contour);
+                        centers.Add(CalculateCenter(contour));
+                        if (edge.Count > 0)
+                        {
+                            edges.Add(edge);
+                        }
+                    }
+                    
+                }
+            }
+
+            return (contours, edges, centers);
+        }
+
+        static Point CalculateCenter(List<Point> contour)
+        {
+            int sumX = 0;
+            int sumY = 0;
+
+            foreach (var point in contour)
+            {
+                sumX += point.X;
+                sumY += point.Y;
+            }
+
+            int centerX = sumX / contour.Count;
+            int centerY = sumY / contour.Count;
+
+            return new Point(centerX, centerY);
+        }
+
+        public static Bitmap ConvertToCompatibleFormat(Bitmap bitmap)
+        {
+            // Crear un nuevo Bitmap con el mismo tamaño y formato compatible
+            Bitmap compatibleBitmap = new Bitmap(bitmap.Width, bitmap.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+            // Copiar los píxeles de la imagen original al nuevo Bitmap
+            using (Graphics g = Graphics.FromImage(compatibleBitmap))
+            {
+                g.DrawImage(bitmap, 0, 0, bitmap.Width, bitmap.Height);
+            }
+
+            return compatibleBitmap;
         }
     }
 }
