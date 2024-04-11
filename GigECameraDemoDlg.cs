@@ -10,26 +10,13 @@ using System.Runtime.InteropServices;
 using System.IO;
 using System.Linq;
 using System.Data;
-using System.Diagnostics;
-using System.Drawing.Imaging;
 
 using EasyModbus;
 
-using Emgu.CV;
-using Emgu.CV.CvEnum;
-using Emgu.CV.Structure;
-using Emgu.CV.Util;
-
-using System.Net;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Net.Http;
 using Newtonsoft.Json;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Newtonsoft.Json.Linq;
-using System.Security.Policy;
-using static Emgu.Util.Platform;
-using System.Runtime.ConstrainedExecution;
 
 
 [StructLayout(LayoutKind.Sequential)]
@@ -48,42 +35,68 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         // Variables globales
         public RECT UserROI = new RECT();
         long[] Histogram = new long[256];
-        private DIP DIP = new DIP();
-        public int Blobs_Count;
-        public int X_Lines;
-        public int Y_Columns;
+
+
+        // private DIP DIP = new DIP();
+        // public int Blobs_Count;
+        // public int X_Lines;
+        // public int Y_Columns;
 
         // Creadas por mi
 
         // Color de la tortilla en la imagen binarizada
         int tortillaColor = 1; // 1 - Blanco, 0 - Negro
 
-        //Threshold
+        // Variables para el Threshold
         int threshold = 140;
         bool autoThreshold = true;
 
+        // Variable para escribir los datos de los diametros en la imagen (no se utiliza por ahora)
         bool txtDiameters = true;
 
+        // Varibles para identificar si el trigger viene del PLC o del Software
         bool triggerPLC = false;
-        int mode = 0;
+        int mode = 0; // 1 - Live, 0 - Frame
 
+        // Variable para actualizar las imagenes si estamos el la imagesTab
         bool updateImages = true;
 
-        // Creamos una lista de colores
+        // Creamos una lista de colores (no se utilizan por ahora)
         List<Color> colorList = new List<Color>();
         int colorIndex = 0;
 
-        // Control de recursion
+        // Control de recursion para el algoritmo de los triangulos
         int maxIteration = 10000;
         int iteration = 0;
 
-        // Parametros para el tamaño de la tortilla
-        float maxD = 88;
-        float minD = 72;
+        // Parametros para el tamaño de la tortilla (Se van a traer de una base de datos)
+        int maxArea = 8000;
+        int minArea = 3000;
+        float maxDiameter = 88;
+        float minDiameter = 72;
         double maxCompactness = 16;
         double maxOvality = 0.5;
 
+        // Parametros para la calibración (Se van a cargar de un archivo)
+        int calibrationTarget = 120;
+        string units = "mm";
+        bool calibrating = false;
+        double euFactor = 1.399063;
+
+        // Lista para los strings de los tamaños de la tortilla
         List<string> sizes = new List<string>();
+
+        // Imagen para cargar la imagen tomada por la camara
+        public Bitmap originalImage { get; private set; }
+
+        // Directortio para guardar la imagenes para trabajar, es una carpeta tempoal
+        string imagesPath = Path.GetTempPath();
+
+        // Crear una lista de blobs
+        List<Blob> Blobs = new List<Blob>();
+
+        // Configurar el servidor Modbus TCP
+        ModbusServer modbusServer = new ModbusServer();
 
         // Hasta aqui las creadas por mi
 
@@ -96,29 +109,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         int Max_Threshold = 255;
         int OffsetLeft = 0;
         int OffsetTop = 0;
+
         int gridRows = 3;
         int gridCols = 3;
+
         public bool isActivatedProcessData = false; // Variable de estado para el botón tipo toggle
-
-        public Bitmap originalImage { get; private set; }
-
-        string executablePath = System.Reflection.Assembly.GetEntryAssembly().Location;
-
-        string imagesPath = "";
-
-        // Crear una lista de blobs
-        List<Blob> Blobs = new List<Blob>();
-
-        Mat auxImage = new Mat();
-        Mat originalImageCV = new Mat();
-
-        // Configurar el servidor Modbus TCP
-        ModbusServer modbusServer = new ModbusServer();
-
-        int calibrationTarget = 120;
-        string units = "mm";
-        bool calibrating = false;
-        double euFactor = 1.399063;
 
         // Delegate to display number of frame acquired 
         // Delegate is needed because .NEt framework does not support  cross thread control modification
@@ -154,6 +149,32 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 Compacidad = compacidad;
                 Size = size;
                 Ovalidad = ovalidad;
+            }
+        }
+
+        // Clase para representar un cuadrante L_Q1
+        public class Quadrant
+        {
+            public int Number { get; set; }
+            public string ClassName { get; set; }
+            public bool Found { get; set; }
+            public double DiameterAvg { get; set; }
+            public double DiameterMax { get; set; }
+            public double DiameterMin { get; set; }
+            public double Ratio { get; set; }
+            public double Compacity { get; set; }
+
+            public Quadrant(int number, string className, bool found, double diameterAvg, double diameterMax, double diameterMin, double compacity)
+            {
+                // Inicializar las propiedades según sea necesario
+                Number = number;
+                ClassName = className;
+                Found = found;
+                DiameterAvg = diameterAvg;
+                DiameterMax = diameterMax;
+                DiameterMin = diameterMin;
+                Ratio = diameterMax/diameterMin;
+                Compacity = compacity;
             }
         }
 
@@ -207,24 +228,20 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                         centralSector.Save(imagesPath + "centralSector.bmp");
 
-                        var (contoursNCV, edgesNCV, centersNCV) = FindContoursWithEdgesAndCenters(centralSector, areaMin, areaMax);
+                        var (areas, perimeters, centers) = FindContoursWithEdgesAndCenters(centralSector, areaMin, areaMax);
 
-                        for (int i = 0; i < contoursNCV.Count; i++)
+                        for (int i = 0; i < areas.Count; i++)
                         {
-                            int area = contoursNCV[i].Count;
+                            int area = areas[i].Count;
+                            int perimeter = perimeters[i].Count;
+                            Point centro = centers[i];
 
-                            if (area >= areaMin && area <= areaMax)
+                            if (itsInCenter(centralSector,centro,10))
                             {
-                                int perimeter = edgesNCV[i].Count;
-                                Point centro = centersNCV[i];
-
-                                if (itsInCenter(centralSector,centro,10))
-                                {
-                                    // Este diametro lo vamos a dejar para despues
-                                    diametroIA = (float)CalculateDiameterFromArea(area);
-                                    calibrationValidate = true;
-                                    break;
-                                }
+                                // Este diametro lo vamos a dejar para despues
+                                diametroIA = (float)CalculateDiameterFromArea(area);
+                                calibrationValidate = true;
+                                break;
                             }
                         }
 
@@ -328,6 +345,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             roiImage.Dispose();
             originalImage.Dispose();
 
+
+
             processImageBtn.Enabled = false;
         }
 
@@ -367,9 +386,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 modbusServer.Listen();
                 Console.WriteLine("Servidor Modbus TCP en ejecución...");
 
-                imagesPath = Path.GetTempPath();
-                Console.WriteLine(imagesPath);
-
                 sizes.Add("Normal");
                 sizes.Add("Big");
                 sizes.Add("Small");
@@ -382,8 +398,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 UserROI.Right = 531;
                 UserROI.Bottom = 430;
 
-                Txt_MaxDiameter.Text = maxD.ToString();
-                Txt_MinDiameter.Text = minD.ToString();
+                Txt_MaxDiameter.Text = maxDiameter.ToString();
+                Txt_MinDiameter.Text = minDiameter.ToString();
                 Txt_MaxCompacity.Text = maxCompactness.ToString();
                 Txt_MaxOvality.Text = maxOvality.ToString();
 
@@ -512,10 +528,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             if (e.KeyChar == (char)Keys.Enter)
             {
                 // Intentar convertir el texto del TextBox a un número entero
-                if (float.TryParse(Txt_MinDiameter.Text, out minD))
+                if (float.TryParse(Txt_MinDiameter.Text, out minDiameter))
                 {
                     // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-                    MessageBox.Show("Se ha guardado la cantidad modificada: " + minD, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Se ha guardado la cantidad modificada: " + minDiameter, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else
                 {
@@ -531,10 +547,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             if (e.KeyChar == (char)Keys.Enter)
             {
                 // Intentar convertir el texto del TextBox a un número entero
-                if (float.TryParse(Txt_MaxDiameter.Text, out maxD))
+                if (float.TryParse(Txt_MaxDiameter.Text, out maxDiameter))
                 {
                     // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-                    MessageBox.Show("Se ha guardado la cantidad modificada: " + maxD, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Se ha guardado la cantidad modificada: " + maxDiameter, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else
                 {
@@ -762,14 +778,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         //
         //**********************************************************************************
 
-       //protected override void OnResize(EventArgs argsPaint)
-       //{
-       //   if (m_ImageBox != null)
-       //      m_ImageBox.OnSize();
-       //   base.OnResize(argsPaint);
-       //}
+        protected override void OnResize(EventArgs argsPaint)
+        {
+            if (m_ImageBox != null)
+                m_ImageBox.OnSize();
+            base.OnResize(argsPaint);
+        }
 
-       private void GigECameraDemoDlg_FormClosed(object sender, FormClosedEventArgs e)
+        private void GigECameraDemoDlg_FormClosed(object sender, FormClosedEventArgs e)
        {
           DestroyObjects();
           DisposeObjects();
@@ -1080,10 +1096,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void blobProces(Bitmap image, PictureBox pictureBox)
         {
-            // Definir el área mínima y máxima permitida para los contornos
-            int areaMin = 2000; // Área mínima
-            int areaMax = 10000; // Área máxima
-
             Blobs = new List<Blob>();
 
             // Configurar el PictureBox para ajustar automáticamente al tamaño de la imagen
@@ -1094,7 +1106,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             image.Save(imagesPath + "roi.bmp");
 
-            var (contoursNCV, edgesNCV, centersNCV) = FindContoursWithEdgesAndCenters(image, areaMin, areaMax);
+            var (areas, perimeters, centers) = FindContoursWithEdgesAndCenters(image, minArea, maxArea);
 
             image = ConvertToCompatibleFormat(image);
 
@@ -1105,92 +1117,74 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             double avg_diam = 0;
             int n = 0;
 
-            for (int i = 0; i < contoursNCV.Count; i++)
+            for (int i = 0; i < areas.Count; i++)
             {
-                int area = contoursNCV[i].Count;
-                if (area >= areaMin && area <= areaMax)
+                int area = areas[i].Count;
+                int perimeter = perimeters[i].Count;
+                Point centro = centers[i];
+
+                // Calcular el sector del contorno
+                int sector = CalculateSector(centro, image.Width, image.Height, gridRows, gridCols) + 1;
+
+                double tempFactor = euFactor;
+
+                // Este diametro lo vamos a dejar para despues
+                double diametroIA = CalculateDiameterFromArea(area);
+
+                // Calculamos el diametro
+                (double diameterTriangles, double maxDiameter, double minDiameter) = calculateAndDrawDiameterTrianglesAlghoritm(centro, image, sector, true);
+
+                // Sumamos para promediar
+                avg_diam += (diametroIA*tempFactor);
+                // Aumentamos el numero de elementos para promediar
+                n++;
+
+                // Calcular la compacidad
+                double compactness = CalculateCompactness(area, perimeter);
+
+                double ovalidad = calculateOvality(maxDiameter, minDiameter);
+
+                ushort size = calculateSize(maxDiameter, minDiameter, compactness, ovalidad);
+
+                // Agregamos los datos a la tabla
+                dataTable.Rows.Add(sector, area, Math.Round(diametroIA * tempFactor, 3), Math.Round(diameterTriangles * tempFactor, 3), Math.Round(maxDiameter * tempFactor, 3), Math.Round(minDiameter * tempFactor, 3), Math.Round(compactness, 3));
+
+                Blob blob = new Blob(area, perimeter, diameterTriangles, centro, maxDiameter, minDiameter, sector, compactness, size, ovalidad);
+
+                if (blob.Sector == 5)
                 {
-                    // Calcular el sector del contorno
-                    int sector = CalculateSector(centersNCV[i], image.Width, image.Height, gridRows, gridCols) + 1;
+                    Console.WriteLine(blob.Centro.X + UserROI.Left);
+                    Console.WriteLine(blob.Centro.Y + UserROI.Top);
+                }
 
-                    double tempFactor = euFactor;
+                // Agregamos el elemento a la lista
+                Blobs.Add(blob);
 
-                    //List<int> cruz = new List<int>() { 2, 4, 6, 8 };
+                // Configurar los datos que quieres publicar
+                ushort[] dataToPublish = new ushort[] { (ushort)blob.Diametro, (ushort)blob.Area, (ushort)blob.Perimetro };
 
-                    //if (cruz.Contains(sector))
-                    //{
-                    //    tempFactor = (euFactor * 1.0742);
-                    //}
+                int index = 0;
+                for (int h = (sector - 1) * 3; h < ((sector - 1) * 3) + 3; h++)
+                {
+                    // Publicar los datos en direcciones Modbus
+                    modbusServer.holdingRegisters[h + 1] = (short)dataToPublish[index];
+                    index++;
+                }
 
-                    //List<int> corners = new List<int>() { 1, 3, 7, 9 };
+                // Aqui dibujamos todo lo necesario
+                using (Graphics g = Graphics.FromImage(image))
+                {
+                    // Dibujamos el perimetro
+                    drawPerimeter(image, perimeters[i], 1, Color.Red);
 
-                    //if (corners.Contains(sector))
-                    //{
-                    //    tempFactor = (euFactor * 1.1427);
-                    //}
+                    // Dibujamos el centro
+                    drawCenter(centro,2,g);
 
-                    int perimeter = edgesNCV[i].Count;
-                    Point centro = centersNCV[i];
+                    // Dibujamos el sector
+                    drawSector(image, sector, g);
 
-                    // Este diametro lo vamos a dejar para despues
-                    double diametroIA = CalculateDiameterFromArea(area);
-
-                    // Calculamos el diametro
-                    (double diameterTriangles, double maxDiameter, double minDiameter) = calculateAndDrawDiameterTrianglesAlghoritm(centersNCV[i], image, sector, true);
-
-                    // Sumamos para promediar
-                    avg_diam += (diametroIA*tempFactor);
-                    // Aumentamos el numero de elementos para promediar
-                    n++;
-
-                    // Calcular la compacidad
-                    double compactness = CalculateCompactness(area, perimeter);
-
-                    double ovalidad = calculateOvality(maxDiameter, minDiameter);
-
-                    ushort size = calculateSize(maxDiameter, minDiameter, compactness, ovalidad);
-
-                    // Agregamos los datos a la tabla
-                    dataTable.Rows.Add(sector, area, Math.Round(diametroIA * tempFactor, 3), Math.Round(diameterTriangles * tempFactor, 3), Math.Round(maxDiameter * tempFactor, 3), Math.Round(minDiameter * tempFactor, 3), Math.Round(compactness, 3));
-
-                    Blob blob = new Blob(area, perimeter, diameterTriangles, centersNCV[i], maxDiameter, minDiameter, sector, compactness, size, ovalidad);
-
-                    if (blob.Sector == 5)
-                    {
-                        Console.WriteLine(blob.Centro.X + UserROI.Left);
-                        Console.WriteLine(blob.Centro.Y + UserROI.Top);
-                    }
-
-                    // Agregamos el elemento a la lista
-                    Blobs.Add(blob);
-
-                    // Configurar los datos que quieres publicar
-                    ushort[] dataToPublish = new ushort[] { (ushort)blob.Diametro, (ushort)blob.Area, (ushort)blob.Perimetro };
-
-                    int index = 0;
-                    for (int h = (sector - 1) * 3; h < ((sector - 1) * 3) + 3; h++)
-                    {
-                        // Publicar los datos en direcciones Modbus
-                        modbusServer.holdingRegisters[h + 1] = (short)dataToPublish[index];
-                        index++;
-                    }
-
-                    // Crear un objeto Graphics a partir del Bitmap
-                    using (Graphics g = Graphics.FromImage(image))
-                    {
-                        // Dibujamos el perimetro
-                        drawPerimeter(image, edgesNCV[i], 1, Color.Red);
-
-                        // Dibujamos el centro
-                        drawCenter(centro,2,g);
-
-                        // Dibujamos el sector
-                        drawSector(image, sector, g);
-
-                        // Dibujamos el numero del sector
-                        drawSectorNumber(image, centersNCV[i], sector-1);
-                    }
-                    
+                    // Dibujamos el numero del sector
+                    drawSectorNumber(image, centro, sector-1);
                 }
             }
 
@@ -1257,11 +1251,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             ushort size = 0;
 
-            if (dMayor > maxD)
+            if (dMayor > maxDiameter)
             {
                 size = 1; // Grande
             }
-            if (dMenor < minD) 
+            if (dMenor < minDiameter) 
             {
                 size = 2; // Pequeña
             }
@@ -1275,20 +1269,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
 
             return size;
-        }
-
-        private VectorOfVectorOfPoint findContours(Mat imageCV)
-        {
-            // Conversion del tipo de imagenes
-            Mat grayImage = new Mat();
-            CvInvoke.CvtColor(imageCV, grayImage, ColorConversion.Bgr2Gray);
-
-            // Buscar contornos
-            VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint();
-            Mat hierarchy = new Mat();
-            CvInvoke.FindContours(grayImage, contours, hierarchy, RetrType.List, ChainApproxMethod.ChainApproxSimple);
-
-            return contours;
         }
 
         private Bitmap binarizeImage(Bitmap image)
@@ -1374,66 +1354,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             dataTable.Columns.Add("Compacidad");
         }
 
-        private void drawData(Mat image, Blob blob)
+        private void drawData(Bitmap image, Blob blob)
         {
-            int width = image.Width;
-            int height = image.Height;
-
-            // Límites de la cuadrícula
-            double xMin = 0;
-            double xMax = width;
-            double yMin = 0;
-            double yMax = height;
-
-            // Tamaño de cada cuadro de la cuadrícula
-            double cuadroAncho = width/gridCols;
-            double cuadroAlto = height/gridRows;
-
-            // Determinar en qué cuadro de la cuadrícula se encuentra el punto
-            int x = (int)((blob.Centro.X - xMin) / cuadroAncho);
-            int y = (int)((blob.Centro.Y - yMin) / cuadroAlto) + 1;
-
-            //Console.WriteLine("Sector: " + blob.Sector);
-            //Console.WriteLine(x);
-            //Console.WriteLine(y);
-
-            int xOffset = 5;
-            int yOffset = 10;
-
-            x = (width / gridCols) * x;
-            y = (height / gridRows) * y;
-
-            Point textPosition = new Point();
-            string text = string.Empty;
-
-            if (txtDiameters)
-            {
-                Rectangle rect = new Rectangle(x + xOffset, (int)(y - yOffset * 3), (int)(width * 0.22), (int)(height * 0.06));
-
-                // Dibujar el rectángulo negro en la imagen
-                CvInvoke.Rectangle(image, rect, new MCvScalar(0, 0, 0), -1);
-
-                textPosition = new Point((int)(x + xOffset), (int)(y - (yOffset)));
-                text = "Dm = " + Math.Round(blob.DMenor, 2).ToString();
-                CvInvoke.PutText(image, text, textPosition, FontFace.HersheySimplex, 0.4, new MCvScalar(255, 255, 255), 1);
-
-                textPosition = new Point((int)(x + xOffset), (int)(y - (yOffset * 2)));
-                text = "DM = " + Math.Round(blob.DMayor, 2).ToString();
-                CvInvoke.PutText(image, text, textPosition, FontFace.HersheySimplex, 0.4, new MCvScalar(255, 255, 255), 1);
-            }
-
-            textPosition = new Point((int)(x + xOffset), (int)(y - (yOffset * 10.5)));
-            text = sizes[blob.Size];
-            CvInvoke.PutText(image, text, textPosition, FontFace.HersheySimplex, 0.4, new MCvScalar(255, 255, 255), 1);
+            
         }
-
-        //private void drawSectorNumber(ref Mat imageCV, Point center, int sector)
-        //{
-        //    int offsetX = 5;
-        //    int offsetY = 5;
-        //    Point textPosition = new Point((int)(center.X + offsetX), (int)(center.Y + offsetY));
-        //    CvInvoke.PutText(imageCV, sector.ToString(), textPosition, FontFace.HersheySimplex, 0.6, new MCvScalar(255), 1);
-        //}
 
         private void drawSectorNumber(Bitmap image, Point center, int sector)
         {
@@ -1491,8 +1415,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             
             double diameter, maxDiameter, minDiameter;
-            //Point pointDM = new Point();
-            //Point pointDm = new Point();
             List<Point> listXY = new List<Point>();
 
             maxDiameter = 0; minDiameter = 0;
@@ -1679,16 +1601,18 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 if (m_Xfer.Grab())
                 {
                     UpdateControls();
-                    // Para activar el botón
+
                     viewModeBtn.BackColor = DefaultBackColor; // Restaurar el color de fondo predeterminado
                     viewModeBtn.Text = "LIVE";
                     virtualTriggerBtn.Enabled = false;
                     processImageBtn.Enabled = false;
+                    mode = 1;
+
                     if (triggerPLC)
                     {
                         viewModeBtn.Text = "FRAME";
+                        mode = 0;
                     }
-                    mode = 0;
                 }
             }
 
@@ -1701,10 +1625,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     if (abort.ShowDialog() != DialogResult.OK)
                         m_Xfer.Abort();
                     UpdateControls();
-                    // Para desactivar el botón
+
                     viewModeBtn.BackColor = Color.Silver; // Cambiar el color de fondo a gris
                     viewModeBtn.Text = "FRAME"; // Cambiar el texto cuando está desactivado
-                    mode = 1;
+                    mode = 0;
                     processImageBtn.Enabled = true;
                     virtualTriggerBtn.Enabled = true;
                 }
