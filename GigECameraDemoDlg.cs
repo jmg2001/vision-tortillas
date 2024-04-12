@@ -47,6 +47,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         // Color de la tortilla en la imagen binarizada
         int tortillaColor = 1; // 1 - Blanco, 0 - Negro
+        int backgroundColor = 0;
+
+        List<List<Point>> bgArea = new List<List<Point>>();
 
         // Variables para el Threshold
         int threshold = 140;
@@ -111,9 +114,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         // Crear una DataTable para almacenar la información
         DataTable dataTable = new DataTable();
-
-        // Variable para almacenar el color del fondo
-        Color backgroundColor = Color.Black;
         
         int Max_Threshold = 255;
         int OffsetLeft = 0;
@@ -241,6 +241,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                     if (calibrating)
                     {
+                        updateGridType(1);
                         // Se crea el histograma de la imagen
                         ImageHistogram(originalImage);
 
@@ -263,35 +264,42 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                         centralSector.Save(imagesPath + "centralSector.bmp");
 
-                        var (areas, perimeters, centers) = FindContoursWithEdgesAndCenters(centralSector, areaMin, areaMax);
+                        var (areas, perimeters, centers) = FindContoursWithEdgesAndCenters(centralSector, areaMin, areaMax, tortillaColor);
+
+                        Point centro = new Point();
 
                         for (int i = 0; i < areas.Count; i++)
                         {
                             int area = areas[i].Count;
                             int perimeter = perimeters[i].Count;
-                            Point centro = centers[i];
+                            centro = centers[i];
 
                             if (itsInCenter(centralSector,centro,10))
                             {
-                                // Este diametro lo vamos a dejar para despues
                                 diametroIA = (float)CalculateDiameterFromArea(area);
                                 calibrationValidate = true;
                                 break;
                             }
                         }
 
-                        if ( calibrationValidate)
+                        // Obtener las coordenadas del centro de la imagen
+                        int centroX = centralSector.Width / 2;
+                        int centroY = centralSector.Height / 2;
+
+                        if (calibrationValidate)
                         {
                             euFactor = int.Parse(txtCalibrationTarget.Text) / diametroIA; // unit/pixels
 
-                            Console.WriteLine(euFactor);
+                            euFactorTxt.Text = Math.Round(euFactor,3).ToString();
 
                             MessageBox.Show("Calibration Succesful, Factor: " + euFactor);
                         }
                         else
                         {
-                            MessageBox.Show("Place the calibration target in the middle");
+                            MessageBox.Show("Place the calibration target in the middle. Error = X:" + (centro.X - centroX) + ", Y:" + (centroY - centro.Y));
                         }
+
+                        updateGridType(grid);
 
                         // Liberamos las imagenes
                         binarizedImage.Dispose();
@@ -434,6 +442,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 processImageBtn.Enabled = false;
 
                 euListSelection.SelectedItem = "mm";
+                euFactorTxt.Text = Math.Round(euFactor, 3).ToString();
 
                 modbusServer.Port = 502;
                 modbusServer.Listen();
@@ -469,10 +478,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 sizes.Add("Oval");
 
                 //objeto ROI
-                UserROI.Top = 68;
-                UserROI.Left = 159;
-                UserROI.Right = 531;
-                UserROI.Bottom = 430;
+                UserROI.Top = 55;
+                UserROI.Left = 145;
+                UserROI.Right = 500;
+                UserROI.Bottom = 410;
 
                 Txt_MaxDiameter.Text = maxDiameter.ToString();
                 Txt_MinDiameter.Text = minDiameter.ToString();
@@ -548,23 +557,30 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 switch (unitsNew)
                 {
-                    // mm/px
+                    // inch/px
                     case "mm":
                         euFactor *= 25.4; //mm/inch
                         fact = 25.4f;
                         break;
+                    // mm/px
+
+                    // mm/px
                     case "inch":
                         euFactor *= 0.0393701; // inch/mm
                         fact = 0.0393701f;
                         break;
+                    // inch/px
                 }
+
+                euFactorTxt.Text = Math.Round(euFactor, 3).ToString();
+
                 // Actualizamos los datos de la tabla
                 if (dataTable.Rows.Count > 0)
                 {
                     dataTable.Clear();
                     foreach (Blob blob in Blobs)
                     {
-                        dataTable.Rows.Add(blob.Sector, blob.Area, Math.Round(blob.DiametroIA * fact, 3), Math.Round(blob.Diametro * fact, 3), Math.Round(blob.DMayor * fact, 3), Math.Round(blob.DMenor * fact, 3), Math.Round(blob.Compacidad, 3));
+                        dataTable.Rows.Add(blob.Sector, blob.Area, Math.Round(blob.DiametroIA * euFactor, 3), Math.Round(blob.Diametro * euFactor, 3), Math.Round(blob.DMayor * euFactor, 3), Math.Round(blob.DMenor * euFactor, 3), Math.Round(blob.Compacidad, 3));
                     }
                 }
 
@@ -1231,7 +1247,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             image.Save(imagesPath + "roi.bmp");
 
-            var (areas, perimeters, centers) = FindContoursWithEdgesAndCenters(image, minArea, maxArea);
+            var (areas, perimeters, centers) = FindContoursWithEdgesAndCenters(image, minArea, maxArea, tortillaColor);
 
             image = ConvertToCompatibleFormat(image);
 
@@ -1241,6 +1257,19 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // Inicializamos variables
             double avg_diam = 0;
             int n = 0;
+
+            bgArea = new List<List<Point>>();
+            bgArea = FindBackground(image,backgroundColor, 1, maxArea);
+
+            //Console.WriteLine(bgArea.Count);
+
+            foreach (List<Point> contour in bgArea)
+            {
+                foreach (Point point in contour)
+                {
+                    image.SetPixel(point.X, point.Y, Color.Aqua);
+                }
+            }
 
             List<(int,bool)> drawFlags = new List<(int, bool)>();
 
@@ -1382,6 +1411,73 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         }
 
+        public static List<List<Point>> FindBackground(Bitmap binaryImage, int color, int minArea, int maxArea)
+        {
+            List<List<Point>> contours = new List<List<Point>>();
+            var visited = new HashSet<(int, int)>();
+
+            int height = binaryImage.Height;
+            int width = binaryImage.Width;
+
+            // Función para verificar si un píxel está dentro de los límites de la imagen
+            bool IsWithinBounds(int x, int y)
+            {
+                return 0 <= x && x < width && 0 <= y && y < height;
+            }
+
+            // Encontrar todos los contornos y bordes en la imagen utilizando DFS
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    if (visited.Contains((x, y)) || binaryImage.GetPixel(x, y).GetBrightness() != color)
+                    {
+                        continue;
+                    }
+
+                    var contour = new List<Point>();
+                    var stack = new Stack<(int, int)>();
+
+                    stack.Push((x, y));
+
+                    while (stack.Count > 0)
+                    {
+
+                        var (cx, cy) = stack.Pop();
+                        if (visited.Contains((cx, cy)) || binaryImage.GetPixel(cx, cy).GetBrightness() != color)
+                        {
+                            continue;
+                        }
+
+                        contour.Add(new Point(cx, cy));
+                        visited.Add((cx, cy));
+
+                        foreach (var (dx, dy) in new (int, int)[] { (1, 0), (0, 1), (-1, 0), (0, -1) })
+                        {
+                            int nx = cx + dx;
+                            int ny = cy + dy;
+                            if (IsWithinBounds(nx, ny) && !visited.Contains((nx, ny)))
+                            {
+                                stack.Push((nx, ny));
+                            }
+                        }
+
+                    }
+
+                    int area = contour.Count;
+
+                    if (area > 0 && area > minArea && area < maxArea)
+                    {
+                        contours.Add(contour);
+
+                    }
+
+                }
+            }
+
+            return (contours);
+        }
+
         private void drawCenter(Point centro, int thickness, Graphics g)
         {
             Rectangle rect = new Rectangle(centro.X - thickness, centro.Y - thickness, thickness* 2, thickness* 2);
@@ -1485,34 +1581,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         }
 
-        //private Mat binarizeImage(Mat originalImageCV)
-        //{
-        //    Mat grayImage = new Mat();
-        //    CvInvoke.CvtColor(originalImageCV, grayImage, ColorConversion.Bgr2Gray); // Convertir a escala de grises
-
-        //    try
-        //    {
-        //        if (autoThreshold)
-        //        {
-        //            threshold = CalculateOtsuThreshold();
-        //        }
-        //        else
-        //        {
-        //            threshold = int.Parse(Txt_Threshold.Text);
-        //        }
-        //    }
-        //    catch (FormatException)
-        //    {
-
-        //    }
-
-        //    Mat binaryImage = new Mat();
-
-        //    CvInvoke.Threshold(grayImage, binaryImage, (double)threshold, 255, ThresholdType.Binary); // Binarizar la imagen
-
-        //    return binaryImage;
-        //}
-
         private void InitializeDataTable()
         {
             dataTable = new DataTable();
@@ -1548,13 +1616,28 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private int CalculateSector(Point objectCenter, int imageWidth, int imageHeight, int gridRows, int gridCols)
         {
+            //// Calcular el ancho y alto de cada sector
+            //int sectorWidth = imageWidth / gridCols;
+            //int sectorHeight = imageHeight / gridRows;
+
+            //// Calcular el sector en el que se encuentra el centro del objeto
+            //int sectorX = objectCenter.X / sectorWidth;
+            //int sectorY = objectCenter.Y / sectorHeight;
+
+            //// Calcular el índice del sector en función del número de columnas
+            //int sectorIndex = sectorY * gridCols + sectorX;
+
+            //return sectorIndex;
+
             // Calcular el ancho y alto de cada sector
             int sectorWidth = imageWidth / gridCols;
             int sectorHeight = imageHeight / gridRows;
 
             // Calcular el sector en el que se encuentra el centro del objeto
             int sectorX = objectCenter.X / sectorWidth;
-            int sectorY = objectCenter.Y / sectorHeight;
+
+            // Calcular sectorY de abajo hacia arriba
+            int sectorY = gridRows - 1 - (objectCenter.Y / sectorHeight);
 
             // Calcular el índice del sector en función del número de columnas
             int sectorIndex = sectorX * gridCols + sectorY;
@@ -1610,7 +1693,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 iteration = 0;
                 Color pixelColor = image.GetPixel(newX, newY);
 
-                while (pixelColor.GetBrightness() == tortillaColor)
+                while (pixelColor.GetBrightness() != 0)
                 {
                     iteration++;
 
@@ -1743,14 +1826,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             int sectorWidth = image.Width / gridType.Grid.Item2;
             int sectorHeight = image.Height / gridType.Grid.Item1;
 
-            // Calcular las coordenadas del sector
-            int sectorX = ((sector - 1) % gridType.Grid.Item2) * sectorWidth;
-            int sectorY = ((sector - 1) / gridType.Grid.Item2) * sectorHeight;
+            // Calcular las coordenadas del sector en el orden deseado
+            int sectorX = ((sector - 1) / gridType.Grid.Item2) * sectorHeight;
+            int sectorY = ((gridType.Grid.Item2 - 1) - ((sector - 1) % gridType.Grid.Item2)) * sectorWidth;
 
             // Definir el rectángulo (x, y, ancho, alto)
             Rectangle rect = new Rectangle(sectorX, sectorY, sectorWidth, sectorHeight);
 
-            // Crear un lápiz para el borde del rectángulo (en este caso, color rojo y grosor 2)
+            // Crear un lápiz para el borde del rectángulo (en este caso, color azul y grosor 2)
             using (Pen pen = new Pen(Color.Blue, 2))
             {
                 // Dibujar el rectángulo en el Bitmap
@@ -2012,14 +2095,19 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             updateGridType(1, "3x3");
         }
 
-        private void updateGridType(int v, string type)
+        private void updateGridType(int v, string type = "")
         {
             foreach (GridType gridT in gridTypes)
             {
                 if (gridT.Type == v)
                 {
                     gridType = gridT;
-                    MessageBox.Show("Format switched to: " + type);
+                    if (type != "")
+                    {
+                        formatTxt.Text = type;
+                        grid = v;
+                        MessageBox.Show("Format switched to: " + type);
+                    }
                     break;
                 }
             }
@@ -2164,7 +2252,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         }
 
-        public static (List<List<Point>>, List<List<Point>>, List<Point>) FindContoursWithEdgesAndCenters(Bitmap binaryImage, int minArea, int maxArea)
+        public static (List<List<Point>>, List<List<Point>>, List<Point>) FindContoursWithEdgesAndCenters(Bitmap binaryImage, double minArea, double maxArea, int color)
         {
             List<List<Point>> contours = new List<List<Point>>();
             List<List<Point>> edges = new List<List<Point>>();
@@ -2185,7 +2273,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 for (int x = 0; x < width; x++)
                 {
-                    if (visited.Contains((x, y)) || binaryImage.GetPixel(x, y).GetBrightness() == 0)
+                    if (visited.Contains((x, y)) || binaryImage.GetPixel(x, y).GetBrightness() != color)
                     {
                         continue;
                     }
@@ -2200,7 +2288,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     while (stack.Count > 0)
                     {
                         var (cx, cy) = stack.Pop();
-                        if (visited.Contains((cx, cy)) || binaryImage.GetPixel(cx, cy).GetBrightness() == 0)
+                        if (visited.Contains((cx, cy)) || binaryImage.GetPixel(cx, cy).GetBrightness() != color)
                         {
                             continue;
                         }
@@ -2208,22 +2296,25 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         contour.Add(new Point(cx, cy));
                         visited.Add((cx, cy));
 
-                        if (isOnEdge)
+                        if (color == 1)
                         {
-                            edge.Add(new Point(cx, cy));
-                            isOnEdge = false;
-                        }
-
-                        foreach (var (dx, dy) in new (int, int)[] { (1, 0), (0, 1), (-1, 0), (0, -1) })
-                        {
-                            int nx = cx + dx;
-                            int ny = cy + dy;
-                            if (IsWithinBounds(nx, ny) && !visited.Contains((nx, ny)))
+                            if (isOnEdge)
                             {
-                                stack.Push((nx, ny));
-                                if (binaryImage.GetPixel(nx, ny).GetBrightness() == 0)
+                                edge.Add(new Point(cx, cy));
+                                isOnEdge = false;
+                            }
+
+                            foreach (var (dx, dy) in new (int, int)[] { (1, 0), (0, 1), (-1, 0), (0, -1) })
+                            {
+                                int nx = cx + dx;
+                                int ny = cy + dy;
+                                if (IsWithinBounds(nx, ny) && !visited.Contains((nx, ny)))
                                 {
-                                    isOnEdge = true;
+                                    stack.Push((nx, ny));
+                                    if (binaryImage.GetPixel(nx, ny).GetBrightness() != color)
+                                    {
+                                        isOnEdge = true;
+                                    }
                                 }
                             }
                         }
@@ -2232,10 +2323,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     if (contour.Count > minArea && contour.Count < maxArea)
                     {
                         contours.Add(contour);
-                        centers.Add(CalculateCenter(contour));
-                        if (edge.Count > 0)
+                        if (color == 1)
                         {
-                            edges.Add(edge);
+                            centers.Add(CalculateCenter(contour));
+                            if (edge.Count > 0)
+                            {
+                                edges.Add(edge);
+                            }
                         }
                     }
                     
