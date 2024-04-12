@@ -155,6 +155,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             public List<Point> AreaPoints { get; set; }
             public double Perimetro { get; set; }
             public List<Point> PerimetroPoints { get; set; }
+            public double DiametroIA { get; set; }
             public double Diametro { get; set; }
             public Point Centro { get; set; }
             public double DMayor { get; set; }
@@ -165,13 +166,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             public ushort Size { get; set; }
 
             // Constructor de la clase Blob
-            public Blob(double area, List<Point> areaPoints, double perimetro, List<Point> perimetroPoints, double diametro, Point centro, double dMayor, double dMenor, double sector, double compacidad, ushort size, double ovalidad)
+            public Blob(double area, List<Point> areaPoints, double perimetro, List<Point> perimetroPoints, double diametro, double diametroIA, Point centro, double dMayor, double dMenor, double sector, double compacidad, ushort size, double ovalidad)
             {
                 Area = area;
                 AreaPoints = areaPoints;
                 Perimetro = perimetro;
                 PerimetroPoints = perimetroPoints;
                 Diametro = diametro;
+                DiametroIA = diametroIA;
                 Centro = centro;
                 DMayor = dMayor;
                 DMenor = dMenor;
@@ -361,7 +363,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 List<Point> points = new List<Point>();
                 Point centro = new Point();
-                Blob blb = new Blob(0, points, 0, points, 0, centro, 0, 0, 0, 0, 0, 0);
+                Blob blb = new Blob(0,points,0,points,0,0, centro, 0, 0, 0, 0, 0, 0);
                 Quadrant qua = new Quadrant(quadrant, "", false, 0, 0, 0, 0, blb);
                 Quadrants.Add(qua);
             }
@@ -428,6 +430,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 // Suscribir al evento SelectedIndexChanged del TabControl
                 mainTabs.SelectedIndexChanged += TabControl2_SelectedIndexChanged;
+
+                processImageBtn.Enabled = false;
 
                 euListSelection.SelectedItem = "mm";
 
@@ -528,13 +532,62 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void euListSelection_SelectedIndexChanged(object sender, EventArgs e)
         {
-            units = (string)euListSelection.SelectedItem;
-            updateUnits();
+            updateUnits((string)euListSelection.SelectedItem);
         }
 
-        private void updateUnits()
+        private void updateUnits(string unitsNew)
         {
-            throw new NotImplementedException();
+            float fact = 0;
+            if (units != unitsNew)
+            {
+                units = unitsNew;
+                targetUnitsTxt.Text = units;
+                unitsTxt.Text = units;
+                maxDiameterUnitsTxt.Text = units;
+                minDiameterUnitsTxt.Text = units;
+
+                switch (unitsNew)
+                {
+                    // mm/px
+                    case "mm":
+                        euFactor *= 25.4; //mm/inch
+                        fact = 25.4f;
+                        break;
+                    case "inch":
+                        euFactor *= 0.0393701; // inch/mm
+                        fact = 0.0393701f;
+                        break;
+                }
+                // Actualizamos los datos de la tabla
+                if (dataTable.Rows.Count > 0)
+                {
+                    dataTable.Clear();
+                    foreach (Blob blob in Blobs)
+                    {
+                        dataTable.Rows.Add(blob.Sector, blob.Area, Math.Round(blob.DiametroIA * fact, 3), Math.Round(blob.Diametro * fact, 3), Math.Round(blob.DMayor * fact, 3), Math.Round(blob.DMenor * fact, 3), Math.Round(blob.Compacidad, 3));
+                    }
+                }
+
+                double avgDiameter = 0;
+                if (Double.TryParse(avg_diameter.Text, out avgDiameter)) ;
+                avgDiameter *= fact;
+                avg_diameter.Text = Math.Round(avgDiameter, 3).ToString();
+
+                double maxDiameter = 0;
+                if (Double.TryParse(Txt_MaxDiameter.Text, out maxDiameter)) ;
+                maxDiameter *= fact;
+                Txt_MaxDiameter.Text = Math.Round(maxDiameter, 3).ToString();
+
+                double minDiameter = 0;
+                if (Double.TryParse(Txt_MinDiameter.Text, out minDiameter)) ;
+                minDiameter *= fact;
+                Txt_MinDiameter.Text = Math.Round(minDiameter, 3).ToString();
+
+                double calibrationTarget = 0;
+                if (Double.TryParse(txtCalibrationTarget.Text, out calibrationTarget)) ;
+                calibrationTarget *= fact;
+                txtCalibrationTarget.Text = Math.Round(calibrationTarget, 3).ToString();
+            }
         }
 
         private void calibrationTarget_KeyPress(object sender, KeyPressEventArgs e)
@@ -1241,7 +1294,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     // Agregamos los datos a la tabla
                     dataTable.Rows.Add(sector, area, Math.Round(diametroIA * tempFactor, 3), Math.Round(diameterTriangles * tempFactor, 3), Math.Round(maxDiameter * tempFactor, 3), Math.Round(minDiameter * tempFactor, 3), Math.Round(compactness, 3));
 
-                    Blob blob = new Blob(area, areas[i], perimeter, perimeters[i], diameterTriangles, centro, maxDiameter, minDiameter, sector, compactness, size, ovalidad);
+                    Blob blob = new Blob(area, areas[i], perimeter, perimeters[i], diameterTriangles, diametroIA, centro, maxDiameter, minDiameter, sector, compactness, size, ovalidad);
 
                     // Agregamos el elemento a la lista
                     Blobs.Add(blob);
@@ -1956,33 +2009,35 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void grid_4_Click(object sender, EventArgs e)
         {
-            updateGridType(1);
+            updateGridType(1, "3x3");
         }
 
-        private void updateGridType(int v)
+        private void updateGridType(int v, string type)
         {
             foreach (GridType gridT in gridTypes)
             {
                 if (gridT.Type == v)
                 {
                     gridType = gridT;
+                    MessageBox.Show("Format switched to: " + type);
+                    break;
                 }
             }
         }
 
         private void grid_5_Click(object sender, EventArgs e)
         {
-            updateGridType(2);
+            updateGridType(2, "5");
         }
 
         private void grid_6_Click(object sender, EventArgs e)
         {
-            updateGridType(3);
+            updateGridType(3, "4x4");
         }
 
         private void grid_9_Click(object sender, EventArgs e)
         {
-            updateGridType(4);
+            updateGridType(4,"2x2");
         }
 
         private void Cmd_Program_5_Click(object sender, EventArgs e)

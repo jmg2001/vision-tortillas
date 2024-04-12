@@ -147,6 +147,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Cmd_video = new System.Windows.Forms.Button();
             this.Cmd_Calibration = new System.Windows.Forms.Button();
             this.Cmd_Save = new System.Windows.Forms.Button();
+            this.maxDiameterUnitsTxt = new System.Windows.Forms.Label();
+            this.minDiameterUnitsTxt = new System.Windows.Forms.Label();
             this.toolStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.GroupBox1.SuspendLayout();
@@ -387,6 +389,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             // GroupBox17
             // 
+            this.GroupBox17.Controls.Add(this.minDiameterUnitsTxt);
+            this.GroupBox17.Controls.Add(this.maxDiameterUnitsTxt);
             this.GroupBox17.Controls.Add(this.Txt_MaxCompacity);
             this.GroupBox17.Controls.Add(this.Label50);
             this.GroupBox17.Controls.Add(this.Txt_MaxOvality);
@@ -498,7 +502,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.grid_16.Name = "grid_16";
             this.grid_16.Size = new System.Drawing.Size(67, 42);
             this.grid_16.TabIndex = 75;
-            this.grid_16.Text = "16 Grid";
             this.grid_16.UseVisualStyleBackColor = false;
             this.grid_16.Click += new System.EventHandler(this.Cmd_Program_6_Click);
             // 
@@ -510,7 +513,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.grid_12.Name = "grid_12";
             this.grid_12.Size = new System.Drawing.Size(67, 42);
             this.grid_12.TabIndex = 74;
-            this.grid_12.Text = "12 Grid";
             this.grid_12.UseVisualStyleBackColor = false;
             this.grid_12.Click += new System.EventHandler(this.Cmd_Program_5_Click);
             // 
@@ -1380,6 +1382,24 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Cmd_Save.Text = "Save";
             this.Cmd_Save.UseVisualStyleBackColor = false;
             // 
+            // maxDiameterUnitsTxt
+            // 
+            this.maxDiameterUnitsTxt.AutoSize = true;
+            this.maxDiameterUnitsTxt.Location = new System.Drawing.Point(223, 23);
+            this.maxDiameterUnitsTxt.Name = "maxDiameterUnitsTxt";
+            this.maxDiameterUnitsTxt.Size = new System.Drawing.Size(23, 13);
+            this.maxDiameterUnitsTxt.TabIndex = 95;
+            this.maxDiameterUnitsTxt.Text = "mm";
+            // 
+            // minDiameterUnitsTxt
+            // 
+            this.minDiameterUnitsTxt.AutoSize = true;
+            this.minDiameterUnitsTxt.Location = new System.Drawing.Point(223, 46);
+            this.minDiameterUnitsTxt.Name = "minDiameterUnitsTxt";
+            this.minDiameterUnitsTxt.Size = new System.Drawing.Size(23, 13);
+            this.minDiameterUnitsTxt.TabIndex = 96;
+            this.minDiameterUnitsTxt.Text = "mm";
+            // 
             // GigECameraDemoDlg
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1389,8 +1409,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.controlsTabs);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.mainTabs);
+            this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "GigECameraDemoDlg";
             this.Text = "VISION SYSTEM";
@@ -1571,6 +1591,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private Label targetUnitsTxt;
         private Label unitsTxt;
         private Label label6;
+        private Label minDiameterUnitsTxt;
+        private Label maxDiameterUnitsTxt;
     }
 }
 
