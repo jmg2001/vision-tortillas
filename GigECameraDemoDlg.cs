@@ -394,6 +394,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // Procesamos el ROI
             blobProces(roiImage, processROIBox);
 
+            setModbusData();
             // drawOnROI(roiImage);
 
             // Liberamos las imagenes
@@ -402,6 +403,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             originalImage.Dispose();
 
             processImageBtn.Enabled = false;
+        }
+
+        private void setModbusData()
+        {
+            throw new NotImplementedException();
         }
 
         private void drawOnROI(Bitmap image)
@@ -483,8 +489,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 UserROI.Right = 500;
                 UserROI.Bottom = 410;
 
-                Txt_MaxDiameter.Text = maxDiameter.ToString();
-                Txt_MinDiameter.Text = minDiameter.ToString();
+                Txt_MaxDiameter.Text = Math.Round(maxDiameter*euFactor,3).ToString();
+                Txt_MinDiameter.Text = Math.Round(minDiameter*euFactor,3).ToString();
                 Txt_MaxCompacity.Text = maxCompactness.ToString();
                 Txt_MaxOvality.Text = maxOvality.ToString();
 
@@ -1367,11 +1373,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         index++;
                     }
 
-                    // Aqui dibujamos todo lo necesario
-                    using (Graphics g = Graphics.FromImage(image))
+
+                    if (drawFlag)
                     {
-                        if (drawFlag)
+                        // Aqui dibujamos todo lo necesario
+                        using (Graphics g = Graphics.FromImage(image))
                         {
+                        
                             // Dibujamos el perimetro
                             drawPerimeter(image, perimeters[i], 1, Color.Red);
 
@@ -1383,6 +1391,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                             // Dibujamos el numero del sector
                             drawSectorNumber(image, centro, sector - 1);
+
+                            drawSize(image, sector, size, g);
                         }
                     }
                 }
@@ -1409,6 +1419,32 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // Asignar la DataTable al DataGridView
             dataGridView1.DataSource = dataTable;
 
+        }
+
+        private void drawSize(Bitmap image, int sector, ushort size, Graphics g)
+        {
+            // Calcular el ancho y alto de cada sector
+            int sectorWidth = image.Width / gridType.Grid.Item2;
+            int sectorHeight = image.Height / gridType.Grid.Item1;
+
+            // Calcular las coordenadas del sector en el orden deseado
+            int textX = ((sector - 1) / gridType.Grid.Item2) * sectorHeight;
+            int textY = ((gridType.Grid.Item2 - 1) - ((sector - 1) % gridType.Grid.Item2)) * sectorWidth;
+
+            // Crear un objeto Font para el texto
+            Font font = new Font("Arial", 12);
+
+            // Crear un objeto Brush para el color del texto
+            Brush brush = Brushes.White;
+
+            // Crear el texto a mostrar
+            string texto = sizes[size];
+
+            // Obtener el tamaño del texto
+            SizeF textSize = g.MeasureString(texto, font);
+
+            // Dibujar el texto en el centro del sector
+            g.DrawString(texto, font, brush, textX, textY);
         }
 
         public static List<List<Point>> FindBackground(Bitmap binaryImage, int color, int minArea, int maxArea)
