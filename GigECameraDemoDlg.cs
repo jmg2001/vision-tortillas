@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using static DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.GigECameraDemoDlg;
 
 
 [StructLayout(LayoutKind.Sequential)]
@@ -95,8 +96,28 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         // Crear una lista de blobs
         List<Blob> Blobs = new List<Blob>();
 
+        // Creamos una lista de cuadrantes
+        List<Quadrant> Quadrants = new List<Quadrant>();
+
         // Configurar el servidor Modbus TCP
         ModbusServer modbusServer = new ModbusServer();
+
+        //// Definir ejemplos de grids
+        //List<List<int>> gridDefinition1 = ;
+
+        //List<List<int>> gridDefinition2 = new List<List<int>> {
+        //    new List<int> { 1, 0, 1 },
+        //    new List<int> { 1, 0, 1 },
+        //    new List<int> { 1, 0, 1 }
+        //};
+
+
+        //// Crear instancias de Grid para cada definición de grid
+        //Grid grid1 = new Grid(new List<List<int>> {
+        //    new List<int> { 1, 1, 1 },
+        //    new List<int> { 1, 1, 1 },
+        //    new List<int> { 1, 1, 1 }
+        //});
 
         // Hasta aqui las creadas por mi
 
@@ -113,6 +134,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         int gridRows = 3;
         int gridCols = 3;
 
+        // Inicializar la matriz con ceros
+        int[,] grid = new int[0, 0];
+
         public bool isActivatedProcessData = false; // Variable de estado para el botón tipo toggle
 
         // Delegate to display number of frame acquired 
@@ -121,6 +145,44 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         //
         // This function is called each time an image has been transferred into system memory by the transfer object
         //
+
+
+        // Clase para representar un sector en el grid
+        public class Sector
+        {
+            public int Row { get; set; }
+            public int Column { get; set; }
+            public bool IsActive { get; set; }
+
+            public Sector(int row, int column, bool isActive)
+            {
+                Row = row;
+                Column = column;
+                IsActive = isActive;
+            }
+        }
+
+        // Clase para representar el grid
+        public class Grid
+        {
+            public List<Sector> Sectors { get; set; }
+
+            public Grid(List<List<int>> gridDefinition)
+            {
+                Sectors = new List<Sector>();
+
+                // Generar los sectores según la definición del grid
+                for (int i = 0; i < gridDefinition.Count; i++)
+                {
+                    for (int j = 0; j < gridDefinition[i].Count; j++)
+                    {
+                        bool isActive = gridDefinition[i][j] == 1;
+                        Sector sector = new Sector(i, j, isActive);
+                        Sectors.Add(sector);
+                    }
+                }
+            }
+        }
 
         public class Blob
         {
@@ -164,7 +226,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             public double Ratio { get; set; }
             public double Compacity { get; set; }
 
-            public Quadrant(int number, string className, bool found, double diameterAvg, double diameterMax, double diameterMin, double compacity)
+            public Blob Blob { get; set; }
+
+            public Quadrant(int number, string className, bool found, double diameterAvg, double diameterMax, double diameterMin, double compacity, Blob blob)
             {
                 // Inicializar las propiedades según sea necesario
                 Number = number;
@@ -175,6 +239,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 DiameterMin = diameterMin;
                 Ratio = diameterMax/diameterMin;
                 Compacity = compacity;
+                Blob = Blob;
             }
         }
 
@@ -198,6 +263,16 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                     processImageBtn.Enabled = true;
                     originalImage = saveImage();
+
+                    Quadrants = new List<Quadrant>();
+
+                    int numberOfSector = 0;
+                    for (int i = 0; i<gridRows; i++) {
+                        for (int j = 0; j < gridCols; j++) {
+                            Quadrants.Add(new Quadrant(numberOfSector,"",false,0,0,0,0, new Blob(0,0,0,new Point(),0,0,0,0,0,0)));
+                            numberOfSector++;
+                        }
+                    }
 
                     if (triggerPLC && !calibrating)
                     {
@@ -376,6 +451,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 InitializeComponent();
                 InitializeDataTable();
+
+                // Inicializar la matriz con ceros
+                grid = new int[gridRows, gridCols];
 
                 // Suscribir al evento SelectedIndexChanged del TabControl
                 mainTabs.SelectedIndexChanged += TabControl2_SelectedIndexChanged;
@@ -1157,6 +1235,18 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     Console.WriteLine(blob.Centro.Y + UserROI.Top);
                 }
 
+                foreach (Quadrant quadrant in Quadrants)
+                {
+                    if (quadrant.Number == sector && !quadrant.Found)
+                    {
+                        quadrant.DiameterMax = maxDiameter;
+                        quadrant.DiameterMin = minDiameter;
+                        quadrant.Compacity = compactness;
+                        quadrant.Found = true;
+                        quadrant.Blob = blob;
+                    }
+                }
+
                 // Agregamos el elemento a la lista
                 Blobs.Add(blob);
 
@@ -1386,7 +1476,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             int sectorY = objectCenter.Y / sectorHeight;
 
             // Calcular el índice del sector en función del número de columnas
-            int sectorIndex = sectorY * gridCols + sectorX;
+            int sectorIndex = sectorX * gridCols + sectorY;
 
             return sectorIndex;
         }
