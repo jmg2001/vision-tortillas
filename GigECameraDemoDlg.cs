@@ -96,10 +96,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         string imagesPath = Path.GetTempPath();
 
         // Crear una lista de blobs
-        List<Blob> Blobs = new List<Blob>();
+        public List<Blob> Blobs = new List<Blob>();
 
         // Creamos una lista de cuadrantes
-        List<Quadrant> Quadrants = new List<Quadrant>();
+        public List<Quadrant> Quadrants = new List<Quadrant>();
 
         // Configurar el servidor Modbus TCP
         ModbusServer modbusServer = new ModbusServer();
@@ -130,23 +130,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private delegate void DisplayFrameAcquired(int number, bool trash);
         //
         // This function is called each time an image has been transferred into system memory by the transfer object
-        //
-
-
-        // Clase para representar un sector en el grid
-        public class Sector
-        {
-            public int Row { get; set; }
-            public int Column { get; set; }
-            public bool IsActive { get; set; }
-
-            public Sector(int row, int column, bool isActive)
-            {
-                Row = row;
-                Column = column;
-                IsActive = isActive;
-            }
-        }
+        
 
         // Clase para representar el grid
         public class GridType
@@ -168,7 +152,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             // Propiedades de la estructura Blob
             public double Area { get; set; }
+            public List<Point> AreaPoints { get; set; }
             public double Perimetro { get; set; }
+            public List<Point> PerimetroPoints { get; set; }
             public double Diametro { get; set; }
             public Point Centro { get; set; }
             public double DMayor { get; set; }
@@ -179,10 +165,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             public ushort Size { get; set; }
 
             // Constructor de la clase Blob
-            public Blob(double area, double perimetro, double diametro, Point centro, double dMayor, double dMenor, double sector, double compacidad, ushort size, double ovalidad)
+            public Blob(double area, List<Point> areaPoints, double perimetro, List<Point> perimetroPoints, double diametro, Point centro, double dMayor, double dMenor, double sector, double compacidad, ushort size, double ovalidad)
             {
                 Area = area;
+                AreaPoints = areaPoints;
                 Perimetro = perimetro;
+                PerimetroPoints = perimetroPoints;
                 Diametro = diametro;
                 Centro = centro;
                 DMayor = dMayor;
@@ -243,14 +231,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                     processImageBtn.Enabled = true;
                     originalImage = saveImage();
-
-                    Quadrants = new List<Quadrant>();
-
-                    foreach (int quadrant in gridType.QuadrantsOfInterest) {
-                        Blob blb = null;
-                        Quadrant qua = new Quadrant(quadrant,"",false,0,0,0,0, blb);
-                        Quadrants.Add(qua);
-                    }
 
                     if (triggerPLC && !calibrating)
                     {
@@ -375,6 +355,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void process()
         {
+            Quadrants = new List<Quadrant>();
+
+            foreach (int quadrant in gridType.QuadrantsOfInterest)
+            {
+                List<Point> points = new List<Point>();
+                Point centro = new Point();
+                Blob blb = new Blob(0, points, 0, points, 0, centro, 0, 0, 0, 0, 0, 0);
+                Quadrant qua = new Quadrant(quadrant, "", false, 0, 0, 0, 0, blb);
+                Quadrants.Add(qua);
+            }
+
             originalBox.Visible = false;
             processROIBox.Visible = true; // Mostrar el PictureBox ROI
 
@@ -393,12 +384,19 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // Procesamos el ROI
             blobProces(roiImage, processROIBox);
 
+            // drawOnROI(roiImage);
+
             // Liberamos las imagenes
             binarizedImage.Dispose();
             roiImage.Dispose();
             originalImage.Dispose();
 
             processImageBtn.Enabled = false;
+        }
+
+        private void drawOnROI(Bitmap image)
+        {
+            
         }
 
         private Bitmap extractROI(Bitmap image)
@@ -1191,6 +1189,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             double avg_diam = 0;
             int n = 0;
 
+            List<(int,bool)> drawFlags = new List<(int, bool)>();
+
+            foreach (int k in gridType.QuadrantsOfInterest) {
+                drawFlags.Add((k,true));
+            }
+
             for (int i = 0; i < areas.Count; i++)
             {
                 Point centro = centers[i];
@@ -1201,6 +1205,16 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 // Verificamos si el sector es uno de los que nos interesa
                 if (Array.IndexOf(gridType.QuadrantsOfInterest,sector) != -1){
 
+                    bool drawFlag = true;
+
+                    foreach ((int, bool) tuple in drawFlags)
+                    {
+                        if (sector == tuple.Item1)
+                        {
+                            drawFlag = tuple.Item2;
+                        }
+                    }
+
                     int area = areas[i].Count;
                     int perimeter = perimeters[i].Count;
 
@@ -1210,7 +1224,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     double diametroIA = CalculateDiameterFromArea(area);
 
                     // Calculamos el diametro
-                    (double diameterTriangles, double maxDiameter, double minDiameter) = calculateAndDrawDiameterTrianglesAlghoritm(centro, image, sector, true);
+                    (double diameterTriangles, double maxDiameter, double minDiameter) = calculateAndDrawDiameterTrianglesAlghoritm(centro, image, sector, drawFlag);
 
                     // Sumamos para promediar
                     avg_diam += (diametroIA * tempFactor);
@@ -1227,7 +1241,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     // Agregamos los datos a la tabla
                     dataTable.Rows.Add(sector, area, Math.Round(diametroIA * tempFactor, 3), Math.Round(diameterTriangles * tempFactor, 3), Math.Round(maxDiameter * tempFactor, 3), Math.Round(minDiameter * tempFactor, 3), Math.Round(compactness, 3));
 
-                    Blob blob = new Blob(area, perimeter, diameterTriangles, centro, maxDiameter, minDiameter, sector, compactness, size, ovalidad);
+                    Blob blob = new Blob(area, areas[i], perimeter, perimeters[i], diameterTriangles, centro, maxDiameter, minDiameter, sector, compactness, size, ovalidad);
 
                     // Agregamos el elemento a la lista
                     Blobs.Add(blob);
@@ -1242,13 +1256,21 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     {
                         if (quadrant.Number == sector)
                         {
-                            if (area > quadrant.Blob.Area) {
-                                quadrant.DiameterMax = maxDiameter;
-                                quadrant.DiameterMin = minDiameter;
-                                quadrant.Compacity = compactness;
-                                quadrant.Found = true;
-                                quadrant.Blob = blob;
+                            quadrant.DiameterMax = maxDiameter;
+                            quadrant.DiameterMin = minDiameter;
+                            quadrant.Compacity = compactness;
+                            quadrant.Found = true;
+                            quadrant.Blob = blob;
+
+                            for (int l = 0; l < drawFlags.Count; l++)
+                            {
+                                if (drawFlags[l].Item1 == sector)
+                                {
+                                    drawFlags[l] = (sector, false);
+                                }
                             }
+
+                            break;
                         }
                     }
 
@@ -1266,29 +1288,23 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     // Aqui dibujamos todo lo necesario
                     using (Graphics g = Graphics.FromImage(image))
                     {
-                        // Dibujamos el perimetro
-                        drawPerimeter(image, perimeters[i], 1, Color.Red);
+                        if (drawFlag)
+                        {
+                            // Dibujamos el perimetro
+                            drawPerimeter(image, perimeters[i], 1, Color.Red);
 
-                        // Dibujamos el centro
-                        drawCenter(centro, 2, g);
+                            // Dibujamos el centro
+                            drawCenter(centro, 2, g);
 
-                        // Dibujamos el sector
-                        drawSector(image, sector, g);
+                            // Dibujamos el sector
+                            drawSector(image, sector, g);
 
-                        // Dibujamos el numero del sector
-                        drawSectorNumber(image, centro, sector - 1);
+                            // Dibujamos el numero del sector
+                            drawSectorNumber(image, centro, sector - 1);
+                        }
                     }
                 }
             }
-
-            // Calculamos el promedio de los diametros
-            avg_diam /= n;
-
-            // Asignamos el texto del promedio de los diametros
-            avg_diameter.Text = Math.Round(avg_diam, 3).ToString();
-
-            // Asignar la DataTable al DataGridView
-            dataGridView1.DataSource = dataTable;
 
             try
             {
@@ -1301,6 +1317,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             // Colocamos la imagen con todos los dibujos en el picturebox
             processROIBox.Image = image;
+
+            // Calculamos el promedio de los diametros
+            avg_diam /= n;
+
+            // Asignamos el texto del promedio de los diametros
+            avg_diameter.Text = Math.Round(avg_diam, 3).ToString();
+
+            // Asignar la DataTable al DataGridView
+            dataGridView1.DataSource = dataTable;
 
         }
 
@@ -1662,12 +1687,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private void drawSector(Bitmap image, int sector, Graphics g)
         {
             // Calcular el ancho y alto de cada sector
-            int sectorWidth = image.Width / gridCols;
-            int sectorHeight = image.Height / gridRows;
+            int sectorWidth = image.Width / gridType.Grid.Item2;
+            int sectorHeight = image.Height / gridType.Grid.Item1;
 
             // Calcular las coordenadas del sector
-            int sectorX = ((sector - 1) % gridCols) * sectorWidth;
-            int sectorY = ((sector - 1) / gridCols) * sectorHeight;
+            int sectorX = ((sector - 1) % gridType.Grid.Item2) * sectorWidth;
+            int sectorY = ((sector - 1) / gridType.Grid.Item2) * sectorHeight;
 
             // Definir el rectángulo (x, y, ancho, alto)
             Rectangle rect = new Rectangle(sectorX, sectorY, sectorWidth, sectorHeight);
@@ -1931,26 +1956,33 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void grid_4_Click(object sender, EventArgs e)
         {
-            gridRows = 2;
-            gridCols = 2;
+            updateGridType(1);
+        }
+
+        private void updateGridType(int v)
+        {
+            foreach (GridType gridT in gridTypes)
+            {
+                if (gridT.Type == v)
+                {
+                    gridType = gridT;
+                }
+            }
         }
 
         private void grid_5_Click(object sender, EventArgs e)
         {
-            gridRows = 3;
-            gridCols = 3;
+            updateGridType(2);
         }
 
         private void grid_6_Click(object sender, EventArgs e)
         {
-            gridRows = 2;
-            gridCols = 3;
+            updateGridType(3);
         }
 
         private void grid_9_Click(object sender, EventArgs e)
         {
-            gridRows = 3;
-            gridCols = 3;
+            updateGridType(4);
         }
 
         private void Cmd_Program_5_Click(object sender, EventArgs e)
