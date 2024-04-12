@@ -234,6 +234,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     processImageBtn.Enabled = true;
                     originalImage = saveImage();
 
+                    Quadrants = new List<Quadrant>();
+
+                    for (int i = 1; i < 17; i++)
+                    {
+                        List<Point> points = new List<Point>();
+                        Point centro = new Point();
+                        Blob blb = new Blob(0, points, 0, points, 0, 0, centro, 0, 0, 0, 0, 0, 0);
+                        Quadrant qua = new Quadrant(i, "", false, 0, 0, 0, 0, blb);
+                        Quadrants.Add(qua);
+                    }
+
                     if (triggerPLC && !calibrating)
                     {
                         process();
@@ -365,17 +376,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void process()
         {
-            Quadrants = new List<Quadrant>();
-
-            foreach (int quadrant in gridType.QuadrantsOfInterest)
-            {
-                List<Point> points = new List<Point>();
-                Point centro = new Point();
-                Blob blb = new Blob(0,points,0,points,0,0, centro, 0, 0, 0, 0, 0, 0);
-                Quadrant qua = new Quadrant(quadrant, "", false, 0, 0, 0, 0, blb);
-                Quadrants.Add(qua);
-            }
-
             originalBox.Visible = false;
             processROIBox.Visible = true; // Mostrar el PictureBox ROI
 
@@ -407,7 +407,251 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void setModbusData()
         {
-            throw new NotImplementedException();
+            int offset = 14;
+            int firtsRegister = 0;
+            foreach (Quadrant q in Quadrants)
+            {
+                firtsRegister = 14 * q.Number + 10;
+                if (gridType.QuadrantsOfInterest.Contains(q.Number))
+                {
+                    if (q.Found) { 
+                        // Class
+                        // Número flotante que deseas publicar
+                        float floatValue = (float)q.Blob.Size;
+                        // Convertir el número flotante a bytes
+                        byte[] floatBytes = BitConverter.GetBytes(floatValue);
+                        // Escribir los bytes en dos registros de 16 bits (dos palabras)
+                        ushort register1 = BitConverter.ToUInt16(floatBytes, 0);
+                        ushort register2 = BitConverter.ToUInt16(floatBytes, 2);
+                        modbusServer.holdingRegisters[firtsRegister] = (short)register1;
+                        modbusServer.holdingRegisters[firtsRegister+1] = (short)register2;
+
+                        // Found
+                        // Número flotante que deseas publicar
+                        floatValue = q.Found ? 1.0f : 0.0f;
+                        // Convertir el número flotante a bytes
+                        floatBytes = BitConverter.GetBytes(floatValue);
+                        // Escribir los bytes en dos registros de 16 bits (dos palabras)
+                        register1 = BitConverter.ToUInt16(floatBytes, 0);
+                        register2 = BitConverter.ToUInt16(floatBytes, 2);
+                        modbusServer.holdingRegisters[firtsRegister + 2] = (short)register1;
+                        modbusServer.holdingRegisters[firtsRegister + 3] = (short)register2;
+
+                        // Diameter
+                        // Número flotante que deseas publicar
+                        floatValue = (float) q.Blob.DiametroIA;
+                        // Convertir el número flotante a bytes
+                        floatBytes = BitConverter.GetBytes(floatValue);
+                        // Escribir los bytes en dos registros de 16 bits (dos palabras)
+                        register1 = BitConverter.ToUInt16(floatBytes, 0);
+                        register2 = BitConverter.ToUInt16(floatBytes, 2);
+                        modbusServer.holdingRegisters[firtsRegister + 4] = (short)register1;
+                        modbusServer.holdingRegisters[firtsRegister + 5] = (short)register2;
+
+                        // Max Diameter
+                        // Número flotante que deseas publicar
+                        floatValue = (float)q.Blob.DMayor;
+                        // Convertir el número flotante a bytes
+                        floatBytes = BitConverter.GetBytes(floatValue);
+                        // Escribir los bytes en dos registros de 16 bits (dos palabras)
+                        register1 = BitConverter.ToUInt16(floatBytes, 0);
+                        register2 = BitConverter.ToUInt16(floatBytes, 2);
+                        modbusServer.holdingRegisters[firtsRegister + 6] = (short)register1;
+                        modbusServer.holdingRegisters[firtsRegister + 7] = (short)register2;
+
+                        // Min Diameter
+                        // Número flotante que deseas publicar
+                        floatValue = (float)q.Blob.DMenor;
+                        // Convertir el número flotante a bytes
+                        floatBytes = BitConverter.GetBytes(floatValue);
+                        // Escribir los bytes en dos registros de 16 bits (dos palabras)
+                        register1 = BitConverter.ToUInt16(floatBytes, 0);
+                        register2 = BitConverter.ToUInt16(floatBytes, 2);
+                        modbusServer.holdingRegisters[firtsRegister + 8] = (short)register1;
+                        modbusServer.holdingRegisters[firtsRegister + 9] = (short)register2;
+
+                        // Ratio
+                        // Número flotante que deseas publicar
+                        floatValue = (float) (q.Blob.DMayor/q.Blob.DMenor);
+                        // Convertir el número flotante a bytes
+                        floatBytes = BitConverter.GetBytes(floatValue);
+                        // Escribir los bytes en dos registros de 16 bits (dos palabras)
+                        register1 = BitConverter.ToUInt16(floatBytes, 0);
+                        register2 = BitConverter.ToUInt16(floatBytes, 2);
+                        modbusServer.holdingRegisters[firtsRegister + 10] = (short)register1;
+                        modbusServer.holdingRegisters[firtsRegister + 11] = (short)register2;
+
+                        // Compacity
+                        // Número flotante que deseas publicar
+                        floatValue = (float)q.Blob.Compacidad;
+                        // Convertir el número flotante a bytes
+                        floatBytes = BitConverter.GetBytes(floatValue);
+                        // Escribir los bytes en dos registros de 16 bits (dos palabras)
+                        register1 = BitConverter.ToUInt16(floatBytes, 0);
+                        register2 = BitConverter.ToUInt16(floatBytes, 2);
+                        modbusServer.holdingRegisters[firtsRegister + 12] = (short)register1;
+                        modbusServer.holdingRegisters[firtsRegister + 13] = (short)register2;
+                    }
+                    else
+                    {
+                        // Class
+                        // Número flotante que deseas publicar
+                        float floatValue = (float)0.0;
+                        // Convertir el número flotante a bytes
+                        byte[] floatBytes = BitConverter.GetBytes(floatValue);
+                        // Escribir los bytes en dos registros de 16 bits (dos palabras)
+                        ushort register1 = BitConverter.ToUInt16(floatBytes, 0);
+                        ushort register2 = BitConverter.ToUInt16(floatBytes, 2);
+                        modbusServer.holdingRegisters[firtsRegister] = (short)register1;
+                        modbusServer.holdingRegisters[firtsRegister + 1] = (short)register2;
+
+                        // Found
+                        // Número flotante que deseas publicar
+                        floatValue = 0.0f;
+                        // Convertir el número flotante a bytes
+                        floatBytes = BitConverter.GetBytes(floatValue);
+                        // Escribir los bytes en dos registros de 16 bits (dos palabras)
+                        register1 = BitConverter.ToUInt16(floatBytes, 0);
+                        register2 = BitConverter.ToUInt16(floatBytes, 2);
+                        modbusServer.holdingRegisters[firtsRegister + 2] = (short)register1;
+                        modbusServer.holdingRegisters[firtsRegister + 3] = (short)register2;
+
+                        // Diameter
+                        // Número flotante que deseas publicar
+                        floatValue = 0.0f;
+                        // Convertir el número flotante a bytes
+                        floatBytes = BitConverter.GetBytes(floatValue);
+                        // Escribir los bytes en dos registros de 16 bits (dos palabras)
+                        register1 = BitConverter.ToUInt16(floatBytes, 0);
+                        register2 = BitConverter.ToUInt16(floatBytes, 2);
+                        modbusServer.holdingRegisters[firtsRegister + 4] = (short)register1;
+                        modbusServer.holdingRegisters[firtsRegister + 5] = (short)register2;
+
+                        // Max Diameter
+                        // Número flotante que deseas publicar
+                        floatValue = 0.0f;
+                        // Convertir el número flotante a bytes
+                        floatBytes = BitConverter.GetBytes(floatValue);
+                        // Escribir los bytes en dos registros de 16 bits (dos palabras)
+                        register1 = BitConverter.ToUInt16(floatBytes, 0);
+                        register2 = BitConverter.ToUInt16(floatBytes, 2);
+                        modbusServer.holdingRegisters[firtsRegister + 6] = (short)register1;
+                        modbusServer.holdingRegisters[firtsRegister + 7] = (short)register2;
+
+                        // Min Diameter
+                        // Número flotante que deseas publicar
+                        floatValue = 0.0f;
+                        // Convertir el número flotante a bytes
+                        floatBytes = BitConverter.GetBytes(floatValue);
+                        // Escribir los bytes en dos registros de 16 bits (dos palabras)
+                        register1 = BitConverter.ToUInt16(floatBytes, 0);
+                        register2 = BitConverter.ToUInt16(floatBytes, 2);
+                        modbusServer.holdingRegisters[firtsRegister + 8] = (short)register1;
+                        modbusServer.holdingRegisters[firtsRegister + 9] = (short)register2;
+
+                        // Ratio
+                        // Número flotante que deseas publicar
+                        floatValue = 0.0f;
+                        // Convertir el número flotante a bytes
+                        floatBytes = BitConverter.GetBytes(floatValue);
+                        // Escribir los bytes en dos registros de 16 bits (dos palabras)
+                        register1 = BitConverter.ToUInt16(floatBytes, 0);
+                        register2 = BitConverter.ToUInt16(floatBytes, 2);
+                        modbusServer.holdingRegisters[firtsRegister + 10] = (short)register1;
+                        modbusServer.holdingRegisters[firtsRegister + 11] = (short)register2;
+
+                        // Compacity
+                        // Número flotante que deseas publicar
+                        floatValue = 0.0f;
+                        // Convertir el número flotante a bytes
+                        floatBytes = BitConverter.GetBytes(floatValue);
+                        // Escribir los bytes en dos registros de 16 bits (dos palabras)
+                        register1 = BitConverter.ToUInt16(floatBytes, 0);
+                        register2 = BitConverter.ToUInt16(floatBytes, 2);
+                        modbusServer.holdingRegisters[firtsRegister + 12] = (short)register1;
+                        modbusServer.holdingRegisters[firtsRegister + 13] = (short)register2;
+                    }
+                }
+                else
+                {
+                    // Class
+                    // Número flotante que deseas publicar
+                    float floatValue = (float)0.0;
+                    // Convertir el número flotante a bytes
+                    byte[] floatBytes = BitConverter.GetBytes(floatValue);
+                    // Escribir los bytes en dos registros de 16 bits (dos palabras)
+                    ushort register1 = BitConverter.ToUInt16(floatBytes, 0);
+                    ushort register2 = BitConverter.ToUInt16(floatBytes, 2);
+                    modbusServer.holdingRegisters[firtsRegister] = (short)register1;
+                    modbusServer.holdingRegisters[firtsRegister + 1] = (short)register2;
+
+                    // Found
+                    // Número flotante que deseas publicar
+                    floatValue = 0.0f;
+                    // Convertir el número flotante a bytes
+                    floatBytes = BitConverter.GetBytes(floatValue);
+                    // Escribir los bytes en dos registros de 16 bits (dos palabras)
+                    register1 = BitConverter.ToUInt16(floatBytes, 0);
+                    register2 = BitConverter.ToUInt16(floatBytes, 2);
+                    modbusServer.holdingRegisters[firtsRegister + 2] = (short)register1;
+                    modbusServer.holdingRegisters[firtsRegister + 3] = (short)register2;
+
+                    // Diameter
+                    // Número flotante que deseas publicar
+                    floatValue = 0.0f;
+                    // Convertir el número flotante a bytes
+                    floatBytes = BitConverter.GetBytes(floatValue);
+                    // Escribir los bytes en dos registros de 16 bits (dos palabras)
+                    register1 = BitConverter.ToUInt16(floatBytes, 0);
+                    register2 = BitConverter.ToUInt16(floatBytes, 2);
+                    modbusServer.holdingRegisters[firtsRegister + 4] = (short)register1;
+                    modbusServer.holdingRegisters[firtsRegister + 5] = (short)register2;
+
+                    // Max Diameter
+                    // Número flotante que deseas publicar
+                    floatValue = 0.0f;
+                    // Convertir el número flotante a bytes
+                    floatBytes = BitConverter.GetBytes(floatValue);
+                    // Escribir los bytes en dos registros de 16 bits (dos palabras)
+                    register1 = BitConverter.ToUInt16(floatBytes, 0);
+                    register2 = BitConverter.ToUInt16(floatBytes, 2);
+                    modbusServer.holdingRegisters[firtsRegister + 6] = (short)register1;
+                    modbusServer.holdingRegisters[firtsRegister + 7] = (short)register2;
+
+                    // Min Diameter
+                    // Número flotante que deseas publicar
+                    floatValue = 0.0f;
+                    // Convertir el número flotante a bytes
+                    floatBytes = BitConverter.GetBytes(floatValue);
+                    // Escribir los bytes en dos registros de 16 bits (dos palabras)
+                    register1 = BitConverter.ToUInt16(floatBytes, 0);
+                    register2 = BitConverter.ToUInt16(floatBytes, 2);
+                    modbusServer.holdingRegisters[firtsRegister + 8] = (short)register1;
+                    modbusServer.holdingRegisters[firtsRegister + 9] = (short)register2;
+
+                    // Ratio
+                    // Número flotante que deseas publicar
+                    floatValue = 0.0f;
+                    // Convertir el número flotante a bytes
+                    floatBytes = BitConverter.GetBytes(floatValue);
+                    // Escribir los bytes en dos registros de 16 bits (dos palabras)
+                    register1 = BitConverter.ToUInt16(floatBytes, 0);
+                    register2 = BitConverter.ToUInt16(floatBytes, 2);
+                    modbusServer.holdingRegisters[firtsRegister + 10] = (short)register1;
+                    modbusServer.holdingRegisters[firtsRegister + 11] = (short)register2;
+
+                    // Compacity
+                    // Número flotante que deseas publicar
+                    floatValue = 0.0f;
+                    // Convertir el número flotante a bytes
+                    floatBytes = BitConverter.GetBytes(floatValue);
+                    // Escribir los bytes en dos registros de 16 bits (dos palabras)
+                    register1 = BitConverter.ToUInt16(floatBytes, 0);
+                    register2 = BitConverter.ToUInt16(floatBytes, 2);
+                    modbusServer.holdingRegisters[firtsRegister + 12] = (short)register1;
+                    modbusServer.holdingRegisters[firtsRegister + 13] = (short)register2;
+                }
+            }
         }
 
         private void drawOnROI(Bitmap image)
@@ -1362,16 +1606,16 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         }
                     }
 
-                    // Configurar los datos que quieres publicar
-                    ushort[] dataToPublish = new ushort[] { (ushort)blob.Diametro, (ushort)blob.Area, (ushort)blob.Perimetro };
+                    //// Configurar los datos que quieres publicar
+                    //ushort[] dataToPublish = new ushort[] { (ushort)blob.Diametro, (ushort)blob.Area, (ushort)blob.Perimetro };
 
-                    int index = 0;
-                    for (int h = (sector - 1) * 3; h < ((sector - 1) * 3) + 3; h++)
-                    {
-                        // Publicar los datos en direcciones Modbus
-                        modbusServer.holdingRegisters[h + 1] = (short)dataToPublish[index];
-                        index++;
-                    }
+                    //int index = 0;
+                    //for (int h = (sector - 1) * 3; h < ((sector - 1) * 3) + 3; h++)
+                    //{
+                    //    // Publicar los datos en direcciones Modbus
+                    //    modbusServer.holdingRegisters[h + 1] = (short)dataToPublish[index];
+                    //    index++;
+                    //}
 
 
                     if (drawFlag)
