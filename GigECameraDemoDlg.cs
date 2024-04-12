@@ -83,6 +83,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         string units = "mm";
         bool calibrating = false;
         double euFactor = 1.399063;
+        // Variable para el tipo de grid de la lista gridTypes
+        int grid = 1;
 
         // Lista para los strings de los tamaños de la tortilla
         List<string> sizes = new List<string>();
@@ -102,22 +104,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         // Configurar el servidor Modbus TCP
         ModbusServer modbusServer = new ModbusServer();
 
-        //// Definir ejemplos de grids
-        //List<List<int>> gridDefinition1 = ;
-
-        //List<List<int>> gridDefinition2 = new List<List<int>> {
-        //    new List<int> { 1, 0, 1 },
-        //    new List<int> { 1, 0, 1 },
-        //    new List<int> { 1, 0, 1 }
-        //};
-
-
-        //// Crear instancias de Grid para cada definición de grid
-        //Grid grid1 = new Grid(new List<List<int>> {
-        //    new List<int> { 1, 1, 1 },
-        //    new List<int> { 1, 1, 1 },
-        //    new List<int> { 1, 1, 1 }
-        //});
+        List<GridType> gridTypes = new List<GridType>();
+        GridType gridType = null;
 
         // Hasta aqui las creadas por mi
 
@@ -134,8 +122,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         int gridRows = 3;
         int gridCols = 3;
 
-        // Inicializar la matriz con ceros
-        int[,] grid = new int[0, 0];
 
         public bool isActivatedProcessData = false; // Variable de estado para el botón tipo toggle
 
@@ -163,25 +149,19 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         }
 
         // Clase para representar el grid
-        public class Grid
+        public class GridType
         {
-            public List<Sector> Sectors { get; set; }
+            public int Type { get; set; }
+            public (int, int) Grid { get; set; }
+            public int[] QuadrantsOfInterest { get; set; }
 
-            public Grid(List<List<int>> gridDefinition)
+            public GridType (int type, (int, int) grid, int[] quadrantsOfInterest)
             {
-                Sectors = new List<Sector>();
-
-                // Generar los sectores según la definición del grid
-                for (int i = 0; i < gridDefinition.Count; i++)
-                {
-                    for (int j = 0; j < gridDefinition[i].Count; j++)
-                    {
-                        bool isActive = gridDefinition[i][j] == 1;
-                        Sector sector = new Sector(i, j, isActive);
-                        Sectors.Add(sector);
-                    }
-                }
+                Type = type;
+                Grid = grid;
+                QuadrantsOfInterest = quadrantsOfInterest;
             }
+            
         }
 
         public class Blob
@@ -266,12 +246,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                     Quadrants = new List<Quadrant>();
 
-                    int numberOfSector = 0;
-                    for (int i = 0; i<gridRows; i++) {
-                        for (int j = 0; j < gridCols; j++) {
-                            Quadrants.Add(new Quadrant(numberOfSector,"",false,0,0,0,0, new Blob(0,0,0,new Point(),0,0,0,0,0,0)));
-                            numberOfSector++;
-                        }
+                    foreach (int quadrant in gridType.QuadrantsOfInterest) {
+                        Blob blb = null;
+                        Quadrant qua = new Quadrant(quadrant,"",false,0,0,0,0, blb);
+                        Quadrants.Add(qua);
                     }
 
                     if (triggerPLC && !calibrating)
@@ -420,8 +398,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             roiImage.Dispose();
             originalImage.Dispose();
 
-
-
             processImageBtn.Enabled = false;
         }
 
@@ -452,9 +428,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 InitializeComponent();
                 InitializeDataTable();
 
-                // Inicializar la matriz con ceros
-                grid = new int[gridRows, gridCols];
-
                 // Suscribir al evento SelectedIndexChanged del TabControl
                 mainTabs.SelectedIndexChanged += TabControl2_SelectedIndexChanged;
 
@@ -463,6 +436,29 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 modbusServer.Port = 502;
                 modbusServer.Listen();
                 Console.WriteLine("Servidor Modbus TCP en ejecución...");
+
+                // Aquí vamos a agregar todos los formatos
+                // 3x3
+                int[] quadrantsOfinterest = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+                gridTypes.Add(new GridType(1, (3, 3), quadrantsOfinterest));
+                // 5
+                quadrantsOfinterest = new int[] { 1, 3, 5, 7, 9 };
+                gridTypes.Add(new GridType(2, (3, 3), quadrantsOfinterest));
+                // 4x4
+                quadrantsOfinterest = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+                gridTypes.Add(new GridType(3, (4, 4), quadrantsOfinterest));
+                // 2x2
+                quadrantsOfinterest = new int[] { 1, 2, 3, 4 };
+                gridTypes.Add(new GridType(4, (2, 2), quadrantsOfinterest));
+
+                // Cargamos el GridType inicial
+                foreach (GridType gridT in gridTypes)
+                {
+                    if (gridT.Type == grid)
+                    {
+                        gridType = gridT;
+                    }
+                }
 
                 sizes.Add("Normal");
                 sizes.Add("Big");
@@ -1197,84 +1193,91 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             for (int i = 0; i < areas.Count; i++)
             {
-                int area = areas[i].Count;
-                int perimeter = perimeters[i].Count;
                 Point centro = centers[i];
 
                 // Calcular el sector del contorno
-                int sector = CalculateSector(centro, image.Width, image.Height, gridRows, gridCols) + 1;
+                int sector = CalculateSector(centro, image.Width, image.Height, gridType.Grid.Item1, gridType.Grid.Item2) + 1;
 
-                double tempFactor = euFactor;
+                // Verificamos si el sector es uno de los que nos interesa
+                if (Array.IndexOf(gridType.QuadrantsOfInterest,sector) != -1){
 
-                // Este diametro lo vamos a dejar para despues
-                double diametroIA = CalculateDiameterFromArea(area);
+                    int area = areas[i].Count;
+                    int perimeter = perimeters[i].Count;
 
-                // Calculamos el diametro
-                (double diameterTriangles, double maxDiameter, double minDiameter) = calculateAndDrawDiameterTrianglesAlghoritm(centro, image, sector, true);
+                    double tempFactor = euFactor;
 
-                // Sumamos para promediar
-                avg_diam += (diametroIA*tempFactor);
-                // Aumentamos el numero de elementos para promediar
-                n++;
+                    // Este diametro lo vamos a dejar para despues
+                    double diametroIA = CalculateDiameterFromArea(area);
 
-                // Calcular la compacidad
-                double compactness = CalculateCompactness(area, perimeter);
+                    // Calculamos el diametro
+                    (double diameterTriangles, double maxDiameter, double minDiameter) = calculateAndDrawDiameterTrianglesAlghoritm(centro, image, sector, true);
 
-                double ovalidad = calculateOvality(maxDiameter, minDiameter);
+                    // Sumamos para promediar
+                    avg_diam += (diametroIA * tempFactor);
+                    // Aumentamos el numero de elementos para promediar
+                    n++;
 
-                ushort size = calculateSize(maxDiameter, minDiameter, compactness, ovalidad);
+                    // Calcular la compacidad
+                    double compactness = CalculateCompactness(area, perimeter);
 
-                // Agregamos los datos a la tabla
-                dataTable.Rows.Add(sector, area, Math.Round(diametroIA * tempFactor, 3), Math.Round(diameterTriangles * tempFactor, 3), Math.Round(maxDiameter * tempFactor, 3), Math.Round(minDiameter * tempFactor, 3), Math.Round(compactness, 3));
+                    double ovalidad = calculateOvality(maxDiameter, minDiameter);
 
-                Blob blob = new Blob(area, perimeter, diameterTriangles, centro, maxDiameter, minDiameter, sector, compactness, size, ovalidad);
+                    ushort size = calculateSize(maxDiameter, minDiameter, compactness, ovalidad);
 
-                if (blob.Sector == 5)
-                {
-                    Console.WriteLine(blob.Centro.X + UserROI.Left);
-                    Console.WriteLine(blob.Centro.Y + UserROI.Top);
-                }
+                    // Agregamos los datos a la tabla
+                    dataTable.Rows.Add(sector, area, Math.Round(diametroIA * tempFactor, 3), Math.Round(diameterTriangles * tempFactor, 3), Math.Round(maxDiameter * tempFactor, 3), Math.Round(minDiameter * tempFactor, 3), Math.Round(compactness, 3));
 
-                foreach (Quadrant quadrant in Quadrants)
-                {
-                    if (quadrant.Number == sector && !quadrant.Found)
+                    Blob blob = new Blob(area, perimeter, diameterTriangles, centro, maxDiameter, minDiameter, sector, compactness, size, ovalidad);
+
+                    // Agregamos el elemento a la lista
+                    Blobs.Add(blob);
+
+                    if (blob.Sector == 5)
                     {
-                        quadrant.DiameterMax = maxDiameter;
-                        quadrant.DiameterMin = minDiameter;
-                        quadrant.Compacity = compactness;
-                        quadrant.Found = true;
-                        quadrant.Blob = blob;
+                        Console.WriteLine(blob.Centro.X + UserROI.Left);
+                        Console.WriteLine(blob.Centro.Y + UserROI.Top);
                     }
-                }
 
-                // Agregamos el elemento a la lista
-                Blobs.Add(blob);
+                    foreach (Quadrant quadrant in Quadrants)
+                    {
+                        if (quadrant.Number == sector)
+                        {
+                            if (area > quadrant.Blob.Area) {
+                                quadrant.DiameterMax = maxDiameter;
+                                quadrant.DiameterMin = minDiameter;
+                                quadrant.Compacity = compactness;
+                                quadrant.Found = true;
+                                quadrant.Blob = blob;
+                            }
+                        }
+                    }
 
-                // Configurar los datos que quieres publicar
-                ushort[] dataToPublish = new ushort[] { (ushort)blob.Diametro, (ushort)blob.Area, (ushort)blob.Perimetro };
+                    // Configurar los datos que quieres publicar
+                    ushort[] dataToPublish = new ushort[] { (ushort)blob.Diametro, (ushort)blob.Area, (ushort)blob.Perimetro };
 
-                int index = 0;
-                for (int h = (sector - 1) * 3; h < ((sector - 1) * 3) + 3; h++)
-                {
-                    // Publicar los datos en direcciones Modbus
-                    modbusServer.holdingRegisters[h + 1] = (short)dataToPublish[index];
-                    index++;
-                }
+                    int index = 0;
+                    for (int h = (sector - 1) * 3; h < ((sector - 1) * 3) + 3; h++)
+                    {
+                        // Publicar los datos en direcciones Modbus
+                        modbusServer.holdingRegisters[h + 1] = (short)dataToPublish[index];
+                        index++;
+                    }
 
-                // Aqui dibujamos todo lo necesario
-                using (Graphics g = Graphics.FromImage(image))
-                {
-                    // Dibujamos el perimetro
-                    drawPerimeter(image, perimeters[i], 1, Color.Red);
+                    // Aqui dibujamos todo lo necesario
+                    using (Graphics g = Graphics.FromImage(image))
+                    {
+                        // Dibujamos el perimetro
+                        drawPerimeter(image, perimeters[i], 1, Color.Red);
 
-                    // Dibujamos el centro
-                    drawCenter(centro,2,g);
+                        // Dibujamos el centro
+                        drawCenter(centro, 2, g);
 
-                    // Dibujamos el sector
-                    drawSector(image, sector, g);
+                        // Dibujamos el sector
+                        drawSector(image, sector, g);
 
-                    // Dibujamos el numero del sector
-                    drawSectorNumber(image, centro, sector-1);
+                        // Dibujamos el numero del sector
+                        drawSectorNumber(image, centro, sector - 1);
+                    }
                 }
             }
 
