@@ -901,11 +901,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     }
                 }
 
+                sizes.Add("Null");
                 sizes.Add("Normal");
                 sizes.Add("Big");
                 sizes.Add("Small");
-                sizes.Add("Incomplete");
                 sizes.Add("Oval");
+                sizes.Add("Oversize");
+                sizes.Add("Shape");
 
                 //objeto ROI
                 UserROI.Top = settings.ROI_Top;
@@ -1148,26 +1150,26 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     }
                 }
 
+
                 double avgDiameter = 0;
                 if (Double.TryParse(avg_diameter.Text, out avgDiameter)) ;
                 avgDiameter *= fact;
                 avg_diameter.Text = Math.Round(avgDiameter, 3).ToString();
 
-                double maxDiameter = 0;
-                if (Double.TryParse(Txt_MaxDiameter.Text, out maxDiameter)) ;
-                settings.maxDiameter = maxDiameter;
-                maxDiameter *= fact;
-                Txt_MaxDiameter.Text = Math.Round(maxDiameter, 3).ToString();
+                double mxDiameter = 0;
+                if (Double.TryParse(Txt_MaxDiameter.Text, out mxDiameter)) ;
+                mxDiameter *= fact;
+                Txt_MaxDiameter.Text = Math.Round(mxDiameter, 3).ToString();
 
-                double minDiameter = 0;
-                if (Double.TryParse(Txt_MinDiameter.Text, out minDiameter)) ;
-                settings.minDiameter = minDiameter;
-                minDiameter *= fact;
-                Txt_MinDiameter.Text = Math.Round(minDiameter, 3).ToString();
+                double mnDiameter = 0;
+                if (Double.TryParse(Txt_MinDiameter.Text, out mnDiameter)) ;
+                mnDiameter *= fact;
+                Txt_MinDiameter.Text = Math.Round(mnDiameter, 3).ToString();
 
                 double calibrationTarget = 0;
-                if (Double.TryParse(txtCalibrationTarget.Text, out calibrationTarget)) ;
+                if (Double.TryParse(txtCalibrationTarget.Text, out calibrationTarget));
                 calibrationTarget *= fact;
+                // settings.targetCalibration = (float) calibrationTarget;
                 txtCalibrationTarget.Text = Math.Round(calibrationTarget, 3).ToString();
             }
         }
@@ -2124,25 +2126,26 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private ushort calculateSize(double dMayor, double dMenor, double compacidad, double ovalidad)
         {
-            ushort size = 0;
+            ushort size = 1; // Normal
 
             if (dMayor > maxDiameter)
             {
-                size = 1; // Grande
+                size = 2; // Big
             }
-            if (dMenor < minDiameter) 
+            else if (dMenor < minDiameter) 
             {
-                size = 2; // Pequeña
+                size = 3; // Pequeña
             }
-            if (compacidad > maxCompactness)
+            else if (ovalidad > maxOvality)
+            {
+                size = 4; // Oval
+            }
+            else if (compacidad > maxCompactness)
             {
                 Console.WriteLine(compacidad);
-                size = 3; // Con hueco
+                size = 6; // Shape
             }
-            if (ovalidad > maxOvality)
-            {
-                size = 4; // Ovalada
-            }
+            
 
             return size;
         }
