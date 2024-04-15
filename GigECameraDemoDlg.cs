@@ -18,6 +18,8 @@ using System.Net.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using static DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.GigECameraDemoDlg;
+using Emgu.CV.Structure;
+using Emgu.CV;
 
 
 [StructLayout(LayoutKind.Sequential)]
@@ -236,6 +238,28 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                     Quadrants = new List<Quadrant>();
 
+                    if(mode == 0)
+                    {
+                        Bitmap originalROIImage = new Bitmap(originalImage);
+
+                        ConvertToCompatibleFormat(originalROIImage);
+
+                        drawROI(originalROIImage);
+
+                        originalBox.Image = originalROIImage;
+                        originalBox.SizeMode = PictureBoxSizeMode.AutoSize;
+                        originalBox.Visible = true;
+                        originalBox.BringToFront();
+                        processROIBox.SendToBack();
+                        m_ImageBox.SendToBack();
+                    }
+                    else
+                    {
+                        processROIBox.SendToBack();
+                        originalBox.SendToBack();
+                        m_ImageBox.BringToFront();
+                    }
+
                     for (int i = 1; i < 17; i++)
                     {
                         List<Point> points = new List<Point>();
@@ -252,7 +276,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                     if (calibrating)
                     {
+                        // Cambiamos al modo de grid 3x3 para calibrar con la del centro
                         updateGridType(1);
+
                         // Se crea el histograma de la imagen
                         ImageHistogram(originalImage);
 
@@ -376,8 +402,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void process()
         {
-            originalBox.Visible = false;
+            originalBox.Visible = true;
             processROIBox.Visible = true; // Mostrar el PictureBox ROI
+            // m_ImageBox.Visible = true;
+
+            //processROIBox.BringToFront();
+            //originalBox.BringToFront();
+            //m_ImageBox.BringToFront();
+            
 
             // Se crea el histograma de la imagen
             ImageHistogram(originalImage);
@@ -667,11 +699,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return roiImage;
         }
 
-        //private void drawROI(ref Mat image)
-        //{
-        //    Rectangle rect = new Rectangle(UserROI.Left, UserROI.Top, UserROI.Right - UserROI.Left, UserROI.Bottom - UserROI.Top);
-        //    CvInvoke.Rectangle(image, rect, new MCvScalar(255,255,0), 5);
-        //}
+        private void drawROI(Bitmap image)
+        {
+            Rectangle rect = new Rectangle(UserROI.Left, UserROI.Top, UserROI.Right - UserROI.Left, UserROI.Bottom - UserROI.Top);
+            using (Graphics g = Graphics.FromImage(image))
+            {
+                using (Pen p = new Pen(Color.Cyan, 1))
+                {
+                    g.DrawRectangle(p, rect);
+                }
+            }    
+        }
 
         public GigECameraDemoDlg()
         {
@@ -685,6 +723,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 InitializeComponent();
                 InitializeDataTable();
+
+                originalBox.MouseMove += originalBox_MouseMove;
+                processROIBox.MouseMove += processBox_MouseMove;
 
                 // Suscribir al evento SelectedIndexChanged del TabControl
                 mainTabs.SelectedIndexChanged += TabControl2_SelectedIndexChanged;
@@ -788,6 +829,43 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 this.Close();
             }
         }
+
+        private void originalBox_MouseMove(object sender, MouseEventArgs e)
+        {
+            // Obtener la posición del ratón dentro del PictureBox
+            Point mousePos = e.Location;
+
+            // Obtener la imagen del PictureBox
+            Bitmap bitmap = (Bitmap)originalBox.Image;
+
+            if (bitmap != null && originalBox.ClientRectangle.Contains(mousePos))
+            {
+                // Obtener el color del píxel en la posición del ratón
+                Color pixelColor = bitmap.GetPixel(mousePos.X, mousePos.Y);
+
+                // Mostrar la información del píxel
+                PixelDataValue.Text = $"  [ Ax= {mousePos.X} y= {mousePos.Y}, Value: {(int)(Math.Round(pixelColor.GetBrightness(),3)*255)}]";
+            }
+        }
+
+        private void processBox_MouseMove(object sender, MouseEventArgs e)
+        {
+            // Obtener la posición del ratón dentro del PictureBox
+            Point mousePos = e.Location;
+
+            // Obtener la imagen del PictureBox
+            Bitmap bitmap = (Bitmap)processROIBox.Image;
+
+            if (bitmap != null && processROIBox.ClientRectangle.Contains(mousePos))
+            {
+                // Obtener el color del píxel en la posición del ratón
+                Color pixelColor = bitmap.GetPixel(mousePos.X, mousePos.Y);
+
+                // Mostrar la información del píxel
+                PixelDataValue.Text = $"  [ Bx= {mousePos.X + UserROI.Left} y= {mousePos.Y + UserROI.Top}, Value: {(int)(Math.Round(pixelColor.GetBrightness(),3)*255)}]";
+            }
+        }
+
 
         private void euListSelection_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -1411,19 +1489,19 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // string imagePath = "C:\\Users\\Jesús\\Documents\\vision-tortillas\\images\\imagenOrigen.bmp";
 
             // Aqui va a ir el trigger
-            Console.WriteLine("Trigger.");
+            if (mode == 0) Console.WriteLine("Trigger.");
 
             try
             {
                 // Se guarda la imagen
                 m_Buffers.Save(imagePath, "-format bmp", -1, 0);
-                Console.WriteLine("Imagen guardada en :" + imagePath); 
+                if (mode == 0) Console.WriteLine("Imagen guardada en :" + imagePath);
             }
             catch
             {
-                Console.WriteLine("Atrapado");
+                if (mode == 0) Console.WriteLine("Atrapado");
             }
- 
+
             // Cargar la imagen
             Bitmap originalImage = new Bitmap(imagePath);
 
@@ -2354,8 +2432,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // Agregar el PictureBox a la misma TabPage que m_ImageBox
             tabPage.Controls.Add(pictureBox);
 
-            m_ImageBox.SendToBack();
+
             originalBox.SendToBack();
+            m_ImageBox.SendToBack();
             pictureBox.BringToFront();
 
         }
