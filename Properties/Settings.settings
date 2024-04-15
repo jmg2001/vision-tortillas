@@ -1,7 +1,45 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)">
-  <Profiles>
-    <Profile Name="(Default)" />
-  </Profiles>
-  <Settings />
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="ROI_Top" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">55</Value>
+    </Setting>
+    <Setting Name="ROI_Bottom" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">410</Value>
+    </Setting>
+    <Setting Name="ROI_Left" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">145</Value>
+    </Setting>
+    <Setting Name="ROI_Right" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">500</Value>
+    </Setting>
+    <Setting Name="Units" Type="System.String" Scope="User">
+      <Value Profile="(Default)">mm</Value>
+    </Setting>
+    <Setting Name="EUFactor" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">1.399063</Value>
+    </Setting>
+    <Setting Name="GridType" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="Format" Type="System.String" Scope="User">
+      <Value Profile="(Default)">3x3</Value>
+    </Setting>
+    <Setting Name="maxDiameter" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">88</Value>
+    </Setting>
+    <Setting Name="minDiameter" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">72</Value>
+    </Setting>
+    <Setting Name="maxOvality" Type="System.Single" Scope="User">
+      <Value Profile="(Default)">0.5</Value>
+    </Setting>
+    <Setting Name="maxCompacity" Type="System.Single" Scope="User">
+      <Value Profile="(Default)">12</Value>
+    </Setting>
+    <Setting Name="targetCalibration" Type="System.Single" Scope="User">
+      <Value Profile="(Default)">5.5</Value>
+    </Setting>
+  </Settings>
 </SettingsFile>

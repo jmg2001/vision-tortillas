@@ -22,5 +22,161 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("55")]
+        public int ROI_Top {
+            get {
+                return ((int)(this["ROI_Top"]));
+            }
+            set {
+                this["ROI_Top"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("410")]
+        public int ROI_Bottom {
+            get {
+                return ((int)(this["ROI_Bottom"]));
+            }
+            set {
+                this["ROI_Bottom"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("145")]
+        public int ROI_Left {
+            get {
+                return ((int)(this["ROI_Left"]));
+            }
+            set {
+                this["ROI_Left"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("500")]
+        public int ROI_Right {
+            get {
+                return ((int)(this["ROI_Right"]));
+            }
+            set {
+                this["ROI_Right"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("mm")]
+        public string Units {
+            get {
+                return ((string)(this["Units"]));
+            }
+            set {
+                this["Units"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1.399063")]
+        public double EUFactor {
+            get {
+                return ((double)(this["EUFactor"]));
+            }
+            set {
+                this["EUFactor"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public int GridType {
+            get {
+                return ((int)(this["GridType"]));
+            }
+            set {
+                this["GridType"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("3x3")]
+        public string Format {
+            get {
+                return ((string)(this["Format"]));
+            }
+            set {
+                this["Format"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("88")]
+        public double maxDiameter {
+            get {
+                return ((double)(this["maxDiameter"]));
+            }
+            set {
+                this["maxDiameter"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("72")]
+        public double minDiameter {
+            get {
+                return ((double)(this["minDiameter"]));
+            }
+            set {
+                this["minDiameter"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.5")]
+        public float maxOvality {
+            get {
+                return ((float)(this["maxOvality"]));
+            }
+            set {
+                this["maxOvality"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("12")]
+        public float maxCompacity {
+            get {
+                return ((float)(this["maxCompacity"]));
+            }
+            set {
+                this["maxCompacity"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5.5")]
+        public float targetCalibration {
+            get {
+                return ((float)(this["targetCalibration"]));
+            }
+            set {
+                this["targetCalibration"] = value;
+            }
+        }
     }
 }

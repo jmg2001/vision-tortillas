@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using Microsoft.Win32;
+using System.Configuration;
 
 using DALSA.SaperaLT.SapClassBasic;
 using DALSA.SaperaLT.SapClassGui;
@@ -20,6 +21,7 @@ using Newtonsoft.Json.Linq;
 using static DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.GigECameraDemoDlg;
 using Emgu.CV.Structure;
 using Emgu.CV;
+using Emgu.CV.Features2D;
 
 
 [StructLayout(LayoutKind.Sequential)]
@@ -47,6 +49,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         // Creadas por mi
 
+        Properties.Settings settings = new Properties.Settings();
+
         // Color de la tortilla en la imagen binarizada
         int tortillaColor = 1; // 1 - Blanco, 0 - Negro
         int backgroundColor = 0;
@@ -63,6 +67,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         // Varibles para identificar si el trigger viene del PLC o del Software
         bool triggerPLC = false;
         int mode = 0; // 1 - Live, 0 - Frame
+        int frameCounter = 0;
 
         // Variable para actualizar las imagenes si estamos el la imagesTab
         bool updateImages = true;
@@ -78,24 +83,26 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         // Parametros para el tamaño de la tortilla (Se van a traer de una base de datos)
         int maxArea = 8000;
         int minArea = 3000;
-        float maxDiameter = 88;
-        float minDiameter = 72;
+        double maxDiameter = 88;
+        double minDiameter = 72;
         double maxCompactness = 16;
         double maxOvality = 0.5;
 
         // Parametros para la calibración (Se van a cargar de un archivo)
-        int calibrationTarget = 120;
-        string units = "mm";
+        float calibrationTarget = 120;
+        string units = "";
         bool calibrating = false;
-        double euFactor = 1.399063;
+        double euFactor;
         // Variable para el tipo de grid de la lista gridTypes
-        int grid = 1;
+        int grid;
+
+        bool processed = true;
 
         // Lista para los strings de los tamaños de la tortilla
         List<string> sizes = new List<string>();
 
         // Imagen para cargar la imagen tomada por la camara
-        public Bitmap originalImage { get; private set; }
+        public Bitmap originalImage { get; set; }
 
         // Directortio para guardar la imagenes para trabajar, es una carpeta tempoal
         string imagesPath = Path.GetTempPath();
@@ -166,9 +173,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             public double Compacidad { get; set; }
             public double Ovalidad { get; set; }
             public ushort Size { get; set; }
+            public double CorrectionFactor { get; set; }
 
             // Constructor de la clase Blob
-            public Blob(double area, List<Point> areaPoints, double perimetro, List<Point> perimetroPoints, double diametro, double diametroIA, Point centro, double dMayor, double dMenor, double sector, double compacidad, ushort size, double ovalidad)
+            public Blob(double area, List<Point> areaPoints, double perimetro, List<Point> perimetroPoints, double diametro, double diametroIA, Point centro, double dMayor, double dMenor, double sector, double compacidad, ushort size, double ovalidad, double correctionFactor)
             {
                 Area = area;
                 AreaPoints = areaPoints;
@@ -183,6 +191,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 Compacidad = compacidad;
                 Size = size;
                 Ovalidad = ovalidad;
+                CorrectionFactor = correctionFactor;
             }
         }
 
@@ -229,11 +238,27 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 GigeDlg.Invoke((MethodInvoker)delegate
                 {
+                    //try
+                    //{
+                    //    originalImage.Dispose();
+                    //}
+                    //catch
+                    //{
+                    //    Console.WriteLine("Atrapado");
+                    //}
                     // Al parecer esto es lo que sucede al tomar la captura, ya sea con el trigger o en vivo
                     // Se muestra la imagen en el Form
                     GigeDlg.m_View.Show();
 
-                    processImageBtn.Enabled = true;
+                    //foreach(var feature in m_AcqDevice.FeatureNames)
+                    //{
+                    //    Console.WriteLine(feature);
+                    //}
+
+                    // m_AcqDevice.SetFeatureValue(44, true);
+                    
+
+                    if (mode == 0) processImageBtn.Enabled = true;
                     originalImage = saveImage();
 
                     Quadrants = new List<Quadrant>();
@@ -246,12 +271,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                         drawROI(originalROIImage);
 
+                        originalROIImage.Save(imagesPath + "1.bmp");
+
                         originalBox.Image = originalROIImage;
                         originalBox.SizeMode = PictureBoxSizeMode.AutoSize;
                         originalBox.Visible = true;
                         originalBox.BringToFront();
                         processROIBox.SendToBack();
                         m_ImageBox.SendToBack();
+                        // originalBox.Visible = false;
                     }
                     else
                     {
@@ -264,7 +292,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     {
                         List<Point> points = new List<Point>();
                         Point centro = new Point();
-                        Blob blb = new Blob(0, points, 0, points, 0, 0, centro, 0, 0, 0, 0, 0, 0);
+                        Blob blb = new Blob(0, points, 0, points, 0, 0, centro, 0, 0, 0, 0, 0, 0, 0);
                         Quadrant qua = new Quadrant(i, "", false, 0, 0, 0, 0, blb);
                         Quadrants.Add(qua);
                     }
@@ -320,20 +348,24 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         }
 
                         // Obtener las coordenadas del centro de la imagen
-                        int centroX = centralSector.Width / 2;
-                        int centroY = centralSector.Height / 2;
+                        int centroX = originalImage.Width / 2;
+                        int centroY = originalImage.Height / 2;
 
                         if (calibrationValidate)
                         {
-                            euFactor = int.Parse(txtCalibrationTarget.Text) / diametroIA; // unit/pixels
-
+                            euFactor = float.Parse(txtCalibrationTarget.Text) / diametroIA; // unit/pixels
+                            settings.EUFactor = euFactor;
                             euFactorTxt.Text = Math.Round(euFactor,3).ToString();
+                            maxDiameter = double.Parse(Txt_MaxDiameter.Text) / euFactor;
+                            minDiameter = double.Parse(Txt_MinDiameter.Text) / euFactor;
+                            settings.maxDiameter = maxDiameter;
+                            settings.minDiameter = minDiameter;
 
                             MessageBox.Show("Calibration Succesful, Factor: " + euFactor);
                         }
                         else
                         {
-                            MessageBox.Show("Place the calibration target in the middle. Error = X:" + (centro.X - centroX) + ", Y:" + (centroY - centro.Y));
+                            MessageBox.Show("Place the calibration target in the middle. Error = X:" + (centro.X + centralSector.Width + UserROI.Left - centroX) + ", Y:" + (centroY - (centro.Y + centralSector.Height + UserROI.Top)));
                         }
 
                         updateGridType(grid);
@@ -341,23 +373,38 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         // Liberamos las imagenes
                         binarizedImage.Dispose();
                         roiImage.Dispose();
-                        originalImage.Dispose();
                         centralSector.Dispose();
-
+                        originalImage.Dispose();
                         processImageBtn.Enabled = false;
                     }
+                    
+                    
                 });
             }
+        }
+
+        double CalculateCorrectionFactor(double diameter, Bitmap image, double focalLength, Point center)
+        {
+            double radius = diameter / 2;
+            Point imageCenter = new Point((int)(image.Width/2), (int)(image.Height / 2));
+
+            double distance = Math.Sqrt(Math.Pow((center.X - imageCenter.X), 2) + Math.Pow((center.Y - imageCenter.Y), 2));
+
+            double x = Math.Sqrt(distance * distance - radius * radius);
+            double correctedRadius = x / focalLength * radius;
+            return correctedRadius / radius; // Factor de corrección
         }
 
         private bool itsInCenter(Bitmap image,Point center, int margin)
         {
             // Obtener las coordenadas del centro de la imagen
-            int centroX = image.Width / 2;
-            int centroY = image.Height / 2;
+            int centroX = originalImage.Width/2;
+            int centroY = originalImage.Height/2;
+
+            
 
             // Verificar si el punto está dentro del área central definida por el margen de error
-            if (Math.Abs(center.X - centroX) <= margin && Math.Abs(center.Y - centroY) <= margin)
+            if (Math.Abs(center.X + image.Width + UserROI.Left - centroX) <= margin && Math.Abs(center.Y + image.Height + UserROI.Top - centroY) <= margin)
             {
                 return true;
             }
@@ -402,6 +449,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void process()
         {
+            frameCounter++;
+
             originalBox.Visible = true;
             processROIBox.Visible = true; // Mostrar el PictureBox ROI
             // m_ImageBox.Visible = true;
@@ -433,12 +482,90 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             binarizedImage.Dispose();
             roiImage.Dispose();
             originalImage.Dispose();
+            processed = true;
 
             processImageBtn.Enabled = false;
         }
 
         private void setModbusData()
         {
+            // Frame Counter
+            // Número flotante que deseas publicar
+            float floatValue = (float)frameCounter;
+            // Convertir el número flotante a bytes
+            byte[] floatBytes = BitConverter.GetBytes(floatValue);
+            // Escribir los bytes en dos registros de 16 bits (dos palabras)
+            ushort register1 = BitConverter.ToUInt16(floatBytes, 0);
+            ushort register2 = BitConverter.ToUInt16(floatBytes, 2);
+            modbusServer.holdingRegisters[0] = (short)register1;
+            modbusServer.holdingRegisters[1] = (short)register2;
+
+            // Mode
+            // Número flotante que deseas publicar
+            floatValue = (float)mode;
+            // Convertir el número flotante a bytes
+            floatBytes = BitConverter.GetBytes(floatValue);
+            // Escribir los bytes en dos registros de 16 bits (dos palabras)
+            register1 = BitConverter.ToUInt16(floatBytes, 0);
+            register2 = BitConverter.ToUInt16(floatBytes, 2);
+            modbusServer.holdingRegisters[2] = (short)register1;
+            modbusServer.holdingRegisters[3] = (short)register2;
+
+            // GridType
+            // Número flotante que deseas publicar
+            floatValue = (float)grid;
+            // Convertir el número flotante a bytes
+            floatBytes = BitConverter.GetBytes(floatValue);
+            // Escribir los bytes en dos registros de 16 bits (dos palabras)
+            register1 = BitConverter.ToUInt16(floatBytes, 0);
+            register2 = BitConverter.ToUInt16(floatBytes, 2);
+            modbusServer.holdingRegisters[4] = (short)register1;
+            modbusServer.holdingRegisters[5] = (short)register2;
+
+            // Max Diameter SP
+            // Número flotante que deseas publicar
+            floatValue = (float)maxDiameter;
+            // Convertir el número flotante a bytes
+            floatBytes = BitConverter.GetBytes(floatValue);
+            // Escribir los bytes en dos registros de 16 bits (dos palabras)
+            register1 = BitConverter.ToUInt16(floatBytes, 0);
+            register2 = BitConverter.ToUInt16(floatBytes, 2);
+            modbusServer.holdingRegisters[6] = (short)register1;
+            modbusServer.holdingRegisters[7] = (short)register2;
+
+            // Min Diameter SP
+            // Número flotante que deseas publicar
+            floatValue = (float)minDiameter;
+            // Convertir el número flotante a bytes
+            floatBytes = BitConverter.GetBytes(floatValue);
+            // Escribir los bytes en dos registros de 16 bits (dos palabras)
+            register1 = BitConverter.ToUInt16(floatBytes, 0);
+            register2 = BitConverter.ToUInt16(floatBytes, 2);
+            modbusServer.holdingRegisters[8] = (short)register1;
+            modbusServer.holdingRegisters[9] = (short)register2;
+
+            // Ovality SP
+            // Número flotante que deseas publicar
+            floatValue = (float)maxOvality;
+            // Convertir el número flotante a bytes
+            floatBytes = BitConverter.GetBytes(floatValue);
+            // Escribir los bytes en dos registros de 16 bits (dos palabras)
+            register1 = BitConverter.ToUInt16(floatBytes, 0);
+            register2 = BitConverter.ToUInt16(floatBytes, 2);
+            modbusServer.holdingRegisters[10] = (short)register1;
+            modbusServer.holdingRegisters[11] = (short)register2;
+
+            // Compacity SP
+            // Número flotante que deseas publicar
+            floatValue = (float)maxCompactness;
+            // Convertir el número flotante a bytes
+            floatBytes = BitConverter.GetBytes(floatValue);
+            // Escribir los bytes en dos registros de 16 bits (dos palabras)
+            register1 = BitConverter.ToUInt16(floatBytes, 0);
+            register2 = BitConverter.ToUInt16(floatBytes, 2);
+            modbusServer.holdingRegisters[12] = (short)register1;
+            modbusServer.holdingRegisters[13] = (short)register2;
+
             int offset = 14;
             int firtsRegister = 0;
             foreach (Quadrant q in Quadrants)
@@ -449,12 +576,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     if (q.Found) { 
                         // Class
                         // Número flotante que deseas publicar
-                        float floatValue = (float)q.Blob.Size;
+                        floatValue = (float)q.Blob.Size;
                         // Convertir el número flotante a bytes
-                        byte[] floatBytes = BitConverter.GetBytes(floatValue);
+                        floatBytes = BitConverter.GetBytes(floatValue);
                         // Escribir los bytes en dos registros de 16 bits (dos palabras)
-                        ushort register1 = BitConverter.ToUInt16(floatBytes, 0);
-                        ushort register2 = BitConverter.ToUInt16(floatBytes, 2);
+                        register1 = BitConverter.ToUInt16(floatBytes, 0);
+                        register2 = BitConverter.ToUInt16(floatBytes, 2);
                         modbusServer.holdingRegisters[firtsRegister] = (short)register1;
                         modbusServer.holdingRegisters[firtsRegister+1] = (short)register2;
 
@@ -528,12 +655,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     {
                         // Class
                         // Número flotante que deseas publicar
-                        float floatValue = (float)0.0;
+                        floatValue = (float)0.0;
                         // Convertir el número flotante a bytes
-                        byte[] floatBytes = BitConverter.GetBytes(floatValue);
+                        floatBytes = BitConverter.GetBytes(floatValue);
                         // Escribir los bytes en dos registros de 16 bits (dos palabras)
-                        ushort register1 = BitConverter.ToUInt16(floatBytes, 0);
-                        ushort register2 = BitConverter.ToUInt16(floatBytes, 2);
+                        register1 = BitConverter.ToUInt16(floatBytes, 0);
+                        register2 = BitConverter.ToUInt16(floatBytes, 2);
                         modbusServer.holdingRegisters[firtsRegister] = (short)register1;
                         modbusServer.holdingRegisters[firtsRegister + 1] = (short)register2;
 
@@ -608,12 +735,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 {
                     // Class
                     // Número flotante que deseas publicar
-                    float floatValue = (float)0.0;
+                    floatValue = (float)0.0;
                     // Convertir el número flotante a bytes
-                    byte[] floatBytes = BitConverter.GetBytes(floatValue);
+                    floatBytes = BitConverter.GetBytes(floatValue);
                     // Escribir los bytes en dos registros de 16 bits (dos palabras)
-                    ushort register1 = BitConverter.ToUInt16(floatBytes, 0);
-                    ushort register2 = BitConverter.ToUInt16(floatBytes, 2);
+                    register1 = BitConverter.ToUInt16(floatBytes, 0);
+                    register2 = BitConverter.ToUInt16(floatBytes, 2);
                     modbusServer.holdingRegisters[firtsRegister] = (short)register1;
                     modbusServer.holdingRegisters[firtsRegister + 1] = (short)register2;
 
@@ -707,6 +834,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 using (Pen p = new Pen(Color.Cyan, 1))
                 {
                     g.DrawRectangle(p, rect);
+                    g.DrawEllipse(p, (int)originalImage.Width/2, (int)originalImage.Height/2,2,2);
                 }
             }    
         }
@@ -732,8 +860,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 processImageBtn.Enabled = false;
 
-                euListSelection.SelectedItem = "mm";
+                units = settings.Units;
+                unitsTxt.Text = units;
+                targetUnitsTxt.Text = units;
+                maxDiameterUnitsTxt.Text = units;
+                minDiameterUnitsTxt.Text = units;
+                euListSelection.SelectedItem = units;
+                euFactor = settings.EUFactor;
+                txtCalibrationTarget.Text = settings.targetCalibration.ToString();
                 euFactorTxt.Text = Math.Round(euFactor, 3).ToString();
+
+                formatTxt.Text = settings.Format; 
 
                 modbusServer.Port = 502;
                 modbusServer.Listen();
@@ -753,6 +890,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 quadrantsOfinterest = new int[] { 1, 2, 3, 4 };
                 gridTypes.Add(new GridType(4, (2, 2), quadrantsOfinterest));
 
+                grid = settings.GridType;
+
                 // Cargamos el GridType inicial
                 foreach (GridType gridT in gridTypes)
                 {
@@ -769,17 +908,27 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 sizes.Add("Oval");
 
                 //objeto ROI
-                UserROI.Top = 55;
-                UserROI.Left = 145;
-                UserROI.Right = 500;
-                UserROI.Bottom = 410;
+                UserROI.Top = settings.ROI_Top;
+                UserROI.Left = settings.ROI_Left;
+                UserROI.Right = settings.ROI_Right;
+                UserROI.Bottom = settings.ROI_Bottom;
+
+                TXT_ROI_Left.Text = UserROI.Left.ToString();
+                TXT_ROI_Right.Text = UserROI.Right.ToString();
+                TXT_ROI_Top.Text = UserROI.Top.ToString();
+                TXT_ROI_Bottom.Text = UserROI.Bottom.ToString();
+
+                maxOvality = settings.maxOvality;
+                maxCompactness = settings.maxCompacity;
+                maxDiameter = (float)settings.maxDiameter;
+                minDiameter = (float)settings.minDiameter;
 
                 Txt_MaxDiameter.Text = Math.Round(maxDiameter*euFactor,3).ToString();
                 Txt_MinDiameter.Text = Math.Round(minDiameter*euFactor,3).ToString();
                 Txt_MaxCompacity.Text = maxCompactness.ToString();
                 Txt_MaxOvality.Text = maxOvality.ToString();
 
-                txtCalibrationTarget.Text = calibrationTarget.ToString();
+                // txtCalibrationTarget.Text = calibrationTarget.ToString();
 
                 //InitializeInterface();
                 // Suscribir al evento KeyPress del TextBox
@@ -789,6 +938,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 Txt_MaxCompacity.KeyPress += Txt_MaxCompacity_KeyPress;
                 Txt_MaxOvality.KeyPress += Txt_MaxOvality_KeyPress;
                 txtCalibrationTarget.KeyPress += calibrationTarget_KeyPress;
+
+                TXT_ROI_Left.KeyPress += Txt_UserROILeft_KeyPress;
+                TXT_ROI_Right.KeyPress += Txt_UserROIRight_KeyPress;
+                TXT_ROI_Top.KeyPress += Txt_UserROITop_KeyPress;
+                TXT_ROI_Bottom.KeyPress += Txt_UserROIBottom_KeyPress;
 
                 // Suscribir la función al evento SelectedIndexChanged del ComboBox
                 euListSelection.SelectedIndexChanged += euListSelection_SelectedIndexChanged;
@@ -830,6 +984,86 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
+        private void Txt_UserROIBottom_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Verificar si la tecla presionada es "Enter" (código ASCII 13)
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                // Intentar convertir el texto del TextBox a un número entero
+                if (int.TryParse(TXT_ROI_Bottom.Text, out UserROI.Bottom))
+                {
+                    // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
+                    MessageBox.Show("Se ha guardado la cantidad modificada: " + UserROI.Bottom, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    settings.ROI_Bottom = UserROI.Bottom;
+                }
+                else
+                {
+                    // Manejar el caso en que el texto no sea un número válido
+                    MessageBox.Show("Por favor ingresa un número válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void Txt_UserROITop_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Verificar si la tecla presionada es "Enter" (código ASCII 13)
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                // Intentar convertir el texto del TextBox a un número entero
+                if (int.TryParse(TXT_ROI_Top.Text, out UserROI.Top))
+                {
+                    // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
+                    MessageBox.Show("Se ha guardado la cantidad modificada: " + UserROI.Top, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    settings.ROI_Top = UserROI.Top;
+                }
+                else
+                {
+                    // Manejar el caso en que el texto no sea un número válido
+                    MessageBox.Show("Por favor ingresa un número válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void Txt_UserROIRight_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Verificar si la tecla presionada es "Enter" (código ASCII 13)
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                // Intentar convertir el texto del TextBox a un número entero
+                if (int.TryParse(TXT_ROI_Right.Text, out UserROI.Right))
+                {
+                    // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
+                    MessageBox.Show("Se ha guardado la cantidad modificada: " + UserROI.Right, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    settings.ROI_Right = UserROI.Right;
+                }
+                else
+                {
+                    // Manejar el caso en que el texto no sea un número válido
+                    MessageBox.Show("Por favor ingresa un número válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void Txt_UserROILeft_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Verificar si la tecla presionada es "Enter" (código ASCII 13)
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                // Intentar convertir el texto del TextBox a un número entero
+                if (int.TryParse(TXT_ROI_Left.Text, out UserROI.Left))
+                {
+                    // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
+                    MessageBox.Show("Se ha guardado la cantidad modificada: " + UserROI.Left, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    settings.ROI_Left = UserROI.Left;
+                }
+                else
+                {
+                    // Manejar el caso en que el texto no sea un número válido
+                    MessageBox.Show("Por favor ingresa un número válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
         private void originalBox_MouseMove(object sender, MouseEventArgs e)
         {
             // Obtener la posición del ratón dentro del PictureBox
@@ -844,7 +1078,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 Color pixelColor = bitmap.GetPixel(mousePos.X, mousePos.Y);
 
                 // Mostrar la información del píxel
-                PixelDataValue.Text = $"  [ Ax= {mousePos.X} y= {mousePos.Y}, Value: {(int)(Math.Round(pixelColor.GetBrightness(),3)*255)}]";
+                PixelDataValue.Text = $"  [ x= {mousePos.X} y= {mousePos.Y}, Value: {(int)(Math.Round(pixelColor.GetBrightness(),3)*255)}]";
             }
         }
 
@@ -862,7 +1096,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 Color pixelColor = bitmap.GetPixel(mousePos.X, mousePos.Y);
 
                 // Mostrar la información del píxel
-                PixelDataValue.Text = $"  [ Bx= {mousePos.X + UserROI.Left} y= {mousePos.Y + UserROI.Top}, Value: {(int)(Math.Round(pixelColor.GetBrightness(),3)*255)}]";
+                PixelDataValue.Text = $"  [ x= {mousePos.X + UserROI.Left} y= {mousePos.Y + UserROI.Top}, Value: {(int)(Math.Round(pixelColor.GetBrightness(),3)*255)}]";
             }
         }
 
@@ -900,7 +1134,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     // inch/px
                 }
 
+                settings.Units = units;
                 euFactorTxt.Text = Math.Round(euFactor, 3).ToString();
+                settings.EUFactor = euFactor;
 
                 // Actualizamos los datos de la tabla
                 if (dataTable.Rows.Count > 0)
@@ -919,11 +1155,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 double maxDiameter = 0;
                 if (Double.TryParse(Txt_MaxDiameter.Text, out maxDiameter)) ;
+                settings.maxDiameter = maxDiameter;
                 maxDiameter *= fact;
                 Txt_MaxDiameter.Text = Math.Round(maxDiameter, 3).ToString();
 
                 double minDiameter = 0;
                 if (Double.TryParse(Txt_MinDiameter.Text, out minDiameter)) ;
+                settings.minDiameter = minDiameter;
                 minDiameter *= fact;
                 Txt_MinDiameter.Text = Math.Round(minDiameter, 3).ToString();
 
@@ -940,10 +1178,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             if (e.KeyChar == (char)Keys.Enter)
             {
                 // Intentar convertir el texto del TextBox a un número entero
-                if (int.TryParse(txtCalibrationTarget.Text, out calibrationTarget))
+                if (float.TryParse(txtCalibrationTarget.Text, out calibrationTarget))
                 {
                     // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
                     MessageBox.Show("Se ha guardado la cantidad modificada: " + calibrationTarget, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    settings.targetCalibration = calibrationTarget;
                 }
                 else
                 {
@@ -997,10 +1236,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             if (e.KeyChar == (char)Keys.Enter)
             {
                 // Intentar convertir el texto del TextBox a un número entero
-                if (float.TryParse(Txt_MinDiameter.Text, out minDiameter))
+                if (double.TryParse(Txt_MinDiameter.Text, out minDiameter))
                 {
                     // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
                     MessageBox.Show("Se ha guardado la cantidad modificada: " + minDiameter, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    minDiameter = minDiameter / euFactor;
+                    settings.minDiameter = minDiameter / euFactor;
                 }
                 else
                 {
@@ -1016,10 +1257,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             if (e.KeyChar == (char)Keys.Enter)
             {
                 // Intentar convertir el texto del TextBox a un número entero
-                if (float.TryParse(Txt_MaxDiameter.Text, out maxDiameter))
+                if (double.TryParse(Txt_MaxDiameter.Text, out maxDiameter))
                 {
                     // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
                     MessageBox.Show("Se ha guardado la cantidad modificada: " + maxDiameter, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    maxDiameter = maxDiameter / euFactor;
+                    settings.maxDiameter = maxDiameter;
                 }
                 else
                 {
@@ -1648,10 +1891,16 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                     ushort size = calculateSize(maxDiameter, minDiameter, compactness, ovalidad);
 
+                    //double focalLenght = 1 / 1.23;
+
+                    //double correctionFactor = CalculateCorrectionFactor(diameterTriangles, image, focalLenght, centro);
+
+                    //Console.WriteLine(correctionFactor);
+
                     // Agregamos los datos a la tabla
                     dataTable.Rows.Add(sector, area, Math.Round(diametroIA * tempFactor, 3), Math.Round(diameterTriangles * tempFactor, 3), Math.Round(maxDiameter * tempFactor, 3), Math.Round(minDiameter * tempFactor, 3), Math.Round(compactness, 3));
 
-                    Blob blob = new Blob(area, areas[i], perimeter, perimeters[i], diameterTriangles, diametroIA, centro, maxDiameter, minDiameter, sector, compactness, size, ovalidad);
+                    Blob blob = new Blob(area, areas[i], perimeter, perimeters[i], diameterTriangles, diametroIA, centro, maxDiameter, minDiameter, sector, compactness, size, ovalidad, 0);
 
                     // Agregamos el elemento a la lista
                     Blobs.Add(blob);
@@ -1745,13 +1994,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void drawSize(Bitmap image, int sector, ushort size, Graphics g)
         {
-            // Calcular el ancho y alto de cada sector
             int sectorWidth = image.Width / gridType.Grid.Item2;
             int sectorHeight = image.Height / gridType.Grid.Item1;
 
+            // Console.WriteLine(sectorWidth);
+
             // Calcular las coordenadas del sector en el orden deseado
-            int textX = ((sector - 1) / gridType.Grid.Item2) * sectorHeight;
-            int textY = ((gridType.Grid.Item2 - 1) - ((sector - 1) % gridType.Grid.Item2)) * sectorWidth;
+            int textX = ((sector - 1) / gridType.Grid.Item2) * sectorWidth;
+            int textY = ((gridType.Grid.Item2 - 1) - ((sector - 1) % gridType.Grid.Item2)) * sectorHeight;
 
             // Crear un objeto Font para el texto
             Font font = new Font("Arial", 12);
@@ -1886,6 +2136,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
             if (compacidad > maxCompactness)
             {
+                Console.WriteLine(compacidad);
                 size = 3; // Con hueco
             }
             if (ovalidad > maxOvality)
@@ -1974,18 +2225,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private int CalculateSector(Point objectCenter, int imageWidth, int imageHeight, int gridRows, int gridCols)
         {
-            //// Calcular el ancho y alto de cada sector
-            //int sectorWidth = imageWidth / gridCols;
-            //int sectorHeight = imageHeight / gridRows;
-
-            //// Calcular el sector en el que se encuentra el centro del objeto
-            //int sectorX = objectCenter.X / sectorWidth;
-            //int sectorY = objectCenter.Y / sectorHeight;
-
-            //// Calcular el índice del sector en función del número de columnas
-            //int sectorIndex = sectorY * gridCols + sectorX;
-
-            //return sectorIndex;
 
             // Calcular el ancho y alto de cada sector
             int sectorWidth = imageWidth / gridCols;
@@ -2184,9 +2423,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             int sectorWidth = image.Width / gridType.Grid.Item2;
             int sectorHeight = image.Height / gridType.Grid.Item1;
 
+            // Console.WriteLine(sectorWidth);
+
             // Calcular las coordenadas del sector en el orden deseado
-            int sectorX = ((sector - 1) / gridType.Grid.Item2) * sectorHeight;
-            int sectorY = ((gridType.Grid.Item2 - 1) - ((sector - 1) % gridType.Grid.Item2)) * sectorWidth;
+            int sectorX = ((sector - 1) / gridType.Grid.Item2) * sectorWidth;
+            int sectorY = ((gridType.Grid.Item2 - 1) - ((sector - 1) % gridType.Grid.Item2)) * sectorHeight;
 
             // Definir el rectángulo (x, y, ancho, alto)
             Rectangle rect = new Rectangle(sectorX, sectorY, sectorWidth, sectorHeight);
@@ -2441,7 +2682,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void btnsave_Click(object sender, EventArgs e)
         {
-            SaveResultsToTxt(dataTable);
+            // SaveResultsToTxt(dataTable);
+            // Para guardar la configuración
+            settings.Save();
+        }
+
+        public void GuardarConfiguracion(string nombreUsuario, string valorConfiguracion)
+        {
+
         }
 
         private void tabPage3_Click(object sender, EventArgs e)
@@ -2464,6 +2712,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     if (type != "")
                     {
                         formatTxt.Text = type;
+                        settings.Format = type;
+                        settings.GridType = v;
                         grid = v;
                         MessageBox.Show("Format switched to: " + type);
                     }
@@ -2497,17 +2747,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         }
 
-        private void groupBox2_Enter(object sender, EventArgs e)
-        {
-
-        }
-
         private void BtnLocalRemote_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void Txt_MaxDiameter_TextChanged(object sender, EventArgs e)
         {
 
         }
@@ -2517,14 +2757,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             autoThreshold = !autoThreshold;
         }
 
-        private void avg_diameter_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void virtualTriggerBtn_Click(object sender, EventArgs e)
         {
-            m_ImageBox.BringToFront();
+            // m_ImageBox.BringToFront();
+            if (!processed)
+            {
+                originalImage.Dispose();
+            }
             processROIBox.Visible = false;
             
             AbortDlg abort = new AbortDlg(m_Xfer);
@@ -2535,6 +2774,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     m_Xfer.Abort();
                 UpdateControls();
             }
+
+            processed = false;
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -2581,34 +2822,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
-        private void Txt_Threshold_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label2_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label3_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label4_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void diametersTxtCheck_CheckedChanged(object sender, EventArgs e)
         {
             txtDiameters = !txtDiameters;
-        }
-
-        private void GroupBox1_Enter(object sender, EventArgs e)
-        {
-
         }
 
         public static (List<List<Point>>, List<List<Point>>, List<Point>) FindContoursWithEdgesAndCenters(Bitmap binaryImage, double minArea, double maxArea, int color)
@@ -2729,11 +2945,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return compatibleBitmap;
         }
 
-        private void label4_Click_1(object sender, EventArgs e)
-        {
-
-        }
-
         private void button2_Click(object sender, EventArgs e)
         {
             calibrate();
@@ -2760,7 +2971,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             calibrating = false;
         }
 
-        private void textBox2_TextChanged(object sender, EventArgs e)
+        private void TXT_ROI_Left_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void txtCalibrationTarget_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void formatTxt_Click(object sender, EventArgs e)
         {
 
         }
