@@ -23,6 +23,7 @@ using Emgu.CV.Structure;
 using Emgu.CV;
 using Emgu.CV.Features2D;
 using System.Diagnostics;
+using System.Drawing.Imaging;
 
 
 [StructLayout(LayoutKind.Sequential)]
@@ -97,13 +98,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         // Variable para el tipo de grid de la lista gridTypes
         int grid;
 
-        bool processed = true;
+        bool processed = false;
 
         // Lista para los strings de los tamaños de la tortilla
         List<string> sizes = new List<string>();
 
         // Imagen para cargar la imagen tomada por la camara
-        public Bitmap originalImage { get; set; }
+        public Bitmap originalImage = new Bitmap(640,480);
+        bool originalImageIsDisposed = true;
 
         // Directortio para guardar la imagenes para trabajar, es una carpeta tempoal
         string imagesPath = Path.GetTempPath();
@@ -244,6 +246,23 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 GigeDlg.Invoke((MethodInvoker)delegate
                 {
+
+                    if (!processed || triggerPLC)
+                    {
+                        if (!originalImageIsDisposed)
+                        {
+                            try
+                            {
+                                originalImage.Dispose();
+                                originalImageIsDisposed = true;
+                            }
+                            catch
+                            {
+
+                            }
+                        }
+                    }
+
                     // Al parecer esto es lo que sucede al tomar la captura, ya sea con el trigger o en vivo
                     // Se muestra la imagen en el Form
                     GigeDlg.m_View.Show();
@@ -259,16 +278,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     if (mode == 0) processImageBtn.Enabled = true;
                     originalImage = saveImage();
 
-                    // originalImage = new Bitmap(@"C:\Users\Jesús\Documents\Python\cam_calib\imagenOrigen.bmp");
-
                     // Se crea el histograma de la imagen
                     ImageHistogram(originalImage);
 
-                    stopwatch = new Stopwatch();
-                    stopwatch.Start();
-
                     if (imageCorrectionCheck.Checked) originalImage = undistortImage(originalImage);
 
+                    originalImageIsDisposed = false;
 
                     Quadrants = new List<Quadrant>();
 
@@ -288,7 +303,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         originalBox.BringToFront();
                         processROIBox.SendToBack();
                         m_ImageBox.SendToBack();
-                        // originalBox.Visible = false;
                     }
                     else
                     {
@@ -311,13 +325,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         process();
                     }
 
-                    if (calibrating)
+                    else if (calibrating)
                     {
                         // Cambiamos al modo de grid 3x3 para calibrar con la del centro
                         updateGridType(1);
-
-                        // Se crea el histograma de la imagen
-                        // ImageHistogram(originalImage);
 
                         // Se binariza la imagen
                         Bitmap binarizedImage = binarizeImage(originalImage);
@@ -334,6 +345,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         int areaMax = 10000; // Área máxima
 
                         float diametroIA = 0;
+                        double diameter = 0;
+                        double maxD = 0;
+                        double minD = 0;
                         bool calibrationValidate = false;
 
                         centralSector.Save(imagesPath + "centralSector.bmp");
@@ -351,6 +365,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                             if (itsInCenter(centralSector,centro,10))
                             {
                                 diametroIA = (float)CalculateDiameterFromArea(area);
+
+                                (diameter, maxD, minD) = calculateAndDrawDiameterTrianglesAlghoritm(centro,centralSector, 5, false);
+
                                 calibrationValidate = true;
                                 break;
                             }
@@ -362,7 +379,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                         if (calibrationValidate)
                         {
-                            euFactor = float.Parse(txtCalibrationTarget.Text) / diametroIA; // unit/pixels
+                            euFactor = float.Parse(txtCalibrationTarget.Text) / maxD; // unit/pixels
                             settings.EUFactor = euFactor;
                             euFactorTxt.Text = Math.Round(euFactor,3).ToString();
                             maxDiameter = double.Parse(Txt_MaxDiameter.Text) / euFactor;
@@ -384,35 +401,32 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         roiImage.Dispose();
                         centralSector.Dispose();
                         originalImage.Dispose();
+                        originalImageIsDisposed = true;
                         processImageBtn.Enabled = false;
                     }
-
-                    // Detener el cronómetro
-                    stopwatch.Stop();
-
-                    // Obtener el tiempo transcurrido en milisegundos
-                    long tiempoTranscurrido = stopwatch.ElapsedMilliseconds;
-                    Console.WriteLine("Tiempo transcurrido: " + tiempoTranscurrido + " milisegundos");
-
+                    else
+                    {
+                        processed = false;
+                    }
 
                 });
             }
         }
 
-        static Bitmap undistortImage(Bitmap imagenOriginal)
+        public Bitmap undistortImage(Bitmap imagenOriginal)
         {
             // Dimensiones de la imagen
             int alto = imagenOriginal.Height;
             int ancho = imagenOriginal.Width;
 
-            double k1 = -21.4641724 - 6;
-            double k2 = 1391.66319 - 700;
+            double k1 = -21.4641724 - 3;
+            double k2 = 0;// 1391.66319 - 1500;
             double k3 = 0;
 
             double fx = 4728.60;
             double fy = 4623.52;
-            double cx = 320;
-            double cy = 240;
+            double cx = (int)((UserROI.Right - UserROI.Left)/2) + UserROI.Left;
+            double cy = (int)((UserROI.Bottom - UserROI.Top) / 2) + UserROI.Top;
 
             // Crear una imagen corregida vacía
             Bitmap imagenCorregida = new Bitmap(ancho, alto);
@@ -428,9 +442,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
 
             // Procesar cada sección de la imagen en paralelo
-            Parallel.For(0, ancho, xCorregido =>
+            Parallel.For(0, alto, yCorregido =>
             {
-                for (int yCorregido = 0; yCorregido < alto; yCorregido++)
+                for (int xCorregido = 0; xCorregido < ancho; xCorregido++)
                 {
                     // Procesar cada píxel de la sección dentro de un bloqueo
                     lock (lockObject)
@@ -441,23 +455,30 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         double factorCorreccionRadial = 1 + k1 * Math.Pow(radio, 2) + k2 * Math.Pow(radio, 4) + k3 * Math.Pow(radio, 6);
                         double xNormalizadoCorregido = xNormalizado * factorCorreccionRadial;
                         double yNormalizadoCorregido = yNormalizado * factorCorreccionRadial;
-                        int xCorregidoFinal = (int)(xNormalizadoCorregido * fx + cx);
-                        int yCorregidoFinal = (int)(yNormalizadoCorregido * fy + cy);
+                        var xCorregidoFinal = (xNormalizadoCorregido * fx + cx);
+                        var yCorregidoFinal = (yNormalizadoCorregido * fy + cy);
 
-                        // Realizar interpolación bilineal si las coordenadas no son exactas
                         if (0 <= xCorregidoFinal && xCorregidoFinal < ancho - 1 && 0 <= yCorregidoFinal && yCorregidoFinal < alto - 1)
                         {
-                            Color c00 = pixels[xCorregidoFinal, yCorregidoFinal];
-                            Color c10 = pixels[xCorregidoFinal + 1, yCorregidoFinal];
-                            Color c01 = pixels[xCorregidoFinal, yCorregidoFinal + 1];
-                            Color c11 = pixels[xCorregidoFinal + 1, yCorregidoFinal + 1];
+                            int x0 = (int)xCorregidoFinal;
+                            int y0 = (int)yCorregidoFinal;
+                            int x1 = x0 + 1;
+                            int y1 = y0 + 1;
 
-                            double dx = xNormalizadoCorregido - Math.Floor(xNormalizadoCorregido);
-                            double dy = yNormalizadoCorregido - Math.Floor(yNormalizadoCorregido);
+                            double dx = xCorregidoFinal - x0;
+                            double dy = yCorregidoFinal - y0;
 
-                            Color valorPixel = InterpolarBilineal(c00, c10, c01, c11, dx, dy);
+                            Color c00 = pixels[x0, y0];
+                            Color c10 = pixels[x1, y0];
+                            Color c01 = pixels[x0, y1];
+                            Color c11 = pixels[x1, y1];
+
+                            double dr = (1 - dx) * (1 - dy) * c00.R + dx * (1 - dy) * c10.R + (1 - dx) * dy * c01.R + dx * dy * c11.R;
+                            double dg = (1 - dx) * (1 - dy) * c00.G + dx * (1 - dy) * c10.G + (1 - dx) * dy * c01.G + dx * dy * c11.G;
+                            double db = (1 - dx) * (1 - dy) * c00.B + dx * (1 - dy) * c10.B + (1 - dx) * dy * c01.B + dx * dy * c11.B;
+
+                            Color valorPixel = Color.FromArgb((int)dr, (int)dg, (int)db);
                             imagenCorregida.SetPixel(xCorregido, yCorregido, valorPixel);
-
                         }
                         else
                         {
@@ -613,6 +634,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             binarizedImage.Dispose();
             roiImage.Dispose();
             originalImage.Dispose();
+            originalImageIsDisposed = true;
             processed = true;
 
             processImageBtn.Enabled = false;
@@ -966,6 +988,18 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 {
                     g.DrawRectangle(p, rect);
                     g.DrawEllipse(p, (int)originalImage.Width/2, (int)originalImage.Height/2,2,2);
+
+                    g.DrawEllipse(p, 76 + UserROI.Left , 72 + UserROI.Top , 2, 2);
+                    g.DrawEllipse(p, 76*3 + UserROI.Left, 72 + UserROI.Top, 2, 2);
+                    g.DrawEllipse(p, 76*5 + UserROI.Left, 72 + UserROI.Top, 2, 2);
+
+                    g.DrawEllipse(p, 76 + UserROI.Left, 72*3 + UserROI.Top, 2, 2);
+                    g.DrawEllipse(p, 76*5 + UserROI.Left, 72*3 + UserROI.Top, 2, 2);
+
+                    g.DrawEllipse(p, 76 + UserROI.Left, 72*5 + UserROI.Top, 2, 2);
+                    g.DrawEllipse(p, 76*3 + UserROI.Left, 72*5 + UserROI.Top, 2, 2);
+                    g.DrawEllipse(p, 76*5 + UserROI.Left, 72*5 + UserROI.Top, 2, 2);
+
                 }
             }    
         }
@@ -2035,6 +2069,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                     Blob blob = new Blob(area, areas[i], perimeter, perimeters[i], diameterTriangles, diametroIA, centro, maxDiameter, minDiameter, sector, compactness, size, ovalidad, 0);
 
+                    Console.WriteLine("Sector: " + sector);
+                    Console.WriteLine("X: " + centro.X);
+                    Console.WriteLine("Y: " + centro.Y);
+
                     //// Ruta del archivo de texto
                     //string rutaArchivo = @"C:\Users\Jesús\Desktop\datos.txt";
 
@@ -2907,12 +2945,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void virtualTriggerBtn_Click(object sender, EventArgs e)
         {
-            // m_ImageBox.BringToFront();
-            if (!processed)
-            {
-                originalImage.Dispose();
-                processed = false;
-            }
             processROIBox.Visible = false;
             
             AbortDlg abort = new AbortDlg(m_Xfer);
@@ -2923,8 +2955,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     m_Xfer.Abort();
                 UpdateControls();
             }
-
-            processed = false;
         }
 
         private void button1_Click(object sender, EventArgs e)
