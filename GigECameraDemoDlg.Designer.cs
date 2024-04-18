@@ -91,6 +91,16 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.avg_diameter = new System.Windows.Forms.Label();
             this.cameraControlPage = new System.Windows.Forms.TabPage();
+            this.GroupBox11 = new System.Windows.Forms.GroupBox();
+            this.TableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
+            this.TXT_ROI_Bottom = new System.Windows.Forms.TextBox();
+            this.TXT_ROI_Right = new System.Windows.Forms.TextBox();
+            this.TXT_ROI_Top = new System.Windows.Forms.TextBox();
+            this.TXT_ROI_Left = new System.Windows.Forms.TextBox();
+            this.Label34 = new System.Windows.Forms.Label();
+            this.Label35 = new System.Windows.Forms.Label();
+            this.Label36 = new System.Windows.Forms.Label();
+            this.Label37 = new System.Windows.Forms.Label();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.euFactorTxt = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
@@ -143,16 +153,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Cmd_video = new System.Windows.Forms.Button();
             this.Cmd_Calibration = new System.Windows.Forms.Button();
             this.Cmd_Save = new System.Windows.Forms.Button();
-            this.GroupBox11 = new System.Windows.Forms.GroupBox();
-            this.TableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
-            this.TXT_ROI_Bottom = new System.Windows.Forms.TextBox();
-            this.TXT_ROI_Right = new System.Windows.Forms.TextBox();
-            this.TXT_ROI_Top = new System.Windows.Forms.TextBox();
-            this.TXT_ROI_Left = new System.Windows.Forms.TextBox();
-            this.Label34 = new System.Windows.Forms.Label();
-            this.Label35 = new System.Windows.Forms.Label();
-            this.Label36 = new System.Windows.Forms.Label();
-            this.Label37 = new System.Windows.Forms.Label();
+            this.imageCorrectionCheck = new System.Windows.Forms.CheckBox();
             this.toolStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.GroupBox1.SuspendLayout();
@@ -166,6 +167,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.groupBox3.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.cameraControlPage.SuspendLayout();
+            this.GroupBox11.SuspendLayout();
+            this.TableLayoutPanel3.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.mainTabs.SuspendLayout();
             this.imagePage.SuspendLayout();
@@ -177,8 +180,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.GroupBox12.SuspendLayout();
             this.GroupBox10.SuspendLayout();
             this.GroupBox9.SuspendLayout();
-            this.GroupBox11.SuspendLayout();
-            this.TableLayoutPanel3.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStrip1
@@ -772,6 +773,121 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.cameraControlPage.Text = "Configuration";
             this.cameraControlPage.UseVisualStyleBackColor = true;
             // 
+            // GroupBox11
+            // 
+            this.GroupBox11.Controls.Add(this.TableLayoutPanel3);
+            this.GroupBox11.Location = new System.Drawing.Point(57, 323);
+            this.GroupBox11.Name = "GroupBox11";
+            this.GroupBox11.Size = new System.Drawing.Size(197, 155);
+            this.GroupBox11.TabIndex = 121;
+            this.GroupBox11.TabStop = false;
+            this.GroupBox11.Text = "ROI Definition";
+            // 
+            // TableLayoutPanel3
+            // 
+            this.TableLayoutPanel3.CellBorderStyle = System.Windows.Forms.TableLayoutPanelCellBorderStyle.Single;
+            this.TableLayoutPanel3.ColumnCount = 2;
+            this.TableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.TableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.TableLayoutPanel3.Controls.Add(this.TXT_ROI_Bottom, 1, 3);
+            this.TableLayoutPanel3.Controls.Add(this.TXT_ROI_Right, 1, 2);
+            this.TableLayoutPanel3.Controls.Add(this.TXT_ROI_Top, 1, 1);
+            this.TableLayoutPanel3.Controls.Add(this.TXT_ROI_Left, 1, 0);
+            this.TableLayoutPanel3.Controls.Add(this.Label34, 0, 0);
+            this.TableLayoutPanel3.Controls.Add(this.Label35, 0, 1);
+            this.TableLayoutPanel3.Controls.Add(this.Label36, 0, 2);
+            this.TableLayoutPanel3.Controls.Add(this.Label37, 0, 3);
+            this.TableLayoutPanel3.Location = new System.Drawing.Point(16, 23);
+            this.TableLayoutPanel3.Name = "TableLayoutPanel3";
+            this.TableLayoutPanel3.RowCount = 4;
+            this.TableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.TableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.TableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+            this.TableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
+            this.TableLayoutPanel3.Size = new System.Drawing.Size(168, 120);
+            this.TableLayoutPanel3.TabIndex = 80;
+            // 
+            // TXT_ROI_Bottom
+            // 
+            this.TXT_ROI_Bottom.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.TXT_ROI_Bottom.Location = new System.Drawing.Point(106, 97);
+            this.TXT_ROI_Bottom.Name = "TXT_ROI_Bottom";
+            this.TXT_ROI_Bottom.Size = new System.Drawing.Size(38, 20);
+            this.TXT_ROI_Bottom.TabIndex = 87;
+            this.TXT_ROI_Bottom.Text = "0";
+            this.TXT_ROI_Bottom.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // TXT_ROI_Right
+            // 
+            this.TXT_ROI_Right.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.TXT_ROI_Right.Location = new System.Drawing.Point(106, 68);
+            this.TXT_ROI_Right.Name = "TXT_ROI_Right";
+            this.TXT_ROI_Right.Size = new System.Drawing.Size(38, 20);
+            this.TXT_ROI_Right.TabIndex = 86;
+            this.TXT_ROI_Right.Text = "0";
+            this.TXT_ROI_Right.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // TXT_ROI_Top
+            // 
+            this.TXT_ROI_Top.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.TXT_ROI_Top.Location = new System.Drawing.Point(106, 37);
+            this.TXT_ROI_Top.Name = "TXT_ROI_Top";
+            this.TXT_ROI_Top.Size = new System.Drawing.Size(38, 20);
+            this.TXT_ROI_Top.TabIndex = 85;
+            this.TXT_ROI_Top.Text = "0";
+            this.TXT_ROI_Top.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // TXT_ROI_Left
+            // 
+            this.TXT_ROI_Left.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.TXT_ROI_Left.Location = new System.Drawing.Point(106, 6);
+            this.TXT_ROI_Left.Name = "TXT_ROI_Left";
+            this.TXT_ROI_Left.Size = new System.Drawing.Size(38, 20);
+            this.TXT_ROI_Left.TabIndex = 81;
+            this.TXT_ROI_Left.Text = "0";
+            this.TXT_ROI_Left.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.TXT_ROI_Left.TextChanged += new System.EventHandler(this.TXT_ROI_Left_TextChanged);
+            // 
+            // Label34
+            // 
+            this.Label34.AutoSize = true;
+            this.Label34.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Label34.Location = new System.Drawing.Point(4, 1);
+            this.Label34.Name = "Label34";
+            this.Label34.Size = new System.Drawing.Size(32, 16);
+            this.Label34.TabIndex = 81;
+            this.Label34.Text = "Left";
+            // 
+            // Label35
+            // 
+            this.Label35.AutoSize = true;
+            this.Label35.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Label35.Location = new System.Drawing.Point(4, 32);
+            this.Label35.Name = "Label35";
+            this.Label35.Size = new System.Drawing.Size(35, 16);
+            this.Label35.TabIndex = 82;
+            this.Label35.Text = "Top";
+            // 
+            // Label36
+            // 
+            this.Label36.AutoSize = true;
+            this.Label36.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Label36.Location = new System.Drawing.Point(4, 63);
+            this.Label36.Name = "Label36";
+            this.Label36.Size = new System.Drawing.Size(43, 16);
+            this.Label36.TabIndex = 83;
+            this.Label36.Text = "Right";
+            // 
+            // Label37
+            // 
+            this.Label37.AutoSize = true;
+            this.Label37.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Label37.Location = new System.Drawing.Point(4, 94);
+            this.Label37.Name = "Label37";
+            this.Label37.Size = new System.Drawing.Size(55, 16);
+            this.Label37.TabIndex = 84;
+            this.Label37.Text = "Bottom";
+            // 
             // groupBox4
             // 
             this.groupBox4.Controls.Add(this.euFactorTxt);
@@ -884,6 +1000,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             // imagePage
             // 
+            this.imagePage.Controls.Add(this.imageCorrectionCheck);
             this.imagePage.Controls.Add(this.originalBox);
             this.imagePage.Controls.Add(this.processROIBox);
             this.imagePage.Location = new System.Drawing.Point(4, 22);
@@ -1327,120 +1444,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Cmd_Save.Text = "Save";
             this.Cmd_Save.UseVisualStyleBackColor = false;
             // 
-            // GroupBox11
+            // imageCorrectionCheck
             // 
-            this.GroupBox11.Controls.Add(this.TableLayoutPanel3);
-            this.GroupBox11.Location = new System.Drawing.Point(57, 323);
-            this.GroupBox11.Name = "GroupBox11";
-            this.GroupBox11.Size = new System.Drawing.Size(197, 155);
-            this.GroupBox11.TabIndex = 121;
-            this.GroupBox11.TabStop = false;
-            this.GroupBox11.Text = "ROI Definition";
-            // 
-            // TableLayoutPanel3
-            // 
-            this.TableLayoutPanel3.CellBorderStyle = System.Windows.Forms.TableLayoutPanelCellBorderStyle.Single;
-            this.TableLayoutPanel3.ColumnCount = 2;
-            this.TableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.TableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.TableLayoutPanel3.Controls.Add(this.TXT_ROI_Bottom, 1, 3);
-            this.TableLayoutPanel3.Controls.Add(this.TXT_ROI_Right, 1, 2);
-            this.TableLayoutPanel3.Controls.Add(this.TXT_ROI_Top, 1, 1);
-            this.TableLayoutPanel3.Controls.Add(this.TXT_ROI_Left, 1, 0);
-            this.TableLayoutPanel3.Controls.Add(this.Label34, 0, 0);
-            this.TableLayoutPanel3.Controls.Add(this.Label35, 0, 1);
-            this.TableLayoutPanel3.Controls.Add(this.Label36, 0, 2);
-            this.TableLayoutPanel3.Controls.Add(this.Label37, 0, 3);
-            this.TableLayoutPanel3.Location = new System.Drawing.Point(16, 23);
-            this.TableLayoutPanel3.Name = "TableLayoutPanel3";
-            this.TableLayoutPanel3.RowCount = 4;
-            this.TableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.TableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.TableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
-            this.TableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
-            this.TableLayoutPanel3.Size = new System.Drawing.Size(168, 120);
-            this.TableLayoutPanel3.TabIndex = 80;
-            // 
-            // TXT_ROI_Bottom
-            // 
-            this.TXT_ROI_Bottom.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.TXT_ROI_Bottom.Location = new System.Drawing.Point(106, 97);
-            this.TXT_ROI_Bottom.Name = "TXT_ROI_Bottom";
-            this.TXT_ROI_Bottom.Size = new System.Drawing.Size(38, 20);
-            this.TXT_ROI_Bottom.TabIndex = 87;
-            this.TXT_ROI_Bottom.Text = "0";
-            this.TXT_ROI_Bottom.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // TXT_ROI_Right
-            // 
-            this.TXT_ROI_Right.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.TXT_ROI_Right.Location = new System.Drawing.Point(106, 68);
-            this.TXT_ROI_Right.Name = "TXT_ROI_Right";
-            this.TXT_ROI_Right.Size = new System.Drawing.Size(38, 20);
-            this.TXT_ROI_Right.TabIndex = 86;
-            this.TXT_ROI_Right.Text = "0";
-            this.TXT_ROI_Right.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // TXT_ROI_Top
-            // 
-            this.TXT_ROI_Top.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.TXT_ROI_Top.Location = new System.Drawing.Point(106, 37);
-            this.TXT_ROI_Top.Name = "TXT_ROI_Top";
-            this.TXT_ROI_Top.Size = new System.Drawing.Size(38, 20);
-            this.TXT_ROI_Top.TabIndex = 85;
-            this.TXT_ROI_Top.Text = "0";
-            this.TXT_ROI_Top.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // TXT_ROI_Left
-            // 
-            this.TXT_ROI_Left.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.TXT_ROI_Left.Location = new System.Drawing.Point(106, 6);
-            this.TXT_ROI_Left.Name = "TXT_ROI_Left";
-            this.TXT_ROI_Left.Size = new System.Drawing.Size(38, 20);
-            this.TXT_ROI_Left.TabIndex = 81;
-            this.TXT_ROI_Left.Text = "0";
-            this.TXT_ROI_Left.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.TXT_ROI_Left.TextChanged += new System.EventHandler(this.TXT_ROI_Left_TextChanged);
-            // 
-            // Label34
-            // 
-            this.Label34.AutoSize = true;
-            this.Label34.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Label34.Location = new System.Drawing.Point(4, 1);
-            this.Label34.Name = "Label34";
-            this.Label34.Size = new System.Drawing.Size(32, 16);
-            this.Label34.TabIndex = 81;
-            this.Label34.Text = "Left";
-            // 
-            // Label35
-            // 
-            this.Label35.AutoSize = true;
-            this.Label35.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Label35.Location = new System.Drawing.Point(4, 32);
-            this.Label35.Name = "Label35";
-            this.Label35.Size = new System.Drawing.Size(35, 16);
-            this.Label35.TabIndex = 82;
-            this.Label35.Text = "Top";
-            // 
-            // Label36
-            // 
-            this.Label36.AutoSize = true;
-            this.Label36.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Label36.Location = new System.Drawing.Point(4, 63);
-            this.Label36.Name = "Label36";
-            this.Label36.Size = new System.Drawing.Size(43, 16);
-            this.Label36.TabIndex = 83;
-            this.Label36.Text = "Right";
-            // 
-            // Label37
-            // 
-            this.Label37.AutoSize = true;
-            this.Label37.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Label37.Location = new System.Drawing.Point(4, 94);
-            this.Label37.Name = "Label37";
-            this.Label37.Size = new System.Drawing.Size(55, 16);
-            this.Label37.TabIndex = 84;
-            this.Label37.Text = "Bottom";
+            this.imageCorrectionCheck.AutoSize = true;
+            this.imageCorrectionCheck.Location = new System.Drawing.Point(264, 541);
+            this.imageCorrectionCheck.Name = "imageCorrectionCheck";
+            this.imageCorrectionCheck.Size = new System.Drawing.Size(106, 17);
+            this.imageCorrectionCheck.TabIndex = 2;
+            this.imageCorrectionCheck.Text = "Image Correction";
+            this.imageCorrectionCheck.UseVisualStyleBackColor = true;
             // 
             // GigECameraDemoDlg
             // 
@@ -1480,10 +1492,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             this.cameraControlPage.ResumeLayout(false);
+            this.GroupBox11.ResumeLayout(false);
+            this.TableLayoutPanel3.ResumeLayout(false);
+            this.TableLayoutPanel3.PerformLayout();
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
             this.mainTabs.ResumeLayout(false);
             this.imagePage.ResumeLayout(false);
+            this.imagePage.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.originalBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.processROIBox)).EndInit();
             this.tablePage.ResumeLayout(false);
@@ -1497,9 +1513,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.GroupBox10.ResumeLayout(false);
             this.GroupBox9.ResumeLayout(false);
             this.GroupBox9.PerformLayout();
-            this.GroupBox11.ResumeLayout(false);
-            this.TableLayoutPanel3.ResumeLayout(false);
-            this.TableLayoutPanel3.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1639,6 +1652,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         internal Label Label35;
         internal Label Label36;
         internal Label Label37;
+        private CheckBox imageCorrectionCheck;
     }
 }
 

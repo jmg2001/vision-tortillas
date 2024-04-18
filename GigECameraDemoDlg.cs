@@ -22,6 +22,7 @@ using static DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.GigECameraDemoDlg;
 using Emgu.CV.Structure;
 using Emgu.CV;
 using Emgu.CV.Features2D;
+using System.Diagnostics;
 
 
 [StructLayout(LayoutKind.Sequential)]
@@ -118,6 +119,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         List<GridType> gridTypes = new List<GridType>();
         GridType gridType = null;
+
+        // Iniciar el cronómetro
+        Stopwatch stopwatch = new Stopwatch();
 
         // Hasta aqui las creadas por mi
 
@@ -238,14 +242,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 GigeDlg.Invoke((MethodInvoker)delegate
                 {
-                    //try
-                    //{
-                    //    originalImage.Dispose();
-                    //}
-                    //catch
-                    //{
-                    //    Console.WriteLine("Atrapado");
-                    //}
                     // Al parecer esto es lo que sucede al tomar la captura, ya sea con el trigger o en vivo
                     // Se muestra la imagen en el Form
                     GigeDlg.m_View.Show();
@@ -256,10 +252,23 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     //}
 
                     // m_AcqDevice.SetFeatureValue(44, true);
-                    
+
 
                     if (mode == 0) processImageBtn.Enabled = true;
                     originalImage = saveImage();
+
+                    
+
+                    // originalImage = new Bitmap(@"C:\Users\Jesús\Documents\Python\cam_calib\imagenOrigen.bmp");
+
+                    // Se crea el histograma de la imagen
+                    ImageHistogram(originalImage);
+
+                    stopwatch = new Stopwatch();
+                    stopwatch.Start();
+
+                    if (imageCorrectionCheck.Checked) originalImage = undistortImage(originalImage);
+
 
                     Quadrants = new List<Quadrant>();
 
@@ -308,7 +317,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         updateGridType(1);
 
                         // Se crea el histograma de la imagen
-                        ImageHistogram(originalImage);
+                        // ImageHistogram(originalImage);
 
                         // Se binariza la imagen
                         Bitmap binarizedImage = binarizeImage(originalImage);
@@ -321,7 +330,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         Bitmap centralSector = extractSector(roiImage ,sectorSel);
 
                         // Definir el área mínima y máxima permitida para los contornos
-                        int areaMin = 2000; // Área mínima
+                        int areaMin = 4000; // Área mínima
                         int areaMax = 10000; // Área máxima
 
                         float diametroIA = 0;
@@ -377,10 +386,141 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         originalImage.Dispose();
                         processImageBtn.Enabled = false;
                     }
-                    
-                    
+
+                    // Detener el cronómetro
+                    stopwatch.Stop();
+
+                    // Obtener el tiempo transcurrido en milisegundos
+                    long tiempoTranscurrido = stopwatch.ElapsedMilliseconds;
+                    Console.WriteLine("Tiempo transcurrido: " + tiempoTranscurrido + " milisegundos");
+
+
                 });
             }
+        }
+
+        public Bitmap undistortImage(Bitmap image)
+        {
+
+            // Cargar la imagen original
+            Bitmap imagenOriginal = image;
+
+            // Dimensiones de la imagen
+            int alto = imagenOriginal.Height;
+            int ancho = imagenOriginal.Width;
+
+            double k1 = -21.4641724 - 6;
+            double k2 = 1391.66319 - 700;
+            double k3 = 0;
+
+            double fx = 4728.60;
+            double fy = 4623.52;
+            double cx = 320;
+            double cy = 240;
+
+            // Crear una imagen corregida vacía
+            Bitmap imagenCorregida = new Bitmap(ancho, alto);
+
+            
+
+            // Iterar sobre cada píxel en la imagen corregida
+            for (int yCorregido = 0; yCorregido < alto; yCorregido++)
+            {
+                
+                for (int xCorregido = 0; xCorregido < ancho; xCorregido++)
+                {
+                    
+                    // Convertir las coordenadas del píxel corregido a coordenadas normalizadas (rayo de luz en el espacio tridimensional)
+                    double xNormalizado = (xCorregido - cx) / fx;
+                    double yNormalizado = (yCorregido - cy) / fy;
+
+                    // Corregir la distorsión radial
+                    double radio = Math.Sqrt(xNormalizado * xNormalizado + yNormalizado * yNormalizado);
+                    double factorCorreccionRadial = 1 + k1 * Math.Pow(radio, 2) + k2 * Math.Pow(radio, 4) + k3 * Math.Pow(radio, 6);
+                    double xNormalizadoCorregido = xNormalizado * factorCorreccionRadial;
+                    double yNormalizadoCorregido = yNormalizado * factorCorreccionRadial;
+
+                    // Proyectar el rayo de luz corregido de nuevo en el plano de la imagen
+                    int xCorregidoFinal = (int)(xNormalizadoCorregido * fx + cx);
+                    int yCorregidoFinal = (int)(yNormalizadoCorregido * fy + cy);
+                    
+
+                    // Realizar interpolación bilineal si las coordenadas no son exactas
+                    if (0 <= xCorregidoFinal && xCorregidoFinal < ancho - 1 && 0 <= yCorregidoFinal && yCorregidoFinal < alto - 1)
+                    {
+                        Color c00 = imagenOriginal.GetPixel(xCorregidoFinal, yCorregidoFinal);
+                        Color c10 = imagenOriginal.GetPixel(xCorregidoFinal + 1, yCorregidoFinal);
+                        Color c01 = imagenOriginal.GetPixel(xCorregidoFinal, yCorregidoFinal + 1);
+                        Color c11 = imagenOriginal.GetPixel(xCorregidoFinal + 1, yCorregidoFinal + 1);
+
+                        double dx = xNormalizadoCorregido - Math.Floor(xNormalizadoCorregido);
+                        double dy = yNormalizadoCorregido - Math.Floor(yNormalizadoCorregido);
+
+                        Color valorPixel = InterpolarBilineal(c00, c10, c01, c11, dx, dy);
+                        imagenCorregida.SetPixel(xCorregido, yCorregido, valorPixel);
+                    }
+                    else
+                    {
+                        // Si las coordenadas están fuera de la imagen, simplemente copiar el valor del píxel original
+                        imagenCorregida.SetPixel(xCorregido, yCorregido, imagenOriginal.GetPixel((int)xNormalizadoCorregido, (int)yNormalizadoCorregido));
+                    }
+                    
+                }
+            }
+            // Guardar la imagen corregida
+            return imagenCorregida;
+        }
+
+
+        // Interpolación bilineal entre cuatro píxeles
+        static Color InterpolarBilineal(Color c00, Color c10, Color c01, Color c11, double dx, double dy)
+        {
+            double dr = (1 - dx) * (1 - dy) * c00.R + dx * (1 - dy) * c10.R + (1 - dx) * dy * c01.R + dx * dy * c11.R;
+            double dg = (1 - dx) * (1 - dy) * c00.G + dx * (1 - dy) * c10.G + (1 - dx) * dy * c01.G + dx * dy * c11.G;
+            double db = (1 - dx) * (1 - dy) * c00.B + dx * (1 - dy) * c10.B + (1 - dx) * dy * c01.B + dx * dy * c11.B;
+            return Color.FromArgb((int)dr, (int)dg, (int)db);
+        }
+
+        public Bitmap imageCorrection(Bitmap bitmap)
+        {
+            // Convertir el objeto Bitmap a una matriz de Emgu CV (Image<Bgr, byte>)
+            Image<Bgr, byte> image = bitmap.ToImage<Bgr, byte>();
+
+            // Declarar el vector de coeficientes de distorsión manualmente
+            Matrix<double> distCoeffs = new Matrix<double>(1, 5); // 5 coeficientes de distorsión
+
+            double k1 = -21.4641724 - 6;
+            double k2 = 1391.66319 - 700;
+            double p1 = 0;
+            double p2 = 0;
+            double k3 = 0;
+
+            // Asignar los valores de los coeficientes de distorsión
+            distCoeffs[0, 0] = k1; // k1
+            distCoeffs[0, 1] = k2; // k2
+            distCoeffs[0, 2] = p1; // p1
+            distCoeffs[0, 3] = p2; // p2
+            distCoeffs[0, 4] = k3; // k3
+
+            Matrix<double> cameraMatrix = new Matrix<double>(3, 3);
+
+            double fx = 4728.60;
+            double fy = 4623.52;
+            double cx = 320;
+            double cy = 240;
+
+            cameraMatrix[0,0] = fx;
+            cameraMatrix[0,2] = cx;
+            cameraMatrix[1,1] = fy;
+            cameraMatrix[1,2] = cy;
+            cameraMatrix[2,2] = 1;
+
+            // Corregir la distorsión en la imagen
+            Mat undistortedImage = new Mat();
+            CvInvoke.Undistort(image, undistortedImage, cameraMatrix, distCoeffs);
+
+
+            return undistortedImage.ToBitmap();
         }
 
         double CalculateCorrectionFactor(double diameter, Bitmap image, double focalLength, Point center)
@@ -453,15 +593,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             originalBox.Visible = true;
             processROIBox.Visible = true; // Mostrar el PictureBox ROI
-            // m_ImageBox.Visible = true;
-
-            //processROIBox.BringToFront();
-            //originalBox.BringToFront();
-            //m_ImageBox.BringToFront();
-            
-
-            // Se crea el histograma de la imagen
-            ImageHistogram(originalImage);
             
             // Se binariza la imagen
             Bitmap binarizedImage = binarizeImage(originalImage);
@@ -1904,6 +2035,20 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                     Blob blob = new Blob(area, areas[i], perimeter, perimeters[i], diameterTriangles, diametroIA, centro, maxDiameter, minDiameter, sector, compactness, size, ovalidad, 0);
 
+                    //// Ruta del archivo de texto
+                    //string rutaArchivo = @"C:\Users\Jesús\Desktop\datos.txt";
+
+                    //// Datos que quieres guardar en el archivo
+                    //string[] datos = { sector.ToString(), centro.X.ToString(), centro.Y.ToString() };
+
+                    //// Escribir los datos en el archivo de texto
+                    //using (StreamWriter escritor = new StreamWriter(rutaArchivo,true))
+                    //{
+                    //    escritor.WriteLine(datos[0] + ',' + datos[1] + ',' + datos[2]);
+                    //}
+
+                    //Console.WriteLine("Datos guardados en el archivo de texto.");
+
                     // Agregamos el elemento a la lista
                     Blobs.Add(blob);
 
@@ -2766,6 +2911,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             if (!processed)
             {
                 originalImage.Dispose();
+                processed = false;
             }
             processROIBox.Visible = false;
             
