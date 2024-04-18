@@ -123,6 +123,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         // Iniciar el cronómetro
         Stopwatch stopwatch = new Stopwatch();
 
+        static object lockObject = new object();
+
         // Hasta aqui las creadas por mi
 
         // Crear una DataTable para almacenar la información
@@ -256,8 +258,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                     if (mode == 0) processImageBtn.Enabled = true;
                     originalImage = saveImage();
-
-                    
 
                     // originalImage = new Bitmap(@"C:\Users\Jesús\Documents\Python\cam_calib\imagenOrigen.bmp");
 
@@ -399,12 +399,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
-        public Bitmap undistortImage(Bitmap image)
+        static Bitmap undistortImage(Bitmap imagenOriginal)
         {
-
-            // Cargar la imagen original
-            Bitmap imagenOriginal = image;
-
             // Dimensiones de la imagen
             int alto = imagenOriginal.Height;
             int ancho = imagenOriginal.Width;
@@ -421,53 +417,57 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // Crear una imagen corregida vacía
             Bitmap imagenCorregida = new Bitmap(ancho, alto);
 
-            
-
-            // Iterar sobre cada píxel en la imagen corregida
-            for (int yCorregido = 0; yCorregido < alto; yCorregido++)
+            // Obtener todos los píxeles de la imagen original de una vez
+            Color[,] pixels = new Color[ancho, alto];
+            for (int x = 0; x < ancho; x++)
             {
-                
-                for (int xCorregido = 0; xCorregido < ancho; xCorregido++)
+                for (int y = 0; y < alto; y++)
                 {
-                    
-                    // Convertir las coordenadas del píxel corregido a coordenadas normalizadas (rayo de luz en el espacio tridimensional)
-                    double xNormalizado = (xCorregido - cx) / fx;
-                    double yNormalizado = (yCorregido - cy) / fy;
-
-                    // Corregir la distorsión radial
-                    double radio = Math.Sqrt(xNormalizado * xNormalizado + yNormalizado * yNormalizado);
-                    double factorCorreccionRadial = 1 + k1 * Math.Pow(radio, 2) + k2 * Math.Pow(radio, 4) + k3 * Math.Pow(radio, 6);
-                    double xNormalizadoCorregido = xNormalizado * factorCorreccionRadial;
-                    double yNormalizadoCorregido = yNormalizado * factorCorreccionRadial;
-
-                    // Proyectar el rayo de luz corregido de nuevo en el plano de la imagen
-                    int xCorregidoFinal = (int)(xNormalizadoCorregido * fx + cx);
-                    int yCorregidoFinal = (int)(yNormalizadoCorregido * fy + cy);
-                    
-
-                    // Realizar interpolación bilineal si las coordenadas no son exactas
-                    if (0 <= xCorregidoFinal && xCorregidoFinal < ancho - 1 && 0 <= yCorregidoFinal && yCorregidoFinal < alto - 1)
-                    {
-                        Color c00 = imagenOriginal.GetPixel(xCorregidoFinal, yCorregidoFinal);
-                        Color c10 = imagenOriginal.GetPixel(xCorregidoFinal + 1, yCorregidoFinal);
-                        Color c01 = imagenOriginal.GetPixel(xCorregidoFinal, yCorregidoFinal + 1);
-                        Color c11 = imagenOriginal.GetPixel(xCorregidoFinal + 1, yCorregidoFinal + 1);
-
-                        double dx = xNormalizadoCorregido - Math.Floor(xNormalizadoCorregido);
-                        double dy = yNormalizadoCorregido - Math.Floor(yNormalizadoCorregido);
-
-                        Color valorPixel = InterpolarBilineal(c00, c10, c01, c11, dx, dy);
-                        imagenCorregida.SetPixel(xCorregido, yCorregido, valorPixel);
-                    }
-                    else
-                    {
-                        // Si las coordenadas están fuera de la imagen, simplemente copiar el valor del píxel original
-                        imagenCorregida.SetPixel(xCorregido, yCorregido, imagenOriginal.GetPixel((int)xNormalizadoCorregido, (int)yNormalizadoCorregido));
-                    }
-                    
+                    pixels[x, y] = imagenOriginal.GetPixel(x, y);
                 }
             }
-            // Guardar la imagen corregida
+
+            // Procesar cada sección de la imagen en paralelo
+            Parallel.For(0, ancho, xCorregido =>
+            {
+                for (int yCorregido = 0; yCorregido < alto; yCorregido++)
+                {
+                    // Procesar cada píxel de la sección dentro de un bloqueo
+                    lock (lockObject)
+                    {
+                        double xNormalizado = (xCorregido - cx) / fx;
+                        double yNormalizado = (yCorregido - cy) / fy;
+                        double radio = Math.Sqrt(xNormalizado * xNormalizado + yNormalizado * yNormalizado);
+                        double factorCorreccionRadial = 1 + k1 * Math.Pow(radio, 2) + k2 * Math.Pow(radio, 4) + k3 * Math.Pow(radio, 6);
+                        double xNormalizadoCorregido = xNormalizado * factorCorreccionRadial;
+                        double yNormalizadoCorregido = yNormalizado * factorCorreccionRadial;
+                        int xCorregidoFinal = (int)(xNormalizadoCorregido * fx + cx);
+                        int yCorregidoFinal = (int)(yNormalizadoCorregido * fy + cy);
+
+                        // Realizar interpolación bilineal si las coordenadas no son exactas
+                        if (0 <= xCorregidoFinal && xCorregidoFinal < ancho - 1 && 0 <= yCorregidoFinal && yCorregidoFinal < alto - 1)
+                        {
+                            Color c00 = pixels[xCorregidoFinal, yCorregidoFinal];
+                            Color c10 = pixels[xCorregidoFinal + 1, yCorregidoFinal];
+                            Color c01 = pixels[xCorregidoFinal, yCorregidoFinal + 1];
+                            Color c11 = pixels[xCorregidoFinal + 1, yCorregidoFinal + 1];
+
+                            double dx = xNormalizadoCorregido - Math.Floor(xNormalizadoCorregido);
+                            double dy = yNormalizadoCorregido - Math.Floor(yNormalizadoCorregido);
+
+                            Color valorPixel = InterpolarBilineal(c00, c10, c01, c11, dx, dy);
+                            imagenCorregida.SetPixel(xCorregido, yCorregido, valorPixel);
+
+                        }
+                        else
+                        {
+                            // Si las coordenadas están fuera de la imagen, simplemente copiar el valor del píxel original
+                            imagenCorregida.SetPixel(xCorregido, yCorregido, pixels[(int)xNormalizadoCorregido, (int)yNormalizadoCorregido]);
+                        }
+                    }
+                }
+            });
+
             return imagenCorregida;
         }
 
