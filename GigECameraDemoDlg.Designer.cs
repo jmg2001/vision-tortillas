@@ -112,6 +112,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.euListSelection = new System.Windows.Forms.ComboBox();
             this.mainTabs = new System.Windows.Forms.TabControl();
             this.imagePage = new System.Windows.Forms.TabPage();
+            this.imageCorrectionCheck = new System.Windows.Forms.CheckBox();
             this.originalBox = new System.Windows.Forms.PictureBox();
             this.processROIBox = new System.Windows.Forms.PictureBox();
             this.tablePage = new System.Windows.Forms.TabPage();
@@ -153,7 +154,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Cmd_video = new System.Windows.Forms.Button();
             this.Cmd_Calibration = new System.Windows.Forms.Button();
             this.Cmd_Save = new System.Windows.Forms.Button();
-            this.imageCorrectionCheck = new System.Windows.Forms.CheckBox();
             this.toolStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.GroupBox1.SuspendLayout();
@@ -1012,6 +1012,16 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.imagePage.UseVisualStyleBackColor = true;
             this.imagePage.Click += new System.EventHandler(this.tabPage3_Click);
             // 
+            // imageCorrectionCheck
+            // 
+            this.imageCorrectionCheck.AutoSize = true;
+            this.imageCorrectionCheck.Location = new System.Drawing.Point(264, 541);
+            this.imageCorrectionCheck.Name = "imageCorrectionCheck";
+            this.imageCorrectionCheck.Size = new System.Drawing.Size(106, 17);
+            this.imageCorrectionCheck.TabIndex = 2;
+            this.imageCorrectionCheck.Text = "Image Correction";
+            this.imageCorrectionCheck.UseVisualStyleBackColor = true;
+            // 
             // originalBox
             // 
             this.originalBox.Location = new System.Drawing.Point(0, 0);
@@ -1443,16 +1453,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Cmd_Save.TabIndex = 114;
             this.Cmd_Save.Text = "Save";
             this.Cmd_Save.UseVisualStyleBackColor = false;
-            // 
-            // imageCorrectionCheck
-            // 
-            this.imageCorrectionCheck.AutoSize = true;
-            this.imageCorrectionCheck.Location = new System.Drawing.Point(264, 541);
-            this.imageCorrectionCheck.Name = "imageCorrectionCheck";
-            this.imageCorrectionCheck.Size = new System.Drawing.Size(106, 17);
-            this.imageCorrectionCheck.TabIndex = 2;
-            this.imageCorrectionCheck.Text = "Image Correction";
-            this.imageCorrectionCheck.UseVisualStyleBackColor = true;
             // 
             // GigECameraDemoDlg
             // 
