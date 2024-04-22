@@ -150,14 +150,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="SapNETCSharpGigECameraDemo.exe" size="227280">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="SapNETCSharpGigECameraDemo.exe" size="227792">
       <assemblyIdentity name="SapNETCSharpGigECameraDemo" version="8.70.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>IqE52A2AiMVK2K3WYsmzY87YdDJ4vF57gA4iXrgJg3Y=</dsig:DigestValue>
+        <dsig:DigestValue>yke6v6qxg4Al2NNdh7SXIL30h6azsd7uSCCK1VWX9Jc=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

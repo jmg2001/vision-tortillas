@@ -371,8 +371,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                             Bitmap centralSector = extractSector(roiImage ,sectorSel);
 
                             // Definir el área mínima y máxima permitida para los contornos
-                            int areaMin = 4000; // Área mínima
-                            int areaMax = 10000; // Área máxima
+                            int areaMin = minArea; // Área mínima
+                            int areaMax = maxArea; // Área máxima
 
                             float diametroIA = 0;
                             double diameter = 0;
@@ -644,7 +644,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             processROIBox.Visible = true; // Mostrar el PictureBox ROI
             
             // Se binariza la imagen
-            Bitmap binarizedImage = binarizeImage(originalImage, 1);
+            Bitmap binarizedImage = binarizeImage(originalImage, 0);
 
             // Se extrae el ROI de la imagen binarizada
             Bitmap roiImage = extractROI(binarizedImage);
@@ -2338,7 +2338,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
             else if (compacidad > maxCompactness)
             {
-                Console.WriteLine(compacidad);
                 size = 6; // Shape
             }
             
