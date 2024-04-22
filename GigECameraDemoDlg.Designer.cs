@@ -154,6 +154,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Cmd_video = new System.Windows.Forms.Button();
             this.Cmd_Calibration = new System.Windows.Forms.Button();
             this.Cmd_Save = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
             this.toolStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.GroupBox1.SuspendLayout();
@@ -1000,6 +1001,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             // imagePage
             // 
+            this.imagePage.Controls.Add(this.button2);
             this.imagePage.Controls.Add(this.imageCorrectionCheck);
             this.imagePage.Controls.Add(this.originalBox);
             this.imagePage.Controls.Add(this.processROIBox);
@@ -1454,6 +1456,16 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Cmd_Save.Text = "Save";
             this.Cmd_Save.UseVisualStyleBackColor = false;
             // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(484, 523);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(186, 61);
+            this.button2.TabIndex = 3;
+            this.button2.Text = "Dispose";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click_1);
+            // 
             // GigECameraDemoDlg
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1653,6 +1665,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         internal Label Label36;
         internal Label Label37;
         private CheckBox imageCorrectionCheck;
+        private Button button2;
     }
 }
 
