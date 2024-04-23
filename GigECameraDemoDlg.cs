@@ -83,8 +83,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         int iteration = 0;
 
         // Parametros para el tamaño de la tortilla (Se van a traer de una base de datos)
-        int maxArea = 8000;
-        int minArea = 3000;
+        int maxArea = 300;
+        int minArea = 10;
         double maxDiameter = 88;
         double minDiameter = 72;
         double maxCompactness = 16;
@@ -286,11 +286,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                         originalImage = new Bitmap(saveImage());
 
-                        //originalImage = new Bitmap(imagesPath + "imagenOriginal.bmp");
+                        // originalImage = new Bitmap(imagesPath + "imagenOriginal.bmp");
 
                         // originalImage = (Bitmap)originalImage.Clone();
 
-                        //originalImage = new Bitmap(@"C:\Users\Jesús\Documents\Python\cam_calib\imagenOrigen.bmp");
+                        // originalImage = new Bitmap(@"C:\Users\Jesús\Documents\Python\cam_calib\imagenOrigen.bmp");
 
                         // Se crea el histograma de la imagen
                         ImageHistogram(originalImage);
@@ -310,8 +310,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                         originalImageIsDisposed = false;
 
-                        Quadrants = new List<Quadrant>();
-
                         if (mode == 0)
                         {
                             originalROIImage = new Bitmap(originalImage);
@@ -329,17 +327,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                             processROIBox.SendToBack();
                             m_ImageBox.SendToBack();
 
-                        }
-                        else
-                        {
-                            m_ImageBox.BringToFront();
-                            processROIBox.SendToBack();
-                            originalBox.SendToBack();
-                        }
+                            Quadrants = new List<Quadrant>();
 
-
-                        if (mode == 0)
-                        {
                             for (int i = 1; i < 17; i++)
                             {
                                 List<Point> points = new List<Point>();
@@ -348,6 +337,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                                 Quadrant qua = new Quadrant(i, "", false, 0, 0, 0, 0, blb);
                                 Quadrants.Add(qua);
                             }
+
+                        }
+                        else
+                        {
+                            m_ImageBox.BringToFront();
+                            processROIBox.SendToBack();
+                            originalBox.SendToBack();
                         }
 
                         if (triggerPLC && !calibrating)
@@ -357,86 +353,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                         if (calibrating)
                         {
-                            // Cambiamos al modo de grid 3x3 para calibrar con la del centro
-                            updateGridType(1);
-
-                            // Se binariza la imagen
-                            Bitmap binarizedImage = binarizeImage(originalImage, 0);
-
-                            Bitmap roiImage = extractROI(binarizedImage);
-
-                            int sectorSel = calculateCentralSector();
-
-                            // Se extrae el sector central
-                            Bitmap centralSector = extractSector(roiImage ,sectorSel);
-
-                            // Definir el área mínima y máxima permitida para los contornos
-                            int areaMin = minArea; // Área mínima
-                            int areaMax = maxArea; // Área máxima
-
-                            float diametroIA = 0;
-                            double diameter = 0;
-                            double maxD = 0;
-                            double minD = 0;
-                            bool calibrationValidate = false;
-
-                            centralSector.Save(imagesPath + "centralSector.bmp");
-
-                            var (areas, perimeters, centers) = FindContoursWithEdgesAndCenters(centralSector, areaMin, areaMax, tortillaColor);
-
-                            Point centro = new Point();
-
-                            for (int i = 0; i < areas.Count; i++)
-                            {
-                                int area = areas[i].Count;
-                                int perimeter = perimeters[i].Count;
-                                centro = centers[i];
-
-                                if (itsInCenter(centralSector,centro,10))
-                                {
-                                    diametroIA = (float)CalculateDiameterFromArea(area);
-
-                                    (diameter, maxD, minD) = calculateAndDrawDiameterTrianglesAlghoritm(centro,centralSector, 5, false);
-
-                                    calibrationValidate = true;
-                                    break;
-                                }
-                            }
-
-                            // Obtener las coordenadas del centro de la imagen
-                            int centroX = originalImage.Width / 2;
-                            int centroY = originalImage.Height / 2;
-
-                            if (calibrationValidate)
-                            {
-                                euFactor = float.Parse(txtCalibrationTarget.Text) / diametroIA; // unit/pixels
-                                settings.EUFactor = euFactor;
-                                euFactorTxt.Text = Math.Round(euFactor,3).ToString();
-                                maxDiameter = double.Parse(Txt_MaxDiameter.Text) / euFactor;
-                                minDiameter = double.Parse(Txt_MinDiameter.Text) / euFactor;
-                                settings.maxDiameter = maxDiameter;
-                                settings.minDiameter = minDiameter;
-
-                                MessageBox.Show("Calibration Succesful, Factor: " + euFactor);
-                            }
-                            else
-                            {
-                                MessageBox.Show("Place the calibration target in the middle. Error = X:" + (centro.X + centralSector.Width + UserROI.Left - centroX) + ", Y:" + (centroY - (centro.Y + centralSector.Height + UserROI.Top)));
-                            }
-
-                            updateGridType(grid);
-
-                            // Liberamos las imagenes
-                            binarizedImage.Dispose();
-                            roiImage.Dispose();
-                            centralSector.Dispose();
-
-                            originalImage.Dispose();
-                            originalImageIsDisposed = true;
-
-                            processImageBtn.Enabled = false;
-
-                            calibrating = false;
+                            calibrate();
                         }
 
                         processing = false;
@@ -446,7 +363,87 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
-        public Bitmap undistortImage()
+        private void calibrate()
+        {
+            // Cambiamos al modo de grid 3x3 para calibrar con la del centro
+            updateGridType(1);
+
+            // Se binariza la imagen
+            Bitmap binarizedImage = binarizeImage(originalImage, 0);
+
+            Bitmap roiImage = extractROI(binarizedImage);
+
+            int sectorSel = calculateCentralSector();
+
+            // Se extrae el sector central
+            Bitmap centralSector = extractSector(roiImage, sectorSel);
+
+            float diametroIA = 0;
+            double diameter = 0;
+            double maxD = 0;
+            double minD = 0;
+            bool calibrationValidate = false;
+
+            centralSector.Save(imagesPath + "centralSector.bmp");
+
+            var (areas, perimeters, centers) = FindContoursWithEdgesAndCenters(centralSector, minArea, maxArea, tortillaColor);
+
+            Point centro = new Point();
+
+            for (int i = 0; i < areas.Count; i++)
+            {
+                int area = areas[i].Count;
+                int perimeter = perimeters[i].Count;
+                centro = centers[i];
+
+                if (itsInCenter(centralSector, centro, 10))
+                {
+                    diametroIA = (float)CalculateDiameterFromArea(area);
+
+                    (diameter, maxD, minD) = calculateAndDrawDiameterTrianglesAlghoritm(centro, centralSector, 5, false);
+
+                    calibrationValidate = true;
+                    break;
+                }
+            }
+
+            // Obtener las coordenadas del centro de la imagen
+            int centroX = originalImage.Width / 2;
+            int centroY = originalImage.Height / 2;
+
+            if (calibrationValidate)
+            {
+                euFactor = float.Parse(txtCalibrationTarget.Text) / diametroIA; // unit/pixels
+                settings.EUFactor = euFactor;
+                euFactorTxt.Text = Math.Round(euFactor, 3).ToString();
+                maxDiameter = double.Parse(Txt_MaxDiameter.Text) / euFactor;
+                minDiameter = double.Parse(Txt_MinDiameter.Text) / euFactor;
+                settings.maxDiameter = maxDiameter;
+                settings.minDiameter = minDiameter;
+
+                MessageBox.Show("Calibration Succesful, Factor: " + euFactor);
+            }
+            else
+            {
+                MessageBox.Show("Place the calibration target in the middle. Error = X:" + (centro.X + centralSector.Width + UserROI.Left - centroX) + ", Y:" + (centroY - (centro.Y + centralSector.Height + UserROI.Top)));
+            }
+
+            updateGridType(grid);
+
+            // Liberamos las imagenes
+            binarizedImage.Dispose();
+            roiImage.Dispose();
+            centralSector.Dispose();
+
+            originalImage.Dispose();
+            originalImageIsDisposed = true;
+
+            processImageBtn.Enabled = false;
+
+            calibrating = false;
+        }
+
+        public void undistortImage()
         {
             Bitmap imagen = new Bitmap(originalImage);
 
@@ -454,14 +451,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             int alto = imagen.Height;
             int ancho = imagen.Width;
 
-            double k1 = -1.158e-6;// -24.4641724;
-            double k2 = 1.56e-12;//-108.33681;
+            double k1 = (2.8824e-6)/2;//-1.158e-6;// -24.4641724;
+            double k2 = (-3.444e-11)/2;//1.56e-12;//-108.33681;
             //double k3 = 0;
 
             //double fx = 4728.60;
             //double fy = 4623.52;
-            double cx = 320;
-            double cy = 240;
+            double cx = 319;
+            double cy = 239;
 
             // Crear una imagen corregida vacía
             Bitmap imagenCorregida = new Bitmap(ancho, alto);
@@ -524,7 +521,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         else
                         {
                             // Si las coordenadas están fuera de la imagen, simplemente copiar el valor del píxel original
-                            imagenCorregida.SetPixel(xCorregido, yCorregido, pixels[(int)xCorregido, (int)yCorregido]);//pixels[(int)xNormalizadoCorregido, (int)yNormalizadoCorregido]);
+                            imagenCorregida.SetPixel(xCorregido, yCorregido, Color.Black);//pixels[(int)xCorregido, (int)yCorregido]);//pixels[(int)xNormalizadoCorregido, (int)yNormalizadoCorregido]);
                         }
                     }
                 }
@@ -532,7 +529,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             imagenCorregida.Save(imagesPath + "imagenCorregida.bmp");
 
-            return imagenCorregida;
+            imagenCorregida.Dispose();
         }
 
 
@@ -644,7 +641,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             processROIBox.Visible = true; // Mostrar el PictureBox ROI
             
             // Se binariza la imagen
-            Bitmap binarizedImage = binarizeImage(originalImage, 0);
+            Bitmap binarizedImage = binarizeImage(originalImage, 1);
 
             // Se extrae el ROI de la imagen binarizada
             Bitmap roiImage = extractROI(binarizedImage);
@@ -2112,6 +2109,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                     Blob blob = new Blob(area, areas[i], perimeter, perimeters[i], diameterTriangles, diametroIA, centro, maxDiameter, minDiameter, sector, compactness, size, ovalidad, 0);
 
+                    Console.WriteLine("Sector: " + sector);
+                    Console.WriteLine("X: " + (centro.X + UserROI.Left) + " Y: " + (centro.Y + UserROI.Top));
+
                     // Agregamos el elemento a la lista
                     Blobs.Add(blob);
 
@@ -3157,10 +3157,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void button2_Click(object sender, EventArgs e)
         {
-            calibrate();
+            calibrateBtnClick();
         }
 
-        private void calibrate()
+        private void calibrateBtnClick()
         {
             calibrating = true;
             if (!m_Xfer.Grabbing || mode == 1)

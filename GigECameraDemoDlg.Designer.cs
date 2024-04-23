@@ -112,6 +112,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.euListSelection = new System.Windows.Forms.ComboBox();
             this.mainTabs = new System.Windows.Forms.TabControl();
             this.imagePage = new System.Windows.Forms.TabPage();
+            this.button2 = new System.Windows.Forms.Button();
             this.imageCorrectionCheck = new System.Windows.Forms.CheckBox();
             this.originalBox = new System.Windows.Forms.PictureBox();
             this.processROIBox = new System.Windows.Forms.PictureBox();
@@ -154,7 +155,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Cmd_video = new System.Windows.Forms.Button();
             this.Cmd_Calibration = new System.Windows.Forms.Button();
             this.Cmd_Save = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
             this.toolStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.GroupBox1.SuspendLayout();
@@ -1014,6 +1014,16 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.imagePage.UseVisualStyleBackColor = true;
             this.imagePage.Click += new System.EventHandler(this.tabPage3_Click);
             // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(484, 523);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(186, 61);
+            this.button2.TabIndex = 3;
+            this.button2.Text = "Dispose";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click_1);
+            // 
             // imageCorrectionCheck
             // 
             this.imageCorrectionCheck.AutoSize = true;
@@ -1455,16 +1465,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Cmd_Save.TabIndex = 114;
             this.Cmd_Save.Text = "Save";
             this.Cmd_Save.UseVisualStyleBackColor = false;
-            // 
-            // button2
-            // 
-            this.button2.Location = new System.Drawing.Point(484, 523);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(186, 61);
-            this.button2.TabIndex = 3;
-            this.button2.Text = "Dispose";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click_1);
             // 
             // GigECameraDemoDlg
             // 
