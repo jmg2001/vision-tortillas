@@ -281,32 +281,30 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                         // m_AcqDevice.SetFeatureValue(44, true);
 
+                        Bitmap testImage = new Bitmap(640,480);
 
-                        if (mode == 0) processImageBtn.Enabled = true;
+                        if (mode == 0) 
+                        {
+                            processImageBtn.Enabled = true;
 
-                        originalImage = new Bitmap(saveImage());
+                            testImage = new Bitmap(saveImage());
 
+                        }
                         // originalImage = new Bitmap(imagesPath + "imagenOriginal.bmp");
 
                         // originalImage = (Bitmap)originalImage.Clone();
 
-                        // originalImage = new Bitmap(@"C:\Users\Jesús\Documents\Python\cam_calib\imagenOrigen.bmp");
+                        originalImage = new Bitmap(@"C:\Users\Jesús\Documents\Python\cam_calib\imagenOrigen.bmp");
 
                         // Se crea el histograma de la imagen
                         ImageHistogram(originalImage);
 
-                        stopwatch.Start();
-
                         if (imageCorrectionCheck.Checked && mode == 0)
                         {
                             undistortImage();
-                            originalImage.Dispose();
+                            // originalImage.Dispose();
                             originalImage = new Bitmap(imagesPath + "imagenCorregida.bmp");
                         }
-
-                        stopwatch.Stop();
-                        Console.WriteLine(stopwatch.ElapsedMilliseconds);
-                        stopwatch.Restart();
 
                         originalImageIsDisposed = false;
 
@@ -326,6 +324,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                             originalBox.BringToFront();
                             processROIBox.SendToBack();
                             m_ImageBox.SendToBack();
+                            m_View.Hide();
 
                             Quadrants = new List<Quadrant>();
 
@@ -356,8 +355,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                             calibrate();
                         }
 
+                        testImage.Dispose();
                         processing = false;
-                        m_Buffers.Clear();
                     }
                 });
             }
@@ -451,8 +450,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             int alto = imagen.Height;
             int ancho = imagen.Width;
 
-            double k1 = (2.8824e-6)/2;//-1.158e-6;// -24.4641724;
-            double k2 = (-3.444e-11)/2;//1.56e-12;//-108.33681;
+            double k1 = -2.8824e-6;//-1.158e-6;// -24.4641724;
+            double k2 = 3.444e-12;//1.56e-12;//-108.33681;
             //double k3 = 0;
 
             //double fx = 4728.60;
@@ -1950,8 +1949,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 if(!m_Buffers.Save(imagePath, "-format bmp", -1, 0))
                 {
                     Console.WriteLine("Fuck");
-                    m_Buffers.Clear();
-                    originalImage.Dispose();
                 }
                 if (mode == 0) Console.WriteLine("Imagen guardada en :" + imagePath);
             }
@@ -1964,7 +1961,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             Bitmap image = new Bitmap(imagePath);
 
             return image;
-
+            
         }
 
         private int CalculateOtsuThreshold()
