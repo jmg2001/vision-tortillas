@@ -122,6 +122,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         int gridRows = 3;
         int gridCols = 3;
 
+        bool originalImageIsDisposed = true;
+
 
         public bool isActivatedProcessData = false; // Variable de estado para el botón tipo toggle
 
@@ -229,10 +231,25 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 {
                     // Al parecer esto es lo que sucede al tomar la captura, ya sea con el trigger o en vivo
                     // Se muestra la imagen en el Form
+
+                    if (!originalImageIsDisposed)
+                    {
+                        try
+                        {
+                            originalImage.Dispose();
+                        }
+                        catch
+                        {
+
+                        }
+                    }
+                    
+
                     GigeDlg.m_View.Show();
 
                     processImageBtn.Enabled = true;
                     originalImage = saveImage();
+                    originalImageIsDisposed = false;
 
                     if (triggerPLC && !calibrating)
                     {
@@ -305,6 +322,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         binarizedImage.Dispose();
                         roiImage.Dispose();
                         originalImage.Dispose();
+                        originalImageIsDisposed = true;
                         centralSector.Dispose();
 
                         processImageBtn.Enabled = false;
@@ -400,6 +418,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             binarizedImage.Dispose();
             roiImage.Dispose();
             originalImage.Dispose();
+            originalImageIsDisposed = true;
 
             processImageBtn.Enabled = false;
         }
