@@ -256,12 +256,108 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     {
                         processing = true;
 
+                        //if (!originalImageIsDisposed)
+                        //{
+                        //    try
+                        //    {
+                        //        originalImage.Dispose();
+                        //        originalImageIsDisposed = true;
+                        //    }
+                        //    catch
+                        //    {
+
+                        //    }
+                        //}
+
+                        //// Al parecer esto es lo que sucede al tomar la captura, ya sea con el trigger o en vivo
+                        //// Se muestra la imagen en el Form
+                        //GigeDlg.m_View.Show();
+                        //// var test = GigeDlg.m_Buffers.get_Page(-1);
+
+                        ////foreach(var feature in m_AcqDevice.FeatureNames)
+                        ////{
+                        ////    Console.WriteLine(feature);
+                        ////}
+
+                        //// m_AcqDevice.SetFeatureValue(44, true);
+
+                        //Bitmap testImage = new Bitmap(640,480);
+
+                        //if (mode == 0) 
+                        //{
+                        //    processImageBtn.Enabled = true;
+
+                        //    originalImage = new Bitmap(saveImage());
+
+                        //}
+
+                        ////originalImage = new Bitmap(@"C:\Users\Jesús\Documents\Python\cam_calib\imagenOrigen.bmp");
+
+                        //// Se crea el histograma de la imagen
+                        //ImageHistogram(originalImage);
+
+                        //if (imageCorrectionCheck.Checked && mode == 0)
+                        //{
+                        //    undistortImage();
+                        //    originalImage = new Bitmap(imagesPath + "imagenCorregida.bmp");
+                        //}
+
+                        //originalImageIsDisposed = false;
+
+                        //if (mode == 0)
+                        //{
+                        //    originalROIImage = new Bitmap(originalImage);
+
+                        //    ConvertToCompatibleFormat(originalROIImage);
+
+                        //    drawROI(originalROIImage);
+
+                        //    originalROIImage.Save(imagesPath + "1.bmp");
+
+                        //    originalBox.Image = originalROIImage;
+                        //    originalBox.SizeMode = PictureBoxSizeMode.AutoSize;
+                        //    originalBox.Visible = true;
+                        //    originalBox.BringToFront();
+                        //    processROIBox.SendToBack();
+                        //    m_ImageBox.SendToBack();
+                        //    m_View.Hide();
+
+                        //    Quadrants = new List<Quadrant>();
+
+                        //    for (int i = 1; i < 17; i++)
+                        //    {
+                        //        List<Point> points = new List<Point>();
+                        //        Point centro = new Point();
+                        //        Blob blb = new Blob(0, points, 0, points, 0, 0, centro, 0, 0, 0, 0, 0, 0, 0);
+                        //        Quadrant qua = new Quadrant(i, "", false, 0, 0, 0, 0, blb);
+                        //        Quadrants.Add(qua);
+                        //    }
+
+                        //}
+                        //else
+                        //{
+                        //    m_ImageBox.BringToFront();
+                        //    processROIBox.SendToBack();
+                        //    originalBox.SendToBack();
+                        //}
+
+                        //if (triggerPLC && !calibrating)
+                        //{
+                        //    process();
+                        //}
+
+                        //if (calibrating)
+                        //{
+                        //    calibrate();
+                        //}
+
+                        //testImage.Dispose();
+
                         if (!originalImageIsDisposed)
                         {
                             try
                             {
                                 originalImage.Dispose();
-                                originalImageIsDisposed = true;
                             }
                             catch
                             {
@@ -269,76 +365,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                             }
                         }
 
-                        // Al parecer esto es lo que sucede al tomar la captura, ya sea con el trigger o en vivo
-                        // Se muestra la imagen en el Form
                         GigeDlg.m_View.Show();
-                        // var test = GigeDlg.m_Buffers.get_Page(-1);
-
-                        //foreach(var feature in m_AcqDevice.FeatureNames)
-                        //{
-                        //    Console.WriteLine(feature);
-                        //}
-
-                        // m_AcqDevice.SetFeatureValue(44, true);
-
-                        Bitmap testImage = new Bitmap(640,480);
-
-                        if (mode == 0) 
-                        {
-                            processImageBtn.Enabled = true;
-
-                            originalImage = new Bitmap(saveImage());
-
-                        }
-
-                        //originalImage = new Bitmap(@"C:\Users\Jesús\Documents\Python\cam_calib\imagenOrigen.bmp");
-
-                        // Se crea el histograma de la imagen
-                        ImageHistogram(originalImage);
-
-                        if (imageCorrectionCheck.Checked && mode == 0)
-                        {
-                            undistortImage();
-                            originalImage = new Bitmap(imagesPath + "imagenCorregida.bmp");
-                        }
-
-                        originalImageIsDisposed = false;
 
                         if (mode == 0)
                         {
-                            originalROIImage = new Bitmap(originalImage);
-
-                            ConvertToCompatibleFormat(originalROIImage);
-
-                            drawROI(originalROIImage);
-
-                            originalROIImage.Save(imagesPath + "1.bmp");
-
-                            originalBox.Image = originalROIImage;
-                            originalBox.SizeMode = PictureBoxSizeMode.AutoSize;
-                            originalBox.Visible = true;
-                            originalBox.BringToFront();
-                            processROIBox.SendToBack();
-                            m_ImageBox.SendToBack();
-                            m_View.Hide();
-
-                            Quadrants = new List<Quadrant>();
-
-                            for (int i = 1; i < 17; i++)
-                            {
-                                List<Point> points = new List<Point>();
-                                Point centro = new Point();
-                                Blob blb = new Blob(0, points, 0, points, 0, 0, centro, 0, 0, 0, 0, 0, 0, 0);
-                                Quadrant qua = new Quadrant(i, "", false, 0, 0, 0, 0, blb);
-                                Quadrants.Add(qua);
-                            }
-
-                        }
-                        else
-                        {
-                            m_ImageBox.BringToFront();
-                            processROIBox.SendToBack();
-                            originalBox.SendToBack();
+                            preProcess();
                         }
 
                         if (triggerPLC && !calibrating)
@@ -351,10 +382,49 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                             calibrate();
                         }
 
-                        testImage.Dispose();
                         processing = false;
                     }
                 });
+            }
+        }
+
+        private void preProcess()
+        {
+            processImageBtn.Enabled = true;
+            originalImage = saveImage();
+            originalImageIsDisposed = false;
+            ImageHistogram(originalImage);
+
+            if (imageCorrectionCheck.Checked)
+            {
+                originalImage = undistortImage(originalImage);
+            }
+
+            originalROIImage = new Bitmap(originalImage);
+
+            ConvertToCompatibleFormat(originalROIImage);
+
+            drawROI(originalROIImage);
+
+            originalROIImage.Save(imagesPath + "1.bmp");
+
+            originalBox.Image = originalROIImage;
+            originalBox.SizeMode = PictureBoxSizeMode.AutoSize;
+            originalBox.Visible = true;
+            originalBox.BringToFront();
+            processROIBox.SendToBack();
+            m_ImageBox.SendToBack();
+            m_View.Hide();
+
+            Quadrants = new List<Quadrant>();
+
+            for (int i = 1; i < 17; i++)
+            {
+                List<Point> points = new List<Point>();
+                Point centro = new Point();
+                Blob blb = new Blob(0, points, 0, points, 0, 0, centro, 0, 0, 0, 0, 0, 0, 0);
+                Quadrant qua = new Quadrant(i, "", false, 0, 0, 0, 0, blb);
+                Quadrants.Add(qua);
             }
         }
 
@@ -438,9 +508,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             calibrating = false;
         }
 
-        public void undistortImage()
+        public Bitmap undistortImage(Bitmap imagen)
         {
-            Bitmap imagen = new Bitmap(originalImage);
+            // Bitmap imagen = new Bitmap(originalImage);
 
             // Dimensiones de la imagen
             int alto = imagen.Height;
@@ -522,9 +592,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 }
             });
 
+            imagen.Dispose();
+
             imagenCorregida.Save(imagesPath + "imagenCorregida.bmp");
 
-            imagenCorregida.Dispose();
+            return imagenCorregida;
         }
 
 
@@ -2102,9 +2174,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                     Blob blob = new Blob(area, areas[i], perimeter, perimeters[i], diameterTriangles, diametroIA, centro, maxDiameter, minDiameter, sector, compactness, size, ovalidad, 0);
 
-                    Console.WriteLine("Sector: " + sector);
-                    Console.WriteLine("X: " + (centro.X + UserROI.Left) + " Y: " + (centro.Y + UserROI.Top));
-
                     // Agregamos el elemento a la lista
                     Blobs.Add(blob);
 
@@ -3190,31 +3259,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void button2_Click_1(object sender, EventArgs e)
         {
-            string filePath = imagesPath + "imagenOrigen.bmp"; // Ruta del archivo
-
-            // Obtener los procesos que están utilizando el archivo
-            Process[] processes = Process.GetProcesses();
-
-            foreach (Process process in processes)
-            {
-                try
-                {
-                    // Obtener los archivos que el proceso tiene abierto
-                    foreach (ProcessModule module in process.Modules)
-                    {
-                        if (module.FileName.Equals(filePath, StringComparison.OrdinalIgnoreCase))
-                        {
-                            Console.WriteLine($"El proceso {process.ProcessName} está utilizando el archivo.");
-                            break;
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // Manejar excepciones al obtener los módulos del proceso
-                    // Console.WriteLine($"Error al obtener los módulos del proceso {process.ProcessName}: {ex.Message}");
-                }
-            }
+            
         }
     }
 }
