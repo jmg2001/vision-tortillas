@@ -83,8 +83,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         int iteration = 0;
 
         // Parametros para el tamaño de la tortilla (Se van a traer de una base de datos)
-        int maxArea = 8000;
-        int minArea = 3000;
+        int maxArea = 25000;
+        int minArea = 1500;
         double maxDiameter = 88;
         double minDiameter = 72;
         double maxCompactness = 16;
@@ -367,10 +367,18 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                         GigeDlg.m_View.Show();
 
-                        if (mode == 0)
+                        switch (mode)
                         {
-                            preProcess();
+                            case 0:
+                                preProcess();
+                                break;
+                            case 1:
+                                m_ImageBox.BringToFront();
+                                processROIBox.SendToBack();
+                                originalBox.SendToBack();
+                                break;
                         }
+
 
                         if (triggerPLC && !calibrating)
                         {
@@ -518,12 +526,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             double k1 = -1.158e-6;//-1.6105e-6;//-1.158e-6;// -24.4641724;
             double k2 = 1.56e-12;//1.28317e-11;//1.56e-12;//-108.33681;
-            //double k3 = 0;
 
-            //double fx = 4728.60;
-            //double fy = 4623.52;
-            double cx = 320;
-            double cy = 240;
+            double cx = 319;
+            double cy = 239;
 
             // Crear una imagen corregida vacía
             Bitmap imagenCorregida = new Bitmap(ancho, alto);
@@ -544,18 +549,18 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 for (int xCorregido = 0; xCorregido < ancho; xCorregido++)
                 {
                     
-                    double xNormalizado = (xCorregido - cx);//(xCorregido - cx) / fx;
-                    double yNormalizado = (yCorregido - cy);//(yCorregido - cy) / fy;
+                    double xNormalizado = (xCorregido - cx);
+                    double yNormalizado = (yCorregido - cy);
 
                     double radio = Math.Sqrt(xNormalizado * xNormalizado + yNormalizado * yNormalizado);
 
-                    double factorCorreccionRadial = 1 + k1 * Math.Pow(radio, 2) + k2 * Math.Pow(radio, 4); //+ k3 * Math.Pow(radio, 6);
+                    double factorCorreccionRadial = 1 + k1 * Math.Pow(radio, 2) + k2 * Math.Pow(radio, 4);
 
                     double xNormalizadoCorregido = xNormalizado * factorCorreccionRadial;
                     double yNormalizadoCorregido = yNormalizado * factorCorreccionRadial;
 
-                    var xCorregidoFinal = (xNormalizadoCorregido + cx);//(xNormalizadoCorregido * fx + cx);
-                    var yCorregidoFinal = (yNormalizadoCorregido + cy);//(yNormalizadoCorregido * fy + cy);
+                    var xCorregidoFinal = (xNormalizadoCorregido + cx);
+                    var yCorregidoFinal = (yNormalizadoCorregido + cy);
 
                     // Procesar cada píxel de la sección dentro de un bloqueo
                     lock (lockObject)
