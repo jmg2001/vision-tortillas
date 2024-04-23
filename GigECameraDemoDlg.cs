@@ -83,8 +83,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         int iteration = 0;
 
         // Parametros para el tamaño de la tortilla (Se van a traer de una base de datos)
-        int maxArea = 300;
-        int minArea = 10;
+        int maxArea = 8000;
+        int minArea = 3000;
         double maxDiameter = 88;
         double minDiameter = 72;
         double maxCompactness = 16;
@@ -287,14 +287,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         {
                             processImageBtn.Enabled = true;
 
-                            testImage = new Bitmap(saveImage());
+                            originalImage = new Bitmap(saveImage());
 
                         }
-                        // originalImage = new Bitmap(imagesPath + "imagenOriginal.bmp");
 
-                        // originalImage = (Bitmap)originalImage.Clone();
-
-                        originalImage = new Bitmap(@"C:\Users\Jesús\Documents\Python\cam_calib\imagenOrigen.bmp");
+                        //originalImage = new Bitmap(@"C:\Users\Jesús\Documents\Python\cam_calib\imagenOrigen.bmp");
 
                         // Se crea el histograma de la imagen
                         ImageHistogram(originalImage);
@@ -302,7 +299,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         if (imageCorrectionCheck.Checked && mode == 0)
                         {
                             undistortImage();
-                            // originalImage.Dispose();
                             originalImage = new Bitmap(imagesPath + "imagenCorregida.bmp");
                         }
 
@@ -450,14 +446,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             int alto = imagen.Height;
             int ancho = imagen.Width;
 
-            double k1 = -2.8824e-6;//-1.158e-6;// -24.4641724;
-            double k2 = 3.444e-12;//1.56e-12;//-108.33681;
+            double k1 = -1.158e-6;//-1.6105e-6;//-1.158e-6;// -24.4641724;
+            double k2 = 1.56e-12;//1.28317e-11;//1.56e-12;//-108.33681;
             //double k3 = 0;
 
             //double fx = 4728.60;
             //double fy = 4623.52;
-            double cx = 319;
-            double cy = 239;
+            double cx = 320;
+            double cy = 240;
 
             // Crear una imagen corregida vacía
             Bitmap imagenCorregida = new Bitmap(ancho, alto);
@@ -640,7 +636,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             processROIBox.Visible = true; // Mostrar el PictureBox ROI
             
             // Se binariza la imagen
-            Bitmap binarizedImage = binarizeImage(originalImage, 1);
+            Bitmap binarizedImage = binarizeImage(originalImage, 0);
 
             // Se extrae el ROI de la imagen binarizada
             Bitmap roiImage = extractROI(binarizedImage);
