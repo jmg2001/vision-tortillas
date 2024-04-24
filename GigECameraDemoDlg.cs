@@ -28,6 +28,7 @@ using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.Globalization;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Threading;
 
 
 [StructLayout(LayoutKind.Sequential)]
@@ -124,6 +125,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         // Configurar el servidor Modbus TCP
         ModbusServer modbusServer = new ModbusServer();
+        ModbusClient modbusClient = new ModbusClient();
+
+        Thread thread;
+        bool threadSuspended = false;
 
         List<GridType> gridTypes = new List<GridType>();
         GridType gridType = null;
@@ -1089,6 +1094,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 InitializeComponent();
                 InitializeDataTable();
 
+                initModbusClient();
+
                 originalBox.MouseMove += originalBox_MouseMove;
                 processROIBox.MouseMove += processBox_MouseMove;
 
@@ -1263,20 +1270,106 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 case "Manual":
                     operationMode = 0;
                     productsPage.Enabled = false;
+                    GroupActualTargetSize.Enabled = true;
+                    GroupSelectGrid.Enabled = true;
+                    if (thread.IsAlive)
+                    {
+                        thread.Suspend();
+                        threadSuspended = true;
+                    }
                     break;
                 case "Local":
                     operationMode = 1;
                     productsPage.Enabled = true;
+                    GroupActualTargetSize.Enabled = false;
+                    GroupSelectGrid.Enabled = false;
+                    if (thread.IsAlive)
+                    {
+                        thread.Suspend();
+                        threadSuspended = true;
+                    }
+
                     break;
                 case "PLC":
                     operationMode = 2;
                     productsPage.Enabled = false;
+                    GroupActualTargetSize.Enabled = false;
+                    GroupSelectGrid.Enabled = false;
+                    if (threadSuspended)
+                    {
+                        thread.Resume();
+                    }
+                    else
+                    {
+                        thread.Start();
+                    }
                     break;
             }
         }
 
+        private void initModbusClient()
+        {
+            // Dirección IP y puerto del dispositivo Modbus
+            string ipAddress = "127.0.0.1";
+            int port = 503;
+
+            // Crear un cliente Modbus TCP
+            modbusClient = new ModbusClient(ipAddress, port);
+
+            // Dirección del registro a leer y cantidad de registros a leer
+            int startAddress = 0; // Dirección del primer registro a leer
+            int numRegisters = 10; // Cantidad de registros a leer
+
+            // Crear e iniciar un hilo para la lectura continua de registros Modbus
+            thread = new Thread(() =>
+            {
+                while (true)
+                {
+                    try
+                    {
+                        // Conectar al dispositivo Modbus
+                        modbusClient.Connect();
+
+                        try
+                        {
+                            // Leer registros del dispositivo Modbus
+                            int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+
+                            // Mostrar los valores de los registros leídos
+                            Console.WriteLine("Valores de los registros leídos:");
+                            for (int i = 0; i < registers.Length; i++)
+                            {
+                                Console.WriteLine($"Registro {startAddress + i}: {registers[i]}");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            // Manejar errores de comunicación con el dispositivo Modbus
+                            Console.WriteLine($"Error: {ex.Message}");
+                        }
+                        finally
+                        {
+                            // Desconectar del dispositivo Modbus
+                            modbusClient.Disconnect();
+                        }
+                    }
+                    catch
+                    {
+                        Console.WriteLine("No se pudo conectar al servidor modbus");
+                    }
+                    
+
+                    
+
+                    // Esperar 5 segundos antes de realizar la próxima lectura
+                    Thread.Sleep(1000); // 5000 milisegundos = 5 segundos
+                }
+            });
+        }
+
         private void changeProduct(Product record)
         {
+            settings.productCode = record.Code;
             CmbProducts.SelectedItem = record.Code;
             Txt_Code.Text = record.Code.ToString();
             Txt_Description.Text = record.Name;
@@ -3397,6 +3490,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         }
 
         private void Txt_MaxDiameter_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void CmdDelete_Click(object sender, EventArgs e)
         {
 
         }
