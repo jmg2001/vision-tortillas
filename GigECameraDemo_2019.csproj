@@ -211,6 +211,12 @@
     <Compile Include="AcqConfigDlg.designer.cs">
       <DependentUpon>AcqConfigDlg.cs</DependentUpon>
     </Compile>
+    <Compile Include="AuthenticationDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AuthenticationDlg.Designer.cs">
+      <DependentUpon>AuthenticationDlg.cs</DependentUpon>
+    </Compile>
     <Compile Include="AviFileDlg.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -279,6 +285,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="AcqConfigDlg.resx">
       <DependentUpon>AcqConfigDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AuthenticationDlg.resx">
+      <DependentUpon>AuthenticationDlg.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="AviFileDlg.resx">
       <DependentUpon>AviFileDlg.cs</DependentUpon>

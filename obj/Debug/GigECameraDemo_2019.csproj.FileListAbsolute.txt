@@ -81,3 +81,4 @@ C:\Users\Jesús\Documents\vision-tortillas\bin\Debug\CsvHelper.dll
 C:\Users\Jesús\Documents\vision-tortillas\bin\Debug\Microsoft.Bcl.HashCode.dll
 C:\Users\Jesús\Documents\vision-tortillas\bin\Debug\CsvHelper.xml
 C:\Users\Jesús\Documents\vision-tortillas\bin\Debug\Microsoft.Bcl.HashCode.xml
+C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.AuthenticationDlg.resources

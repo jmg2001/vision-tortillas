@@ -173,7 +173,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             public double MinD { get; set; }
             public double MaxOvality { get; set; }
             public double MaxCompacity { get; set; }
-            public int[,] Grid { get; set; }
+            public int Grid { get; set; }
 
         }
 
@@ -1357,9 +1357,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     {
                         Console.WriteLine("No se pudo conectar al servidor modbus");
                     }
-                    
-
-                    
 
                     // Esperar 5 segundos antes de realizar la próxima lectura
                     Thread.Sleep(1000); // 5000 milisegundos = 5 segundos
@@ -1377,6 +1374,23 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             Txt_MinD.Text = (record.MinD*euFactor).ToString();
             Txt_Ovality.Text = record.MaxOvality.ToString();
             Txt_Compacity.Text = record.MaxCompacity.ToString();
+            string grid = "";
+            switch (record.Grid)
+            {
+                case 1:
+                    grid = "3x3";
+                    break;
+                case 2:
+                    grid = "5";
+                    break;
+                case 3:
+                    grid = "4x4";
+                    break;
+                case 4:
+                    grid = "2x2";
+                    break;
+            }
+            CmbGrid.SelectedItem = grid;
         }
 
         private void CmbProducts_SelectedIndexChanged(object sender, EventArgs e)
@@ -2150,7 +2164,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             try
             {
                 File.Delete(imagePath);
-                Console.WriteLine("Archivo eliminado correctamente.");
+                // Console.WriteLine("Archivo eliminado correctamente.");
             }
             catch (FileNotFoundException)
             {
@@ -2166,9 +2180,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 // Se guarda la imagen
                 if(!m_Buffers.Save(imagePath, "-format bmp", -1, 0))
                 {
-                    Console.WriteLine("Fuck");
+                    Console.WriteLine("Error al fuardar");
                 }
-                if (mode == 0) Console.WriteLine("Imagen guardada en :" + imagePath);
+                // if (mode == 0) Console.WriteLine("Imagen guardada en :" + imagePath);
             }
             catch (SapLibraryException exception)
             {
@@ -2326,12 +2340,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                     // Agregamos el elemento a la lista
                     Blobs.Add(blob);
-
-                    if (blob.Sector == 5)
-                    {
-                        Console.WriteLine(blob.Centro.X + UserROI.Left);
-                        Console.WriteLine(blob.Centro.Y + UserROI.Top);
-                    }
 
                     foreach (Quadrant quadrant in Quadrants)
                     {
@@ -3134,7 +3142,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             foreach (GridType gridT in gridTypes)
             {
-                if (gridT.Type == v)
+                if (gridT.Type == v && grid != v)
                 {
                     gridType = gridT;
                     if (type != "")
@@ -3143,7 +3151,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         settings.Format = type;
                         settings.GridType = v;
                         grid = v;
-                        MessageBox.Show("Format switched to: " + type);
+                        MessageBox.Show("Grid switched to: " + type);
                     }
                     break;
                 }
@@ -3447,15 +3455,35 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 {
                     if (records[i].Code == selectedItem)
                     {
+                        int grid = 0;
+
+                        switch (CmbGrid.SelectedItem.ToString())
+                        {
+                            case "3x3":
+                                grid = 1;
+                                break;
+                            case "5":
+                                grid = 2;
+                                break;
+                            case "4x4":
+                                grid = 3;
+                                break;
+                            case "2x2":
+                                grid = 4;
+                                break;
+                        }
+
                         records[i] = new Product
                         {
                             Code = int.Parse(Txt_Code.Text),
                             Name = Txt_Description.Text,
-                            MaxD = double.Parse(Txt_MaxD.Text)/euFactor,
-                            MinD = double.Parse(Txt_MinD.Text)/euFactor,
+                            MaxD = double.Parse(Txt_MaxD.Text) / euFactor,
+                            MinD = double.Parse(Txt_MinD.Text) / euFactor,
                             MaxOvality = double.Parse(Txt_Ovality.Text),
-                            MaxCompacity = double.Parse(Txt_Compacity.Text)
+                            MaxCompacity = double.Parse(Txt_Compacity.Text),
+                            Grid = grid
                         };
+
                         break;
                     }
                 }
@@ -3487,6 +3515,26 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             Txt_MaxCompacity.Text = Txt_Compacity.Text;
             maxCompactness = double.Parse(Txt_Compacity.Text);
 
+            int grid = 0;
+
+            switch (CmbGrid.SelectedItem.ToString())
+            {
+                case "3x3":
+                    grid = 1;
+                    break;
+                case "5":
+                    grid = 2;
+                    break;
+                case "4x4":
+                    grid = 3;
+                    break;
+                case "2x2":
+                    grid = 4;
+                    break;
+            }
+
+            updateGridType(grid, CmbGrid.SelectedItem.ToString());
+
         }
 
         private void Txt_MaxDiameter_TextChanged(object sender, EventArgs e)
@@ -3495,6 +3543,16 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         }
 
         private void CmdDelete_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label9_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void CmbGridSelection_SelectedIndexChanged(object sender, EventArgs e)
         {
 
         }
