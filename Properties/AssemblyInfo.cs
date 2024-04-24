@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("GigECameraDemo")]
-[assembly: AssemblyDescription("Sapera GigE-Vision Camera Demo (.NET)")]
+[assembly: AssemblyTitle("InspecTorT")]
+[assembly: AssemblyDescription("Sistema de vision para medicion de tortillas")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Teledyne Digital Imaging Inc.")]
-[assembly: AssemblyProduct("Sapera LT")]
+[assembly: AssemblyCompany("SIOS Ingenieria")]
+[assembly: AssemblyProduct("InspecTorT")]
 [assembly: AssemblyCopyright("Copyright © Teledyne Digital Imaging Inc. 2008-2022")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -29,5 +29,5 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("8.70.0.0")]
-[assembly: AssemblyFileVersion("8.70.0.0")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]

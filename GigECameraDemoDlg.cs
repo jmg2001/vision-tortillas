@@ -1311,7 +1311,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             // Dirección IP y puerto del dispositivo Modbus
             string ipAddress = "127.0.0.1";
-            int port = 503;
+            int port = 504;
 
             // Crear un cliente Modbus TCP
             modbusClient = new ModbusClient(ipAddress, port);
@@ -1929,6 +1929,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
        {
           DestroyObjects();
           DisposeObjects();
+          modbusClient.Disconnect();
+          modbusServer.StopListening();
        }
 
         //*****************************************************************************************

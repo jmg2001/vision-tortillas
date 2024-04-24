@@ -19,7 +19,9 @@
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <TargetFrameworkProfile />
-    <PublishUrl>C:\Users\Jair\Downloads\source\</PublishUrl>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <PublishUrl>C:\Users\Jesús\Downloads\TestDeploy\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
     <UpdateEnabled>false</UpdateEnabled>
@@ -29,14 +31,11 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <AutorunEnabled>true</AutorunEnabled>
-    <ApplicationRevision>2</ApplicationRevision>
+    <ApplicationRevision>3</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -76,6 +75,7 @@
   </PropertyGroup>
   <PropertyGroup />
   <ItemGroup>
+    <Reference Include="Accessibility" />
     <Reference Include="AForge, Version=2.2.5.0, Culture=neutral, PublicKeyToken=c1db6ff4eaa06aeb, processorArchitecture=MSIL">
       <HintPath>packages\AForge.2.2.5\lib\AForge.dll</HintPath>
     </Reference>
@@ -88,9 +88,8 @@
     <Reference Include="CsvHelper, Version=31.0.0.0, Culture=neutral, PublicKeyToken=8c4959082be5c823, processorArchitecture=MSIL">
       <HintPath>packages\CsvHelper.31.0.4\lib\net48\CsvHelper.dll</HintPath>
     </Reference>
-    <Reference Include="DALSA.SaperaLT.SapClassBasic, Version=8.70.0.0, Culture=neutral, PublicKeyToken=4d8604101dcb6b58, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Components\NET\Bin\DALSA.SaperaLT.SapClassBasic.dll</HintPath>
+    <Reference Include="DALSA.SaperaLT.SapClassBasic">
+      <HintPath>..\..\..\..\Program Files\Teledyne DALSA\Sapera\Components\NET\Bin\DALSA.SaperaLT.SapClassBasic.dll</HintPath>
     </Reference>
     <Reference Include="EasyModbus, Version=5.6.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\EasyModbusTCP.5.6.0\lib\net40\EasyModbus.dll</HintPath>
@@ -193,47 +192,73 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AbortDlg.cs">
+    <Compile Include="Common\CSharp\AbortDlg.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="AbortDlg.designer.cs">
+    <Compile Include="Common\CSharp\AbortDlg.Designer.cs">
       <DependentUpon>AbortDlg.cs</DependentUpon>
     </Compile>
-    <Compile Include="AboutBox.cs">
+    <Compile Include="Common\CSharp\AboutBox.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="AboutBox.designer.cs">
+    <Compile Include="Common\CSharp\AboutBox.Designer.cs">
       <DependentUpon>AboutBox.cs</DependentUpon>
     </Compile>
-    <Compile Include="AcqConfigDlg.cs">
+    <Compile Include="Common\CSharp\AcqConfigDlg.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="AcqConfigDlg.designer.cs">
+    <Compile Include="Common\CSharp\AcqConfigDlg.Designer.cs">
       <DependentUpon>AcqConfigDlg.cs</DependentUpon>
     </Compile>
-    <Compile Include="AuthenticationDlg.cs">
+    <Compile Include="Common\CSharp\AviFileDlg.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="AuthenticationDlg.Designer.cs">
-      <DependentUpon>AuthenticationDlg.cs</DependentUpon>
-    </Compile>
-    <Compile Include="AviFileDlg.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="AviFileDlg.designer.cs">
+    <Compile Include="Common\CSharp\AviFileDlg.designer.cs">
       <DependentUpon>AviFileDlg.cs</DependentUpon>
     </Compile>
-    <Compile Include="BayerDlg.cs">
+    <Compile Include="Common\CSharp\BayerDlg.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="BayerDlg.designer.cs">
+    <Compile Include="Common\CSharp\BayerDlg.Designer.cs">
       <DependentUpon>BayerDlg.cs</DependentUpon>
     </Compile>
-    <Compile Include="BufDlg.cs">
+    <Compile Include="Common\CSharp\BufDlg.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="BufDlg.designer.cs">
+    <Compile Include="Common\CSharp\BufDlg.Designer.cs">
       <DependentUpon>BufDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Common\CSharp\ImageBox.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Common\CSharp\ImageBox.designer.cs">
+      <DependentUpon>ImageBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Common\CSharp\JpegFileDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Common\CSharp\JpegFileDlg.Designer.cs">
+      <DependentUpon>JpegFileDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Common\CSharp\LoadSaveDlg.cs" />
+    <Compile Include="Common\CSharp\RawFileDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Common\CSharp\RawFileDlg.Designer.cs">
+      <DependentUpon>RawFileDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Common\CSharp\SystemMenu.cs" />
+    <Compile Include="Common\CSharp\TiffFileDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Common\CSharp\TiffFileDlg.Designer.cs">
+      <DependentUpon>TiffFileDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Common\CSharp\ViewDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Common\CSharp\ViewDlg.designer.cs">
+      <DependentUpon>ViewDlg.cs</DependentUpon>
     </Compile>
     <Compile Include="DIP.cs" />
     <Compile Include="GigECameraDemoDlg.cs">
@@ -243,89 +268,44 @@
       <DependentUpon>GigECameraDemoDlg.cs</DependentUpon>
     </Compile>
     <Compile Include="GigeCameraDemo.cs" />
-    <Compile Include="ImageBox.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="ImageBox.designer.cs">
-      <DependentUpon>ImageBox.cs</DependentUpon>
-    </Compile>
-    <Compile Include="JpegFileDlg.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="JpegFileDlg.designer.cs">
-      <DependentUpon>JpegFileDlg.cs</DependentUpon>
-    </Compile>
-    <Compile Include="LoadSaveDlg.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RawFileDlg.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="RawFileDlg.designer.cs">
-      <DependentUpon>RawFileDlg.cs</DependentUpon>
-    </Compile>
     <Compile Include="Settings.cs" />
-    <Compile Include="SystemMenu.cs" />
-    <Compile Include="TiffFileDlg.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="TiffFileDlg.designer.cs">
-      <DependentUpon>TiffFileDlg.cs</DependentUpon>
-    </Compile>
-    <Compile Include="ViewDlg.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="ViewDlg.designer.cs">
-      <DependentUpon>ViewDlg.cs</DependentUpon>
-    </Compile>
-    <EmbeddedResource Include="AbortDlg.resx">
+    <EmbeddedResource Include="Common\CSharp\AbortDlg.resx">
       <DependentUpon>AbortDlg.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="AboutBox.resx">
+    <EmbeddedResource Include="Common\CSharp\AboutBox.resx">
       <DependentUpon>AboutBox.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="AcqConfigDlg.resx">
+    <EmbeddedResource Include="Common\CSharp\AcqConfigDlg.resx">
       <DependentUpon>AcqConfigDlg.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="AuthenticationDlg.resx">
-      <DependentUpon>AuthenticationDlg.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="AviFileDlg.resx">
+    <EmbeddedResource Include="Common\CSharp\AviFileDlg.resx">
       <DependentUpon>AviFileDlg.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="BayerDlg.resx">
+    <EmbeddedResource Include="Common\CSharp\BayerDlg.resx">
       <DependentUpon>BayerDlg.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="BufDlg.resx">
+    <EmbeddedResource Include="Common\CSharp\BufDlg.resx">
       <DependentUpon>BufDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Common\CSharp\ImageBox.resx">
+      <DependentUpon>ImageBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Common\CSharp\JpegFileDlg.resx">
+      <DependentUpon>JpegFileDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Common\CSharp\RawFileDlg.resx">
+      <DependentUpon>RawFileDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Common\CSharp\TiffFileDlg.resx">
+      <DependentUpon>TiffFileDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Common\CSharp\ViewDlg.resx">
+      <DependentUpon>ViewDlg.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GigECameraDemoDlg.resx">
       <DependentUpon>GigECameraDemoDlg.cs</DependentUpon>
       <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ImageBox.resx">
-      <DependentUpon>ImageBox.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="JpegFileDlg.resx">
-      <DependentUpon>JpegFileDlg.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <EmbeddedResource Include="RawFileDlg.resx">
-      <DependentUpon>RawFileDlg.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="TiffFileDlg.resx">
-      <DependentUpon>TiffFileDlg.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ViewDlg.resx">
-      <DependentUpon>ViewDlg.cs</DependentUpon>
     </EmbeddedResource>
     <None Include=".editorconfig" />
     <None Include="app.config" />
