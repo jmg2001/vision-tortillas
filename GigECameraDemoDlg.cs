@@ -3389,10 +3389,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             minDiameter = double.Parse(Txt_MinD.Text) / euFactor;
 
             Txt_MaxOvality.Text = Txt_Ovality.Text;
-            maxOvality = double.Parse(Txt_Ovality.Text) / euFactor;
+            maxOvality = double.Parse(Txt_Ovality.Text);
 
             Txt_MaxCompacity.Text = Txt_Compacity.Text;
-            maxCompactness = double.Parse(Txt_Compacity.Text) / euFactor;
+            maxCompactness = double.Parse(Txt_Compacity.Text);
 
         }
 

@@ -659,6 +659,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             this.controlsTabs.Controls.Add(this.commandsPage);
             this.controlsTabs.Controls.Add(this.cameraControlPage);
+            this.controlsTabs.Cursor = System.Windows.Forms.Cursors.Hand;
             this.controlsTabs.Dock = System.Windows.Forms.DockStyle.Right;
             this.controlsTabs.Location = new System.Drawing.Point(790, 0);
             this.controlsTabs.Name = "controlsTabs";
@@ -668,6 +669,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             // commandsPage
             // 
+            this.commandsPage.BackColor = System.Drawing.Color.Transparent;
             this.commandsPage.Controls.Add(this.formatTxt);
             this.commandsPage.Controls.Add(this.label8);
             this.commandsPage.Controls.Add(this.unitsTxt);
@@ -685,7 +687,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.commandsPage.Size = new System.Drawing.Size(325, 617);
             this.commandsPage.TabIndex = 0;
             this.commandsPage.Text = " Main";
-            this.commandsPage.UseVisualStyleBackColor = true;
             // 
             // formatTxt
             // 
