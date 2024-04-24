@@ -178,5 +178,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Properties {
                 this["targetCalibration"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public int productCode {
+            get {
+                return ((int)(this["productCode"]));
+            }
+            set {
+                this["productCode"] = value;
+            }
+        }
     }
 }

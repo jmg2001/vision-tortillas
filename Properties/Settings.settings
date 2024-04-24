@@ -41,5 +41,8 @@
     <Setting Name="targetCalibration" Type="System.Single" Scope="User">
       <Value Profile="(Default)">5.5</Value>
     </Setting>
+    <Setting Name="productCode" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

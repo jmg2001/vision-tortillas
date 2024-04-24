@@ -13,6 +13,8 @@ using System.Linq;
 using System.Data;
 
 using EasyModbus;
+using CsvHelper;
+using CsvHelper.Configuration;
 
 using System.Threading.Tasks;
 using System.Net.Http;
@@ -24,6 +26,8 @@ using Emgu.CV;
 using Emgu.CV.Features2D;
 using System.Diagnostics;
 using System.Drawing.Imaging;
+using System.Globalization;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 
 [StructLayout(LayoutKind.Sequential)]
@@ -145,6 +149,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         int gridRows = 3;
         int gridCols = 3;
 
+        int operationMode;
 
         public bool isActivatedProcessData = false; // Variable de estado para el botón tipo toggle
 
@@ -153,7 +158,57 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private delegate void DisplayFrameAcquired(int number, bool trash);
         //
         // This function is called each time an image has been transferred into system memory by the transfer object
-        
+
+        // Clase de los productos
+        public class Product
+        {
+            public int Code { get; set; }
+            public string Name { get; set; }
+            public double MaxD { get; set; }
+            public double MinD { get; set; }
+            public double MaxOvality { get; set; }
+            public double MaxCompacity { get; set; }
+            public int[,] Grid { get; set; }
+
+        }
+
+
+        //public class CsvFileManager<Product>
+        //{
+        //    private readonly string filePath;
+
+        //    public CsvFileManager(string filePath)
+        //    {
+        //        this.filePath = filePath;
+        //    }
+
+        //    public IEnumerable<Product> ReadCsv()
+        //    {
+        //        if (!File.Exists(filePath))
+        //        {
+        //            // Si el archivo no existe, devuelve una lista vacía
+        //            return Enumerable.Empty<Product>();
+        //        }
+
+        //        using (var reader = new StreamReader(filePath))
+        //        using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)))
+        //        {
+        //            return csv.GetRecords<Product>().ToList();
+        //        }
+        //    }
+
+        //    public void WriteCsv(IEnumerable<Product> records)
+        //    {
+        //        using (var writer = new StreamWriter(filePath))
+        //        using (var csv = new CsvWriter(writer, new CsvConfiguration(CultureInfo.InvariantCulture)))
+        //        {
+        //            csv.WriteRecords(records);
+        //        }
+        //    }
+
+        //}
+
+
 
         // Clase para representar el grid
         public class GridType
@@ -255,103 +310,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     if (!processing)
                     {
                         processing = true;
-
-                        //if (!originalImageIsDisposed)
-                        //{
-                        //    try
-                        //    {
-                        //        originalImage.Dispose();
-                        //        originalImageIsDisposed = true;
-                        //    }
-                        //    catch
-                        //    {
-
-                        //    }
-                        //}
-
-                        //// Al parecer esto es lo que sucede al tomar la captura, ya sea con el trigger o en vivo
-                        //// Se muestra la imagen en el Form
-                        //GigeDlg.m_View.Show();
-                        //// var test = GigeDlg.m_Buffers.get_Page(-1);
-
-                        ////foreach(var feature in m_AcqDevice.FeatureNames)
-                        ////{
-                        ////    Console.WriteLine(feature);
-                        ////}
-
-                        //// m_AcqDevice.SetFeatureValue(44, true);
-
-                        //Bitmap testImage = new Bitmap(640,480);
-
-                        //if (mode == 0) 
-                        //{
-                        //    processImageBtn.Enabled = true;
-
-                        //    originalImage = new Bitmap(saveImage());
-
-                        //}
-
-                        ////originalImage = new Bitmap(@"C:\Users\Jesús\Documents\Python\cam_calib\imagenOrigen.bmp");
-
-                        //// Se crea el histograma de la imagen
-                        //ImageHistogram(originalImage);
-
-                        //if (imageCorrectionCheck.Checked && mode == 0)
-                        //{
-                        //    undistortImage();
-                        //    originalImage = new Bitmap(imagesPath + "imagenCorregida.bmp");
-                        //}
-
-                        //originalImageIsDisposed = false;
-
-                        //if (mode == 0)
-                        //{
-                        //    originalROIImage = new Bitmap(originalImage);
-
-                        //    ConvertToCompatibleFormat(originalROIImage);
-
-                        //    drawROI(originalROIImage);
-
-                        //    originalROIImage.Save(imagesPath + "1.bmp");
-
-                        //    originalBox.Image = originalROIImage;
-                        //    originalBox.SizeMode = PictureBoxSizeMode.AutoSize;
-                        //    originalBox.Visible = true;
-                        //    originalBox.BringToFront();
-                        //    processROIBox.SendToBack();
-                        //    m_ImageBox.SendToBack();
-                        //    m_View.Hide();
-
-                        //    Quadrants = new List<Quadrant>();
-
-                        //    for (int i = 1; i < 17; i++)
-                        //    {
-                        //        List<Point> points = new List<Point>();
-                        //        Point centro = new Point();
-                        //        Blob blb = new Blob(0, points, 0, points, 0, 0, centro, 0, 0, 0, 0, 0, 0, 0);
-                        //        Quadrant qua = new Quadrant(i, "", false, 0, 0, 0, 0, blb);
-                        //        Quadrants.Add(qua);
-                        //    }
-
-                        //}
-                        //else
-                        //{
-                        //    m_ImageBox.BringToFront();
-                        //    processROIBox.SendToBack();
-                        //    originalBox.SendToBack();
-                        //}
-
-                        //if (triggerPLC && !calibrating)
-                        //{
-                        //    process();
-                        //}
-
-                        //if (calibrating)
-                        //{
-                        //    calibrate();
-                        //}
-
-                        //testImage.Dispose();
 
                         if (!originalImageIsDisposed)
                         {
@@ -486,15 +444,30 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             if (calibrationValidate)
             {
-                euFactor = float.Parse(txtCalibrationTarget.Text) / diametroIA; // unit/pixels
-                settings.EUFactor = euFactor;
-                euFactorTxt.Text = Math.Round(euFactor, 3).ToString();
-                maxDiameter = double.Parse(Txt_MaxDiameter.Text) / euFactor;
-                minDiameter = double.Parse(Txt_MinDiameter.Text) / euFactor;
-                settings.maxDiameter = maxDiameter;
-                settings.minDiameter = minDiameter;
+                double tempFactor= float.Parse(txtCalibrationTarget.Text) / diametroIA; // unit/pixels
+                                                                                // Mostrar un MessageBox con un mensaje y botones de opción
+                DialogResult result = MessageBox.Show($"A factor of {tempFactor} was obtained. Do you want to continue?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
-                MessageBox.Show("Calibration Succesful, Factor: " + euFactor);
+                // Verificar la opción seleccionada por el usuario
+                if (result == DialogResult.Yes)
+                {
+                    // Si el usuario elige "Sí", continuar con la acción deseada
+                    // Agrega aquí el código que deseas ejecutar después de que el usuario confirme
+                    euFactor = tempFactor;
+                    settings.EUFactor = euFactor;
+                    euFactorTxt.Text = Math.Round(euFactor, 3).ToString();
+                    maxDiameter = double.Parse(Txt_MaxDiameter.Text) / euFactor;
+                    minDiameter = double.Parse(Txt_MinDiameter.Text) / euFactor;
+                    settings.maxDiameter = maxDiameter;
+                    settings.minDiameter = minDiameter;
+
+                    MessageBox.Show("Calibration Succesful, Factor: " + euFactor);
+                }
+                else
+                {
+                    // Si el usuario elige "No", puedes hacer algo o simplemente salir
+                    MessageBox.Show("Operation canceled.");
+                }
             }
             else
             {
@@ -1119,6 +1092,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 originalBox.MouseMove += originalBox_MouseMove;
                 processROIBox.MouseMove += processBox_MouseMove;
 
+                CmbOperationModeSelection.Text = "Manual";
+                operationMode = 0;
+                productsPage.Enabled = false;
+
                 // Suscribir al evento SelectedIndexChanged del TabControl
                 mainTabs.SelectedIndexChanged += TabControl2_SelectedIndexChanged;
 
@@ -1134,7 +1111,31 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 txtCalibrationTarget.Text = settings.targetCalibration.ToString();
                 euFactorTxt.Text = Math.Round(euFactor, 3).ToString();
 
-                formatTxt.Text = settings.Format; 
+                formatTxt.Text = settings.Format;
+
+                
+
+                using (var reader = new StreamReader(new FileStream(@"C:\Users\Jesús\Desktop\test.csv", FileMode.Open), System.Text.Encoding.UTF8))
+                using (var csvReader = new CsvReader(reader, CultureInfo.CurrentCulture))
+                {
+                    var records = csvReader.GetRecords<Product>();
+                    //records.Add(new Product { Code = 1, MaxD = 130, MinD = 110, MaxOvality = 0.5, MaxCompacity = 12 });
+                    //csvWriter.WriteRecords(records);
+                    foreach (var record in records)
+                    {
+                        CmbProducts.Items.Add(record.Code);
+                        if (record.Code == settings.productCode)
+                        {
+                            changeProduct(record);
+                        }
+                    }
+                }
+
+                // Suscribirse al evento SelectedIndexChanged del ComboBox
+                CmbProducts.SelectedIndexChanged += CmbProducts_SelectedIndexChanged;
+
+                // Suscribirse al evento SelectedIndexChanged del ComboBox
+                CmbOperationModeSelection.SelectedIndexChanged += CmbOperationModeSelection_SelectedIndexChanged;
 
                 modbusServer.Port = 502;
                 modbusServer.Listen();
@@ -1251,6 +1252,59 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 MessageBox.Show("No cameras found or selected");
                 this.Close();
             }
+        }
+
+        private void CmbOperationModeSelection_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string selection = CmbOperationModeSelection.SelectedItem.ToString();
+
+            switch (selection)
+            {
+                case "Manual":
+                    operationMode = 0;
+                    productsPage.Enabled = false;
+                    break;
+                case "Local":
+                    operationMode = 1;
+                    productsPage.Enabled = true;
+                    break;
+                case "PLC":
+                    operationMode = 2;
+                    productsPage.Enabled = false;
+                    break;
+            }
+        }
+
+        private void changeProduct(Product record)
+        {
+            CmbProducts.SelectedItem = record.Code;
+            Txt_Code.Text = record.Code.ToString();
+            Txt_Description.Text = record.Name;
+            Txt_MaxD.Text = (record.MaxD*euFactor).ToString();
+            Txt_MinD.Text = (record.MinD*euFactor).ToString();
+            Txt_Ovality.Text = record.MaxOvality.ToString();
+            Txt_Compacity.Text = record.MaxCompacity.ToString();
+        }
+
+        private void CmbProducts_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string selectedItem = CmbProducts.SelectedItem.ToString();
+
+            using (var reader = new StreamReader(new FileStream(@"C:\Users\Jesús\Desktop\test.csv", FileMode.Open), System.Text.Encoding.UTF8))
+            using (var csvReader = new CsvReader(reader, CultureInfo.CurrentCulture))
+            {
+                var records = csvReader.GetRecords<Product>();
+                //records.Add(new Product { Code = 1, MaxD = 130, MinD = 110, MaxOvality = 0.5, MaxCompacity = 12 });
+                //csvWriter.WriteRecords(records);
+                foreach (var record in records)
+                {
+                    if (record.Code == int.Parse(selectedItem))
+                    {
+                        changeProduct(record);
+                    }
+                }
+            }
+
         }
 
         private void Txt_UserROIBottom_KeyPress(object sender, KeyPressEventArgs e)
@@ -1417,6 +1471,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     }
                 }
 
+                Txt_MaxD.Text = (double.Parse(Txt_MaxD.Text)*fact).ToString();
+                Txt_MinD.Text = (double.Parse(Txt_MinD.Text)*fact).ToString();
 
                 double avgDiameter = 0;
                 if (Double.TryParse(avg_diameter.Text, out avgDiameter)) ;
@@ -1556,26 +1612,22 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // Verificar si la pestaña seleccionada es la que deseas
             if (mainTabs.SelectedTab == productsPage) // Cambia tabPage1 al nombre real de tu pestaña
             {
-                // Llamar a la función request y esperar a que devuelva el resultado
-                string query = "SELECT * FROM productos";
-                string resultado = await request(query);
-                
-                try
-                {
-                    // Convertir la cadena JSON a un objeto JSON
-                    JObject jsonResult = JObject.Parse(resultado);
-
-                    Console.WriteLine(jsonResult["result"]);
-
-                    foreach (JArray result in jsonResult["result"])
-                    {
-                        CmbProducts.Items.Add(result[1]);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("No se pudo formatear la respuesta");
-                }
+                //CmbProducts.Items.Clear();
+                //using (var writer = new StreamWriter(new FileStream(@"C:\Users\Jesús\Desktop\test.csv", FileMode.Open), System.Text.Encoding.UTF8))
+                //using (var csvWriter = new CsvWriter(writer, CultureInfo.CurrentCulture))
+                //{
+                //    var records = new List<Product>();
+                //    //records.Add(new Product { Code = 1, MaxD = 130, MinD = 110, MaxOvality = 0.5, MaxCompacity = 12 });
+                //    //csvWriter.WriteRecords(records);
+                //    foreach (var record in records)
+                //    {
+                //        CmbProducts.Items.Add(record.Code);
+                //        if (record.Code == settings.productCode)
+                //        {
+                //            CmbProducts.SelectedItem = record.Code;
+                //        }
+                //    }
+                //}
             }
 
 
@@ -3057,7 +3109,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void button1_Click(object sender, EventArgs e)
         {
-            request(textBox1.Text);
         }
 
         static async Task<string> request(string query)
@@ -3224,7 +3275,21 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void button2_Click(object sender, EventArgs e)
         {
-            calibrateBtnClick();
+            // Mostrar un MessageBox con un mensaje y botones de opción
+            DialogResult result = MessageBox.Show($"You are going to perform a calibration with a {txtCalibrationTarget.Text} {unitsTxt.Text} target. Do you want to continue?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            // Verificar la opción seleccionada por el usuario
+            if (result == DialogResult.Yes)
+            {
+                // Si el usuario elige "Sí", continuar con la acción deseada
+                // Agrega aquí el código que deseas ejecutar después de que el usuario confirme
+                calibrateBtnClick();
+            }
+            else
+            {
+                // Si el usuario elige "No", puedes hacer algo o simplemente salir
+                MessageBox.Show("Operation canceled.");
+            }
         }
 
         private void calibrateBtnClick()
@@ -3265,6 +3330,75 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private void button2_Click_1(object sender, EventArgs e)
         {
             
+        }
+
+        private void CmdUpdate_Click(object sender, EventArgs e)
+        {
+            int selectedItem = int.Parse(CmbProducts.SelectedItem.ToString());
+
+            updateProdut(selectedItem);
+
+        }
+
+        private void updateProdut(int selectedItem)
+        {
+            var records = new List<Product>();
+
+            using (var reader = new StreamReader(new FileStream(@"C:\Users\Jesús\Desktop\test.csv", FileMode.Open), System.Text.Encoding.UTF8))
+            using (var csvReader = new CsvReader(reader, CultureInfo.CurrentCulture))
+            {
+                records = csvReader.GetRecords<Product>().ToList();
+                //records.Add(new Product { Code = 1, MaxD = 130, MinD = 110, MaxOvality = 0.5, MaxCompacity = 12 });
+                //csvWriter.WriteRecords(records);
+                for (int i = 0; i < records.Count(); i++)
+                {
+                    if (records[i].Code == selectedItem)
+                    {
+                        records[i] = new Product
+                        {
+                            Code = int.Parse(Txt_Code.Text),
+                            Name = Txt_Description.Text,
+                            MaxD = double.Parse(Txt_MaxD.Text)/euFactor,
+                            MinD = double.Parse(Txt_MinD.Text)/euFactor,
+                            MaxOvality = double.Parse(Txt_Ovality.Text),
+                            MaxCompacity = double.Parse(Txt_Compacity.Text)
+                        };
+                        break;
+                    }
+                }
+            }
+
+            using (var writer = new StreamWriter(new FileStream(@"C:\Users\Jesús\Desktop\test.csv", FileMode.Open), System.Text.Encoding.UTF8))
+            using (var csvWriter = new CsvWriter(writer, CultureInfo.CurrentCulture))
+            {
+                csvWriter.WriteRecords(records);
+            }
+        }
+
+        private void Cmd_Save_Click(object sender, EventArgs e)
+        {
+            changeProductSetPoint();
+        }
+
+        private void changeProductSetPoint()
+        {
+            Txt_MaxDiameter.Text = Txt_MaxD.Text;
+            maxDiameter = double.Parse(Txt_MaxD.Text) / euFactor;
+
+            Txt_MinDiameter.Text = Txt_MinD.Text;
+            minDiameter = double.Parse(Txt_MinD.Text) / euFactor;
+
+            Txt_MaxOvality.Text = Txt_Ovality.Text;
+            maxOvality = double.Parse(Txt_Ovality.Text) / euFactor;
+
+            Txt_MaxCompacity.Text = Txt_Compacity.Text;
+            maxCompactness = double.Parse(Txt_Compacity.Text) / euFactor;
+
+        }
+
+        private void Txt_MaxDiameter_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
