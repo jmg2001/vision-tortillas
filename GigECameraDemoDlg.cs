@@ -75,7 +75,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         bool txtDiameters = true;
 
         // Varibles para identificar si el trigger viene del PLC o del Software
-        bool triggerPLC = false;
+        bool triggerPLC = true;
         int mode = 0; // 1 - Live, 0 - Frame
         int frameCounter = 0;
 
@@ -182,7 +182,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             m_Xfer = null;
             m_View = null;
 
-            AcqConfigDlg acConfigDlg = new AcqConfigDlg(null, "", AcqConfigDlg.ServerCategory.ServerAcqDevice, true);
+            AcqConfigDlg acConfigDlg = new AcqConfigDlg(null, "", AcqConfigDlg.ServerCategory.ServerAcqDevice, false);
             if (acConfigDlg.ShowDialog() == DialogResult.OK)
             {
                 InitializeComponent();
@@ -205,9 +205,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 originalBox.MouseMove += originalBox_MouseMove;
                 processROIBox.MouseMove += processBox_MouseMove;
 
-                CmbOperationModeSelection.Text = "Manual";
-                operationMode = 0;
+                CmbOperationModeSelection.Text = "PLC";
+                operationMode = 2;
                 productsPage.Enabled = false;
+                GroupActualTargetSize.Enabled = false;
+                GroupSelectGrid.Enabled = false;
 
                 // Suscribir al evento SelectedIndexChanged del TabControl
                 mainTabs.SelectedIndexChanged += TabControl2_SelectedIndexChanged;
@@ -387,11 +389,23 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     this.Close();
 
                 // Cargamos la configuracion por default
-                // Console.WriteLine(configPath + "\\TriggerOFF.ccf");
-                m_AcqDevice.LoadFeatures(configPath + "\\TriggerOFF.ccf");
+                m_AcqDevice.LoadFeatures(configPath + "\\TriggerON.ccf");
 
+                // triggerPLC = true;
 
-                transfer.AddPair(new SapXferPair(m_AcqDevice, m_Buffers));
+                if (triggerPLC)
+                {
+                    triggerModeBtn.BackColor = DefaultBackColor;
+                    triggerModeBtn.Text = "PLC";
+                    virtualTriggerBtn.Enabled = false;
+
+                    startStop();
+
+                    viewModeBtn.Enabled = false;
+                    processImageBtn.Enabled = false;
+                    processImageBtn.Text = "PROCESSING";
+
+                }
             }
             else
             {
