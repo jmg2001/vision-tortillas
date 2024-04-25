@@ -231,6 +231,12 @@
       <DependentUpon>JpegFileDlg.cs</DependentUpon>
     </Compile>
     <Compile Include="Common\CSharp\LoadSaveDlg.cs" />
+    <Compile Include="Common\CSharp\LoginDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Common\CSharp\LoginDlg.designer.cs">
+      <DependentUpon>LoginDlg.cs</DependentUpon>
+    </Compile>
     <Compile Include="Common\CSharp\RawFileDlg.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -283,6 +289,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Common\CSharp\JpegFileDlg.resx">
       <DependentUpon>JpegFileDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Common\CSharp\LoginDlg.resx">
+      <DependentUpon>LoginDlg.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Common\CSharp\RawFileDlg.resx">
       <DependentUpon>RawFileDlg.cs</DependentUpon>

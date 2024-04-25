@@ -28,6 +28,7 @@ using System.Globalization;
 using System.Threading;
 using System.Text.RegularExpressions;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp;
 
 
 [StructLayout(LayoutKind.Sequential)]
@@ -54,6 +55,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         // public int Y_Columns;
 
         // Creadas por mi
+        bool authenticated = false;
+        string user = "admin";
+        string password = "12345";
 
         Properties.Settings settings = new Properties.Settings();
 
@@ -183,6 +187,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 InitializeComponent();
                 InitializeDataTable();
+
+                configurationPage.Enabled = true;
 
                 // initModbusClient();
                 // Dirección IP y puerto del dispositivo Modbus
@@ -3833,6 +3839,30 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 {
                     CmbProducts.Items.Add(record.Code);
                 }
+            }
+        }
+
+        private void logoffToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            configurationPage.Enabled = false;
+            authenticated = false;
+            MessageBox.Show("Logged Off");
+        }
+
+        private void loginToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Set new acquisition parameters
+            LoginDlg loginDlg = new LoginDlg(user, password);
+
+            if (loginDlg.ShowDialog() == DialogResult.OK)
+            {
+                authenticated = true;
+                configurationPage.Enabled = true;
+                MessageBox.Show("Authentication Succesfull");
+            }
+            else
+            {
+                MessageBox.Show("Authentication Failed");
             }
         }
     }

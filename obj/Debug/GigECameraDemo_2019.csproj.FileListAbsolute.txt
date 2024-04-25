@@ -73,3 +73,4 @@ C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\InspecTorT.application
 C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\GigECameraDemo_2019.csproj.CopyComplete
 C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\InspecTorT.exe
 C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\InspecTorT.pdb
+C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp.LoginDlg.resources
