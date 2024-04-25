@@ -199,7 +199,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.toolStripSeparator1,
             this.PixelLabel,
             this.PixelDataValue});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 610);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 635);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
             this.toolStrip1.Size = new System.Drawing.Size(790, 25);
@@ -622,7 +622,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.controlsTabs.Location = new System.Drawing.Point(790, 24);
             this.controlsTabs.Name = "controlsTabs";
             this.controlsTabs.SelectedIndex = 0;
-            this.controlsTabs.Size = new System.Drawing.Size(333, 611);
+            this.controlsTabs.Size = new System.Drawing.Size(333, 636);
             this.controlsTabs.TabIndex = 118;
             // 
             // mainControlPage
@@ -647,7 +647,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.mainControlPage.Location = new System.Drawing.Point(4, 22);
             this.mainControlPage.Name = "mainControlPage";
             this.mainControlPage.Padding = new System.Windows.Forms.Padding(3);
-            this.mainControlPage.Size = new System.Drawing.Size(325, 585);
+            this.mainControlPage.Size = new System.Drawing.Size(325, 610);
             this.mainControlPage.TabIndex = 0;
             this.mainControlPage.Text = "Operation";
             // 
@@ -797,7 +797,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.configurationPage.Location = new System.Drawing.Point(4, 22);
             this.configurationPage.Name = "configurationPage";
             this.configurationPage.Padding = new System.Windows.Forms.Padding(3);
-            this.configurationPage.Size = new System.Drawing.Size(325, 609);
+            this.configurationPage.Size = new System.Drawing.Size(325, 585);
             this.configurationPage.TabIndex = 1;
             this.configurationPage.Text = "Configuration";
             // 
@@ -1093,7 +1093,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.mainTabs.Location = new System.Drawing.Point(0, 24);
             this.mainTabs.Name = "mainTabs";
             this.mainTabs.SelectedIndex = 0;
-            this.mainTabs.Size = new System.Drawing.Size(1123, 611);
+            this.mainTabs.Size = new System.Drawing.Size(1123, 636);
             this.mainTabs.TabIndex = 119;
             // 
             // imagePage
@@ -1105,7 +1105,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.imagePage.Location = new System.Drawing.Point(4, 22);
             this.imagePage.Name = "imagePage";
             this.imagePage.Padding = new System.Windows.Forms.Padding(3);
-            this.imagePage.Size = new System.Drawing.Size(1115, 585);
+            this.imagePage.Size = new System.Drawing.Size(1115, 610);
             this.imagePage.TabIndex = 0;
             this.imagePage.Text = "Image";
             this.imagePage.Click += new System.EventHandler(this.tabPage3_Click);
@@ -1134,7 +1134,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.tablePage.Location = new System.Drawing.Point(4, 22);
             this.tablePage.Name = "tablePage";
             this.tablePage.Padding = new System.Windows.Forms.Padding(3);
-            this.tablePage.Size = new System.Drawing.Size(1115, 609);
+            this.tablePage.Size = new System.Drawing.Size(1115, 585);
             this.tablePage.TabIndex = 1;
             this.tablePage.Text = "Table";
             this.tablePage.UseVisualStyleBackColor = true;
@@ -1152,7 +1152,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.productsPage.Location = new System.Drawing.Point(4, 22);
             this.productsPage.Name = "productsPage";
             this.productsPage.Padding = new System.Windows.Forms.Padding(3);
-            this.productsPage.Size = new System.Drawing.Size(1115, 609);
+            this.productsPage.Size = new System.Drawing.Size(1115, 610);
             this.productsPage.TabIndex = 2;
             this.productsPage.Text = "Products";
             this.productsPage.UseVisualStyleBackColor = true;
@@ -1307,7 +1307,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.CmdAdd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.CmdAdd.AutoSize = true;
             this.CmdAdd.BackColor = System.Drawing.Color.Silver;
-            this.CmdAdd.Location = new System.Drawing.Point(506, 173);
+            this.CmdAdd.Location = new System.Drawing.Point(506, 198);
             this.CmdAdd.Name = "CmdAdd";
             this.CmdAdd.Size = new System.Drawing.Size(70, 55);
             this.CmdAdd.TabIndex = 119;
@@ -1320,7 +1320,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.CmdUpdate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.CmdUpdate.AutoSize = true;
             this.CmdUpdate.BackColor = System.Drawing.Color.Silver;
-            this.CmdUpdate.Location = new System.Drawing.Point(581, 173);
+            this.CmdUpdate.Location = new System.Drawing.Point(581, 198);
             this.CmdUpdate.Name = "CmdUpdate";
             this.CmdUpdate.Size = new System.Drawing.Size(70, 55);
             this.CmdUpdate.TabIndex = 118;
@@ -1347,13 +1347,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.CmbProducts.Name = "CmbProducts";
             this.CmbProducts.Size = new System.Drawing.Size(263, 21);
             this.CmbProducts.TabIndex = 106;
+            this.CmbProducts.SelectedIndexChanged += new System.EventHandler(this.CmbProducts_SelectedIndexChanged_1);
             // 
             // CmdDelete
             // 
             this.CmdDelete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.CmdDelete.BackColor = System.Drawing.Color.Silver;
             this.CmdDelete.Enabled = false;
-            this.CmdDelete.Location = new System.Drawing.Point(657, 174);
+            this.CmdDelete.Location = new System.Drawing.Point(657, 199);
             this.CmdDelete.Name = "CmdDelete";
             this.CmdDelete.Size = new System.Drawing.Size(70, 54);
             this.CmdDelete.TabIndex = 116;
@@ -1524,7 +1525,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             this.Cmd_Save.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.Cmd_Save.BackColor = System.Drawing.Color.Silver;
-            this.Cmd_Save.Location = new System.Drawing.Point(508, 121);
+            this.Cmd_Save.Location = new System.Drawing.Point(508, 146);
             this.Cmd_Save.Name = "Cmd_Save";
             this.Cmd_Save.Size = new System.Drawing.Size(143, 40);
             this.Cmd_Save.TabIndex = 114;
@@ -1537,7 +1538,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ButtonFace;
-            this.ClientSize = new System.Drawing.Size(1123, 635);
+            this.ClientSize = new System.Drawing.Size(1123, 660);
             this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.controlsTabs);
             this.Controls.Add(this.label1);

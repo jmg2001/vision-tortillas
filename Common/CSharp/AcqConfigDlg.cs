@@ -28,6 +28,7 @@ namespace DALSA.SaperaLT.SapClassGui
         static string ModelKeyName      = "Model Name";
         static string VicName           = "Vic Name";
         static string Acquisition_Default_folder = "\\CamFiles\\User";
+        bool autoClick = false;
 
         public AcqConfigDlg()
         {
@@ -43,10 +44,11 @@ namespace DALSA.SaperaLT.SapClassGui
         }
 
 
-        public AcqConfigDlg(SapLocation loc, string productDir, ServerCategory serverCategory)
+        public AcqConfigDlg(SapLocation loc, string productDir, ServerCategory serverCategory, bool autoClick)
         {
            m_ProductDir = productDir;
            m_ServerCategory = serverCategory;
+           this.autoClick = autoClick;
 
            if (loc != null)
            {
@@ -164,7 +166,7 @@ namespace DALSA.SaperaLT.SapClassGui
             m_ResourceIndex = comboBox_Device.SelectedIndex;
             // Console.WriteLine(m_ResourceIndex);
 
-            button_ok.PerformClick();
+            if (autoClick) button_ok.PerformClick();
         }
 
         private void button_browse_Click(object sender, EventArgs e)

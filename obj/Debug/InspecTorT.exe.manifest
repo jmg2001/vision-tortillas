@@ -138,14 +138,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="InspecTorT.exe" size="233424">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="InspecTorT.exe" size="234960">
       <assemblyIdentity name="InspecTorT" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>hkrbXbyIjCwDFrDEEt/9CfZtrg8KysgW/yP9NV5z5OA=</dsig:DigestValue>
+        <dsig:DigestValue>WzHgYDCIsGNDbcFQN1GgUml0LI4k7nLL8u8gj/q7tgg=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

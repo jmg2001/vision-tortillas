@@ -58,6 +58,7 @@
             // txtUser
             // 
             this.txtUser.Location = new System.Drawing.Point(146, 50);
+            this.txtUser.MaxLength = 10;
             this.txtUser.Name = "txtUser";
             this.txtUser.Size = new System.Drawing.Size(100, 20);
             this.txtUser.TabIndex = 2;
@@ -65,7 +66,9 @@
             // txtPassword
             // 
             this.txtPassword.Location = new System.Drawing.Point(146, 93);
+            this.txtPassword.MaxLength = 10;
             this.txtPassword.Name = "txtPassword";
+            this.txtPassword.PasswordChar = '*';
             this.txtPassword.Size = new System.Drawing.Size(100, 20);
             this.txtPassword.TabIndex = 4;
             // 
@@ -90,7 +93,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.button1);
             this.Name = "LoginDlg";
-            this.Text = "Form1";
+            this.Text = "Login";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
             this.PerformLayout();

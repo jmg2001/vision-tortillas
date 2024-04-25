@@ -29,6 +29,7 @@ using System.Threading;
 using System.Text.RegularExpressions;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp;
+using System.Security.Cryptography;
 
 
 [StructLayout(LayoutKind.Sequential)]
@@ -57,7 +58,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         // Creadas por mi
         bool authenticated = false;
         string user = "admin";
-        string password = "12345";
 
         Properties.Settings settings = new Properties.Settings();
 
@@ -182,7 +182,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             m_Xfer = null;
             m_View = null;
 
-            AcqConfigDlg acConfigDlg = new AcqConfigDlg(null, "", AcqConfigDlg.ServerCategory.ServerAcqDevice);
+            AcqConfigDlg acConfigDlg = new AcqConfigDlg(null, "", AcqConfigDlg.ServerCategory.ServerAcqDevice, true);
             if (acConfigDlg.ShowDialog() == DialogResult.OK)
             {
                 InitializeComponent();
@@ -192,7 +192,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 // initModbusClient();
                 // Dirección IP y puerto del dispositivo Modbus
-                
+
                 modbusServerIPTxt.Text = ipAddress;
 
                 // Crear un cliente Modbus TCP
@@ -240,21 +240,21 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         foreach (var record in records)
                         {
                             CmbProducts.Items.Add(record.Code);
-                            if (record.Code == settings.productCode)
-                            {
-                                changeProduct(record);
-                            }
+                            //if (record.Code == settings.productCode)
+                            //{
+                            //    changeProduct(record);
+                            //}
                         }
                     }
                 }
                 else
                 {
                     // Encabezados del archivo CSV
-                    string[] headers = { "Code", "Name", "MaxD", "MinD", "MaxOvality", "MaxCompacity", "Grid" };
+                    string[] headers = { "Id","Code", "Name", "MaxD", "MinD", "MaxOvality", "MaxCompacity", "Grid" };
 
                     // Contenido de los registros
                     string[][] data = {
-                    new string[] { "1", "Default", "90", "50", "0.5", "12", "1" },
+                    new string[] { "1","1", "Default", "90", "50", "0.5", "12", "1" },
                     };
 
                     // Escribir los datos en el archivo CSV
@@ -437,6 +437,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         // Clase de los productos
         public class Product
         {
+            public int Id { get; set; }
             public int Code { get; set; }
             public string Name { get; set; }
             public double MaxD { get; set; }
@@ -2205,7 +2206,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private void button_Load_Config_Click(object sender, EventArgs e)
         {
             // Set new acquisition parameters
-            AcqConfigDlg acConfigDlg = new AcqConfigDlg(null, "", AcqConfigDlg.ServerCategory.ServerAcqDevice);
+            AcqConfigDlg acConfigDlg = new AcqConfigDlg(null, "", AcqConfigDlg.ServerCategory.ServerAcqDevice, false);
             if (acConfigDlg.ShowDialog() == DialogResult.OK)
             {
                 DestroyObjects();
@@ -3284,7 +3285,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private void videoSettingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // Set new acquisition parameters
-            AcqConfigDlg acConfigDlg = new AcqConfigDlg(null, "", AcqConfigDlg.ServerCategory.ServerAcqDevice);
+            AcqConfigDlg acConfigDlg = new AcqConfigDlg(null, "", AcqConfigDlg.ServerCategory.ServerAcqDevice, false);
             if (acConfigDlg.ShowDialog() == DialogResult.OK)
             {
                 DestroyObjects();
@@ -3651,6 +3652,19 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             updateProdut(selectedItem);
 
+            using (var reader = new StreamReader(new FileStream(csvPath, FileMode.Open), System.Text.Encoding.UTF8))
+            using (var csvReader = new CsvReader(reader, CultureInfo.CurrentCulture))
+            {
+                var records = csvReader.GetRecords<Product>();
+                CmbProducts.Items.Clear();
+                //records.Add(new Product { Code = 1, MaxD = 130, MinD = 110, MaxOvality = 0.5, MaxCompacity = 12 });
+                //csvWriter.WriteRecords(records);
+                foreach (var record in records)
+                {
+                    CmbProducts.Items.Add(record.Code);
+                }
+            }
+
         }
 
         private void updateProdut(int selectedItem)
@@ -3687,6 +3701,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                         records[i] = new Product
                         {
+                            Id = i + 1,
                             Code = int.Parse(Txt_Code.Text),
                             Name = Txt_Description.Text,
                             MaxD = double.Parse(Txt_MaxD.Text) / euFactor,
@@ -3782,14 +3797,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 records = csvReader.GetRecords<Product>().ToList();
                 List<int> ids = new List<int>();
-                //records.Add(new Product { Code = 1, MaxD = 130, MinD = 110, MaxOvality = 0.5, MaxCompacity = 12 });
-                //csvWriter.WriteRecords(records);
+                List<int> codes = new List<int>();
+
                 foreach (var record in records)
                 {
-                    ids.Add(record.Code);
+                    ids.Add(record.Id);
+                    codes.Add(record.Code);
                 }
 
-                if (!ids.Contains(int.Parse(Txt_Code.Text))) {
+                if (!codes.Contains(int.Parse(Txt_Code.Text))) {
                     int grid = 0;
 
                     switch (CmbGrid.SelectedItem.ToString())
@@ -3810,6 +3826,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                     records.Add(new Product
                     {
+                        Id = ids.Count + 1,
                         Code = int.Parse(Txt_Code.Text),
                         Name = Txt_Description.Text,
                         MaxD = double.Parse(Txt_MaxD.Text) / euFactor,
@@ -3844,26 +3861,46 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void logoffToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            configurationPage.Enabled = false;
-            authenticated = false;
-            MessageBox.Show("Logged Off");
+            if (authenticated)
+            {
+                configurationPage.Enabled = false;
+                authenticated = false;
+                MessageBox.Show("Logged Off");
+            }
+            else
+            {
+                MessageBox.Show("You aren't logged");
+            }
         }
 
         private void loginToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // Set new acquisition parameters
-            LoginDlg loginDlg = new LoginDlg(user, password);
-
-            if (loginDlg.ShowDialog() == DialogResult.OK)
+            if (!authenticated)
             {
-                authenticated = true;
-                configurationPage.Enabled = true;
-                MessageBox.Show("Authentication Succesfull");
+                // Set new acquisition parameters
+                LoginDlg loginDlg = new LoginDlg(user);
+
+                if (loginDlg.ShowDialog() == DialogResult.OK)
+                {
+                    authenticated = true;
+                    configurationPage.Enabled = true;
+                    MessageBox.Show("Authentication Succesfull");
+                }
+                else
+                {
+                    MessageBox.Show("Authentication Failed");
+                }
             }
             else
             {
-                MessageBox.Show("Authentication Failed");
+                MessageBox.Show("You're already logged");
             }
+            
+        }
+
+        private void CmbProducts_SelectedIndexChanged_1(object sender, EventArgs e)
+        {
+
         }
     }
 }
