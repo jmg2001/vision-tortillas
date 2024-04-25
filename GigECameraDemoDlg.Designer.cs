@@ -134,6 +134,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.CmbProducts = new System.Windows.Forms.ComboBox();
             this.CmdDelete = new System.Windows.Forms.Button();
             this.GroupBox9 = new System.Windows.Forms.GroupBox();
+            this.CmbGrid = new System.Windows.Forms.ComboBox();
             this.label9 = new System.Windows.Forms.Label();
             this.Txt_Compacity = new System.Windows.Forms.TextBox();
             this.Label46 = new System.Windows.Forms.Label();
@@ -148,7 +149,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Label27 = new System.Windows.Forms.Label();
             this.Label28 = new System.Windows.Forms.Label();
             this.Cmd_Save = new System.Windows.Forms.Button();
-            this.CmbGrid = new System.Windows.Forms.ComboBox();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.label10 = new System.Windows.Forms.Label();
+            this.modbusServerIPTxt = new System.Windows.Forms.TextBox();
             this.toolStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.GroupBox1.SuspendLayout();
@@ -174,6 +177,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.GroupBox12.SuspendLayout();
             this.GroupBox10.SuspendLayout();
             this.GroupBox9.SuspendLayout();
+            this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStrip1
@@ -484,7 +488,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Txt_MaxDiameter.Size = new System.Drawing.Size(63, 21);
             this.Txt_MaxDiameter.TabIndex = 87;
             this.Txt_MaxDiameter.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.Txt_MaxDiameter.TextChanged += new System.EventHandler(this.Txt_MaxDiameter_TextChanged);
             // 
             // GroupSelectGrid
             // 
@@ -618,9 +621,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // btnsave
             // 
             this.btnsave.AllowDrop = true;
-            this.btnsave.Location = new System.Drawing.Point(70, 256);
+            this.btnsave.Location = new System.Drawing.Point(214, 249);
             this.btnsave.Name = "btnsave";
-            this.btnsave.Size = new System.Drawing.Size(169, 23);
+            this.btnsave.Size = new System.Drawing.Size(97, 44);
             this.btnsave.TabIndex = 116;
             this.btnsave.Text = "Save Configuration";
             this.btnsave.UseVisualStyleBackColor = true;
@@ -681,7 +684,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.formatTxt.Size = new System.Drawing.Size(50, 29);
             this.formatTxt.TabIndex = 118;
             this.formatTxt.Text = "3x3";
-            this.formatTxt.Click += new System.EventHandler(this.formatTxt_Click);
             // 
             // label8
             // 
@@ -746,6 +748,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // configurationPage
             // 
             this.configurationPage.BackColor = System.Drawing.Color.LightSteelBlue;
+            this.configurationPage.Controls.Add(this.groupBox3);
             this.configurationPage.Controls.Add(this.GroupBox11);
             this.configurationPage.Controls.Add(this.groupBox4);
             this.configurationPage.Controls.Add(this.btnsave);
@@ -760,7 +763,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // GroupBox11
             // 
             this.GroupBox11.Controls.Add(this.TableLayoutPanel3);
-            this.GroupBox11.Location = new System.Drawing.Point(57, 323);
+            this.GroupBox11.Location = new System.Drawing.Point(6, 186);
             this.GroupBox11.Name = "GroupBox11";
             this.GroupBox11.Size = new System.Drawing.Size(197, 169);
             this.GroupBox11.TabIndex = 121;
@@ -834,7 +837,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.TXT_ROI_Left.TabIndex = 81;
             this.TXT_ROI_Left.Text = "0";
             this.TXT_ROI_Left.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.TXT_ROI_Left.TextChanged += new System.EventHandler(this.TXT_ROI_Left_TextChanged);
             // 
             // Label34
             // 
@@ -888,7 +890,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.groupBox4.Controls.Add(this.euListSelection);
             this.groupBox4.Location = new System.Drawing.Point(6, 6);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(313, 216);
+            this.groupBox4.Size = new System.Drawing.Size(313, 174);
             this.groupBox4.TabIndex = 117;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Calibration";
@@ -897,7 +899,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             this.euFactorTxt.AutoSize = true;
             this.euFactorTxt.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.euFactorTxt.Location = new System.Drawing.Point(198, 158);
+            this.euFactorTxt.Location = new System.Drawing.Point(191, 132);
             this.euFactorTxt.Name = "euFactorTxt";
             this.euFactorTxt.Size = new System.Drawing.Size(35, 24);
             this.euFactorTxt.TabIndex = 7;
@@ -907,7 +909,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label7.Location = new System.Drawing.Point(21, 158);
+            this.label7.Location = new System.Drawing.Point(23, 132);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(156, 24);
             this.label7.TabIndex = 6;
@@ -925,13 +927,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // calibrateBtn
             // 
             this.calibrateBtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.calibrateBtn.Location = new System.Drawing.Point(120, 100);
+            this.calibrateBtn.Location = new System.Drawing.Point(142, 91);
             this.calibrateBtn.Name = "calibrateBtn";
             this.calibrateBtn.Size = new System.Drawing.Size(84, 27);
             this.calibrateBtn.TabIndex = 4;
             this.calibrateBtn.Text = "Calibrate";
             this.calibrateBtn.UseVisualStyleBackColor = true;
-            this.calibrateBtn.Click += new System.EventHandler(this.button2_Click);
+            this.calibrateBtn.Click += new System.EventHandler(this.calibrateButtom_Click);
             // 
             // txtCalibrationTarget
             // 
@@ -1198,13 +1200,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.CmdAdd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.CmdAdd.AutoSize = true;
             this.CmdAdd.BackColor = System.Drawing.Color.Silver;
-            this.CmdAdd.Enabled = false;
             this.CmdAdd.Location = new System.Drawing.Point(506, 173);
             this.CmdAdd.Name = "CmdAdd";
             this.CmdAdd.Size = new System.Drawing.Size(70, 55);
             this.CmdAdd.TabIndex = 119;
             this.CmdAdd.Text = "Add";
             this.CmdAdd.UseVisualStyleBackColor = false;
+            this.CmdAdd.Click += new System.EventHandler(this.CmdAdd_Click);
             // 
             // CmdUpdate
             // 
@@ -1274,6 +1276,19 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.GroupBox9.TabIndex = 115;
             this.GroupBox9.TabStop = false;
             this.GroupBox9.Text = "Products Database";
+            // 
+            // CmbGrid
+            // 
+            this.CmbGrid.FormattingEnabled = true;
+            this.CmbGrid.Items.AddRange(new object[] {
+            "3x3",
+            "5",
+            "4x4",
+            "2x2"});
+            this.CmbGrid.Location = new System.Drawing.Point(140, 162);
+            this.CmbGrid.Name = "CmbGrid";
+            this.CmbGrid.Size = new System.Drawing.Size(121, 21);
+            this.CmbGrid.TabIndex = 124;
             // 
             // label9
             // 
@@ -1410,18 +1425,36 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Cmd_Save.UseVisualStyleBackColor = false;
             this.Cmd_Save.Click += new System.EventHandler(this.Cmd_Save_Click);
             // 
-            // CmbGrid
+            // groupBox3
             // 
-            this.CmbGrid.FormattingEnabled = true;
-            this.CmbGrid.Items.AddRange(new object[] {
-            "3x3",
-            "5",
-            "4x4",
-            "2x2"});
-            this.CmbGrid.Location = new System.Drawing.Point(140, 162);
-            this.CmbGrid.Name = "CmbGrid";
-            this.CmbGrid.Size = new System.Drawing.Size(121, 21);
-            this.CmbGrid.TabIndex = 124;
+            this.groupBox3.Controls.Add(this.modbusServerIPTxt);
+            this.groupBox3.Controls.Add(this.label10);
+            this.groupBox3.Location = new System.Drawing.Point(6, 361);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(311, 106);
+            this.groupBox3.TabIndex = 122;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Modbus";
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label10.Location = new System.Drawing.Point(6, 32);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(68, 16);
+            this.label10.TabIndex = 7;
+            this.label10.Text = "Server IP: ";
+            // 
+            // modbusServerIPTxt
+            // 
+            this.modbusServerIPTxt.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.modbusServerIPTxt.Location = new System.Drawing.Point(73, 29);
+            this.modbusServerIPTxt.Name = "modbusServerIPTxt";
+            this.modbusServerIPTxt.Size = new System.Drawing.Size(164, 21);
+            this.modbusServerIPTxt.TabIndex = 8;
+            this.modbusServerIPTxt.Text = "127.0.0.1";
+            this.modbusServerIPTxt.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // GigECameraDemoDlg
             // 
@@ -1436,7 +1469,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "GigECameraDemoDlg";
-            this.Text = "VISION SYSTEM";
+            this.Text = "InspecTorT T300";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.GigECameraDemoDlg_FormClosed);
             this.Load += new System.EventHandler(this.GigECameraDemoDlg_Load);
             this.toolStrip1.ResumeLayout(false);
@@ -1477,6 +1510,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.GroupBox10.ResumeLayout(false);
             this.GroupBox9.ResumeLayout(false);
             this.GroupBox9.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1612,6 +1647,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private ComboBox CmbOperationModeSelection;
         internal Label label9;
         private ComboBox CmbGrid;
+        internal GroupBox groupBox3;
+        private TextBox modbusServerIPTxt;
+        private Label label10;
     }
 }
 

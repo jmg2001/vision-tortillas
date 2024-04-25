@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using Microsoft.Win32;
-using System.Configuration;
+// using System.Configuration;
 
 using DALSA.SaperaLT.SapClassBasic;
 using DALSA.SaperaLT.SapClassGui;
@@ -14,21 +14,20 @@ using System.Data;
 
 using EasyModbus;
 using CsvHelper;
-using CsvHelper.Configuration;
+// using CsvHelper.Configuration;
 
 using System.Threading.Tasks;
-using System.Net.Http;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using static DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.GigECameraDemoDlg;
+// using System.Net.Http;
+// using static DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.GigECameraDemoDlg;
 using Emgu.CV.Structure;
 using Emgu.CV;
-using Emgu.CV.Features2D;
 using System.Diagnostics;
-using System.Drawing.Imaging;
+// using System.Drawing.Imaging;
 using System.Globalization;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+// using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Threading;
+using System.Text.RegularExpressions;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 
 [StructLayout(LayoutKind.Sequential)]
@@ -158,11 +157,276 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         public bool isActivatedProcessData = false; // Variable de estado para el botón tipo toggle
 
+        string csvPath = "";
+        string configPath = "";
+        // Obtener el directorio de inicio del usuario actual
+        string userDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
+        string ipAddress = "127.0.0.1";
+        int port = 503;
+
         // Delegate to display number of frame acquired 
         // Delegate is needed because .NEt framework does not support  cross thread control modification
         private delegate void DisplayFrameAcquired(int number, bool trash);
         //
         // This function is called each time an image has been transferred into system memory by the transfer object
+
+        public GigECameraDemoDlg()
+        {
+            m_AcqDevice = null;
+            m_Buffers = null;
+            m_Xfer = null;
+            m_View = null;
+
+            AcqConfigDlg acConfigDlg = new AcqConfigDlg(null, "", AcqConfigDlg.ServerCategory.ServerAcqDevice);
+            if (acConfigDlg.ShowDialog() == DialogResult.OK)
+            {
+                InitializeComponent();
+                InitializeDataTable();
+
+                // initModbusClient();
+                // Dirección IP y puerto del dispositivo Modbus
+                
+                modbusServerIPTxt.Text = ipAddress;
+
+                // Crear un cliente Modbus TCP
+                modbusClient = new ModbusClient(ipAddress, port);
+
+                string actualDIrectory = AppDomain.CurrentDomain.BaseDirectory;
+                csvPath = userDir + "\\InspecTorT_db.csv";
+                configPath = userDir + "\\InspecTorTConfig";
+
+                originalBox.MouseMove += originalBox_MouseMove;
+                processROIBox.MouseMove += processBox_MouseMove;
+
+                CmbOperationModeSelection.Text = "Manual";
+                operationMode = 0;
+                productsPage.Enabled = false;
+
+                // Suscribir al evento SelectedIndexChanged del TabControl
+                mainTabs.SelectedIndexChanged += TabControl2_SelectedIndexChanged;
+
+                processImageBtn.Enabled = false;
+
+                units = settings.Units;
+                unitsTxt.Text = units;
+                targetUnitsTxt.Text = units;
+                maxDiameterUnitsTxt.Text = units;
+                minDiameterUnitsTxt.Text = units;
+                euListSelection.SelectedItem = units;
+                euFactor = settings.EUFactor;
+                txtCalibrationTarget.Text = settings.targetCalibration.ToString();
+                euFactorTxt.Text = Math.Round(euFactor, 3).ToString();
+
+                formatTxt.Text = settings.Format;
+
+
+
+                // Verificar si el archivo existe
+                if (File.Exists(csvPath))
+                {
+                    using (var reader = new StreamReader(new FileStream(csvPath, FileMode.Open), System.Text.Encoding.UTF8))
+                    using (var csvReader = new CsvReader(reader, CultureInfo.CurrentCulture))
+                    {
+                        var records = csvReader.GetRecords<Product>();
+                        //records.Add(new Product { Code = 1, MaxD = 130, MinD = 110, MaxOvality = 0.5, MaxCompacity = 12 });
+                        //csvWriter.WriteRecords(records);
+                        foreach (var record in records)
+                        {
+                            CmbProducts.Items.Add(record.Code);
+                            if (record.Code == settings.productCode)
+                            {
+                                changeProduct(record);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // Encabezados del archivo CSV
+                    string[] headers = { "Code", "Name", "MaxD", "MinD", "MaxOvality", "MaxCompacity", "Grid" };
+
+                    // Contenido de los registros
+                    string[][] data = {
+                    new string[] { "1", "Default", "90", "50", "0.5", "12", "1" },
+                    };
+
+                    // Escribir los datos en el archivo CSV
+                    WriteCsvFile(csvPath, headers, data);
+
+                    Console.WriteLine("Archivo CSV creado correctamente.");
+
+                    using (var reader = new StreamReader(new FileStream(csvPath, FileMode.Open), System.Text.Encoding.UTF8))
+                    using (var csvReader = new CsvReader(reader, CultureInfo.CurrentCulture))
+                    {
+                        var records = csvReader.GetRecords<Product>();
+                        foreach (var record in records)
+                        {
+                            CmbProducts.Items.Add(record.Code);
+                            changeProduct(record);
+                        }
+                    }
+                }
+
+                // Suscribirse al evento SelectedIndexChanged del ComboBox
+                CmbProducts.SelectedIndexChanged += CmbProducts_SelectedIndexChanged;
+
+                // Suscribirse al evento SelectedIndexChanged del ComboBox
+                CmbOperationModeSelection.SelectedIndexChanged += CmbOperationModeSelection_SelectedIndexChanged;
+
+                modbusServer.Port = 502;
+                modbusServer.Listen();
+                Console.WriteLine("Servidor Modbus TCP en ejecución...");
+
+                // Aquí vamos a agregar todos los formatos
+                // 3x3
+                int[] quadrantsOfinterest = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+                gridTypes.Add(new GridType(1, (3, 3), quadrantsOfinterest));
+                // 5
+                quadrantsOfinterest = new int[] { 1, 3, 5, 7, 9 };
+                gridTypes.Add(new GridType(2, (3, 3), quadrantsOfinterest));
+                // 4x4
+                quadrantsOfinterest = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+                gridTypes.Add(new GridType(3, (4, 4), quadrantsOfinterest));
+                // 2x2
+                quadrantsOfinterest = new int[] { 1, 2, 3, 4 };
+                gridTypes.Add(new GridType(4, (2, 2), quadrantsOfinterest));
+
+                grid = settings.GridType;
+
+                // Cargamos el GridType inicial
+                foreach (GridType gridT in gridTypes)
+                {
+                    if (gridT.Type == grid)
+                    {
+                        gridType = gridT;
+                    }
+                }
+
+                sizes.Add("Null");
+                sizes.Add("Normal");
+                sizes.Add("Big");
+                sizes.Add("Small");
+                sizes.Add("Oval");
+                sizes.Add("Oversize");
+                sizes.Add("Shape");
+
+                //objeto ROI
+                UserROI.Top = settings.ROI_Top;
+                UserROI.Left = settings.ROI_Left;
+                UserROI.Right = settings.ROI_Right;
+                UserROI.Bottom = settings.ROI_Bottom;
+
+                TXT_ROI_Left.Text = UserROI.Left.ToString();
+                TXT_ROI_Right.Text = UserROI.Right.ToString();
+                TXT_ROI_Top.Text = UserROI.Top.ToString();
+                TXT_ROI_Bottom.Text = UserROI.Bottom.ToString();
+
+                maxOvality = settings.maxOvality;
+                maxCompactness = settings.maxCompacity;
+                maxDiameter = (float)settings.maxDiameter;
+                minDiameter = (float)settings.minDiameter;
+
+                Txt_MaxDiameter.Text = Math.Round(maxDiameter * euFactor, 3).ToString();
+                Txt_MinDiameter.Text = Math.Round(minDiameter * euFactor, 3).ToString();
+                Txt_MaxCompacity.Text = maxCompactness.ToString();
+                Txt_MaxOvality.Text = maxOvality.ToString();
+
+                // txtCalibrationTarget.Text = calibrationTarget.ToString();
+
+                //InitializeInterface();
+                // Suscribir al evento KeyPress del TextBox
+                Txt_Threshold.KeyPress += Txt_Threshold_KeyPress;
+                Txt_MaxDiameter.KeyPress += Txt_MaxDiameter_KeyPress;
+                Txt_MinDiameter.KeyPress += Txt_MinDiameter_KeyPress;
+                Txt_MaxCompacity.KeyPress += Txt_MaxCompacity_KeyPress;
+                Txt_MaxOvality.KeyPress += Txt_MaxOvality_KeyPress;
+                txtCalibrationTarget.KeyPress += calibrationTarget_KeyPress;
+
+                TXT_ROI_Left.KeyPress += Txt_UserROILeft_KeyPress;
+                TXT_ROI_Right.KeyPress += Txt_UserROIRight_KeyPress;
+                TXT_ROI_Top.KeyPress += Txt_UserROITop_KeyPress;
+                TXT_ROI_Bottom.KeyPress += Txt_UserROIBottom_KeyPress;
+
+                modbusServerIPTxt.KeyPress += ModbusServerIPTxt_KeyPress;
+
+                // Suscribir la función al evento SelectedIndexChanged del ComboBox
+                euListSelection.SelectedIndexChanged += euListSelection_SelectedIndexChanged;
+
+                // Crear un TabControl
+                TabControl tabControl1 = new TabControl();
+                tabControl1.Location = new Point(10, 10);
+                tabControl1.Size = new Size(680, 520);
+                this.Controls.Add(tabControl1);
+
+                // Agregar m_ImageBox al TabPage
+                this.m_ImageBox = new DALSA.SaperaLT.SapClassGui.ImageBox();
+                this.m_ImageBox.Location = new Point(OffsetLeft, OffsetTop);
+                this.m_ImageBox.Name = "m_ImageBox";
+                this.m_ImageBox.PixelValueDisplay = this.PixelDataValue;
+                this.m_ImageBox.Size = new Size(640, 480);
+                this.m_ImageBox.SliderEnable = true;
+                this.m_ImageBox.SliderMaximum = 10;
+                this.m_ImageBox.SliderMinimum = 0;
+                this.m_ImageBox.SliderValue = 0;
+                this.m_ImageBox.SliderVisible = false;
+                this.m_ImageBox.TabIndex = 12;
+                this.m_ImageBox.TrackerEnable = false;
+                this.m_ImageBox.View = null;
+                imagePage.Controls.Add(this.m_ImageBox);
+
+
+
+                if (!CreateNewObjects(acConfigDlg, false))
+                    this.Close();
+
+                // Cargamos la configuracion por default
+                Console.WriteLine(configPath + "\\TriggerOFF.ccf");
+                m_AcqDevice.LoadFeatures(configPath + "\\TriggerOFF.ccf");
+
+
+                transfer.AddPair(new SapXferPair(m_AcqDevice, m_Buffers));
+            }
+            else
+            {
+                MessageBox.Show("No cameras found or selected");
+                this.Close();
+            }
+        }
+
+        private void ModbusServerIPTxt_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Verificar si la tecla presionada es "Enter" (código ASCII 13)
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                string ipText = modbusServerIPTxt.Text.Trim();
+                if (IsValidIP(ipText))
+                {
+                    ipAddress = modbusServerIPTxt.Text;
+                    // MessageBox.Show("Dirección IP válida: " + ipText);
+                    if (modbusClient.Connected)
+                    {
+                        modbusClient.Disconnect();
+                        Console.WriteLine("Modbus Client Disconnected");
+                    }
+
+                    modbusClient = new ModbusClient(ipAddress, port);
+                    MessageBox.Show("Modbus Server IP Address changed");
+                }
+                else
+                {
+                    MessageBox.Show("Dirección IP no válida: " + ipText);
+                }
+            }
+
+            bool IsValidIP(string ip)
+            {
+                // Patrón de expresión regular para validar una dirección IP
+                string pattern = @"^(([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.){3}([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])$";
+                Regex regex = new Regex(pattern);
+                return regex.IsMatch(ip);
+            }
+        }
 
         // Clase de los productos
         public class Product
@@ -316,6 +580,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     {
                         processing = true;
 
+                        if (operationMode == 2)
+                        {
+                            requestModbusData();
+                        }
+
                         if (!originalImageIsDisposed)
                         {
                             try
@@ -356,6 +625,60 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         processing = false;
                     }
                 });
+            }
+        }
+
+        private void requestModbusData()
+        {
+            try
+            {   
+                if (!modbusClient.Connected)
+                {
+                    modbusClient.Connect();
+                    Console.WriteLine("Modbus Client Connected");
+                }
+                
+                try
+                {
+                    // Leer registros del dispositivo Modbus
+                    int[] registers = modbusClient.ReadHoldingRegisters(0, 10);
+
+                    // Mostrar los valores de los registros leídos
+                    // Console.WriteLine("Valores de los registros leídos:");
+                    ushort[] registerValue = new ushort[] { (ushort)registers[0], (ushort)registers[1] }; // Valores de ejemplo en registros
+                                                                                                          // Combina los dos valores de 16 bits en un solo valor entero de 32 bits
+                    int intValue = (registerValue[0] << 16) | registerValue[1];
+                    // Convierte el valor entero de 32 bits a un valor flotante
+                    float floatValue = BitConverter.ToSingle(BitConverter.GetBytes(intValue), 0);
+                    Console.WriteLine(floatValue);
+                    maxDiameter = (double)floatValue / euFactor;
+
+                    // Mostrar los valores de los registros leídos
+                    // Console.WriteLine("Valores de los registros leídos:");
+                    registerValue = new ushort[] { (ushort)registers[2], (ushort)registers[3] }; // Valores de ejemplo en registros
+                                                                                                 // Combina los dos valores de 16 bits en un solo valor entero de 32 bits
+                    intValue = (registerValue[0] << 16) | registerValue[1];
+                    // Convierte el valor entero de 32 bits a un valor flotante
+                    floatValue = BitConverter.ToSingle(BitConverter.GetBytes(intValue), 0);
+                    Console.WriteLine(floatValue);
+                    minDiameter = (double)floatValue / euFactor;
+
+                    Txt_MaxDiameter.Text = (maxDiameter*euFactor).ToString();
+                    Txt_MinDiameter.Text = (minDiameter*euFactor).ToString();
+                }
+                catch (Exception ex)
+                {
+                    // Manejar errores de comunicación con el dispositivo Modbus
+                    Console.WriteLine($"Error: {ex.Message}");
+                }
+                finally
+                {
+                    // modbusClient.Disconnect();
+                }
+            }
+            catch
+            {
+                Console.WriteLine("No se pudo conectar al servidor modbus");
             }
         }
 
@@ -409,7 +732,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             Bitmap roiImage = extractROI(binarizedImage);
 
-            int sectorSel = calculateCentralSector();
+            int sectorSel = 5;
 
             // Se extrae el sector central
             Bitmap centralSector = extractSector(roiImage, sectorSel);
@@ -422,24 +745,29 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             centralSector.Save(imagesPath + "centralSector.bmp");
 
-            var (areas, perimeters, centers) = FindContoursWithEdgesAndCenters(centralSector, minArea, maxArea, tortillaColor);
+            var (areas, perimeters, centers) = FindContoursWithEdgesAndCenters(roiImage, minArea, maxArea, tortillaColor);
 
             Point centro = new Point();
 
             for (int i = 0; i < areas.Count; i++)
             {
                 int area = areas[i].Count;
-                int perimeter = perimeters[i].Count;
+                //int perimeter = perimeters[i].Count;
                 centro = centers[i];
 
-                if (itsInCenter(centralSector, centro, 10))
+                int sector = CalculateSector(centro, roiImage.Width, roiImage.Height, 3, 3) + 1;
+
+                if (sector == sectorSel)
                 {
-                    diametroIA = (float)CalculateDiameterFromArea(area);
+                    if (itsInCenter(centralSector, centro, 10))
+                    {
+                        diametroIA = (float)CalculateDiameterFromArea(area);
 
-                    (diameter, maxD, minD) = calculateAndDrawDiameterTrianglesAlghoritm(centro, centralSector, 5, false);
+                        // (diameter, maxD, minD) = calculateAndDrawDiameterTrianglesAlghoritm(centro, roiImage, sector, false);
 
-                    calibrationValidate = true;
-                    break;
+                        calibrationValidate = true;
+                        break;
+                    }
                 }
             }
 
@@ -476,7 +804,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
             else
             {
-                MessageBox.Show("Place the calibration target in the middle. Error = X:" + (centro.X + centralSector.Width + UserROI.Left - centroX) + ", Y:" + (centroY - (centro.Y + centralSector.Height + UserROI.Top)));
+                Console.WriteLine(centro.X + " " + centro.Y);
+                MessageBox.Show("Place the calibration target in the middle. Error = X:" + (centro.X + UserROI.Left - centroX) + ", Y:" + (centroY - (centro.Y + UserROI.Top)));
             }
 
             updateGridType(grid);
@@ -640,7 +969,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             int centroY = originalImage.Height/2;
 
             // Verificar si el punto está dentro del área central definida por el margen de error
-            if (Math.Abs(center.X + image.Width + UserROI.Left - centroX) <= margin && Math.Abs(center.Y + image.Height + UserROI.Top - centroY) <= margin)
+            if (Math.Abs(center.X + UserROI.Left - centroX) <= margin && Math.Abs(center.Y + UserROI.Top - centroY) <= margin)
             {
                 return true;
             }
@@ -689,9 +1018,19 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             originalBox.Visible = true;
             processROIBox.Visible = true; // Mostrar el PictureBox ROI
-            
+            Bitmap binarizedImage = new Bitmap(originalImage.Width, originalImage.Height);
+
             // Se binariza la imagen
-            Bitmap binarizedImage = binarizeImage(originalImage, 0);
+            try
+            {
+                binarizedImage = binarizeImage(originalImage, 0);
+            }
+            catch
+            {
+                Console.WriteLine("Problema al binarizar");
+                return;
+            }
+            
 
             // Se extrae el ROI de la imagen binarizada
             Bitmap roiImage = extractROI(binarizedImage);
@@ -729,7 +1068,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             // Mode
             // Número flotante que deseas publicar
-            floatValue = (float)mode;
+            floatValue = (float)operationMode;
             // Convertir el número flotante a bytes
             floatBytes = BitConverter.GetBytes(floatValue);
             // Escribir los bytes en dos registros de 16 bits (dos palabras)
@@ -751,7 +1090,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             // Max Diameter SP
             // Número flotante que deseas publicar
-            floatValue = (float)maxDiameter;
+            floatValue = (float)(maxDiameter*euFactor);
             // Convertir el número flotante a bytes
             floatBytes = BitConverter.GetBytes(floatValue);
             // Escribir los bytes en dos registros de 16 bits (dos palabras)
@@ -762,7 +1101,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             // Min Diameter SP
             // Número flotante que deseas publicar
-            floatValue = (float)minDiameter;
+            floatValue = (float)(minDiameter*euFactor);
             // Convertir el número flotante a bytes
             floatBytes = BitConverter.GetBytes(floatValue);
             // Escribir los bytes en dos registros de 16 bits (dos palabras)
@@ -797,7 +1136,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             int firtsRegister = 0;
             foreach (Quadrant q in Quadrants)
             {
-                firtsRegister = 14 * q.Number + 10;
+                firtsRegister = offset * q.Number + 10;
                 if (gridType.QuadrantsOfInterest.Contains(q.Number))
                 {
                     if (q.Found) { 
@@ -882,7 +1221,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     {
                         // Class
                         // Número flotante que deseas publicar
-                        floatValue = (float)0.0;
+                        floatValue = 0.0f;
                         // Convertir el número flotante a bytes
                         floatBytes = BitConverter.GetBytes(floatValue);
                         // Escribir los bytes en dos registros de 16 bits (dos palabras)
@@ -1040,11 +1379,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
-        private void drawOnROI(Bitmap image)
-        {
-            
-        }
-
         private Bitmap extractROI(Bitmap image)
         {
             // Extraer la región del ROI
@@ -1061,203 +1395,44 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 using (Pen p = new Pen(Color.Cyan, 1))
                 {
                     g.DrawRectangle(p, rect);
-                    g.DrawEllipse(p, (int)originalImage.Width/2, (int)originalImage.Height/2,2,2);
 
-                    int sectorWidth = (int) ((UserROI.Right - UserROI.Left) / gridType.Grid.Item1) / 2;
-                    int sectorHeigth = (int) ((UserROI.Bottom - UserROI.Top) / gridType.Grid.Item2) / 2 ;
+                    // int sectorWidth = (int) ((UserROI.Right - UserROI.Left) / gridType.Grid.Item1) / 2;
+                    // int sectorHeigth = (int) ((UserROI.Bottom - UserROI.Top) / gridType.Grid.Item2) / 2 ;
 
-                    g.DrawEllipse(p, sectorWidth + UserROI.Left , sectorHeigth + UserROI.Top , 2, 2);
-                    g.DrawEllipse(p, sectorWidth*3 + UserROI.Left, sectorHeigth + UserROI.Top, 2, 2);
-                    g.DrawEllipse(p, sectorWidth*5 + UserROI.Left, sectorHeigth + UserROI.Top, 2, 2);
+                    //g.DrawEllipse(p, sectorWidth + UserROI.Left , sectorHeigth + UserROI.Top , 2, 2);
+                    //g.DrawEllipse(p, sectorWidth*3 + UserROI.Left, sectorHeigth + UserROI.Top, 2, 2);
+                    //g.DrawEllipse(p, sectorWidth*5 + UserROI.Left, sectorHeigth + UserROI.Top, 2, 2);
 
-                    g.DrawEllipse(p, sectorWidth + UserROI.Left, sectorHeigth*3 + UserROI.Top, 2, 2);
-                    g.DrawEllipse(p, sectorWidth*5 + UserROI.Left, sectorHeigth*3 + UserROI.Top, 2, 2);
+                    //g.DrawEllipse(p, sectorWidth + UserROI.Left, sectorHeigth*3 + UserROI.Top, 2, 2);
+                    //g.DrawEllipse(p, sectorWidth*5 + UserROI.Left, sectorHeigth*3 + UserROI.Top, 2, 2);
 
-                    g.DrawEllipse(p, sectorWidth + UserROI.Left, sectorHeigth*5 + UserROI.Top, 2, 2);
-                    g.DrawEllipse(p, sectorWidth*3 + UserROI.Left, sectorHeigth*5 + UserROI.Top, 2, 2);
-                    g.DrawEllipse(p, sectorWidth*5 + UserROI.Left, sectorHeigth*5 + UserROI.Top, 2, 2);
+                    //g.DrawEllipse(p, sectorWidth + UserROI.Left, sectorHeigth*5 + UserROI.Top, 2, 2);
+                    //g.DrawEllipse(p, sectorWidth*3 + UserROI.Left, sectorHeigth*5 + UserROI.Top, 2, 2);
+                    //g.DrawEllipse(p, sectorWidth*5 + UserROI.Left, sectorHeigth*5 + UserROI.Top, 2, 2);
 
+                }
+
+                using (Pen p = new Pen(Color.Red, 2))
+                {
+                    g.DrawEllipse(p, (int)originalImage.Width / 2, (int)originalImage.Height / 2, 2, 2);
                 }
             }    
         }
 
-        public GigECameraDemoDlg()
+
+        static void WriteCsvFile(string filePath, string[] headers, string[][] data)
         {
-            m_AcqDevice = null;
-            m_Buffers = null;
-            m_Xfer = null;
-            m_View = null;
-
-            AcqConfigDlg acConfigDlg = new AcqConfigDlg(null, "", AcqConfigDlg.ServerCategory.ServerAcqDevice);
-            if (acConfigDlg.ShowDialog() == DialogResult.OK)
+            // Crear un StreamWriter para escribir en el archivo CSV
+            using (StreamWriter writer = new StreamWriter(filePath))
             {
-                InitializeComponent();
-                InitializeDataTable();
+                // Escribir los encabezados en la primera línea
+                writer.WriteLine(string.Join(",", headers));
 
-                initModbusClient();
-
-                originalBox.MouseMove += originalBox_MouseMove;
-                processROIBox.MouseMove += processBox_MouseMove;
-
-                CmbOperationModeSelection.Text = "Manual";
-                operationMode = 0;
-                productsPage.Enabled = false;
-
-                // Suscribir al evento SelectedIndexChanged del TabControl
-                mainTabs.SelectedIndexChanged += TabControl2_SelectedIndexChanged;
-
-                processImageBtn.Enabled = false;
-
-                units = settings.Units;
-                unitsTxt.Text = units;
-                targetUnitsTxt.Text = units;
-                maxDiameterUnitsTxt.Text = units;
-                minDiameterUnitsTxt.Text = units;
-                euListSelection.SelectedItem = units;
-                euFactor = settings.EUFactor;
-                txtCalibrationTarget.Text = settings.targetCalibration.ToString();
-                euFactorTxt.Text = Math.Round(euFactor, 3).ToString();
-
-                formatTxt.Text = settings.Format;
-
-                
-
-                using (var reader = new StreamReader(new FileStream(@"C:\Users\Jesús\Desktop\test.csv", FileMode.Open), System.Text.Encoding.UTF8))
-                using (var csvReader = new CsvReader(reader, CultureInfo.CurrentCulture))
+                // Escribir los datos de cada registro en líneas separadas
+                foreach (string[] row in data)
                 {
-                    var records = csvReader.GetRecords<Product>();
-                    //records.Add(new Product { Code = 1, MaxD = 130, MinD = 110, MaxOvality = 0.5, MaxCompacity = 12 });
-                    //csvWriter.WriteRecords(records);
-                    foreach (var record in records)
-                    {
-                        CmbProducts.Items.Add(record.Code);
-                        if (record.Code == settings.productCode)
-                        {
-                            changeProduct(record);
-                        }
-                    }
+                    writer.WriteLine(string.Join(",", row));
                 }
-
-                // Suscribirse al evento SelectedIndexChanged del ComboBox
-                CmbProducts.SelectedIndexChanged += CmbProducts_SelectedIndexChanged;
-
-                // Suscribirse al evento SelectedIndexChanged del ComboBox
-                CmbOperationModeSelection.SelectedIndexChanged += CmbOperationModeSelection_SelectedIndexChanged;
-
-                modbusServer.Port = 502;
-                modbusServer.Listen();
-                Console.WriteLine("Servidor Modbus TCP en ejecución...");
-
-                // Aquí vamos a agregar todos los formatos
-                // 3x3
-                int[] quadrantsOfinterest = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-                gridTypes.Add(new GridType(1, (3, 3), quadrantsOfinterest));
-                // 5
-                quadrantsOfinterest = new int[] { 1, 3, 5, 7, 9 };
-                gridTypes.Add(new GridType(2, (3, 3), quadrantsOfinterest));
-                // 4x4
-                quadrantsOfinterest = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
-                gridTypes.Add(new GridType(3, (4, 4), quadrantsOfinterest));
-                // 2x2
-                quadrantsOfinterest = new int[] { 1, 2, 3, 4 };
-                gridTypes.Add(new GridType(4, (2, 2), quadrantsOfinterest));
-
-                grid = settings.GridType;
-
-                // Cargamos el GridType inicial
-                foreach (GridType gridT in gridTypes)
-                {
-                    if (gridT.Type == grid)
-                    {
-                        gridType = gridT;
-                    }
-                }
-
-                sizes.Add("Null");
-                sizes.Add("Normal");
-                sizes.Add("Big");
-                sizes.Add("Small");
-                sizes.Add("Oval");
-                sizes.Add("Oversize");
-                sizes.Add("Shape");
-
-                //objeto ROI
-                UserROI.Top = settings.ROI_Top;
-                UserROI.Left = settings.ROI_Left;
-                UserROI.Right = settings.ROI_Right;
-                UserROI.Bottom = settings.ROI_Bottom;
-
-                TXT_ROI_Left.Text = UserROI.Left.ToString();
-                TXT_ROI_Right.Text = UserROI.Right.ToString();
-                TXT_ROI_Top.Text = UserROI.Top.ToString();
-                TXT_ROI_Bottom.Text = UserROI.Bottom.ToString();
-
-                maxOvality = settings.maxOvality;
-                maxCompactness = settings.maxCompacity;
-                maxDiameter = (float)settings.maxDiameter;
-                minDiameter = (float)settings.minDiameter;
-
-                Txt_MaxDiameter.Text = Math.Round(maxDiameter*euFactor,3).ToString();
-                Txt_MinDiameter.Text = Math.Round(minDiameter*euFactor,3).ToString();
-                Txt_MaxCompacity.Text = maxCompactness.ToString();
-                Txt_MaxOvality.Text = maxOvality.ToString();
-
-                // txtCalibrationTarget.Text = calibrationTarget.ToString();
-
-                //InitializeInterface();
-                // Suscribir al evento KeyPress del TextBox
-                Txt_Threshold.KeyPress += Txt_Threshold_KeyPress;
-                Txt_MaxDiameter.KeyPress += Txt_MaxDiameter_KeyPress;
-                Txt_MinDiameter.KeyPress += Txt_MinDiameter_KeyPress;
-                Txt_MaxCompacity.KeyPress += Txt_MaxCompacity_KeyPress;
-                Txt_MaxOvality.KeyPress += Txt_MaxOvality_KeyPress;
-                txtCalibrationTarget.KeyPress += calibrationTarget_KeyPress;
-
-                TXT_ROI_Left.KeyPress += Txt_UserROILeft_KeyPress;
-                TXT_ROI_Right.KeyPress += Txt_UserROIRight_KeyPress;
-                TXT_ROI_Top.KeyPress += Txt_UserROITop_KeyPress;
-                TXT_ROI_Bottom.KeyPress += Txt_UserROIBottom_KeyPress;
-
-                // Suscribir la función al evento SelectedIndexChanged del ComboBox
-                euListSelection.SelectedIndexChanged += euListSelection_SelectedIndexChanged;
-
-                // Crear un TabControl
-                TabControl tabControl1 = new TabControl();
-                tabControl1.Location = new Point(10, 10);
-                tabControl1.Size = new Size(680, 520);
-                this.Controls.Add(tabControl1);
-
-                // Agregar m_ImageBox al TabPage
-                this.m_ImageBox = new DALSA.SaperaLT.SapClassGui.ImageBox();
-                this.m_ImageBox.Location = new Point(OffsetLeft, OffsetTop);
-                this.m_ImageBox.Name = "m_ImageBox";
-                this.m_ImageBox.PixelValueDisplay = this.PixelDataValue;
-                this.m_ImageBox.Size = new Size(640, 480);
-                this.m_ImageBox.SliderEnable = true;
-                this.m_ImageBox.SliderMaximum = 10;
-                this.m_ImageBox.SliderMinimum = 0;
-                this.m_ImageBox.SliderValue = 0;
-                this.m_ImageBox.SliderVisible = false;
-                this.m_ImageBox.TabIndex = 12;
-                this.m_ImageBox.TrackerEnable = false;
-                this.m_ImageBox.View = null;
-                imagePage.Controls.Add(this.m_ImageBox);
-
-                
-
-                if (!CreateNewObjects(acConfigDlg, false))
-                    this.Close();
-
-                // Cargamos la configuracion por default
-                m_AcqDevice.LoadFeatures("C:\\Users\\Jesús\\Documents\\T_Calibir_GXM640_TriggerOFF_Default.ccf");
-
-                
-                transfer.AddPair(new SapXferPair(m_AcqDevice, m_Buffers));
-            }
-            else
-            {
-                MessageBox.Show("No cameras found or selected");
-                this.Close();
             }
         }
 
@@ -1272,22 +1447,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     productsPage.Enabled = false;
                     GroupActualTargetSize.Enabled = true;
                     GroupSelectGrid.Enabled = true;
-                    if (thread.IsAlive)
-                    {
-                        thread.Suspend();
-                        threadSuspended = true;
-                    }
+                    if (modbusClient.Connected) { modbusClient.Disconnect();  Console.WriteLine("Modbus Client Disconnected"); }
                     break;
                 case "Local":
                     operationMode = 1;
                     productsPage.Enabled = true;
                     GroupActualTargetSize.Enabled = false;
                     GroupSelectGrid.Enabled = false;
-                    if (thread.IsAlive)
-                    {
-                        thread.Suspend();
-                        threadSuspended = true;
-                    }
+                    if (modbusClient.Connected) { modbusClient.Disconnect(); Console.WriteLine("Modbus Client Disconnected"); }
 
                     break;
                 case "PLC":
@@ -1295,14 +1462,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     productsPage.Enabled = false;
                     GroupActualTargetSize.Enabled = false;
                     GroupSelectGrid.Enabled = false;
-                    if (threadSuspended)
-                    {
-                        thread.Resume();
-                    }
-                    else
-                    {
-                        thread.Start();
-                    }
                     break;
             }
         }
@@ -1311,7 +1470,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             // Dirección IP y puerto del dispositivo Modbus
             string ipAddress = "127.0.0.1";
-            int port = 504;
+            int port = 503;
 
             // Crear un cliente Modbus TCP
             modbusClient = new ModbusClient(ipAddress, port);
@@ -1336,11 +1495,25 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                             int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
 
                             // Mostrar los valores de los registros leídos
-                            Console.WriteLine("Valores de los registros leídos:");
-                            for (int i = 0; i < registers.Length; i++)
-                            {
-                                Console.WriteLine($"Registro {startAddress + i}: {registers[i]}");
-                            }
+                            // Console.WriteLine("Valores de los registros leídos:");
+                            ushort[] registerValue = new ushort[] { (ushort)registers[0], (ushort)registers[1] }; // Valores de ejemplo en registros
+                            // Combina los dos valores de 16 bits en un solo valor entero de 32 bits
+                            int intValue = (registerValue[0] << 16) | registerValue[1];
+                            // Convierte el valor entero de 32 bits a un valor flotante
+                            float floatValue = BitConverter.ToSingle(BitConverter.GetBytes(intValue), 0);
+                            maxDiameter = (double)floatValue/euFactor;
+
+                            // Mostrar los valores de los registros leídos
+                            // Console.WriteLine("Valores de los registros leídos:");
+                            registerValue = new ushort[] { (ushort)registers[2], (ushort)registers[3] }; // Valores de ejemplo en registros
+                            // Combina los dos valores de 16 bits en un solo valor entero de 32 bits
+                            intValue = (registerValue[0] << 16) | registerValue[1];
+                            // Convierte el valor entero de 32 bits a un valor flotante
+                            floatValue = BitConverter.ToSingle(BitConverter.GetBytes(intValue), 0);
+                            minDiameter = (double)floatValue/euFactor;
+
+                            //Txt_MaxDiameter.Text = maxDiameter.ToString();
+                            //Txt_MinDiameter.Text = minDiameter.ToString();
                         }
                         catch (Exception ex)
                         {
@@ -1397,7 +1570,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             string selectedItem = CmbProducts.SelectedItem.ToString();
 
-            using (var reader = new StreamReader(new FileStream(@"C:\Users\Jesús\Desktop\test.csv", FileMode.Open), System.Text.Encoding.UTF8))
+            using (var reader = new StreamReader(new FileStream(csvPath, FileMode.Open), System.Text.Encoding.UTF8))
             using (var csvReader = new CsvReader(reader, CultureInfo.CurrentCulture))
             {
                 var records = csvReader.GetRecords<Product>();
@@ -1574,7 +1747,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     dataTable.Clear();
                     foreach (Blob blob in Blobs)
                     {
-                        dataTable.Rows.Add(blob.Sector, blob.Area, Math.Round(blob.DiametroIA * euFactor, 3), Math.Round(blob.Diametro * euFactor, 3), Math.Round(blob.DMayor * euFactor, 3), Math.Round(blob.DMenor * euFactor, 3), Math.Round(blob.Compacidad, 3));
+                        dataTable.Rows.Add(blob.Sector, blob.Area, Math.Round(blob.DiametroIA * euFactor, 3), Math.Round(blob.Diametro * euFactor, 3), Math.Round(blob.DMayor * euFactor, 3), Math.Round(blob.DMenor * euFactor, 3), Math.Round(blob.Compacidad, 3), Math.Round(blob.Ovalidad, 3));
                     }
                 }
 
@@ -1599,7 +1772,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 double calibrationTarget = 0;
                 if (Double.TryParse(txtCalibrationTarget.Text, out calibrationTarget));
                 calibrationTarget *= fact;
-                // settings.targetCalibration = (float) calibrationTarget;
                 txtCalibrationTarget.Text = Math.Round(calibrationTarget, 3).ToString();
             }
         }
@@ -1634,6 +1806,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 {
                     // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
                     MessageBox.Show("Se ha guardado la cantidad modificada: " + maxOvality, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    settings.maxOvality = (float)maxOvality;
                 }
                 else
                 {
@@ -1653,6 +1826,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 {
                     // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
                     MessageBox.Show("Se ha guardado la cantidad modificada: " + maxCompactness, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    settings.maxCompacity = (float)maxCompactness;
                 }
                 else
                 {
@@ -2336,7 +2510,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     ushort size = calculateSize(maxDiameter, minDiameter, compactness, ovalidad);
 
                     // Agregamos los datos a la tabla
-                    dataTable.Rows.Add(sector, area, Math.Round(diametroIA * tempFactor, 3), Math.Round(diameterTriangles * tempFactor, 3), Math.Round(maxDiameter * tempFactor, 3), Math.Round(minDiameter * tempFactor, 3), Math.Round(compactness, 3));
+                    dataTable.Rows.Add(sector, area, Math.Round(diametroIA * tempFactor, 3), Math.Round(diameterTriangles * tempFactor, 3), Math.Round(maxDiameter * tempFactor, 3), Math.Round(minDiameter * tempFactor, 3), Math.Round(compactness, 3), Math.Round(ovalidad, 3));
 
                     Blob blob = new Blob(area, areas[i], perimeter, perimeters[i], diameterTriangles, diametroIA, centro, maxDiameter, minDiameter, sector, compactness, size, ovalidad, 0);
 
@@ -2428,6 +2602,32 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             // Crear un objeto Brush para el color del texto
             Brush brush = Brushes.White;
+
+            switch (size)
+            {
+                // Normal
+                case 1:
+                    brush = Brushes.Green;
+                    break;
+                // Big
+                case 2:
+                    brush = Brushes.Orange;
+                    break;
+                // Small
+                case 3:
+                    brush = Brushes.Yellow;
+                    break;
+                // Oval
+                case 4:
+                    brush = Brushes.Cyan;
+                    break;
+                // Shape
+                case 6:
+                    brush = Brushes.Red;
+                    break;
+            }
+
+            
 
             // Crear el texto a mostrar
             string texto = sizes[size];
@@ -2609,8 +2809,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         processedValue = (newValue > threshold) ? 0 : 255;
                     }
 
-                    
-
                     // Crear el nuevo color y establecerlo en la imagen procesada
                     Color processedColor = Color.FromArgb(processedValue, processedValue, processedValue);
                     processed.SetPixel(x, y, processedColor);
@@ -2631,11 +2829,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             dataTable.Columns.Add("Diámetro mayor (triangulos)");
             dataTable.Columns.Add("Diámetro menor (triangulos)");
             dataTable.Columns.Add("Compacidad");
-        }
-
-        private void drawData(Bitmap image, Blob blob)
-        {
-            
+            dataTable.Columns.Add("Ovalidad");
         }
 
         private void drawSectorNumber(Bitmap image, Point center, int sector)
@@ -2944,7 +3138,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 startStop();
 
-                m_AcqDevice.LoadFeatures("C:\\Users\\Jesús\\Documents\\T_Calibir_GXM640_TriggerON_Default.ccf");
+                m_AcqDevice.LoadFeatures(configPath + "\\TriggerON.ccf");
 
                 viewModeBtn.Enabled = false;
                 processImageBtn.Enabled = false;
@@ -2953,7 +3147,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
             else
             {
-                m_AcqDevice.LoadFeatures("C:\\Users\\Jesús\\Documents\\T_Calibir_GXM640_TriggerOFF_Default.ccf");
+                m_AcqDevice.LoadFeatures(configPath + "\\TriggerOFF.ccf");
                 triggerModeBtn.BackColor = Color.Silver;
                 virtualTriggerBtn.Enabled = true;
 
@@ -3018,6 +3212,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
+        // Modificar el threshold manualmente
         private void Txt_Threshold_KeyPress(object sender, KeyPressEventArgs e)
         {
             // Verificar si la tecla presionada es "Enter" (código ASCII 13)
@@ -3123,6 +3318,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // SaveResultsToTxt(dataTable);
             // Para guardar la configuración
             settings.Save();
+            MessageBox.Show("Configuration Saved");
         }
 
         public void GuardarConfiguracion(string nombreUsuario, string valorConfiguracion)
@@ -3214,44 +3410,44 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
         }
 
-        static async Task<string> request(string query)
-        {
-            // URL del servidor donde está alojada la ruta para recibir consultas SQL
-            string serverUrl = "http://localhost:5000/query"; // Cambia la dirección y el puerto según corresponda
+        //static async Task<string> request(string query)
+        //{
+        //    // URL del servidor donde está alojada la ruta para recibir consultas SQL
+        //    string serverUrl = "http://localhost:5000/query"; // Cambia la dirección y el puerto según corresponda
 
-            // Consulta SQL que deseas enviar al servidor
-            // string query = "SELECT * FROM usuarios";
+        //    // Consulta SQL que deseas enviar al servidor
+        //    // string query = "SELECT * FROM usuarios";
 
-            try
-            {
-                // Crear un cliente HTTP
-                using (HttpClient client = new HttpClient())
-                {
-                    // Crear un objeto JSON con la consulta
-                    var json = new { query = query };
+        //    try
+        //    {
+        //        // Crear un cliente HTTP
+        //        using (HttpClient client = new HttpClient())
+        //        {
+        //            // Crear un objeto JSON con la consulta
+        //            var json = new { query = query };
 
-                    // Convertir el objeto JSON a una cadena y crear una solicitud HTTP POST
-                    var content = new StringContent(JsonConvert.SerializeObject(json), System.Text.Encoding.UTF8, "application/json");
+        //            // Convertir el objeto JSON a una cadena y crear una solicitud HTTP POST
+        //            var content = new StringContent(JsonConvert.SerializeObject(json), System.Text.Encoding.UTF8, "application/json");
 
-                    // Enviar la solicitud HTTP POST al servidor
-                    var response = await client.PostAsync(serverUrl, content);
+        //            // Enviar la solicitud HTTP POST al servidor
+        //            var response = await client.PostAsync(serverUrl, content);
 
-                    // Leer la respuesta del servidor
-                    string responseContent = await response.Content.ReadAsStringAsync();
+        //            // Leer la respuesta del servidor
+        //            string responseContent = await response.Content.ReadAsStringAsync();
 
-                    // Imprimir la respuesta del servidor
-                    // Console.WriteLine("Respuesta del servidor:");
-                    // Console.WriteLine(responseContent);
+        //            // Imprimir la respuesta del servidor
+        //            // Console.WriteLine("Respuesta del servidor:");
+        //            // Console.WriteLine(responseContent);
 
-                    return responseContent;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error al enviar la solicitud: " + ex.Message);
-                return string.Empty;
-            }
-        }
+        //            return responseContent;
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine("Error al enviar la solicitud: " + ex.Message);
+        //        return string.Empty;
+        //    }
+        //}
 
         private void diametersTxtCheck_CheckedChanged(object sender, EventArgs e)
         {
@@ -3345,6 +3541,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return (contours, edges, centers);
         }
 
+
         static Point CalculateCenter(List<Point> contour)
         {
             int sumX = 0;
@@ -3362,6 +3559,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return new Point(centerX, centerY);
         }
 
+        //Funcion para convertir a la imagen a un formato compatible para dibujar en ella
         public static Bitmap ConvertToCompatibleFormat(Bitmap bitmap)
         {
             // Crear un nuevo Bitmap con el mismo tamaño y formato compatible
@@ -3376,7 +3574,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return compatibleBitmap;
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        // CLick en el boton de calibración
+        private void calibrateButtom_Click(object sender, EventArgs e)
         {
             // Mostrar un MessageBox con un mensaje y botones de opción
             DialogResult result = MessageBox.Show($"You are going to perform a calibration with a {txtCalibrationTarget.Text} {unitsTxt.Text} target. Do you want to continue?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
@@ -3415,17 +3614,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
-        private void TXT_ROI_Left_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
         private void txtCalibrationTarget_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void formatTxt_Click(object sender, EventArgs e)
         {
 
         }
@@ -3447,7 +3636,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             var records = new List<Product>();
 
-            using (var reader = new StreamReader(new FileStream(@"C:\Users\Jesús\Desktop\test.csv", FileMode.Open), System.Text.Encoding.UTF8))
+            using (var reader = new StreamReader(new FileStream(csvPath, FileMode.Open), System.Text.Encoding.UTF8))
             using (var csvReader = new CsvReader(reader, CultureInfo.CurrentCulture))
             {
                 records = csvReader.GetRecords<Product>().ToList();
@@ -3491,11 +3680,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 }
             }
 
-            using (var writer = new StreamWriter(new FileStream(@"C:\Users\Jesús\Desktop\test.csv", FileMode.Open), System.Text.Encoding.UTF8))
+            using (var writer = new StreamWriter(new FileStream(csvPath, FileMode.Open), System.Text.Encoding.UTF8))
             using (var csvWriter = new CsvWriter(writer, CultureInfo.CurrentCulture))
             {
                 csvWriter.WriteRecords(records);
             }
+
+            MessageBox.Show("Product suceesfully updated");
         }
 
         private void Cmd_Save_Click(object sender, EventArgs e)
@@ -3537,6 +3728,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             updateGridType(grid, CmbGrid.SelectedItem.ToString());
 
+            MessageBox.Show("Set Point Changed Succesfuly");
+
         }
 
         private void Txt_MaxDiameter_TextChanged(object sender, EventArgs e)
@@ -3557,6 +3750,75 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private void CmbGridSelection_SelectedIndexChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void CmdAdd_Click(object sender, EventArgs e)
+        {
+            var records = new List<Product>();
+
+            using (var reader = new StreamReader(new FileStream(csvPath, FileMode.Open), System.Text.Encoding.UTF8))
+            using (var csvReader = new CsvReader(reader, CultureInfo.CurrentCulture))
+            {
+                records = csvReader.GetRecords<Product>().ToList();
+                List<int> ids = new List<int>();
+                //records.Add(new Product { Code = 1, MaxD = 130, MinD = 110, MaxOvality = 0.5, MaxCompacity = 12 });
+                //csvWriter.WriteRecords(records);
+                foreach (var record in records)
+                {
+                    ids.Add(record.Code);
+                }
+
+                if (!ids.Contains(int.Parse(Txt_Code.Text))) {
+                    int grid = 0;
+
+                    switch (CmbGrid.SelectedItem.ToString())
+                    {
+                        case "3x3":
+                            grid = 1;
+                            break;
+                        case "5":
+                            grid = 2;
+                            break;
+                        case "4x4":
+                            grid = 3;
+                            break;
+                        case "2x2":
+                            grid = 4;
+                            break;
+                    }
+
+                    records.Add(new Product
+                    {
+                        Code = int.Parse(Txt_Code.Text),
+                        Name = Txt_Description.Text,
+                        MaxD = double.Parse(Txt_MaxD.Text) / euFactor,
+                        MinD = double.Parse(Txt_MinD.Text) / euFactor,
+                        MaxOvality = double.Parse(Txt_Ovality.Text),
+                        MaxCompacity = double.Parse(Txt_Compacity.Text),
+                        Grid = grid
+                    });
+                    MessageBox.Show("Product succesfully added");
+                }
+                else
+                {
+                    MessageBox.Show("Code already exist");
+                }
+            }
+            using (var writer = new StreamWriter(new FileStream(csvPath, FileMode.Open), System.Text.Encoding.UTF8))
+            using (var csvWriter = new CsvWriter(writer, CultureInfo.CurrentCulture))
+            {
+                csvWriter.WriteRecords(records);
+            }
+            using (var reader = new StreamReader(new FileStream(csvPath, FileMode.Open), System.Text.Encoding.UTF8))
+            using (var csvReader = new CsvReader(reader, CultureInfo.CurrentCulture))
+            {
+                CmbProducts.Items.Clear();
+                var records2 = csvReader.GetRecords<Product>();
+                foreach (var record in records2)
+                {
+                    CmbProducts.Items.Add(record.Code);
+                }
+            }
         }
     }
 }
