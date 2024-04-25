@@ -254,7 +254,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     // Escribir los datos en el archivo CSV
                     WriteCsvFile(csvPath, headers, data);
 
-                    Console.WriteLine("Archivo CSV creado correctamente.");
+                    Console.WriteLine("CSV File created succesfully.");
 
                     using (var reader = new StreamReader(new FileStream(csvPath, FileMode.Open), System.Text.Encoding.UTF8))
                     using (var csvReader = new CsvReader(reader, CultureInfo.CurrentCulture))
@@ -276,7 +276,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 modbusServer.Port = 502;
                 modbusServer.Listen();
-                Console.WriteLine("Servidor Modbus TCP en ejecución...");
+                Console.WriteLine("Modbus Server running...");
 
                 // Aquí vamos a agregar todos los formatos
                 // 3x3
@@ -381,7 +381,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     this.Close();
 
                 // Cargamos la configuracion por default
-                Console.WriteLine(configPath + "\\TriggerOFF.ccf");
+                // Console.WriteLine(configPath + "\\TriggerOFF.ccf");
                 m_AcqDevice.LoadFeatures(configPath + "\\TriggerOFF.ccf");
 
 
@@ -415,7 +415,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 }
                 else
                 {
-                    MessageBox.Show("Dirección IP no válida: " + ipText);
+                    MessageBox.Show("Invalid IP Addres: " + ipText);
                 }
             }
 
@@ -678,7 +678,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
             catch
             {
-                Console.WriteLine("No se pudo conectar al servidor modbus");
+                Console.WriteLine("Can not connect to the Modbus Server");
             }
         }
 
@@ -738,9 +738,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             Bitmap centralSector = extractSector(roiImage, sectorSel);
 
             float diametroIA = 0;
-            double diameter = 0;
-            double maxD = 0;
-            double minD = 0;
+            //double diameter = 0;
+            //double maxD = 0;
+            //double minD = 0;
             bool calibrationValidate = false;
 
             centralSector.Save(imagesPath + "centralSector.bmp");
@@ -1027,7 +1027,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
             catch
             {
-                Console.WriteLine("Problema al binarizar");
+                Console.WriteLine("Binarization problem");
                 return;
             }
             
@@ -1466,76 +1466,76 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
-        private void initModbusClient()
-        {
-            // Dirección IP y puerto del dispositivo Modbus
-            string ipAddress = "127.0.0.1";
-            int port = 503;
+        //private void initModbusClient()
+        //{
+        //    // Dirección IP y puerto del dispositivo Modbus
+        //    string ipAddress = "127.0.0.1";
+        //    int port = 503;
 
-            // Crear un cliente Modbus TCP
-            modbusClient = new ModbusClient(ipAddress, port);
+        //    // Crear un cliente Modbus TCP
+        //    modbusClient = new ModbusClient(ipAddress, port);
 
-            // Dirección del registro a leer y cantidad de registros a leer
-            int startAddress = 0; // Dirección del primer registro a leer
-            int numRegisters = 10; // Cantidad de registros a leer
+        //    // Dirección del registro a leer y cantidad de registros a leer
+        //    int startAddress = 0; // Dirección del primer registro a leer
+        //    int numRegisters = 10; // Cantidad de registros a leer
 
-            // Crear e iniciar un hilo para la lectura continua de registros Modbus
-            thread = new Thread(() =>
-            {
-                while (true)
-                {
-                    try
-                    {
-                        // Conectar al dispositivo Modbus
-                        modbusClient.Connect();
+        //    // Crear e iniciar un hilo para la lectura continua de registros Modbus
+        //    thread = new Thread(() =>
+        //    {
+        //        while (true)
+        //        {
+        //            try
+        //            {
+        //                // Conectar al dispositivo Modbus
+        //                modbusClient.Connect();
 
-                        try
-                        {
-                            // Leer registros del dispositivo Modbus
-                            int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+        //                try
+        //                {
+        //                    // Leer registros del dispositivo Modbus
+        //                    int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
 
-                            // Mostrar los valores de los registros leídos
-                            // Console.WriteLine("Valores de los registros leídos:");
-                            ushort[] registerValue = new ushort[] { (ushort)registers[0], (ushort)registers[1] }; // Valores de ejemplo en registros
-                            // Combina los dos valores de 16 bits en un solo valor entero de 32 bits
-                            int intValue = (registerValue[0] << 16) | registerValue[1];
-                            // Convierte el valor entero de 32 bits a un valor flotante
-                            float floatValue = BitConverter.ToSingle(BitConverter.GetBytes(intValue), 0);
-                            maxDiameter = (double)floatValue/euFactor;
+        //                    // Mostrar los valores de los registros leídos
+        //                    // Console.WriteLine("Valores de los registros leídos:");
+        //                    ushort[] registerValue = new ushort[] { (ushort)registers[0], (ushort)registers[1] }; // Valores de ejemplo en registros
+        //                    // Combina los dos valores de 16 bits en un solo valor entero de 32 bits
+        //                    int intValue = (registerValue[0] << 16) | registerValue[1];
+        //                    // Convierte el valor entero de 32 bits a un valor flotante
+        //                    float floatValue = BitConverter.ToSingle(BitConverter.GetBytes(intValue), 0);
+        //                    maxDiameter = (double)floatValue/euFactor;
 
-                            // Mostrar los valores de los registros leídos
-                            // Console.WriteLine("Valores de los registros leídos:");
-                            registerValue = new ushort[] { (ushort)registers[2], (ushort)registers[3] }; // Valores de ejemplo en registros
-                            // Combina los dos valores de 16 bits en un solo valor entero de 32 bits
-                            intValue = (registerValue[0] << 16) | registerValue[1];
-                            // Convierte el valor entero de 32 bits a un valor flotante
-                            floatValue = BitConverter.ToSingle(BitConverter.GetBytes(intValue), 0);
-                            minDiameter = (double)floatValue/euFactor;
+        //                    // Mostrar los valores de los registros leídos
+        //                    // Console.WriteLine("Valores de los registros leídos:");
+        //                    registerValue = new ushort[] { (ushort)registers[2], (ushort)registers[3] }; // Valores de ejemplo en registros
+        //                    // Combina los dos valores de 16 bits en un solo valor entero de 32 bits
+        //                    intValue = (registerValue[0] << 16) | registerValue[1];
+        //                    // Convierte el valor entero de 32 bits a un valor flotante
+        //                    floatValue = BitConverter.ToSingle(BitConverter.GetBytes(intValue), 0);
+        //                    minDiameter = (double)floatValue/euFactor;
 
-                            //Txt_MaxDiameter.Text = maxDiameter.ToString();
-                            //Txt_MinDiameter.Text = minDiameter.ToString();
-                        }
-                        catch (Exception ex)
-                        {
-                            // Manejar errores de comunicación con el dispositivo Modbus
-                            Console.WriteLine($"Error: {ex.Message}");
-                        }
-                        finally
-                        {
-                            // Desconectar del dispositivo Modbus
-                            modbusClient.Disconnect();
-                        }
-                    }
-                    catch
-                    {
-                        Console.WriteLine("No se pudo conectar al servidor modbus");
-                    }
+        //                    //Txt_MaxDiameter.Text = maxDiameter.ToString();
+        //                    //Txt_MinDiameter.Text = minDiameter.ToString();
+        //                }
+        //                catch (Exception ex)
+        //                {
+        //                    // Manejar errores de comunicación con el dispositivo Modbus
+        //                    Console.WriteLine($"Error: {ex.Message}");
+        //                }
+        //                finally
+        //                {
+        //                    // Desconectar del dispositivo Modbus
+        //                    modbusClient.Disconnect();
+        //                }
+        //            }
+        //            catch
+        //            {
+        //                Console.WriteLine("No se pudo conectar al servidor modbus");
+        //            }
 
-                    // Esperar 5 segundos antes de realizar la próxima lectura
-                    Thread.Sleep(1000); // 5000 milisegundos = 5 segundos
-                }
-            });
-        }
+        //            // Esperar 5 segundos antes de realizar la próxima lectura
+        //            Thread.Sleep(1000); // 5000 milisegundos = 5 segundos
+        //        }
+        //    });
+        //}
 
         private void changeProduct(Product record)
         {
@@ -1596,13 +1596,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 if (int.TryParse(TXT_ROI_Bottom.Text, out UserROI.Bottom))
                 {
                     // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-                    MessageBox.Show("Se ha guardado la cantidad modificada: " + UserROI.Bottom, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Data saved: " + UserROI.Bottom, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     settings.ROI_Bottom = UserROI.Bottom;
                 }
                 else
                 {
                     // Manejar el caso en que el texto no sea un número válido
-                    MessageBox.Show("Por favor ingresa un número válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -1616,13 +1616,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 if (int.TryParse(TXT_ROI_Top.Text, out UserROI.Top))
                 {
                     // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-                    MessageBox.Show("Se ha guardado la cantidad modificada: " + UserROI.Top, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Data saved: " + UserROI.Top, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     settings.ROI_Top = UserROI.Top;
                 }
                 else
                 {
                     // Manejar el caso en que el texto no sea un número válido
-                    MessageBox.Show("Por favor ingresa un número válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -1636,13 +1636,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 if (int.TryParse(TXT_ROI_Right.Text, out UserROI.Right))
                 {
                     // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-                    MessageBox.Show("Se ha guardado la cantidad modificada: " + UserROI.Right, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Data Saved: " + UserROI.Right, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     settings.ROI_Right = UserROI.Right;
                 }
                 else
                 {
                     // Manejar el caso en que el texto no sea un número válido
-                    MessageBox.Show("Por favor ingresa un número válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("usea a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -1656,13 +1656,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 if (int.TryParse(TXT_ROI_Left.Text, out UserROI.Left))
                 {
                     // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-                    MessageBox.Show("Se ha guardado la cantidad modificada: " + UserROI.Left, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Data saved: " + UserROI.Left, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     settings.ROI_Left = UserROI.Left;
                 }
                 else
                 {
                     // Manejar el caso en que el texto no sea un número válido
-                    MessageBox.Show("Por favor ingresa un número válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -1755,7 +1755,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 Txt_MinD.Text = (double.Parse(Txt_MinD.Text)*fact).ToString();
 
                 double avgDiameter = 0;
-                if (Double.TryParse(avg_diameter.Text, out avgDiameter)) ;
+                if (Double.TryParse(avg_diameter.Text, out avgDiameter));
                 avgDiameter *= fact;
                 avg_diameter.Text = Math.Round(avgDiameter, 3).ToString();
 
@@ -1785,13 +1785,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 if (float.TryParse(txtCalibrationTarget.Text, out calibrationTarget))
                 {
                     // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-                    MessageBox.Show("Se ha guardado la cantidad modificada: " + calibrationTarget, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Data saved: " + calibrationTarget, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     settings.targetCalibration = calibrationTarget;
                 }
                 else
                 {
                     // Manejar el caso en que el texto no sea un número válido
-                    MessageBox.Show("Por favor ingresa un número válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -1805,13 +1805,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 if (double.TryParse(Txt_MaxOvality.Text, out maxOvality))
                 {
                     // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-                    MessageBox.Show("Se ha guardado la cantidad modificada: " + maxOvality, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Data saved: " + maxOvality, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     settings.maxOvality = (float)maxOvality;
                 }
                 else
                 {
                     // Manejar el caso en que el texto no sea un número válido
-                    MessageBox.Show("Por favor ingresa un número válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -1825,13 +1825,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 if (double.TryParse(Txt_MaxCompacity.Text, out maxCompactness))
                 {
                     // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-                    MessageBox.Show("Se ha guardado la cantidad modificada: " + maxCompactness, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Data saved: " + maxCompactness, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     settings.maxCompacity = (float)maxCompactness;
                 }
                 else
                 {
                     // Manejar el caso en que el texto no sea un número válido
-                    MessageBox.Show("Por favor ingresa un número válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -1845,14 +1845,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 if (double.TryParse(Txt_MinDiameter.Text, out minDiameter))
                 {
                     // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-                    MessageBox.Show("Se ha guardado la cantidad modificada: " + minDiameter, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Data saved: " + minDiameter, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     minDiameter = minDiameter / euFactor;
                     settings.minDiameter = minDiameter / euFactor;
                 }
                 else
                 {
                     // Manejar el caso en que el texto no sea un número válido
-                    MessageBox.Show("Por favor ingresa un número válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -1866,14 +1866,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 if (double.TryParse(Txt_MaxDiameter.Text, out maxDiameter))
                 {
                     // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-                    MessageBox.Show("Se ha guardado la cantidad modificada: " + maxDiameter, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Data saved: " + maxDiameter, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     maxDiameter = maxDiameter / euFactor;
                     settings.maxDiameter = maxDiameter;
                 }
                 else
                 {
                     // Manejar el caso en que el texto no sea un número válido
-                    MessageBox.Show("Por favor ingresa un número válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -2344,11 +2344,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
             catch (FileNotFoundException)
             {
-                Console.WriteLine("El archivo no existe. No se pudo eliminar.");
+                Console.WriteLine("File doesn´t exists.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al eliminar el archivo: {ex.Message}");
+                Console.WriteLine($"Deleting File Error: {ex.Message}");
             }
 
             try
@@ -2356,7 +2356,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 // Se guarda la imagen
                 if(!m_Buffers.Save(imagePath, "-format bmp", -1, 0))
                 {
-                    Console.WriteLine("Error al fuardar");
+                    Console.WriteLine("Saving Error");
                 }
                 // if (mode == 0) Console.WriteLine("Imagen guardada en :" + imagePath);
             }
@@ -3222,12 +3222,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 if (int.TryParse(Txt_Threshold.Text, out threshold))
                 {
                     // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-                    MessageBox.Show("Se ha guardado la cantidad modificada: " + threshold, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Data saved: " + threshold, "Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else
                 {
                     // Manejar el caso en que el texto no sea un número válido
-                    MessageBox.Show("Por favor ingresa un número válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Use a valid number.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }

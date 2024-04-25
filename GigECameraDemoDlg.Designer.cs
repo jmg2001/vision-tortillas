@@ -73,9 +73,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.grid_5 = new System.Windows.Forms.Button();
             this.grid_4 = new System.Windows.Forms.Button();
             this.grid_9 = new System.Windows.Forms.Button();
-            this.GB_Threshold = new System.Windows.Forms.GroupBox();
-            this.Chk_Threshold_Mode = new System.Windows.Forms.CheckBox();
-            this.Txt_Threshold = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.btnsave = new System.Windows.Forms.Button();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
@@ -89,6 +86,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.avg_diameter = new System.Windows.Forms.Label();
             this.configurationPage = new System.Windows.Forms.TabPage();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.modbusServerIPTxt = new System.Windows.Forms.TextBox();
+            this.label10 = new System.Windows.Forms.Label();
             this.GroupBox11 = new System.Windows.Forms.GroupBox();
             this.TableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.TXT_ROI_Bottom = new System.Windows.Forms.TextBox();
@@ -149,21 +149,21 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Label27 = new System.Windows.Forms.Label();
             this.Label28 = new System.Windows.Forms.Label();
             this.Cmd_Save = new System.Windows.Forms.Button();
-            this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.label10 = new System.Windows.Forms.Label();
-            this.modbusServerIPTxt = new System.Windows.Forms.TextBox();
+            this.GB_Threshold = new System.Windows.Forms.GroupBox();
+            this.Chk_Threshold_Mode = new System.Windows.Forms.CheckBox();
+            this.Txt_Threshold = new System.Windows.Forms.TextBox();
             this.toolStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.GroupBox1.SuspendLayout();
             this.GroupBox8.SuspendLayout();
             this.GroupActualTargetSize.SuspendLayout();
             this.GroupSelectGrid.SuspendLayout();
-            this.GB_Threshold.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.controlsTabs.SuspendLayout();
             this.mainControlPage.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.configurationPage.SuspendLayout();
+            this.groupBox3.SuspendLayout();
             this.GroupBox11.SuspendLayout();
             this.TableLayoutPanel3.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -177,7 +177,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.GroupBox12.SuspendLayout();
             this.GroupBox10.SuspendLayout();
             this.GroupBox9.SuspendLayout();
-            this.groupBox3.SuspendLayout();
+            this.GB_Threshold.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStrip1
@@ -574,42 +574,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.grid_9.UseVisualStyleBackColor = false;
             this.grid_9.Click += new System.EventHandler(this.grid_9_Click);
             // 
-            // GB_Threshold
-            // 
-            this.GB_Threshold.Controls.Add(this.Chk_Threshold_Mode);
-            this.GB_Threshold.Controls.Add(this.Txt_Threshold);
-            this.GB_Threshold.Location = new System.Drawing.Point(3, 112);
-            this.GB_Threshold.Name = "GB_Threshold";
-            this.GB_Threshold.Size = new System.Drawing.Size(320, 47);
-            this.GB_Threshold.TabIndex = 108;
-            this.GB_Threshold.TabStop = false;
-            this.GB_Threshold.Text = "Binary Threshold";
-            // 
-            // Chk_Threshold_Mode
-            // 
-            this.Chk_Threshold_Mode.AutoSize = true;
-            this.Chk_Threshold_Mode.Checked = true;
-            this.Chk_Threshold_Mode.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.Chk_Threshold_Mode.Location = new System.Drawing.Point(168, 20);
-            this.Chk_Threshold_Mode.Name = "Chk_Threshold_Mode";
-            this.Chk_Threshold_Mode.Size = new System.Drawing.Size(84, 20);
-            this.Chk_Threshold_Mode.TabIndex = 13;
-            this.Chk_Threshold_Mode.Text = "Automatic";
-            this.Chk_Threshold_Mode.UseVisualStyleBackColor = true;
-            this.Chk_Threshold_Mode.CheckedChanged += new System.EventHandler(this.Chk_Threshold_Mode_CheckedChanged);
-            // 
-            // Txt_Threshold
-            // 
-            this.Txt_Threshold.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.Txt_Threshold.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.Txt_Threshold.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Txt_Threshold.Location = new System.Drawing.Point(105, 19);
-            this.Txt_Threshold.Name = "Txt_Threshold";
-            this.Txt_Threshold.Size = new System.Drawing.Size(38, 21);
-            this.Txt_Threshold.TabIndex = 12;
-            this.Txt_Threshold.Text = "0";
-            this.Txt_Threshold.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
             // label1
             // 
             this.label1.AutoSize = true;
@@ -621,7 +585,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // btnsave
             // 
             this.btnsave.AllowDrop = true;
-            this.btnsave.Location = new System.Drawing.Point(214, 249);
+            this.btnsave.Location = new System.Drawing.Point(222, 354);
             this.btnsave.Name = "btnsave";
             this.btnsave.Size = new System.Drawing.Size(97, 44);
             this.btnsave.TabIndex = 116;
@@ -662,7 +626,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.mainControlPage.Controls.Add(this.GroupSelectGrid);
             this.mainControlPage.Controls.Add(this.groupBox2);
             this.mainControlPage.Controls.Add(this.GroupBox1);
-            this.mainControlPage.Controls.Add(this.GB_Threshold);
             this.mainControlPage.Controls.Add(this.GroupBox8);
             this.mainControlPage.Controls.Add(this.GroupActualTargetSize);
             this.mainControlPage.Cursor = System.Windows.Forms.Cursors.Default;
@@ -748,6 +711,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // configurationPage
             // 
             this.configurationPage.BackColor = System.Drawing.Color.LightSteelBlue;
+            this.configurationPage.Controls.Add(this.GB_Threshold);
             this.configurationPage.Controls.Add(this.groupBox3);
             this.configurationPage.Controls.Add(this.GroupBox11);
             this.configurationPage.Controls.Add(this.groupBox4);
@@ -760,10 +724,41 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.configurationPage.TabIndex = 1;
             this.configurationPage.Text = "Configuration";
             // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.modbusServerIPTxt);
+            this.groupBox3.Controls.Add(this.label10);
+            this.groupBox3.Location = new System.Drawing.Point(6, 470);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(311, 106);
+            this.groupBox3.TabIndex = 122;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Modbus";
+            // 
+            // modbusServerIPTxt
+            // 
+            this.modbusServerIPTxt.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.modbusServerIPTxt.Location = new System.Drawing.Point(73, 29);
+            this.modbusServerIPTxt.Name = "modbusServerIPTxt";
+            this.modbusServerIPTxt.Size = new System.Drawing.Size(164, 21);
+            this.modbusServerIPTxt.TabIndex = 8;
+            this.modbusServerIPTxt.Text = "127.0.0.1";
+            this.modbusServerIPTxt.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label10.Location = new System.Drawing.Point(6, 32);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(68, 16);
+            this.label10.TabIndex = 7;
+            this.label10.Text = "Server IP: ";
+            // 
             // GroupBox11
             // 
             this.GroupBox11.Controls.Add(this.TableLayoutPanel3);
-            this.GroupBox11.Location = new System.Drawing.Point(6, 186);
+            this.GroupBox11.Location = new System.Drawing.Point(6, 295);
             this.GroupBox11.Name = "GroupBox11";
             this.GroupBox11.Size = new System.Drawing.Size(197, 169);
             this.GroupBox11.TabIndex = 121;
@@ -1425,36 +1420,40 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Cmd_Save.UseVisualStyleBackColor = false;
             this.Cmd_Save.Click += new System.EventHandler(this.Cmd_Save_Click);
             // 
-            // groupBox3
+            // GB_Threshold
             // 
-            this.groupBox3.Controls.Add(this.modbusServerIPTxt);
-            this.groupBox3.Controls.Add(this.label10);
-            this.groupBox3.Location = new System.Drawing.Point(6, 361);
-            this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(311, 106);
-            this.groupBox3.TabIndex = 122;
-            this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "Modbus";
+            this.GB_Threshold.Controls.Add(this.Chk_Threshold_Mode);
+            this.GB_Threshold.Controls.Add(this.Txt_Threshold);
+            this.GB_Threshold.Location = new System.Drawing.Point(6, 210);
+            this.GB_Threshold.Name = "GB_Threshold";
+            this.GB_Threshold.Size = new System.Drawing.Size(313, 47);
+            this.GB_Threshold.TabIndex = 123;
+            this.GB_Threshold.TabStop = false;
+            this.GB_Threshold.Text = "Binary Threshold";
             // 
-            // label10
+            // Chk_Threshold_Mode
             // 
-            this.label10.AutoSize = true;
-            this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label10.Location = new System.Drawing.Point(6, 32);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(68, 16);
-            this.label10.TabIndex = 7;
-            this.label10.Text = "Server IP: ";
+            this.Chk_Threshold_Mode.AutoSize = true;
+            this.Chk_Threshold_Mode.Checked = true;
+            this.Chk_Threshold_Mode.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.Chk_Threshold_Mode.Location = new System.Drawing.Point(168, 20);
+            this.Chk_Threshold_Mode.Name = "Chk_Threshold_Mode";
+            this.Chk_Threshold_Mode.Size = new System.Drawing.Size(84, 20);
+            this.Chk_Threshold_Mode.TabIndex = 13;
+            this.Chk_Threshold_Mode.Text = "Automatic";
+            this.Chk_Threshold_Mode.UseVisualStyleBackColor = true;
             // 
-            // modbusServerIPTxt
+            // Txt_Threshold
             // 
-            this.modbusServerIPTxt.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.modbusServerIPTxt.Location = new System.Drawing.Point(73, 29);
-            this.modbusServerIPTxt.Name = "modbusServerIPTxt";
-            this.modbusServerIPTxt.Size = new System.Drawing.Size(164, 21);
-            this.modbusServerIPTxt.TabIndex = 8;
-            this.modbusServerIPTxt.Text = "127.0.0.1";
-            this.modbusServerIPTxt.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.Txt_Threshold.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.Txt_Threshold.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.Txt_Threshold.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Txt_Threshold.Location = new System.Drawing.Point(105, 19);
+            this.Txt_Threshold.Name = "Txt_Threshold";
+            this.Txt_Threshold.Size = new System.Drawing.Size(38, 21);
+            this.Txt_Threshold.TabIndex = 12;
+            this.Txt_Threshold.Text = "0";
+            this.Txt_Threshold.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // GigECameraDemoDlg
             // 
@@ -1482,8 +1481,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.GroupActualTargetSize.ResumeLayout(false);
             this.GroupActualTargetSize.PerformLayout();
             this.GroupSelectGrid.ResumeLayout(false);
-            this.GB_Threshold.ResumeLayout(false);
-            this.GB_Threshold.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.controlsTabs.ResumeLayout(false);
             this.mainControlPage.ResumeLayout(false);
@@ -1491,6 +1488,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             this.configurationPage.ResumeLayout(false);
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
             this.GroupBox11.ResumeLayout(false);
             this.TableLayoutPanel3.ResumeLayout(false);
             this.TableLayoutPanel3.PerformLayout();
@@ -1510,8 +1509,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.GroupBox10.ResumeLayout(false);
             this.GroupBox9.ResumeLayout(false);
             this.GroupBox9.PerformLayout();
-            this.groupBox3.ResumeLayout(false);
-            this.groupBox3.PerformLayout();
+            this.GB_Threshold.ResumeLayout(false);
+            this.GB_Threshold.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1565,9 +1564,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         internal System.Windows.Forms.Button grid_5;
         internal System.Windows.Forms.Button grid_4;
         internal System.Windows.Forms.Button grid_9;
-        internal System.Windows.Forms.GroupBox GB_Threshold;
-        internal System.Windows.Forms.CheckBox Chk_Threshold_Mode;
-        internal System.Windows.Forms.TextBox Txt_Threshold;
         private Label label1;
         private Button btnsave;
         private DataGridView dataGridView1;
@@ -1650,6 +1646,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         internal GroupBox groupBox3;
         private TextBox modbusServerIPTxt;
         private Label label10;
+        internal GroupBox GB_Threshold;
+        internal CheckBox Chk_Threshold_Mode;
+        internal TextBox Txt_Threshold;
     }
 }
 
