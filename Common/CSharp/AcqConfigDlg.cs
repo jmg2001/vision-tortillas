@@ -162,6 +162,9 @@ namespace DALSA.SaperaLT.SapClassGui
                 }
             }
             m_ResourceIndex = comboBox_Device.SelectedIndex;
+            // Console.WriteLine(m_ResourceIndex);
+
+            button_ok.PerformClick();
         }
 
         private void button_browse_Click(object sender, EventArgs e)

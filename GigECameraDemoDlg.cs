@@ -1041,7 +1041,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // Procesamos el ROI
             blobProces(roiImage, processROIBox);
 
-            setModbusData();
+            if (Blobs.Count>=(int)(gridType.Grid.Item1* gridType.Grid.Item2 / 2))
+            {
+                setModbusData();
+            }
 
             // Liberamos las imagenes
             binarizedImage.Dispose();
@@ -2446,7 +2449,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             dataTable.Clear();
 
             // Inicializamos variables
-            double avg_diam = 0;
+            double avgControlD = 0;
+            double avgMaxD = 0;
+            double avgMinD = 0;
+            double avgD = 0;
             int n = 0;
 
             bgArea = new List<List<Point>>();
@@ -2498,7 +2504,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     (double diameterTriangles, double maxDiameter, double minDiameter) = calculateAndDrawDiameterTrianglesAlghoritm(centro, image, sector, drawFlag);
 
                     // Sumamos para promediar
-                    avg_diam += (diametroIA * tempFactor);
+                    avgControlD += (diametroIA * tempFactor);
+                    avgMaxD += (maxDiameter * tempFactor);
+                    avgMinD += (minDiameter * tempFactor);
+                    avgD += (diameterTriangles * tempFactor);
                     // Aumentamos el numero de elementos para promediar
                     n++;
 
@@ -2576,10 +2585,16 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             processROIBox.Image = image;
 
             // Calculamos el promedio de los diametros
-            avg_diam /= n;
+            avgControlD /= n;
+            avgMaxD /= n;
+            avgMinD /= n;
+            avgD /= n;
 
             // Asignamos el texto del promedio de los diametros
-            avg_diameter.Text = Math.Round(avg_diam, 3).ToString();
+            avg_diameter.Text = Math.Round(avgControlD, 3).ToString();
+            txtAvgMaxD.Text = Math.Round(avgMaxD, 3).ToString();
+            txtAvgMinD.Text = Math.Round(avgMinD, 3).ToString();
+            txtAvgD.Text = Math.Round(avgD, 3).ToString();
 
             // Asignar la DataTable al DataGridView
             dataGridView1.DataSource = dataTable;
