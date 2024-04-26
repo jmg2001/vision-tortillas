@@ -707,8 +707,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             processImageBtn.Enabled = true;
 
-            // originalImage = saveImage();
-            originalImage = new Bitmap(@"C:\Users\Jesús\Documents\Python\cam_calib\imagenOrigen.bmp");
+            originalImage = saveImage();
+            // originalImage = new Bitmap(@"C:\Users\Jesús\Documents\Python\cam_calib\imagenOrigen.bmp");
 
             originalImageIsDisposed = false;
 
@@ -1783,21 +1783,23 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void updateROI()
         {
-            processROIBox.Visible = false;
+            //processROIBox.Visible = false;
 
-            Bitmap originalROIImage = new Bitmap(originalImage);
+            //Bitmap originalROIImage = new Bitmap(originalImage);
 
-            ConvertToCompatibleFormat(originalROIImage);
+            //ConvertToCompatibleFormat(originalROIImage);
 
-            drawROI(originalROIImage);
+            //drawROI(originalROIImage);
 
-            originalBox.Image = originalROIImage;
-            originalBox.SizeMode = PictureBoxSizeMode.AutoSize;
-            originalBox.Visible = true;
-            originalBox.BringToFront();
-            processROIBox.SendToBack();
-            m_ImageBox.SendToBack();
-            m_View.Hide();
+            //originalBox.Image = originalROIImage;
+            //originalBox.SizeMode = PictureBoxSizeMode.AutoSize;
+            //originalBox.Visible = true;
+
+            //originalBox.BringToFront();
+            //processROIBox.SendToBack();
+            //m_ImageBox.SendToBack();
+            //m_View.Hide();
+            //originalROIImage.Dispose();
         }
 
         private void originalBox_MouseMove(object sender, MouseEventArgs e)
@@ -4092,6 +4094,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             GroupSelectGrid.Enabled = false;
             CmbProducts.SelectedIndex = 0;
             changeProductSetPoint();
+        }
+
+        private void Txt_MaxCompacity_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
