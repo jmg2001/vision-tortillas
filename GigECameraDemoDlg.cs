@@ -74,7 +74,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         // Varibles para identificar si el trigger viene del PLC o del Software
         bool triggerPLC = true;
-        int mode = 0; // 1 - Live, 0 - Frame
+        int mode = 1; // 1 - Live, 0 - Frame
         int frameCounter = 0;
 
         // Variable para actualizar las imagenes si estamos el la imagesTab
@@ -204,6 +204,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 processROIBox.MouseMove += processBox_MouseMove;
 
                 CmbOperationModeSelection.Text = "PLC";
+                btnSetPointPLC.BackColor = Color.DarkGray;
+
+
                 operationMode = 2;
                 productsPage.Enabled = false;
                 GroupActualTargetSize.Enabled = false;
@@ -1627,13 +1630,33 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 if (int.TryParse(TXT_ROI_Bottom.Text, out UserROI.Bottom))
                 {
                     // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-                    MessageBox.Show("Data saved: " + UserROI.Bottom, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    settings.ROI_Bottom = UserROI.Bottom;
+                    //MessageBox.Show("Data Saved: " + UserROI.Right, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    if (!triggerPLC && mode == 0)
+                    {
+                        if (UserROI.Bottom > 250 && UserROI.Bottom < 475)
+                        {
+                            settings.ROI_Bottom = UserROI.Bottom;
+                            updateROI();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Out of range");
+                            UserROI.Bottom = settings.ROI_Bottom;
+                            TXT_ROI_Bottom.Text = settings.ROI_Bottom.ToString();
+                        }
+                        
+                    }
+                    else
+                    {
+                        MessageBox.Show("Change the operation mode");
+                        UserROI.Bottom = settings.ROI_Bottom;
+                        TXT_ROI_Bottom.Text = settings.ROI_Bottom.ToString();
+                    }
                 }
                 else
                 {
                     // Manejar el caso en que el texto no sea un número válido
-                    MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("usea a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -1647,13 +1670,33 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 if (int.TryParse(TXT_ROI_Top.Text, out UserROI.Top))
                 {
                     // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-                    MessageBox.Show("Data saved: " + UserROI.Top, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    settings.ROI_Top = UserROI.Top;
+                    //MessageBox.Show("Data Saved: " + UserROI.Right, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    if (!triggerPLC && mode == 0)
+                    {
+                        if (UserROI.Top > 5 && UserROI.Top < 230)
+                        {
+                            settings.ROI_Top = UserROI.Top;
+                            updateROI();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Out of range");
+                            UserROI.Top = settings.ROI_Top;
+                            TXT_ROI_Top.Text = settings.ROI_Top.ToString();
+                        }
+                        
+                    }
+                    else
+                    {
+                        MessageBox.Show("Change the operation mode");
+                        UserROI.Top = settings.ROI_Top;
+                        TXT_ROI_Top.Text = settings.ROI_Top.ToString();
+                    }
                 }
                 else
                 {
                     // Manejar el caso en que el texto no sea un número válido
-                    MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("usea a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -1667,8 +1710,28 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 if (int.TryParse(TXT_ROI_Right.Text, out UserROI.Right))
                 {
                     // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-                    MessageBox.Show("Data Saved: " + UserROI.Right, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    settings.ROI_Right = UserROI.Right;
+                    //MessageBox.Show("Data Saved: " + UserROI.Right, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    if (!triggerPLC && mode == 0)
+                    {
+                        if (UserROI.Right > 330 && UserROI.Right < 630)
+                        {
+                            settings.ROI_Right = UserROI.Right;
+                            updateROI();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Out of range");
+                            UserROI.Right = settings.ROI_Right;
+                            TXT_ROI_Right.Text = settings.ROI_Right.ToString();
+                        }
+                        
+                    }
+                    else
+                    {
+                        MessageBox.Show("Change the operation mode");
+                        UserROI.Right = settings.ROI_Right;
+                        TXT_ROI_Right.Text = settings.ROI_Right.ToString();
+                    }
                 }
                 else
                 {
@@ -1687,8 +1750,28 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 if (int.TryParse(TXT_ROI_Left.Text, out UserROI.Left))
                 {
                     // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-                    MessageBox.Show("Data saved: " + UserROI.Left, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    settings.ROI_Left = UserROI.Left;
+                    // MessageBox.Show("Data saved: " + UserROI.Left, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    if (!triggerPLC && mode == 0)
+                    {
+                        if (UserROI.Left > 10 && UserROI.Left < 310)
+                        {
+                            settings.ROI_Left = UserROI.Left;
+                            updateROI();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Out of range");
+                            UserROI.Left = settings.ROI_Left;
+                            TXT_ROI_Left.Text = settings.ROI_Left.ToString();
+                        }
+                        
+                    }
+                    else
+                    {
+                        MessageBox.Show("Change the operation mode");
+                        UserROI.Left = settings.ROI_Left;
+                        TXT_ROI_Left.Text = settings.ROI_Left.ToString();
+                    }
                 }
                 else
                 {
@@ -1696,6 +1779,25 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+        }
+
+        private void updateROI()
+        {
+            processROIBox.Visible = false;
+
+            Bitmap originalROIImage = new Bitmap(originalImage);
+
+            ConvertToCompatibleFormat(originalROIImage);
+
+            drawROI(originalROIImage);
+
+            originalBox.Image = originalROIImage;
+            originalBox.SizeMode = PictureBoxSizeMode.AutoSize;
+            originalBox.Visible = true;
+            originalBox.BringToFront();
+            processROIBox.SendToBack();
+            m_ImageBox.SendToBack();
+            m_View.Hide();
         }
 
         private void originalBox_MouseMove(object sender, MouseEventArgs e)
@@ -3943,6 +4045,53 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private void label2_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void btnSetPointPLC_Click(object sender, EventArgs e)
+        {
+            btnSetPointPLC.Enabled = false;
+            btnSetPointPLC.BackColor = Color.DarkGray;
+            btnSetPointManual.Enabled = true;
+            btnSetPointManual.BackColor = Color.Silver;
+            btnSetPointLocal.Enabled = true;
+            btnSetPointLocal.BackColor = Color.Silver;
+
+            operationMode = 2;
+            productsPage.Enabled = false;
+            GroupActualTargetSize.Enabled = false;
+            GroupSelectGrid.Enabled = false;
+        }
+
+        private void btnSetPointManual_Click(object sender, EventArgs e)
+        {
+            btnSetPointPLC.Enabled = true;
+            btnSetPointPLC.BackColor = Color.Silver;
+            btnSetPointManual.Enabled = false;
+            btnSetPointManual.BackColor = Color.DarkGray;
+            btnSetPointLocal.Enabled = true;
+            btnSetPointLocal.BackColor = Color.Silver;
+
+            operationMode = 0;
+            productsPage.Enabled = false;
+            GroupActualTargetSize.Enabled = true;
+            GroupSelectGrid.Enabled = true;
+        }
+
+        private void btnSetPointLocal_Click(object sender, EventArgs e)
+        {
+            btnSetPointPLC.Enabled = true;
+            btnSetPointPLC.BackColor = Color.Silver;
+            btnSetPointManual.Enabled = true;
+            btnSetPointManual.BackColor = Color.Silver;
+            btnSetPointLocal.Enabled = false;
+            btnSetPointLocal.BackColor = Color.DarkGray;
+
+            operationMode = 1;
+            productsPage.Enabled = true;
+            GroupActualTargetSize.Enabled = false;
+            GroupSelectGrid.Enabled = false;
+            CmbProducts.SelectedIndex = 0;
+            changeProductSetPoint();
         }
     }
 }
