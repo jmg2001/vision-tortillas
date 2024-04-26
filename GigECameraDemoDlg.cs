@@ -393,8 +393,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 if (triggerPLC)
                 {
-                    triggerModeBtn.BackColor = DefaultBackColor;
-                    triggerModeBtn.Text = "PLC";
+                    // triggerModeBtn.BackColor = DefaultBackColor;
+                    txtTriggerSource.Text = "PLC";
                     virtualTriggerBtn.Enabled = false;
 
                     startStop();
@@ -704,8 +704,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             processImageBtn.Enabled = true;
 
-            originalImage = saveImage();
-            // originalImage = new Bitmap(@"C:\Users\Jesús\Documents\Python\cam_calib\imagenOrigen.bmp");
+            // originalImage = saveImage();
+            originalImage = new Bitmap(@"C:\Users\Jesús\Documents\Python\cam_calib\imagenOrigen.bmp");
 
             originalImageIsDisposed = false;
 
@@ -713,8 +713,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             if (imageCorrectionCheck.Checked)
             {
-                // originalImage = imageCorrection(originalImage);
-                originalImage = undistortImage(originalImage);
+                originalImage = imageCorrection(originalImage);
+                //originalImage = undistortImage(originalImage);
             }
 
             originalROIImage = new Bitmap(originalImage);
@@ -2622,7 +2622,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             avg_diameter.Text = Math.Round(avgControlD, 3).ToString();
             txtAvgMaxD.Text = Math.Round(avgMaxD, 3).ToString();
             txtAvgMinD.Text = Math.Round(avgMinD, 3).ToString();
-            txtAvgD.Text = Math.Round(avgD, 3).ToString();
+            txtControlDiameter.Text = Math.Round(avgD, 3).ToString();
 
             // Asignar la DataTable al DataGridView
             dataGridView1.DataSource = dataTable;
@@ -3129,15 +3129,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 {
                     UpdateControls();
 
-                    viewModeBtn.BackColor = DefaultBackColor; // Restaurar el color de fondo predeterminado
-                    viewModeBtn.Text = "LIVE";
+                    // viewModeBtn.BackColor = DefaultBackColor; // Restaurar el color de fondo predeterminado
+                    txtViewMode.Text = "LIVE";
                     virtualTriggerBtn.Enabled = false;
+                    virtualTriggerBtn.BackColor = Color.DarkGray;
                     processImageBtn.Enabled = false;
+                    processImageBtn.BackColor = Color.DarkGray;
                     mode = 1;
 
                     if (triggerPLC)
                     {
-                        viewModeBtn.Text = "FRAME";
+                        txtViewMode.Text = "FRAME";
                         mode = 0;
                     }
                 }
@@ -3153,11 +3155,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         m_Xfer.Abort();
                     UpdateControls();
 
-                    viewModeBtn.BackColor = Color.Silver; // Cambiar el color de fondo a gris
-                    viewModeBtn.Text = "FRAME"; // Cambiar el texto cuando está desactivado
+                    //viewModeBtn.BackColor = Color.Silver; // Cambiar el color de fondo a gris
+                    txtViewMode.Text = "FRAME"; // Cambiar el texto cuando está desactivado
                     mode = 0;
                     processImageBtn.Enabled = true;
+                    processImageBtn.BackColor = Color.Silver;
                     virtualTriggerBtn.Enabled = true;
+                    virtualTriggerBtn.BackColor = Color.Silver;
                 }
             }
         }
@@ -3171,31 +3175,38 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 m_Xfer.Abort();
                 //viewModeBtn.PerformClick();
                 processImageBtn.Enabled = true;
+                processImageBtn.BackColor = Color.Silver;
             }
 
             if (triggerPLC)
             {
-                triggerModeBtn.BackColor = DefaultBackColor;
-                triggerModeBtn.Text = "PLC";
+                // triggerModeBtn.BackColor = DefaultBackColor;
+                txtTriggerSource.Text = "PLC";
                 virtualTriggerBtn.Enabled = false;
+                virtualTriggerBtn.BackColor = Color.DarkGray;
 
                 startStop();
 
                 m_AcqDevice.LoadFeatures(configPath + "\\TriggerON.ccf");
 
                 viewModeBtn.Enabled = false;
+                viewModeBtn.BackColor = Color.DarkGray;
                 processImageBtn.Enabled = false;
+                processImageBtn.BackColor = Color.DarkGray;
                 processImageBtn.Text = "PROCESSING";
 
             }
             else
             {
                 m_AcqDevice.LoadFeatures(configPath + "\\TriggerOFF.ccf");
-                triggerModeBtn.BackColor = Color.Silver;
+                //triggerModeBtn.BackColor = Color.Silver;
                 virtualTriggerBtn.Enabled = true;
+                virtualTriggerBtn.BackColor = Color.Silver;
 
                 viewModeBtn.Enabled = true;
+                viewModeBtn.BackColor = Color.Silver;
                 processImageBtn.Enabled = true;
+                processImageBtn.BackColor = Color.Silver;
 
                 AbortDlg abort = new AbortDlg(m_Xfer);
 
@@ -3204,10 +3215,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     if (abort.ShowDialog() != DialogResult.OK)
                         m_Xfer.Abort();
                     UpdateControls();
-                    viewModeBtn.BackColor = Color.Silver; // Cambiar el color de fondo a gris
+                    //viewModeBtn.BackColor = Color.Silver; // Cambiar el color de fondo a gris
                 }
 
-                triggerModeBtn.Text = "SOFTWARE";
+                txtTriggerSource.Text = "SOFTWARE";
                 processImageBtn.Text = "PROCESS FRAME";
             }
              
@@ -3925,6 +3936,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         }
 
         private void txtAvgMinD_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label2_Click(object sender, EventArgs e)
         {
 
         }
