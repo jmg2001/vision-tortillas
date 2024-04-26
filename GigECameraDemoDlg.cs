@@ -128,7 +128,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         // Configurar el servidor Modbus TCP
         ModbusServer modbusServer = new ModbusServer();
-        ModbusClient modbusClient = new ModbusClient();
+        //ModbusClient modbusClient = new ModbusClient();
 
         Thread thread;
         bool threadSuspended = false;
@@ -182,7 +182,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             m_Xfer = null;
             m_View = null;
 
-            AcqConfigDlg acConfigDlg = new AcqConfigDlg(null, "", AcqConfigDlg.ServerCategory.ServerAcqDevice, false);
+            AcqConfigDlg acConfigDlg = new AcqConfigDlg(null, "", AcqConfigDlg.ServerCategory.ServerAcqDevice, true);
             if (acConfigDlg.ShowDialog() == DialogResult.OK)
             {
                 InitializeComponent();
@@ -196,7 +196,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 modbusServerIPTxt.Text = ipAddress;
 
                 // Crear un cliente Modbus TCP
-                modbusClient = new ModbusClient(ipAddress, port);
+                // modbusClient = new ModbusClient(ipAddress, port);
 
                 string actualDIrectory = AppDomain.CurrentDomain.BaseDirectory;
                 csvPath = userDir + "\\InspecTorT_db.csv";
@@ -416,36 +416,36 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void ModbusServerIPTxt_KeyPress(object sender, KeyPressEventArgs e)
         {
-            // Verificar si la tecla presionada es "Enter" (código ASCII 13)
-            if (e.KeyChar == (char)Keys.Enter)
-            {
-                string ipText = modbusServerIPTxt.Text.Trim();
-                if (IsValidIP(ipText))
-                {
-                    ipAddress = modbusServerIPTxt.Text;
-                    // MessageBox.Show("Dirección IP válida: " + ipText);
-                    if (modbusClient.Connected)
-                    {
-                        modbusClient.Disconnect();
-                        Console.WriteLine("Modbus Client Disconnected");
-                    }
+            //// Verificar si la tecla presionada es "Enter" (código ASCII 13)
+            //if (e.KeyChar == (char)Keys.Enter)
+            //{
+            //    string ipText = modbusServerIPTxt.Text.Trim();
+            //    if (IsValidIP(ipText))
+            //    {
+            //        ipAddress = modbusServerIPTxt.Text;
+            //        // MessageBox.Show("Dirección IP válida: " + ipText);
+            //        if (modbusClient.Connected)
+            //        {
+            //            modbusClient.Disconnect();
+            //            Console.WriteLine("Modbus Client Disconnected");
+            //        }
 
-                    modbusClient = new ModbusClient(ipAddress, port);
-                    MessageBox.Show("Modbus Server IP Address changed");
-                }
-                else
-                {
-                    MessageBox.Show("Invalid IP Addres: " + ipText);
-                }
-            }
+            //        modbusClient = new ModbusClient(ipAddress, port);
+            //        MessageBox.Show("Modbus Server IP Address changed");
+            //    }
+            //    else
+            //    {
+            //        MessageBox.Show("Invalid IP Addres: " + ipText);
+            //    }
+            //}
 
-            bool IsValidIP(string ip)
-            {
-                // Patrón de expresión regular para validar una dirección IP
-                string pattern = @"^(([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.){3}([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])$";
-                Regex regex = new Regex(pattern);
-                return regex.IsMatch(ip);
-            }
+            //bool IsValidIP(string ip)
+            //{
+            //    // Patrón de expresión regular para validar una dirección IP
+            //    string pattern = @"^(([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.){3}([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])$";
+            //    Regex regex = new Regex(pattern);
+            //    return regex.IsMatch(ip);
+            //}
         }
 
         // Clase de los productos
@@ -652,62 +652,65 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private void requestModbusData()
         {
             try
-            {   
-                if (!modbusClient.Connected)
-                {
-                    modbusClient.Connect();
-                    Console.WriteLine("Modbus Client Connected");
-                }
-                
-                try
-                {
-                    // Leer registros del dispositivo Modbus
-                    int[] registers = modbusClient.ReadHoldingRegisters(0, 10);
+            {
+                var registers = modbusServer.holdingRegisters.localArray;
+                // Console.WriteLine(registers);
 
-                    // Mostrar los valores de los registros leídos
-                    // Console.WriteLine("Valores de los registros leídos:");
-                    ushort[] registerValue = new ushort[] { (ushort)registers[0], (ushort)registers[1] }; // Valores de ejemplo en registros
-                                                                                                          // Combina los dos valores de 16 bits en un solo valor entero de 32 bits
+                int numData = 5;
+                int startAddress = 248;
+                List<float> setPoints = new List<float>();
+
+                for ( int i = startAddress; i < (startAddress + (numData*2)); i+=2 )
+                {
+                    ushort[] registerValue = new ushort[] { (ushort)registers[i], (ushort)registers[i+1] };                                                                                                          // Combina los dos valores de 16 bits en un solo valor entero de 32 bits
                     int intValue = (registerValue[0] << 16) | registerValue[1];
-                    // Convierte el valor entero de 32 bits a un valor flotante
                     float floatValue = BitConverter.ToSingle(BitConverter.GetBytes(intValue), 0);
-                    Console.WriteLine(floatValue);
-                    maxDiameter = (double)floatValue / euFactor;
+                    setPoints.Add(floatValue);
+                    // Console.WriteLine(floatValue);
+                }
 
-                    // Mostrar los valores de los registros leídos
-                    // Console.WriteLine("Valores de los registros leídos:");
-                    registerValue = new ushort[] { (ushort)registers[2], (ushort)registers[3] }; // Valores de ejemplo en registros
-                                                                                                 // Combina los dos valores de 16 bits en un solo valor entero de 32 bits
-                    intValue = (registerValue[0] << 16) | registerValue[1];
-                    // Convierte el valor entero de 32 bits a un valor flotante
-                    floatValue = BitConverter.ToSingle(BitConverter.GetBytes(intValue), 0);
-                    Console.WriteLine(floatValue);
-                    minDiameter = (double)floatValue / euFactor;
+                maxDiameter = setPoints[0] / euFactor;
+                settings.maxDiameter = maxDiameter;
 
-                    Txt_MaxDiameter.Text = (maxDiameter*euFactor).ToString();
-                    Txt_MinDiameter.Text = (minDiameter*euFactor).ToString();
-                }
-                catch (Exception ex)
-                {
-                    // Manejar errores de comunicación con el dispositivo Modbus
-                    Console.WriteLine($"Error: {ex.Message}");
-                }
-                finally
-                {
-                    // modbusClient.Disconnect();
-                }
+                minDiameter = setPoints[1] / euFactor;
+                settings.minDiameter = minDiameter;
+
+                maxOvality = setPoints[2];
+                settings.maxOvality = (float)maxOvality;
+
+                maxCompactness = setPoints[3];
+                settings.maxCompacity = (float)maxCompactness;
+
+                grid = (int)setPoints[4];
+                settings.GridType = grid;
+                updateGridType(grid);
+
+                updateLabels();
+               
             }
             catch
             {
-                Console.WriteLine("Can not connect to the Modbus Server");
+                Console.WriteLine("Registers could no be read");
             }
+        }
+
+        private void updateLabels()
+        {
+            Txt_MaxDiameter.Text = (maxDiameter*euFactor).ToString();
+            Txt_MinDiameter.Text = (minDiameter*euFactor).ToString();
+            Txt_MaxOvality.Text = (maxOvality).ToString();
+            Txt_MaxCompacity.Text = (maxCompactness).ToString();
         }
 
         private void preProcess()
         {
             processImageBtn.Enabled = true;
-            originalImage = saveImage();
+
+            // originalImage = saveImage();
+            originalImage = new Bitmap(@"C:\Users\Jesús\Documents\Python\cam_calib\imagenOrigen.bmp");
+
             originalImageIsDisposed = false;
+
             ImageHistogram(originalImage);
 
             if (imageCorrectionCheck.Checked)
@@ -1471,14 +1474,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     productsPage.Enabled = false;
                     GroupActualTargetSize.Enabled = true;
                     GroupSelectGrid.Enabled = true;
-                    if (modbusClient.Connected) { modbusClient.Disconnect();  Console.WriteLine("Modbus Client Disconnected"); }
+                    // if (modbusClient.Connected) { modbusClient.Disconnect();  Console.WriteLine("Modbus Client Disconnected"); }
                     break;
                 case "Local":
                     operationMode = 1;
                     productsPage.Enabled = true;
                     GroupActualTargetSize.Enabled = false;
                     GroupSelectGrid.Enabled = false;
-                    if (modbusClient.Connected) { modbusClient.Disconnect(); Console.WriteLine("Modbus Client Disconnected"); }
+                    // if (modbusClient.Connected) { modbusClient.Disconnect(); Console.WriteLine("Modbus Client Disconnected"); }
 
                     break;
                 case "PLC":
@@ -2127,7 +2130,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
        {
           DestroyObjects();
           DisposeObjects();
-          modbusClient.Disconnect();
+          // modbusClient.Disconnect();
           modbusServer.StopListening();
        }
 
