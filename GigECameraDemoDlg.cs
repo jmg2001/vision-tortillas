@@ -26,10 +26,8 @@ using System.Diagnostics;
 using System.Globalization;
 // using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Threading;
-using System.Text.RegularExpressions;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp;
-using System.Security.Cryptography;
+// using System.Security.Cryptography;
 
 
 [StructLayout(LayoutKind.Sequential)]
@@ -681,9 +679,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 maxCompactness = setPoints[3];
                 settings.maxCompacity = (float)maxCompactness;
 
-                grid = (int)setPoints[4];
-                settings.GridType = grid;
-                updateGridType(grid);
+                // grid = (int)setPoints[4];
+                // settings.GridType = grid;
+                // updateGridType(grid);
 
                 updateLabels();
                
@@ -706,8 +704,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             processImageBtn.Enabled = true;
 
-            // originalImage = saveImage();
-            originalImage = new Bitmap(@"C:\Users\Jesús\Documents\Python\cam_calib\imagenOrigen.bmp");
+            originalImage = saveImage();
+            // originalImage = new Bitmap(@"C:\Users\Jesús\Documents\Python\cam_calib\imagenOrigen.bmp");
 
             originalImageIsDisposed = false;
 
@@ -715,6 +713,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             if (imageCorrectionCheck.Checked)
             {
+                // originalImage = imageCorrection(originalImage);
                 originalImage = undistortImage(originalImage);
             }
 
@@ -803,10 +802,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 double tempFactor= float.Parse(txtCalibrationTarget.Text) / diametroIA; // unit/pixels
                                                                                 // Mostrar un MessageBox con un mensaje y botones de opción
-                DialogResult result = MessageBox.Show($"A factor of {tempFactor} was obtained. Do you want to continue?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                DialogResult result = MessageBox.Show($"A factor of {tempFactor} was obtained. Do you want to continue?", "Warning", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
 
                 // Verificar la opción seleccionada por el usuario
-                if (result == DialogResult.Yes)
+                if (result == DialogResult.OK)
                 {
                     // Si el usuario elige "Sí", continuar con la acción deseada
                     // Agrega aquí el código que deseas ejecutar después de que el usuario confirme
@@ -953,8 +952,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // Declarar el vector de coeficientes de distorsión manualmente
             Matrix<double> distCoeffs = new Matrix<double>(1, 5); // 5 coeficientes de distorsión
 
-            double k1 = -21.4641724 - 6;
-            double k2 = 1391.66319 - 700;
+            double k1 = -1.158e-6;//-21.4641724 - 6;
+            double k2 = 1.56e-12;//1391.66319 - 700;
             double p1 = 0;
             double p2 = 0;
             double k3 = 0;
@@ -968,8 +967,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             Matrix<double> cameraMatrix = new Matrix<double>(3, 3);
 
-            double fx = 4728.60;
-            double fy = 4623.52;
+            double fx = 1;//4728.60;
+            double fy = 1;// 4623.52;
             double cx = 320;
             double cy = 240;
 
@@ -982,6 +981,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // Corregir la distorsión en la imagen
             Mat undistortedImage = new Mat();
             CvInvoke.Undistort(image, undistortedImage, cameraMatrix, distCoeffs);
+
+            bitmap.Dispose();
 
             return undistortedImage.ToBitmap();
         }
@@ -1481,6 +1482,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     productsPage.Enabled = true;
                     GroupActualTargetSize.Enabled = false;
                     GroupSelectGrid.Enabled = false;
+                    CmbProducts.SelectedIndex = 0;
+                    changeProductSetPoint();
+
                     // if (modbusClient.Connected) { modbusClient.Disconnect(); Console.WriteLine("Modbus Client Disconnected"); }
 
                     break;
@@ -3617,10 +3621,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private void calibrateButtom_Click(object sender, EventArgs e)
         {
             // Mostrar un MessageBox con un mensaje y botones de opción
-            DialogResult result = MessageBox.Show($"You are going to perform a calibration with a {txtCalibrationTarget.Text} {unitsTxt.Text} target. Do you want to continue?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            DialogResult result = MessageBox.Show($"You are going to perform a calibration with a {txtCalibrationTarget.Text} {unitsTxt.Text} target. Do you want to continue?", "Warning", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
 
             // Verificar la opción seleccionada por el usuario
-            if (result == DialogResult.Yes)
+            if (result == DialogResult.OK)
             {
                 // Si el usuario elige "Sí", continuar con la acción deseada
                 // Agrega aquí el código que deseas ejecutar después de que el usuario confirme
@@ -3916,6 +3920,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         }
 
         private void CmbProducts_SelectedIndexChanged_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void txtAvgMinD_Click(object sender, EventArgs e)
         {
 
         }

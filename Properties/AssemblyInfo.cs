@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("SIOS Ingenieria")]
 [assembly: AssemblyProduct("InspecTorT")]
-[assembly: AssemblyCopyright("Copyright © Teledyne Digital Imaging Inc. 2008-2022")]
+[assembly: AssemblyCopyright("Copyright © SIOS Ingenieria. 2024")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
