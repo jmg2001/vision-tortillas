@@ -174,6 +174,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         string archivo = "";
 
+        double targetCalibrationSize = 0;
+
 // Delegate to display number of frame acquired 
 // Delegate is needed because .NEt framework does not support  cross thread control modification
 private delegate void DisplayFrameAcquired(int number, bool trash);
@@ -230,14 +232,33 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
                 targetUnitsTxt.Text = units;
                 maxDiameterUnitsTxt.Text = units;
                 minDiameterUnitsTxt.Text = units;
+
+                txtAvgDiameterUnits.Text = units;
+                txtAvgMaxDiameterUnits.Text = units;
+                txtAvgMinDiameterUnits.Text = units;
+                txtControlDiameterUnits.Text = units;
+
+                txtMaxDProductUnits.Text = units;
+                txtMinDProductUnits.Text = units;
+
+                switch (units)
+                {
+                    case "mm":
+                        btnChangeUnitsMm.BackColor = Color.DarkGray;
+                        btnChangeUnitsInch.BackColor = Color.Silver;
+                        break;
+                    case "inch":
+                        btnChangeUnitsMm.BackColor = Color.Silver;
+                        btnChangeUnitsInch.BackColor = Color.DarkGray;
+                        break;
+                }
+
                 euListSelection.SelectedItem = units;
                 euFactor = settings.EUFactor;
                 txtCalibrationTarget.Text = settings.targetCalibration.ToString();
                 euFactorTxt.Text = Math.Round(euFactor, 3).ToString();
 
                 formatTxt.Text = settings.Format;
-
-
 
                 // Verificar si el archivo existe
                 if (File.Exists(csvPath))
@@ -319,6 +340,8 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
                         gridType = gridT;
                     }
                 }
+
+                
 
                 sizes.Add("Null");
                 sizes.Add("Normal");
@@ -768,7 +791,7 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
 
             if (calibrationValidate)
             {
-                double tempFactor = float.Parse(txtCalibrationTarget.Text) / diametroIA; // unit/pixels
+                double tempFactor = targetCalibrationSize / diametroIA; // unit/pixels
                                                                                          // Mostrar un MessageBox con un mensaje y botones de opción
                 DialogResult result = MessageBox.Show($"A factor of {tempFactor} was obtained. Do you want to continue?", "Warning", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
 
@@ -1758,6 +1781,14 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
                 maxDiameterUnitsTxt.Text = units;
                 minDiameterUnitsTxt.Text = units;
 
+                txtAvgDiameterUnits.Text = units;
+                txtAvgMaxDiameterUnits.Text = units;
+                txtAvgMinDiameterUnits.Text = units;
+                txtControlDiameterUnits.Text = units;
+
+                txtMaxDProductUnits.Text = units;
+                txtMinDProductUnits.Text = units;   
+
                 switch (unitsNew)
                 {
                     // inch/px
@@ -1788,12 +1819,16 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
                         dataTable.Rows.Add(blob.Sector, blob.Area, Math.Round(blob.DiametroIA * euFactor, 3), Math.Round(blob.Diametro * euFactor, 3), Math.Round(blob.DMayor * euFactor, 3), Math.Round(blob.DMenor * euFactor, 3), Math.Round(blob.Compacidad, 3), Math.Round(blob.Ovalidad, 3));
                     }
                 }
+                
+                if (operationMode == 1)
+                {
+                    Txt_MaxD.Text = Math.Round(double.Parse(Txt_MaxD.Text)*fact,3).ToString();
+                    Txt_MinD.Text = Math.Round(double.Parse(Txt_MinD.Text)*fact,3).ToString();
+                }
 
-                Txt_MaxD.Text = (double.Parse(Txt_MaxD.Text)*fact).ToString();
-                Txt_MinD.Text = (double.Parse(Txt_MinD.Text)*fact).ToString();
 
                 double avgDiameter = 0;
-                if (Double.TryParse(avg_diameter.Text, out avgDiameter));
+                if (Double.TryParse(avg_diameter.Text, out avgDiameter)) ;
                 avgDiameter *= fact;
                 avg_diameter.Text = Math.Round(avgDiameter, 3).ToString();
 
@@ -1808,7 +1843,7 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
                 Txt_MinDiameter.Text = Math.Round(mnDiameter, 3).ToString();
 
                 double calibrationTarget = 0;
-                if (Double.TryParse(txtCalibrationTarget.Text, out calibrationTarget));
+                if (Double.TryParse(txtCalibrationTarget.Text, out calibrationTarget)) ;
                 calibrationTarget *= fact;
                 txtCalibrationTarget.Text = Math.Round(calibrationTarget, 3).ToString();
             }
@@ -3618,41 +3653,52 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
         // CLick en el boton de calibración
         private void calibrateButtom_Click(object sender, EventArgs e)
         {
-            // Mostrar un MessageBox con un mensaje y botones de opción
-            DialogResult result = MessageBox.Show($"You are going to perform a calibration with a {txtCalibrationTarget.Text} {unitsTxt.Text} target. Do you want to continue?", "Warning", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
+            //// Mostrar un MessageBox con un mensaje y botones de opción
+            //DialogResult result = MessageBox.Show($"You are going to perform a calibration with a {txtCalibrationTarget.Text} {unitsTxt.Text} target. Do you want to continue?", "Warning", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
 
-            // Verificar la opción seleccionada por el usuario
-            if (result == DialogResult.OK)
+            //// Verificar la opción seleccionada por el usuario
+            //if (result == DialogResult.OK)
+            //{
+            //    // Si el usuario elige "Sí", continuar con la acción deseada
+            //    // Agrega aquí el código que deseas ejecutar después de que el usuario confirme
+            //    calibrateBtnClick();
+            //}
+            //else
+            //{
+            //    // Si el usuario elige "No", puedes hacer algo o simplemente salir
+            //    MessageBox.Show("Operation canceled.");
+            //}
+
+            using (var inputForm = new InputDlg(units))
             {
-                // Si el usuario elige "Sí", continuar con la acción deseada
-                // Agrega aquí el código que deseas ejecutar después de que el usuario confirme
-                calibrateBtnClick();
-            }
-            else
-            {
-                // Si el usuario elige "No", puedes hacer algo o simplemente salir
-                MessageBox.Show("Operation canceled.");
+                if (inputForm.ShowDialog() == DialogResult.OK)
+                {
+                    targetCalibrationSize = inputForm.targetSize;
+
+                    calibrating = true;
+                    if (!m_Xfer.Grabbing || mode == 1)
+                    {
+                        AbortDlg abort = new AbortDlg(m_Xfer);
+
+                        if (m_Xfer.Snap())
+                        {
+                            if (abort.ShowDialog() != DialogResult.OK)
+                                m_Xfer.Abort();
+                            UpdateControls();
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Change the view mode");
+                        calibrating = false;
+                    }
+                }
             }
         }
 
         private void calibrateBtnClick()
         {
-            calibrating = true;
-            if (!m_Xfer.Grabbing || mode == 1)
-            {
-                AbortDlg abort = new AbortDlg(m_Xfer);
-
-                if (m_Xfer.Snap())
-                {
-                    if (abort.ShowDialog() != DialogResult.OK)
-                        m_Xfer.Abort();
-                    UpdateControls();
-                }
-            }
-            else
-            {
-                MessageBox.Show("Change the view mode");
-            }
+            
         }
 
         private void txtCalibrationTarget_TextChanged(object sender, EventArgs e)
@@ -3982,6 +4028,20 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
         private void Txt_MaxCompacity_TextChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            btnChangeUnitsMm.BackColor = Color.DarkGray;
+            btnChangeUnitsInch.BackColor = Color.Silver;
+            updateUnits("mm");
+        }
+
+        private void btnChangeUnitsInch_Click(object sender, EventArgs e)
+        {
+            btnChangeUnitsMm.BackColor = Color.Silver;
+            btnChangeUnitsInch.BackColor = Color.DarkGray;
+            updateUnits("inch");
         }
     }
 }
