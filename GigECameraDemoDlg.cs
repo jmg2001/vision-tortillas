@@ -27,6 +27,10 @@ using System.Globalization;
 // using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Threading;
 using DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp;
+using Emgu.CV.CvEnum;
+using Emgu.CV.Util;
+
+
 // using System.Security.Cryptography;
 
 
@@ -140,6 +144,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         static object lockObject = new object();
 
         Bitmap originalROIImage = new Bitmap(640,480);
+        Mat originalImageCV = new Mat();
 
         SapTransfer transfer = new SapTransfer();
 
@@ -710,25 +715,19 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             originalImage = saveImage();
             // originalImage = new Bitmap(@"C:\Users\Jesús\Documents\Python\cam_calib\imagenOrigen.bmp");
 
+            // Convertir el objeto Bitmap a una matriz de Emgu CV (Image<Bgr, byte>)
+            Image<Bgr, byte> tempImage = originalImage.ToImage<Bgr, byte>();
+
             originalImageIsDisposed = false;
 
             ImageHistogram(originalImage);
 
-            if (imageCorrectionCheck.Checked)
-            {
-                originalImage = imageCorrection(originalImage);
-                //originalImage = undistortImage(originalImage);
-            }
+            originalImageCV = new Mat();
+            originalImageCV = imageCorrection(tempImage);
 
-            originalROIImage = new Bitmap(originalImage);
+            drawROI(ref originalImageCV);
 
-            ConvertToCompatibleFormat(originalROIImage);
-
-            drawROI(originalROIImage);
-
-            originalROIImage.Save(imagesPath + "1.bmp");
-
-            originalBox.Image = originalROIImage;
+            originalBox.Image = originalImageCV.ToBitmap();
             originalBox.SizeMode = PictureBoxSizeMode.AutoSize;
             originalBox.Visible = true;
             originalBox.BringToFront();
@@ -753,15 +752,28 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // Cambiamos al modo de grid 3x3 para calibrar con la del centro
             updateGridType(1);
 
-            // Se binariza la imagen
-            Bitmap binarizedImage = binarizeImage(originalImage, 0);
+            Mat binarizedImage = new Mat();
 
-            Bitmap roiImage = extractROI(binarizedImage);
+            // Se binariza la imagen
+            try
+            {
+                //binarizedImage = binarizeImage(originalImage, 0);
+                binarizedImage = binarizeImage(originalImageCV, 0);
+            }
+            catch
+            {
+                Console.WriteLine("Binarization problem");
+                return;
+            }
+
+
+            //// Se extrae el ROI de la imagen binarizada
+            Mat roiImage = extractROI(binarizedImage);
 
             int sectorSel = 5;
 
             // Se extrae el sector central
-            Bitmap centralSector = extractSector(roiImage, sectorSel);
+            Bitmap centralSector = extractSector(roiImage.ToBitmap(), sectorSel);
 
             float diametroIA = 0;
             //double diameter = 0;
@@ -771,7 +783,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             centralSector.Save(imagesPath + "centralSector.bmp");
 
-            var (areas, perimeters, centers) = FindContoursWithEdgesAndCenters(roiImage, minArea, maxArea, tortillaColor);
+            var (areas, centers, perimeters) = FindContoursWithEdgesAndCenters(roiImage.ToBitmap(), minArea, maxArea, tortillaColor);
 
             Point centro = new Point();
 
@@ -803,8 +815,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             if (calibrationValidate)
             {
-                double tempFactor= float.Parse(txtCalibrationTarget.Text) / diametroIA; // unit/pixels
-                                                                                // Mostrar un MessageBox con un mensaje y botones de opción
+                double tempFactor = float.Parse(txtCalibrationTarget.Text) / diametroIA; // unit/pixels
+                                                                                         // Mostrar un MessageBox con un mensaje y botones de opción
                 DialogResult result = MessageBox.Show($"A factor of {tempFactor} was obtained. Do you want to continue?", "Warning", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
 
                 // Verificar la opción seleccionada por el usuario
@@ -947,11 +959,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return Color.FromArgb((int)dr, (int)dg, (int)db);
         }
 
-        public Bitmap imageCorrection(Bitmap bitmap)
+        public Mat imageCorrection(Image<Bgr, byte> image)
         {
-            // Convertir el objeto Bitmap a una matriz de Emgu CV (Image<Bgr, byte>)
-            Image<Bgr, byte> image = bitmap.ToImage<Bgr, byte>();
-
             // Declarar el vector de coeficientes de distorsión manualmente
             Matrix<double> distCoeffs = new Matrix<double>(1, 5); // 5 coeficientes de distorsión
 
@@ -985,9 +994,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             Mat undistortedImage = new Mat();
             CvInvoke.Undistort(image, undistortedImage, cameraMatrix, distCoeffs);
 
-            bitmap.Dispose();
-
-            return undistortedImage.ToBitmap();
+            return undistortedImage;
         }
 
         private bool itsInCenter(Bitmap image,Point center, int margin)
@@ -1046,12 +1053,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             originalBox.Visible = true;
             processROIBox.Visible = true; // Mostrar el PictureBox ROI
-            Bitmap binarizedImage = new Bitmap(originalImage.Width, originalImage.Height);
+            Mat binarizedImage = new Mat();
 
             // Se binariza la imagen
             try
             {
-                binarizedImage = binarizeImage(originalImage, 0);
+                //binarizedImage = binarizeImage(originalImage, 0);
+                binarizedImage = binarizeImage(originalImageCV, 0);
             }
             catch
             {
@@ -1060,26 +1068,26 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
             
 
-            // Se extrae el ROI de la imagen binarizada
-            Bitmap roiImage = extractROI(binarizedImage);
+            //// Se extrae el ROI de la imagen binarizada
+            Mat roiImage = extractROI(binarizedImage);
 
             // Colocamos el picturebox del ROI
             SetPictureBoxPositionAndSize(processROIBox, imagePage);
 
-            // Procesamos el ROI
-            blobProces(roiImage, processROIBox);
+            //// Procesamos el ROI
+            blobProces(roiImage.ToBitmap(), processROIBox);
 
-            if (Blobs.Count>=(int)(gridType.Grid.Item1* gridType.Grid.Item2 / 2))
+            if (Blobs.Count >= (int)(gridType.Grid.Item1 * gridType.Grid.Item2 / 2))
             {
                 setModbusData();
             }
 
             // Liberamos las imagenes
-            binarizedImage.Dispose();
-            roiImage.Dispose();
+            //binarizedImage.Dispose();
+            //roiImage.Dispose();
 
-            originalImage.Dispose();
-            originalImageIsDisposed = true;
+            //originalImage.Dispose();
+            //originalImageIsDisposed = true;
 
             processImageBtn.Enabled = false;
         }
@@ -1410,44 +1418,55 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
-        private Bitmap extractROI(Bitmap image)
+        private Mat extractROI(Mat image)
         {
-            // Extraer la región del ROI
-            Bitmap roiImage = image.Clone(new Rectangle(UserROI.Left, UserROI.Top, UserROI.Right - UserROI.Left, UserROI.Bottom - UserROI.Top), image.PixelFormat);
+            //// Extraer la región del ROI
+            //Bitmap roiImage = image.Clone(new Rectangle(UserROI.Left, UserROI.Top, UserROI.Right - UserROI.Left, UserROI.Bottom - UserROI.Top), image.PixelFormat);
+            // Definir las coordenadas del ROI (rectángulo de interés)
+            Rectangle roiRect = new Rectangle(UserROI.Left, UserROI.Top, UserROI.Right - UserROI.Left, UserROI.Bottom - UserROI.Top); // (x, y, ancho, alto)
+
+            // Extraer el ROI de la imagen original
+            Mat roiImage = new Mat(image, roiRect);
+
+            // Mostrar el ROI
+            //CvInvoke.Imshow("ROI", roiImage);
+            //CvInvoke.WaitKey(0);
 
             return roiImage;
         }
 
-        private void drawROI(Bitmap image)
+        private void drawROI(ref Mat image)
         {
             Rectangle rect = new Rectangle(UserROI.Left, UserROI.Top, UserROI.Right - UserROI.Left, UserROI.Bottom - UserROI.Top);
-            using (Graphics g = Graphics.FromImage(image))
-            {
-                using (Pen p = new Pen(Color.Cyan, 1))
-                {
-                    g.DrawRectangle(p, rect);
+            // Coordenadas y tamaño del rectángulo
+            int x = UserROI.Left;
+            int y = UserROI.Top;
+            int ancho = UserROI.Right - UserROI.Left;
+            int alto = UserROI.Bottom - UserROI.Top;
 
-                    // int sectorWidth = (int) ((UserROI.Right - UserROI.Left) / gridType.Grid.Item1) / 2;
-                    // int sectorHeigth = (int) ((UserROI.Bottom - UserROI.Top) / gridType.Grid.Item2) / 2 ;
+            // Color del rectángulo (en formato BGR)
+            MCvScalar color = new Bgr(Color.Green).MCvScalar;
 
-                    //g.DrawEllipse(p, sectorWidth + UserROI.Left , sectorHeigth + UserROI.Top , 2, 2);
-                    //g.DrawEllipse(p, sectorWidth*3 + UserROI.Left, sectorHeigth + UserROI.Top, 2, 2);
-                    //g.DrawEllipse(p, sectorWidth*5 + UserROI.Left, sectorHeigth + UserROI.Top, 2, 2);
+            // Grosor del borde del rectángulo
+            int grosor = 2;
 
-                    //g.DrawEllipse(p, sectorWidth + UserROI.Left, sectorHeigth*3 + UserROI.Top, 2, 2);
-                    //g.DrawEllipse(p, sectorWidth*5 + UserROI.Left, sectorHeigth*3 + UserROI.Top, 2, 2);
+            // Dibujar el rectángulo en la imagen
+            CvInvoke.Rectangle(image, new System.Drawing.Rectangle(x, y, ancho, alto), color, grosor);
 
-                    //g.DrawEllipse(p, sectorWidth + UserROI.Left, sectorHeigth*5 + UserROI.Top, 2, 2);
-                    //g.DrawEllipse(p, sectorWidth*3 + UserROI.Left, sectorHeigth*5 + UserROI.Top, 2, 2);
-                    //g.DrawEllipse(p, sectorWidth*5 + UserROI.Left, sectorHeigth*5 + UserROI.Top, 2, 2);
 
-                }
+            //using (Graphics g = Graphics.FromImage(image))
+            //{
+            //    using (Pen p = new Pen(Color.Cyan, 1))
+            //    {
+            //        g.DrawRectangle(p, rect);
 
-                using (Pen p = new Pen(Color.Red, 2))
-                {
-                    g.DrawEllipse(p, (int)originalImage.Width / 2, (int)originalImage.Height / 2, 2, 2);
-                }
-            }    
+            //    }
+
+            //    using (Pen p = new Pen(Color.Red, 2))
+            //    {
+            //        g.DrawEllipse(p, (int)originalImage.Width / 2, (int)originalImage.Height / 2, 2, 2);
+            //    }
+            //}    
         }
 
 
@@ -2573,9 +2592,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             image.Save(imagesPath + "roi.bmp");
 
-            var (areas, perimeters, centers) = FindContoursWithEdgesAndCenters(image, minArea, maxArea, tortillaColor);
+            var (areas, centers, perimeters) = FindContoursWithEdgesAndCenters(image, minArea, maxArea, tortillaColor);
 
-            image = ConvertToCompatibleFormat(image);
+            //image = ConvertToCompatibleFormat(image);
 
             // Limpiamos la tabla
             dataTable.Clear();
@@ -2588,7 +2607,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             int n = 0;
 
             bgArea = new List<List<Point>>();
-            bgArea = FindBackground(image,backgroundColor, 1, maxArea);
+            bgArea = FindBackground(image, backgroundColor, 1, maxArea);
 
             foreach (List<Point> contour in bgArea)
             {
@@ -2600,8 +2619,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             List<(int,bool)> drawFlags = new List<(int, bool)>();
 
-            foreach (int k in gridType.QuadrantsOfInterest) {
-                drawFlags.Add((k,true));
+            foreach (int k in gridType.QuadrantsOfInterest)
+            {
+                drawFlags.Add((k, true));
             }
 
             for (int i = 0; i < areas.Count; i++)
@@ -2612,7 +2632,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 int sector = CalculateSector(centro, image.Width, image.Height, gridType.Grid.Item1, gridType.Grid.Item2) + 1;
 
                 // Verificamos si el sector es uno de los que nos interesa
-                if (Array.IndexOf(gridType.QuadrantsOfInterest,sector) != -1){
+                if (Array.IndexOf(gridType.QuadrantsOfInterest, sector) != -1)
+                {
 
                     bool drawFlag = true;
 
@@ -2626,6 +2647,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                     int area = areas[i].Count;
                     int perimeter = perimeters[i].Count;
+
+                    Console.WriteLine(area);
 
                     double tempFactor = euFactor;
 
@@ -2685,9 +2708,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         // Aqui dibujamos todo lo necesario
                         using (Graphics g = Graphics.FromImage(image))
                         {
-                        
+
                             // Dibujamos el perimetro
-                            // drawPerimeter(image, perimeters[i], 1, Color.Red);
+                            drawPerimeter(image, perimeters[i], 1, Color.Red);
 
                             // Dibujamos el centro
                             drawCenter(centro, 2, g);
@@ -2703,6 +2726,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     }
                 }
             }
+
 
             try
             {
@@ -2914,7 +2938,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return size;
         }
 
-        private Bitmap binarizeImage(Bitmap image, int value)
+        private Mat binarizeImage(Mat image, int value)
         {
 
             try
@@ -2932,38 +2956,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
 
             }
-            // Crear un nuevo mapa de bits para la imagen procesada
-            Bitmap processed = new Bitmap(image.Width, image.Height);
 
-            for (int y = 0; y < image.Height; y++)
-            {
-                for (int x = 0; x < image.Width; x++)
-                {
-                    Color originalColor = image.GetPixel(x, y);
+            // Aplicar umbralización (binarización)
+            Mat imagenBinarizada = new Mat();
+            CvInvoke.Threshold(image, imagenBinarizada, threshold, 255, ThresholdType.Binary);
 
-                    // Aplicar la matriz de 0 a 255
-                    int newValue = originalColor.R;
+            // Guardar la imagen binarizada
+            imagenBinarizada.Save("imagen_binarizada.jpg");
 
-                    int processedValue = 0;
-
-                    if (value == 0) {
-                        // Aplicar el umbral
-                        processedValue = (newValue > threshold) ? 255 : 0;
-                    }
-                    else
-                    {
-                        // Aplicar el umbral
-                        processedValue = (newValue > threshold) ? 0 : 255;
-                    }
-
-                    // Crear el nuevo color y establecerlo en la imagen procesada
-                    Color processedColor = Color.FromArgb(processedValue, processedValue, processedValue);
-                    processed.SetPixel(x, y, processedColor);
-                }
-            }
-
-            return processed;
-
+            return imagenBinarizada;
         }
 
         private void InitializeDataTable()
@@ -3612,7 +3613,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             txtDiameters = !txtDiameters;
         }
 
-        public static (List<List<Point>>, List<List<Point>>, List<Point>) FindContoursWithEdgesAndCenters(Bitmap binaryImage, double minArea, double maxArea, int color)
+        public static (List<List<Point>>, List<Point>, List<List<Point>>) FindContoursWithEdgesAndCenters(Bitmap binaryImage, double minArea, double maxArea, int color)
         {
             List<List<Point>> contours = new List<List<Point>>();
             List<List<Point>> edges = new List<List<Point>>();
@@ -3692,11 +3693,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                             }
                         }
                     }
-                    
+
                 }
             }
 
-            return (contours, edges, centers);
+            return (contours, centers, edges);
         }
 
 
