@@ -169,16 +169,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         // Obtener el directorio de inicio del usuario actual
         string userDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
-        string ipAddress = "127.0.0.1";
-        int port = 503;
 
         string archivo = "";
 
         double targetCalibrationSize = 0;
 
-// Delegate to display number of frame acquired 
-// Delegate is needed because .NEt framework does not support  cross thread control modification
-private delegate void DisplayFrameAcquired(int number, bool trash);
+        // Delegate to display number of frame acquired 
+        // Delegate is needed because .NEt framework does not support  cross thread control modification
+        private delegate void DisplayFrameAcquired(int number, bool trash);
         //
         // This function is called each time an image has been transferred into system memory by the transfer object
 
@@ -197,24 +195,16 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
 
                 configurationPage.Enabled = true;
 
-                // initModbusClient();
-                // Dirección IP y puerto del dispositivo Modbus
-
-                modbusServerIPTxt.Text = ipAddress;
-
-                // Crear un cliente Modbus TCP
-                // modbusClient = new ModbusClient(ipAddress, port);
-
                 string actualDIrectory = AppDomain.CurrentDomain.BaseDirectory;
                 csvPath = userDir + "\\InspecTorT_db.csv";
                 configPath = userDir + "\\InspecTorTConfig";
                 archivo = userDir + "\\datos.txt";
 
-                originalBox.MouseMove += originalBox_MouseMove;
-                processROIBox.MouseMove += processBox_MouseMove;
+                //originalBox.MouseMove += originalBox_MouseMove;
+                //processROIBox.MouseMove += processBox_MouseMove;
 
-                CmbOperationModeSelection.Text = "PLC";
-                btnSetPointPLC.BackColor = Color.DarkGray;
+                //CmbOperationModeSelection.Text = "PLC";
+                btnSetPointPLC.BackColor = Color.LightGreen;
 
 
                 operationMode = 2;
@@ -228,8 +218,6 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
                 processImageBtn.Enabled = false;
 
                 units = settings.Units;
-                unitsTxt.Text = units;
-                targetUnitsTxt.Text = units;
                 maxDiameterUnitsTxt.Text = units;
                 minDiameterUnitsTxt.Text = units;
 
@@ -241,21 +229,22 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
                 txtMaxDProductUnits.Text = units;
                 txtMinDProductUnits.Text = units;
 
+                txtTriggerSource.BackColor = Color.LightGreen;
+                txtViewMode.BackColor = Color.Khaki;
+
                 switch (units)
                 {
                     case "mm":
-                        btnChangeUnitsMm.BackColor = Color.DarkGray;
+                        btnChangeUnitsMm.BackColor = Color.LightGreen;
                         btnChangeUnitsInch.BackColor = Color.Silver;
                         break;
                     case "inch":
                         btnChangeUnitsMm.BackColor = Color.Silver;
-                        btnChangeUnitsInch.BackColor = Color.DarkGray;
+                        btnChangeUnitsInch.BackColor = Color.LightGreen;
                         break;
                 }
 
-                euListSelection.SelectedItem = units;
                 euFactor = settings.EUFactor;
-                txtCalibrationTarget.Text = settings.targetCalibration.ToString();
                 euFactorTxt.Text = Math.Round(euFactor, 3).ToString();
 
                 formatTxt.Text = settings.Format;
@@ -309,9 +298,6 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
                 // Suscribirse al evento SelectedIndexChanged del ComboBox
                 CmbProducts.SelectedIndexChanged += CmbProducts_SelectedIndexChanged;
 
-                // Suscribirse al evento SelectedIndexChanged del ComboBox
-                CmbOperationModeSelection.SelectedIndexChanged += CmbOperationModeSelection_SelectedIndexChanged;
-
                 modbusServer.Port = 502;
                 modbusServer.Listen();
                 Console.WriteLine("Modbus Server running...");
@@ -341,8 +327,6 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
                     }
                 }
 
-                
-
                 sizes.Add("Null");
                 sizes.Add("Normal");
                 sizes.Add("Big");
@@ -357,10 +341,10 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
                 UserROI.Right = settings.ROI_Right;
                 UserROI.Bottom = settings.ROI_Bottom;
 
-                TXT_ROI_Left.Text = UserROI.Left.ToString();
-                TXT_ROI_Right.Text = UserROI.Right.ToString();
-                TXT_ROI_Top.Text = UserROI.Top.ToString();
-                TXT_ROI_Bottom.Text = UserROI.Bottom.ToString();
+                inputLeftRoi.Value = UserROI.Left;
+                inputRightRoi.Value = UserROI.Right;
+                inputTopRoi.Value = UserROI.Top;
+                inputBottomRoi.Value = UserROI.Bottom;
 
                 maxOvality = settings.maxOvality;
                 maxCompactness = settings.maxCompacity;
@@ -381,17 +365,19 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
                 Txt_MinDiameter.KeyPress += Txt_MinDiameter_KeyPress;
                 Txt_MaxCompacity.KeyPress += Txt_MaxCompacity_KeyPress;
                 Txt_MaxOvality.KeyPress += Txt_MaxOvality_KeyPress;
-                txtCalibrationTarget.KeyPress += calibrationTarget_KeyPress;
+                
 
                 TXT_ROI_Left.KeyPress += Txt_UserROILeft_KeyPress;
                 TXT_ROI_Right.KeyPress += Txt_UserROIRight_KeyPress;
                 TXT_ROI_Top.KeyPress += Txt_UserROITop_KeyPress;
                 TXT_ROI_Bottom.KeyPress += Txt_UserROIBottom_KeyPress;
 
-                modbusServerIPTxt.KeyPress += ModbusServerIPTxt_KeyPress;
+                inputLeftRoi.ValueChanged += inputLeftRoi_ValueChanged;
+                inputRightRoi.ValueChanged += inputRightRoi_ValueChanged;
+                inputTopRoi.ValueChanged += inputTopRoi_ValueChanged;
+                inputBottomRoi.ValueChanged += inputBottomRoi_ValueChanged;
 
                 // Suscribir la función al evento SelectedIndexChanged del ComboBox
-                euListSelection.SelectedIndexChanged += euListSelection_SelectedIndexChanged;
 
                 // Crear un TabControl
                 TabControl tabControl1 = new TabControl();
@@ -429,6 +415,7 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
                 {
                     // triggerModeBtn.BackColor = DefaultBackColor;
                     txtTriggerSource.Text = "PLC";
+                    txtTriggerSource.BackColor = Color.LightGreen;
                     virtualTriggerBtn.Enabled = false;
 
                     startStop();
@@ -617,15 +604,8 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
                         processing = false;
                         // Detener el cronómetro
                         stopwatch.Stop();
-
-                        // Crear un StreamWriter para escribir en el archivo
-                        using (StreamWriter writer = File.AppendText(archivo))
-                        {
-                            // Escribir datos en el archivo
-                            writer.WriteLine(stopwatch.ElapsedMilliseconds + " ms para el frame " + frameCounter);
-                        }
+                        timeElapsed.Text = stopwatch.ElapsedMilliseconds.ToString() + " ms";
                         stopwatch.Restart();
-                        Console.WriteLine("Datos agregados al archivo.");
                     }
                 });
             }
@@ -693,6 +673,7 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
 
             // Convertir el objeto Bitmap a una matriz de Emgu CV (Image<Bgr, byte>)
             Image<Bgr, byte> tempImage = originalImage.ToImage<Bgr, byte>();
+            
 
             originalImageIsDisposed = false;
 
@@ -700,6 +681,8 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
 
             originalImageCV = new Mat();
             originalImageCV = imageCorrection(tempImage);
+
+            originalImageCV.Save(imagesPath + "updatedROI.jpg");
 
             drawROI(ref originalImageCV);
 
@@ -1463,38 +1446,38 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
             }
         }
 
-        private void CmbOperationModeSelection_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            string selection = CmbOperationModeSelection.SelectedItem.ToString();
+        //private void CmbOperationModeSelection_SelectedIndexChanged(object sender, EventArgs e)
+        //{
+        //    string selection = CmbOperationModeSelection.SelectedItem.ToString();
 
-            switch (selection)
-            {
-                case "Manual":
-                    operationMode = 0;
-                    productsPage.Enabled = false;
-                    GroupActualTargetSize.Enabled = true;
-                    GroupSelectGrid.Enabled = true;
-                    // if (modbusClient.Connected) { modbusClient.Disconnect();  Console.WriteLine("Modbus Client Disconnected"); }
-                    break;
-                case "Local":
-                    operationMode = 1;
-                    productsPage.Enabled = true;
-                    GroupActualTargetSize.Enabled = false;
-                    GroupSelectGrid.Enabled = false;
-                    CmbProducts.SelectedIndex = 0;
-                    changeProductSetPoint();
+        //    switch (selection)
+        //    {
+        //        case "Manual":
+        //            operationMode = 0;
+        //            productsPage.Enabled = false;
+        //            GroupActualTargetSize.Enabled = true;
+        //            GroupSelectGrid.Enabled = true;
+        //            // if (modbusClient.Connected) { modbusClient.Disconnect();  Console.WriteLine("Modbus Client Disconnected"); }
+        //            break;
+        //        case "Local":
+        //            operationMode = 1;
+        //            productsPage.Enabled = true;
+        //            GroupActualTargetSize.Enabled = false;
+        //            GroupSelectGrid.Enabled = false;
+        //            CmbProducts.SelectedIndex = 0;
+        //            changeProductSetPoint();
 
-                    // if (modbusClient.Connected) { modbusClient.Disconnect(); Console.WriteLine("Modbus Client Disconnected"); }
+        //            // if (modbusClient.Connected) { modbusClient.Disconnect(); Console.WriteLine("Modbus Client Disconnected"); }
 
-                    break;
-                case "PLC":
-                    operationMode = 2;
-                    productsPage.Enabled = false;
-                    GroupActualTargetSize.Enabled = false;
-                    GroupSelectGrid.Enabled = false;
-                    break;
-            }
-        }
+        //            break;
+        //        case "PLC":
+        //            operationMode = 2;
+        //            productsPage.Enabled = false;
+        //            GroupActualTargetSize.Enabled = false;
+        //            GroupSelectGrid.Enabled = false;
+        //            break;
+        //    }
+        //}
 
         private void changeProduct(Product record)
         {
@@ -1551,38 +1534,48 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
             // Verificar si la tecla presionada es "Enter" (código ASCII 13)
             if (e.KeyChar == (char)Keys.Enter)
             {
-                // Intentar convertir el texto del TextBox a un número entero
-                if (int.TryParse(TXT_ROI_Bottom.Text, out UserROI.Bottom))
+                if (File.Exists(imagesPath + "updatedROI.jpg"))
                 {
-                    // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-                    //MessageBox.Show("Data Saved: " + UserROI.Right, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    if (!triggerPLC && mode == 0)
+                    // Intentar convertir el texto del TextBox a un número entero
+                    if (int.TryParse(TXT_ROI_Bottom.Text, out UserROI.Bottom))
                     {
-                        if (UserROI.Bottom > 250 && UserROI.Bottom < 475)
+                        // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
+                        //MessageBox.Show("Data Saved: " + UserROI.Right, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        if (!triggerPLC && mode == 0)
                         {
-                            settings.ROI_Bottom = UserROI.Bottom;
-                            updateROI();
+                            if (UserROI.Bottom > 250 && UserROI.Bottom < 475)
+                            {
+                                settings.ROI_Bottom = UserROI.Bottom;
+                                updateROI();
+                            }
+                            else
+                            {
+                                MessageBox.Show("Out of range");
+                                UserROI.Bottom = settings.ROI_Bottom;
+                                TXT_ROI_Bottom.Text = settings.ROI_Bottom.ToString();
+                            }
+
                         }
                         else
                         {
-                            MessageBox.Show("Out of range");
+                            MessageBox.Show("Change the operation mode");
                             UserROI.Bottom = settings.ROI_Bottom;
                             TXT_ROI_Bottom.Text = settings.ROI_Bottom.ToString();
                         }
-                        
                     }
                     else
                     {
-                        MessageBox.Show("Change the operation mode");
-                        UserROI.Bottom = settings.ROI_Bottom;
-                        TXT_ROI_Bottom.Text = settings.ROI_Bottom.ToString();
+                        // Manejar el caso en que el texto no sea un número válido
+                        MessageBox.Show("usea a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
                 else
                 {
-                    // Manejar el caso en que el texto no sea un número válido
-                    MessageBox.Show("usea a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    UserROI.Bottom = settings.ROI_Bottom;
+                    TXT_ROI_Bottom.Text = settings.ROI_Bottom.ToString();
+                    MessageBox.Show("Please first take a frame");
                 }
+                
             }
         }
 
@@ -1591,37 +1584,46 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
             // Verificar si la tecla presionada es "Enter" (código ASCII 13)
             if (e.KeyChar == (char)Keys.Enter)
             {
-                // Intentar convertir el texto del TextBox a un número entero
-                if (int.TryParse(TXT_ROI_Top.Text, out UserROI.Top))
+                if (File.Exists(imagesPath + "updatedROI.jpg"))
                 {
-                    // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-                    //MessageBox.Show("Data Saved: " + UserROI.Right, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    if (!triggerPLC && mode == 0)
+                    // Intentar convertir el texto del TextBox a un número entero
+                    if (int.TryParse(TXT_ROI_Top.Text, out UserROI.Top))
                     {
-                        if (UserROI.Top > 5 && UserROI.Top < 230)
+                        // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
+                        //MessageBox.Show("Data Saved: " + UserROI.Right, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        if (!triggerPLC && mode == 0)
                         {
-                            settings.ROI_Top = UserROI.Top;
-                            updateROI();
+                            if (UserROI.Top > 5 && UserROI.Top < 230)
+                            {
+                                settings.ROI_Top = UserROI.Top;
+                                updateROI();
+                            }
+                            else
+                            {
+                                MessageBox.Show("Out of range");
+                                UserROI.Top = settings.ROI_Top;
+                                TXT_ROI_Top.Text = settings.ROI_Top.ToString();
+                            }
+
                         }
                         else
                         {
-                            MessageBox.Show("Out of range");
+                            MessageBox.Show("Change the operation mode");
                             UserROI.Top = settings.ROI_Top;
                             TXT_ROI_Top.Text = settings.ROI_Top.ToString();
                         }
-                        
                     }
                     else
                     {
-                        MessageBox.Show("Change the operation mode");
-                        UserROI.Top = settings.ROI_Top;
-                        TXT_ROI_Top.Text = settings.ROI_Top.ToString();
+                        // Manejar el caso en que el texto no sea un número válido
+                        MessageBox.Show("usea a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
                 else
                 {
-                    // Manejar el caso en que el texto no sea un número válido
-                    MessageBox.Show("usea a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    UserROI.Top = settings.ROI_Top;
+                    TXT_ROI_Top.Text = settings.ROI_Top.ToString();
+                    MessageBox.Show("Please first take a frame");
                 }
             }
         }
@@ -1631,38 +1633,48 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
             // Verificar si la tecla presionada es "Enter" (código ASCII 13)
             if (e.KeyChar == (char)Keys.Enter)
             {
-                // Intentar convertir el texto del TextBox a un número entero
-                if (int.TryParse(TXT_ROI_Right.Text, out UserROI.Right))
+                if (File.Exists(imagesPath + "updatedROI.jpg"))
                 {
-                    // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-                    //MessageBox.Show("Data Saved: " + UserROI.Right, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    if (!triggerPLC && mode == 0)
+                    // Intentar convertir el texto del TextBox a un número entero
+                    if (int.TryParse(TXT_ROI_Right.Text, out UserROI.Right))
                     {
-                        if (UserROI.Right > 330 && UserROI.Right < 630)
+                        // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
+                        //MessageBox.Show("Data Saved: " + UserROI.Right, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        if (!triggerPLC && mode == 0)
                         {
-                            settings.ROI_Right = UserROI.Right;
-                            updateROI();
+                            if (UserROI.Right > 330 && UserROI.Right < 630)
+                            {
+                                settings.ROI_Right = UserROI.Right;
+                                updateROI();
+                            }
+                            else
+                            {
+                                MessageBox.Show("Out of range");
+                                UserROI.Right = settings.ROI_Right;
+                                TXT_ROI_Right.Text = settings.ROI_Right.ToString();
+                            }
+
                         }
                         else
                         {
-                            MessageBox.Show("Out of range");
+                            MessageBox.Show("Change the operation mode");
                             UserROI.Right = settings.ROI_Right;
                             TXT_ROI_Right.Text = settings.ROI_Right.ToString();
                         }
-                        
                     }
                     else
                     {
-                        MessageBox.Show("Change the operation mode");
-                        UserROI.Right = settings.ROI_Right;
-                        TXT_ROI_Right.Text = settings.ROI_Right.ToString();
+                        // Manejar el caso en que el texto no sea un número válido
+                        MessageBox.Show("usea a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
                 else
                 {
-                    // Manejar el caso en que el texto no sea un número válido
-                    MessageBox.Show("usea a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    UserROI.Right = settings.ROI_Right;
+                    TXT_ROI_Right.Text = settings.ROI_Right.ToString();
+                    MessageBox.Show("Please first take a frame");
                 }
+                
             }
         }
 
@@ -1671,58 +1683,67 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
             // Verificar si la tecla presionada es "Enter" (código ASCII 13)
             if (e.KeyChar == (char)Keys.Enter)
             {
-                // Intentar convertir el texto del TextBox a un número entero
-                if (int.TryParse(TXT_ROI_Left.Text, out UserROI.Left))
+                if (File.Exists(imagesPath + "updatedROI.jpg"))
                 {
-                    // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-                    // MessageBox.Show("Data saved: " + UserROI.Left, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    if (!triggerPLC && mode == 0)
+                    // Intentar convertir el texto del TextBox a un número entero
+                    if (int.TryParse(TXT_ROI_Left.Text, out UserROI.Left))
                     {
-                        if (UserROI.Left > 10 && UserROI.Left < 310)
+                        // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
+                        // MessageBox.Show("Data saved: " + UserROI.Left, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        if (!triggerPLC && mode == 0)
                         {
-                            settings.ROI_Left = UserROI.Left;
-                            updateROI();
+                            if (UserROI.Left > 10 && UserROI.Left < 310)
+                            {
+                                settings.ROI_Left = UserROI.Left;
+                                updateROI();
+                            }
+                            else
+                            {
+                                MessageBox.Show("Out of range");
+                                UserROI.Left = settings.ROI_Left;
+                                TXT_ROI_Left.Text = settings.ROI_Left.ToString();
+                            }
+
                         }
                         else
                         {
-                            MessageBox.Show("Out of range");
+                            MessageBox.Show("Change the operation mode");
                             UserROI.Left = settings.ROI_Left;
                             TXT_ROI_Left.Text = settings.ROI_Left.ToString();
                         }
-                        
                     }
                     else
                     {
-                        MessageBox.Show("Change the operation mode");
-                        UserROI.Left = settings.ROI_Left;
-                        TXT_ROI_Left.Text = settings.ROI_Left.ToString();
+                        // Manejar el caso en que el texto no sea un número válido
+                        MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
                 else
                 {
-                    // Manejar el caso en que el texto no sea un número válido
-                    MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    UserROI.Left = settings.ROI_Left;
+                    TXT_ROI_Left.Text = settings.ROI_Left.ToString();
+                    MessageBox.Show("Please first take a frame");
                 }
             }
         }
 
         private void updateROI()
         {
-            //processROIBox.Visible = false;
+            processROIBox.Visible = false;
 
-            //Bitmap originalROIImage = new Bitmap(originalImage);
+            Mat originalROIImage = CvInvoke.Imread(imagesPath + "updatedROI.jpg");
 
             //ConvertToCompatibleFormat(originalROIImage);
 
-            //drawROI(originalROIImage);
+            drawROI(ref originalROIImage);
 
-            //originalBox.Image = originalROIImage;
-            //originalBox.SizeMode = PictureBoxSizeMode.AutoSize;
-            //originalBox.Visible = true;
+            originalBox.Image = originalROIImage.ToBitmap();
+            originalBox.SizeMode = PictureBoxSizeMode.AutoSize;
+            originalBox.Visible = true;
 
-            //originalBox.BringToFront();
-            //processROIBox.SendToBack();
-            //m_ImageBox.SendToBack();
+            originalBox.BringToFront();
+            processROIBox.SendToBack();
+            m_ImageBox.SendToBack();
             //m_View.Hide();
             //originalROIImage.Dispose();
         }
@@ -1761,13 +1782,6 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
                 // Mostrar la información del píxel
                 PixelDataValue.Text = $"  [ bx= {mousePos.X + UserROI.Left} y= {mousePos.Y + UserROI.Top}, Value: {(int)(Math.Round(pixelColor.GetBrightness(),3)*255)}]";
             }
-            //bitmap.Dispose();
-        }
-
-
-        private void euListSelection_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            updateUnits((string)euListSelection.SelectedItem);
         }
 
         private void updateUnits(string unitsNew)
@@ -1776,8 +1790,7 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
             if (units != unitsNew)
             {
                 units = unitsNew;
-                targetUnitsTxt.Text = units;
-                unitsTxt.Text = units;
+                //targetUnitsTxt.Text = units;
                 maxDiameterUnitsTxt.Text = units;
                 minDiameterUnitsTxt.Text = units;
 
@@ -1841,31 +1854,6 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
                 if (Double.TryParse(Txt_MinDiameter.Text, out mnDiameter)) ;
                 mnDiameter *= fact;
                 Txt_MinDiameter.Text = Math.Round(mnDiameter, 3).ToString();
-
-                double calibrationTarget = 0;
-                if (Double.TryParse(txtCalibrationTarget.Text, out calibrationTarget)) ;
-                calibrationTarget *= fact;
-                txtCalibrationTarget.Text = Math.Round(calibrationTarget, 3).ToString();
-            }
-        }
-
-        private void calibrationTarget_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            // Verificar si la tecla presionada es "Enter" (código ASCII 13)
-            if (e.KeyChar == (char)Keys.Enter)
-            {
-                // Intentar convertir el texto del TextBox a un número entero
-                if (float.TryParse(txtCalibrationTarget.Text, out calibrationTarget))
-                {
-                    // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-                    MessageBox.Show("Data saved: " + calibrationTarget, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    settings.targetCalibration = calibrationTarget;
-                }
-                else
-                {
-                    // Manejar el caso en que el texto no sea un número válido
-                    MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
             }
         }
 
@@ -2176,7 +2164,6 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
        {
           DestroyObjects();
           DisposeObjects();
-          // modbusClient.Disconnect();
           modbusServer.StopListening();
        }
 
@@ -3153,6 +3140,7 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
 
                     // viewModeBtn.BackColor = DefaultBackColor; // Restaurar el color de fondo predeterminado
                     txtViewMode.Text = "LIVE";
+                    txtViewMode.BackColor = Color.LightGreen;
                     virtualTriggerBtn.Enabled = false;
                     virtualTriggerBtn.BackColor = Color.DarkGray;
                     processImageBtn.Enabled = false;
@@ -3162,6 +3150,7 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
                     if (triggerPLC)
                     {
                         txtViewMode.Text = "FRAME";
+                        txtViewMode.BackColor = Color.Khaki;
                         mode = 0;
                     }
                 }
@@ -3179,6 +3168,7 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
 
                     //viewModeBtn.BackColor = Color.Silver; // Cambiar el color de fondo a gris
                     txtViewMode.Text = "FRAME"; // Cambiar el texto cuando está desactivado
+                    txtViewMode.BackColor = Color.Khaki;
                     mode = 0;
                     processImageBtn.Enabled = true;
                     processImageBtn.BackColor = Color.Silver;
@@ -3204,6 +3194,7 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
             {
                 // triggerModeBtn.BackColor = DefaultBackColor;
                 txtTriggerSource.Text = "PLC";
+                txtTriggerSource.BackColor = Color.LightGreen;
                 virtualTriggerBtn.Enabled = false;
                 virtualTriggerBtn.BackColor = Color.DarkGray;
 
@@ -3241,6 +3232,7 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
                 }
 
                 txtTriggerSource.Text = "SOFTWARE";
+                txtTriggerSource.BackColor = Color.Khaki;
                 processImageBtn.Text = "PROCESS FRAME";
             }
              
@@ -3668,16 +3660,16 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
             //    // Si el usuario elige "No", puedes hacer algo o simplemente salir
             //    MessageBox.Show("Operation canceled.");
             //}
+            calibrating = true;
 
-            using (var inputForm = new InputDlg(units))
+            if (!m_Xfer.Grabbing || mode == 1)
             {
-                if (inputForm.ShowDialog() == DialogResult.OK)
+                using (var inputForm = new InputDlg(units))
                 {
-                    targetCalibrationSize = inputForm.targetSize;
-
-                    calibrating = true;
-                    if (!m_Xfer.Grabbing || mode == 1)
+                    if (inputForm.ShowDialog() == DialogResult.OK)
                     {
+                        targetCalibrationSize = inputForm.targetSize;
+
                         AbortDlg abort = new AbortDlg(m_Xfer);
 
                         if (m_Xfer.Snap())
@@ -3686,14 +3678,17 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
                                 m_Xfer.Abort();
                             UpdateControls();
                         }
-                    }
-                    else
-                    {
-                        MessageBox.Show("Change the view mode");
-                        calibrating = false;
+
                     }
                 }
             }
+            else
+            {
+                MessageBox.Show("Change the operation mode");
+                calibrating = false;
+            }
+
+            
         }
 
         private void calibrateBtnClick()
@@ -3981,7 +3976,7 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
         private void btnSetPointPLC_Click(object sender, EventArgs e)
         {
             btnSetPointPLC.Enabled = false;
-            btnSetPointPLC.BackColor = Color.DarkGray;
+            btnSetPointPLC.BackColor = Color.LightGreen;
             btnSetPointManual.Enabled = true;
             btnSetPointManual.BackColor = Color.Silver;
             btnSetPointLocal.Enabled = true;
@@ -3998,7 +3993,7 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
             btnSetPointPLC.Enabled = true;
             btnSetPointPLC.BackColor = Color.Silver;
             btnSetPointManual.Enabled = false;
-            btnSetPointManual.BackColor = Color.DarkGray;
+            btnSetPointManual.BackColor = Color.LightGreen;
             btnSetPointLocal.Enabled = true;
             btnSetPointLocal.BackColor = Color.Silver;
 
@@ -4015,7 +4010,7 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
             btnSetPointManual.Enabled = true;
             btnSetPointManual.BackColor = Color.Silver;
             btnSetPointLocal.Enabled = false;
-            btnSetPointLocal.BackColor = Color.DarkGray;
+            btnSetPointLocal.BackColor = Color.LightGreen;
 
             operationMode = 1;
             productsPage.Enabled = true;
@@ -4032,7 +4027,7 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
 
         private void button1_Click_1(object sender, EventArgs e)
         {
-            btnChangeUnitsMm.BackColor = Color.DarkGray;
+            btnChangeUnitsMm.BackColor = Color.LightGreen;
             btnChangeUnitsInch.BackColor = Color.Silver;
             updateUnits("mm");
         }
@@ -4040,8 +4035,126 @@ private delegate void DisplayFrameAcquired(int number, bool trash);
         private void btnChangeUnitsInch_Click(object sender, EventArgs e)
         {
             btnChangeUnitsMm.BackColor = Color.Silver;
-            btnChangeUnitsInch.BackColor = Color.DarkGray;
+            btnChangeUnitsInch.BackColor = Color.LightGreen;
             updateUnits("inch");
+        }
+
+        private void progressBar1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void inputLeftRoi_ValueChanged(object sender, EventArgs e)
+        {
+            if (File.Exists(imagesPath + "updatedROI.jpg"))
+            {
+                UserROI.Left = (int)inputLeftRoi.Value;
+                // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
+                // MessageBox.Show("Data saved: " + UserROI.Left, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                if (!triggerPLC && mode == 0)
+                {
+                    settings.ROI_Left = UserROI.Left;
+                    updateROI();
+                }
+                else
+                {
+                    MessageBox.Show("Change the operation mode");
+                    UserROI.Left = settings.ROI_Left;
+                    inputLeftRoi.Value = settings.ROI_Left;
+                }
+            }
+            else
+            {
+                UserROI.Left = settings.ROI_Left;
+                inputLeftRoi.Value = settings.ROI_Left;
+                MessageBox.Show("Please first take a frame");
+            }
+        }
+
+        private void inputRightRoi_ValueChanged(object sender, EventArgs e)
+        {
+            if (File.Exists(imagesPath + "updatedROI.jpg"))
+            {
+                UserROI.Right = (int)inputRightRoi.Value;
+                // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
+                // MessageBox.Show("Data saved: " + UserROI.Left, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                if (!triggerPLC && mode == 0)
+                {
+                    settings.ROI_Right = UserROI.Right;
+                    updateROI();
+                }
+                else
+                {
+                    MessageBox.Show("Change the operation mode");
+                    UserROI.Right = settings.ROI_Right;
+                    inputRightRoi.Value = settings.ROI_Right;
+                }
+            }
+            else
+            {
+                UserROI.Right = settings.ROI_Right;
+                inputRightRoi.Value = settings.ROI_Right;
+                MessageBox.Show("Please first take a frame");
+            }
+        }
+
+        private void inputTopRoi_ValueChanged(object sender, EventArgs e)
+        {
+            if (File.Exists(imagesPath + "updatedROI.jpg"))
+            {
+                UserROI.Top = (int)inputTopRoi.Value;
+                // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
+                // MessageBox.Show("Data saved: " + UserROI.Left, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                if (!triggerPLC && mode == 0)
+                {
+                    settings.ROI_Top = UserROI.Top;
+                    updateROI();
+                }
+                else
+                {
+                    MessageBox.Show("Change the operation mode");
+                    UserROI.Top = settings.ROI_Top;
+                    inputTopRoi.Value = settings.ROI_Top;
+                }
+            }
+            else
+            {
+                UserROI.Top = settings.ROI_Top;
+                inputTopRoi.Value = settings.ROI_Top;
+                MessageBox.Show("Please first take a frame");
+            }
+        }
+
+        private void inputBottomRoi_ValueChanged(object sender, EventArgs e)
+        {
+            if (File.Exists(imagesPath + "updatedROI.jpg"))
+            {
+                UserROI.Bottom = (int)inputBottomRoi.Value;
+                // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
+                // MessageBox.Show("Data saved: " + UserROI.Left, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                if (!triggerPLC && mode == 0)
+                {
+                    settings.ROI_Bottom = UserROI.Bottom;
+                    updateROI();
+                }
+                else
+                {
+                    MessageBox.Show("Change the operation mode");
+                    UserROI.Bottom = settings.ROI_Bottom;
+                    inputBottomRoi.Value = settings.ROI_Bottom;
+                }
+            }
+            else
+            {
+                UserROI.Bottom = settings.ROI_Bottom;
+                inputBottomRoi.Value = settings.ROI_Bottom;
+                MessageBox.Show("Please first take a frame");
+            }
+        }
+
+        private void timeElapsedLabel_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

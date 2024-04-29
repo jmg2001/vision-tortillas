@@ -57,7 +57,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.btnSetPointManual = new System.Windows.Forms.Button();
             this.btnSetPointLocal = new System.Windows.Forms.Button();
             this.btnSetPointPLC = new System.Windows.Forms.Button();
-            this.CmbOperationModeSelection = new System.Windows.Forms.ComboBox();
             this.GroupActualTargetSize = new System.Windows.Forms.GroupBox();
             this.minDiameterUnitsTxt = new System.Windows.Forms.Label();
             this.maxDiameterUnitsTxt = new System.Windows.Forms.Label();
@@ -82,26 +81,24 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.controlsTabs = new System.Windows.Forms.TabControl();
             this.mainControlPage = new System.Windows.Forms.TabPage();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.txtAvgMinDiameterUnits = new System.Windows.Forms.Label();
+            this.txtAvgMaxDiameterUnits = new System.Windows.Forms.Label();
+            this.txtAvgDiameterUnits = new System.Windows.Forms.Label();
             this.avg_diameter = new System.Windows.Forms.Label();
             this.label13 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.unitsTxt = new System.Windows.Forms.Label();
             this.txtAvgMinD = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
             this.txtAvgMaxD = new System.Windows.Forms.Label();
             this.label12 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.txtControlDiameterUnits = new System.Windows.Forms.Label();
             this.txtControlDiameter = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.formatTxt = new System.Windows.Forms.Label();
-            this.imageCorrectionCheck = new System.Windows.Forms.CheckBox();
             this.configurationPage = new System.Windows.Forms.TabPage();
             this.GB_Threshold = new System.Windows.Forms.GroupBox();
             this.Chk_Threshold_Mode = new System.Windows.Forms.CheckBox();
             this.Txt_Threshold = new System.Windows.Forms.TextBox();
-            this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.modbusServerIPTxt = new System.Windows.Forms.TextBox();
-            this.label10 = new System.Windows.Forms.Label();
             this.GroupBox11 = new System.Windows.Forms.GroupBox();
             this.Label37 = new System.Windows.Forms.Label();
             this.TXT_ROI_Bottom = new System.Windows.Forms.TextBox();
@@ -112,12 +109,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.TXT_ROI_Left = new System.Windows.Forms.TextBox();
             this.Label34 = new System.Windows.Forms.Label();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.btnChangeUnitsInch = new System.Windows.Forms.Button();
+            this.btnChangeUnitsMm = new System.Windows.Forms.Button();
             this.euFactorTxt = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
-            this.targetUnitsTxt = new System.Windows.Forms.Label();
             this.calibrateBtn = new System.Windows.Forms.Button();
-            this.txtCalibrationTarget = new System.Windows.Forms.TextBox();
-            this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.mainTabs = new System.Windows.Forms.TabControl();
             this.imagePage = new System.Windows.Forms.TabPage();
@@ -129,15 +125,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Label47 = new System.Windows.Forms.Label();
             this.Chk_Right_Side = new System.Windows.Forms.CheckBox();
             this.Txt_Tag = new System.Windows.Forms.TextBox();
-            this.GroupBox12 = new System.Windows.Forms.GroupBox();
-            this.Label19 = new System.Windows.Forms.Label();
-            this.Txt_Line_Width = new System.Windows.Forms.TextBox();
-            this.Label44 = new System.Windows.Forms.Label();
-            this.Label45 = new System.Windows.Forms.Label();
-            this.txt_under_size = new System.Windows.Forms.TextBox();
-            this.txt_over_size = new System.Windows.Forms.TextBox();
-            this.Label38 = new System.Windows.Forms.Label();
-            this.Txt_Max_Threshold = new System.Windows.Forms.TextBox();
             this.Chk_Digital_Knife = new System.Windows.Forms.CheckBox();
             this.CmdAdd = new System.Windows.Forms.Button();
             this.CmdUpdate = new System.Windows.Forms.Button();
@@ -145,6 +132,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.CmbProducts = new System.Windows.Forms.ComboBox();
             this.CmdDelete = new System.Windows.Forms.Button();
             this.GroupBox9 = new System.Windows.Forms.GroupBox();
+            this.txtMinDProductUnits = new System.Windows.Forms.Label();
+            this.txtMaxDProductUnits = new System.Windows.Forms.Label();
             this.CmbGrid = new System.Windows.Forms.ComboBox();
             this.label9 = new System.Windows.Forms.Label();
             this.Txt_Compacity = new System.Windows.Forms.TextBox();
@@ -160,14 +149,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Label27 = new System.Windows.Forms.Label();
             this.Label28 = new System.Windows.Forms.Label();
             this.Cmd_Save = new System.Windows.Forms.Button();
-            this.txtAvgDiameterUnits = new System.Windows.Forms.Label();
-            this.txtAvgMaxDiameterUnits = new System.Windows.Forms.Label();
-            this.txtAvgMinDiameterUnits = new System.Windows.Forms.Label();
-            this.txtControlDiameterUnits = new System.Windows.Forms.Label();
-            this.txtMaxDProductUnits = new System.Windows.Forms.Label();
-            this.txtMinDProductUnits = new System.Windows.Forms.Label();
-            this.btnChangeUnitsMm = new System.Windows.Forms.Button();
-            this.btnChangeUnitsInch = new System.Windows.Forms.Button();
+            this.inputLeftRoi = new System.Windows.Forms.NumericUpDown();
+            this.inputTopRoi = new System.Windows.Forms.NumericUpDown();
+            this.inputRightRoi = new System.Windows.Forms.NumericUpDown();
+            this.inputBottomRoi = new System.Windows.Forms.NumericUpDown();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.timeElapsedLabel = new System.Windows.Forms.ToolStripLabel();
+            this.timeElapsed = new System.Windows.Forms.ToolStripLabel();
             this.toolStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.GroupBox1.SuspendLayout();
@@ -181,7 +169,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.groupBox2.SuspendLayout();
             this.configurationPage.SuspendLayout();
             this.GB_Threshold.SuspendLayout();
-            this.groupBox3.SuspendLayout();
             this.GroupBox11.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.mainTabs.SuspendLayout();
@@ -191,9 +178,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.tablePage.SuspendLayout();
             this.productsPage.SuspendLayout();
             this.GroupBox13.SuspendLayout();
-            this.GroupBox12.SuspendLayout();
             this.GroupBox10.SuspendLayout();
             this.GroupBox9.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.inputLeftRoi)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.inputTopRoi)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.inputRightRoi)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.inputBottomRoi)).BeginInit();
             this.SuspendLayout();
             // 
             // toolStrip1
@@ -205,7 +195,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.StatusLabelInfoTrash,
             this.toolStripSeparator1,
             this.PixelLabel,
-            this.PixelDataValue});
+            this.PixelDataValue,
+            this.toolStripSeparator2,
+            this.timeElapsedLabel,
+            this.timeElapsed});
             this.toolStrip1.Location = new System.Drawing.Point(0, 754);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
@@ -310,20 +303,23 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // txtTriggerSource
             // 
             this.txtTriggerSource.AutoSize = true;
+            this.txtTriggerSource.BackColor = System.Drawing.Color.LightSteelBlue;
+            this.txtTriggerSource.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.txtTriggerSource.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtTriggerSource.Location = new System.Drawing.Point(119, 83);
+            this.txtTriggerSource.Location = new System.Drawing.Point(117, 83);
             this.txtTriggerSource.Name = "txtTriggerSource";
-            this.txtTriggerSource.Size = new System.Drawing.Size(92, 16);
+            this.txtTriggerSource.Size = new System.Drawing.Size(94, 18);
             this.txtTriggerSource.TabIndex = 125;
             this.txtTriggerSource.Text = "SOFTWARE";
             // 
             // txtViewMode
             // 
             this.txtViewMode.AutoSize = true;
+            this.txtViewMode.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.txtViewMode.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtViewMode.Location = new System.Drawing.Point(29, 83);
             this.txtViewMode.Name = "txtViewMode";
-            this.txtViewMode.Size = new System.Drawing.Size(59, 16);
+            this.txtViewMode.Size = new System.Drawing.Size(61, 18);
             this.txtViewMode.TabIndex = 124;
             this.txtViewMode.Text = "FRAME";
             // 
@@ -422,18 +418,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.btnSetPointPLC.Text = "PLC";
             this.btnSetPointPLC.UseVisualStyleBackColor = false;
             this.btnSetPointPLC.Click += new System.EventHandler(this.btnSetPointPLC_Click);
-            // 
-            // CmbOperationModeSelection
-            // 
-            this.CmbOperationModeSelection.FormattingEnabled = true;
-            this.CmbOperationModeSelection.Items.AddRange(new object[] {
-            "Manual",
-            "Local",
-            "PLC"});
-            this.CmbOperationModeSelection.Location = new System.Drawing.Point(397, 573);
-            this.CmbOperationModeSelection.Name = "CmbOperationModeSelection";
-            this.CmbOperationModeSelection.Size = new System.Drawing.Size(121, 21);
-            this.CmbOperationModeSelection.TabIndex = 95;
             // 
             // GroupActualTargetSize
             // 
@@ -597,6 +581,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             this.grid_6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.grid_6.BackColor = System.Drawing.Color.Silver;
+            this.grid_6.Enabled = false;
             this.grid_6.Location = new System.Drawing.Point(302, 19);
             this.grid_6.Name = "grid_6";
             this.grid_6.Size = new System.Drawing.Size(67, 42);
@@ -609,6 +594,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             this.grid_5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.grid_5.BackColor = System.Drawing.Color.Silver;
+            this.grid_5.Enabled = false;
             this.grid_5.Location = new System.Drawing.Point(153, 19);
             this.grid_5.Name = "grid_5";
             this.grid_5.Size = new System.Drawing.Size(67, 42);
@@ -633,6 +619,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             this.grid_9.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.grid_9.BackColor = System.Drawing.Color.Silver;
+            this.grid_9.Enabled = false;
             this.grid_9.Location = new System.Drawing.Point(13, 63);
             this.grid_9.Name = "grid_9";
             this.grid_9.Size = new System.Drawing.Size(67, 42);
@@ -652,7 +639,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // btnsave
             // 
             this.btnsave.AllowDrop = true;
-            this.btnsave.Location = new System.Drawing.Point(174, 534);
+            this.btnsave.Location = new System.Drawing.Point(269, 613);
             this.btnsave.Name = "btnsave";
             this.btnsave.Size = new System.Drawing.Size(97, 44);
             this.btnsave.TabIndex = 116;
@@ -692,7 +679,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.mainControlPage.Controls.Add(this.groupBox2);
             this.mainControlPage.Controls.Add(this.label8);
             this.mainControlPage.Controls.Add(this.formatTxt);
-            this.mainControlPage.Controls.Add(this.imageCorrectionCheck);
             this.mainControlPage.Controls.Add(this.GroupSelectGrid);
             this.mainControlPage.Controls.Add(this.GroupBox1);
             this.mainControlPage.Controls.Add(this.GroupBox8);
@@ -725,6 +711,36 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Frame Results";
             // 
+            // txtAvgMinDiameterUnits
+            // 
+            this.txtAvgMinDiameterUnits.AutoSize = true;
+            this.txtAvgMinDiameterUnits.Font = new System.Drawing.Font("Alef", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtAvgMinDiameterUnits.Location = new System.Drawing.Point(223, 85);
+            this.txtAvgMinDiameterUnits.Name = "txtAvgMinDiameterUnits";
+            this.txtAvgMinDiameterUnits.Size = new System.Drawing.Size(36, 22);
+            this.txtAvgMinDiameterUnits.TabIndex = 125;
+            this.txtAvgMinDiameterUnits.Text = "mm";
+            // 
+            // txtAvgMaxDiameterUnits
+            // 
+            this.txtAvgMaxDiameterUnits.AutoSize = true;
+            this.txtAvgMaxDiameterUnits.Font = new System.Drawing.Font("Alef", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtAvgMaxDiameterUnits.Location = new System.Drawing.Point(223, 56);
+            this.txtAvgMaxDiameterUnits.Name = "txtAvgMaxDiameterUnits";
+            this.txtAvgMaxDiameterUnits.Size = new System.Drawing.Size(36, 22);
+            this.txtAvgMaxDiameterUnits.TabIndex = 124;
+            this.txtAvgMaxDiameterUnits.Text = "mm";
+            // 
+            // txtAvgDiameterUnits
+            // 
+            this.txtAvgDiameterUnits.AutoSize = true;
+            this.txtAvgDiameterUnits.Font = new System.Drawing.Font("Alef", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtAvgDiameterUnits.Location = new System.Drawing.Point(223, 30);
+            this.txtAvgDiameterUnits.Name = "txtAvgDiameterUnits";
+            this.txtAvgDiameterUnits.Size = new System.Drawing.Size(36, 22);
+            this.txtAvgDiameterUnits.TabIndex = 123;
+            this.txtAvgDiameterUnits.Text = "mm";
+            // 
             // avg_diameter
             // 
             this.avg_diameter.AutoSize = true;
@@ -744,26 +760,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.label13.Size = new System.Drawing.Size(105, 16);
             this.label13.TabIndex = 122;
             this.label13.Text = "Avg Diameter:";
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label6.Location = new System.Drawing.Point(547, 564);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(73, 29);
-            this.label6.TabIndex = 115;
-            this.label6.Text = "Units:";
-            // 
-            // unitsTxt
-            // 
-            this.unitsTxt.AutoSize = true;
-            this.unitsTxt.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.unitsTxt.Location = new System.Drawing.Point(555, 590);
-            this.unitsTxt.Name = "unitsTxt";
-            this.unitsTxt.Size = new System.Drawing.Size(53, 29);
-            this.unitsTxt.TabIndex = 116;
-            this.unitsTxt.Text = "mm";
             // 
             // txtAvgMinD
             // 
@@ -817,6 +813,16 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Control Diameter";
             // 
+            // txtControlDiameterUnits
+            // 
+            this.txtControlDiameterUnits.AutoSize = true;
+            this.txtControlDiameterUnits.Font = new System.Drawing.Font("Alef", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtControlDiameterUnits.Location = new System.Drawing.Point(92, 19);
+            this.txtControlDiameterUnits.Name = "txtControlDiameterUnits";
+            this.txtControlDiameterUnits.Size = new System.Drawing.Size(36, 22);
+            this.txtControlDiameterUnits.TabIndex = 126;
+            this.txtControlDiameterUnits.Text = "mm";
+            // 
             // txtControlDiameter
             // 
             this.txtControlDiameter.AutoSize = true;
@@ -847,27 +853,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.formatTxt.TabIndex = 118;
             this.formatTxt.Text = "3x3";
             // 
-            // imageCorrectionCheck
-            // 
-            this.imageCorrectionCheck.AutoSize = true;
-            this.imageCorrectionCheck.Location = new System.Drawing.Point(181, 661);
-            this.imageCorrectionCheck.Name = "imageCorrectionCheck";
-            this.imageCorrectionCheck.Size = new System.Drawing.Size(120, 20);
-            this.imageCorrectionCheck.TabIndex = 2;
-            this.imageCorrectionCheck.Text = "Image Correction";
-            this.imageCorrectionCheck.UseVisualStyleBackColor = true;
-            // 
             // configurationPage
             // 
             this.configurationPage.BackColor = System.Drawing.Color.LightSteelBlue;
             this.configurationPage.Controls.Add(this.GB_Threshold);
-            this.configurationPage.Controls.Add(this.groupBox3);
-            this.configurationPage.Controls.Add(this.targetUnitsTxt);
             this.configurationPage.Controls.Add(this.GroupBox11);
             this.configurationPage.Controls.Add(this.groupBox4);
+            this.configurationPage.Controls.Add(this.TXT_ROI_Bottom);
             this.configurationPage.Controls.Add(this.btnsave);
-            this.configurationPage.Controls.Add(this.txtCalibrationTarget);
-            this.configurationPage.Controls.Add(this.label5);
+            this.configurationPage.Controls.Add(this.TXT_ROI_Top);
+            this.configurationPage.Controls.Add(this.TXT_ROI_Left);
+            this.configurationPage.Controls.Add(this.TXT_ROI_Right);
             this.configurationPage.Font = new System.Drawing.Font("Alef", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.configurationPage.Location = new System.Drawing.Point(4, 44);
             this.configurationPage.Name = "configurationPage";
@@ -912,46 +908,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Txt_Threshold.Text = "0";
             this.Txt_Threshold.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
-            // groupBox3
-            // 
-            this.groupBox3.Controls.Add(this.modbusServerIPTxt);
-            this.groupBox3.Controls.Add(this.label10);
-            this.groupBox3.Location = new System.Drawing.Point(26, 593);
-            this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(313, 106);
-            this.groupBox3.TabIndex = 122;
-            this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "Modbus";
-            // 
-            // modbusServerIPTxt
-            // 
-            this.modbusServerIPTxt.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.modbusServerIPTxt.Location = new System.Drawing.Point(73, 29);
-            this.modbusServerIPTxt.Name = "modbusServerIPTxt";
-            this.modbusServerIPTxt.Size = new System.Drawing.Size(164, 21);
-            this.modbusServerIPTxt.TabIndex = 8;
-            this.modbusServerIPTxt.Text = "127.0.0.1";
-            this.modbusServerIPTxt.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label10.Location = new System.Drawing.Point(6, 32);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(68, 16);
-            this.label10.TabIndex = 7;
-            this.label10.Text = "Server IP: ";
-            // 
             // GroupBox11
             // 
+            this.GroupBox11.Controls.Add(this.inputBottomRoi);
+            this.GroupBox11.Controls.Add(this.inputRightRoi);
+            this.GroupBox11.Controls.Add(this.inputTopRoi);
+            this.GroupBox11.Controls.Add(this.inputLeftRoi);
             this.GroupBox11.Controls.Add(this.Label37);
-            this.GroupBox11.Controls.Add(this.TXT_ROI_Bottom);
             this.GroupBox11.Controls.Add(this.Label35);
-            this.GroupBox11.Controls.Add(this.TXT_ROI_Right);
             this.GroupBox11.Controls.Add(this.Label36);
-            this.GroupBox11.Controls.Add(this.TXT_ROI_Top);
-            this.GroupBox11.Controls.Add(this.TXT_ROI_Left);
             this.GroupBox11.Controls.Add(this.Label34);
             this.GroupBox11.Location = new System.Drawing.Point(6, 263);
             this.GroupBox11.Name = "GroupBox11";
@@ -974,7 +939,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             this.TXT_ROI_Bottom.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.TXT_ROI_Bottom.Font = new System.Drawing.Font("Microsoft Sans Serif", 27.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.TXT_ROI_Bottom.Location = new System.Drawing.Point(168, 148);
+            this.TXT_ROI_Bottom.Location = new System.Drawing.Point(160, 650);
             this.TXT_ROI_Bottom.Name = "TXT_ROI_Bottom";
             this.TXT_ROI_Bottom.Size = new System.Drawing.Size(68, 49);
             this.TXT_ROI_Bottom.TabIndex = 87;
@@ -985,7 +950,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             this.Label35.AutoSize = true;
             this.Label35.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Label35.Location = new System.Drawing.Point(175, 16);
+            this.Label35.Location = new System.Drawing.Point(178, 19);
             this.Label35.Name = "Label35";
             this.Label35.Size = new System.Drawing.Size(47, 24);
             this.Label35.TabIndex = 82;
@@ -995,7 +960,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             this.TXT_ROI_Right.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.TXT_ROI_Right.Font = new System.Drawing.Font("Microsoft Sans Serif", 27.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.TXT_ROI_Right.Location = new System.Drawing.Point(252, 95);
+            this.TXT_ROI_Right.Location = new System.Drawing.Point(158, 595);
             this.TXT_ROI_Right.Name = "TXT_ROI_Right";
             this.TXT_ROI_Right.Size = new System.Drawing.Size(73, 49);
             this.TXT_ROI_Right.TabIndex = 86;
@@ -1016,7 +981,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             this.TXT_ROI_Top.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.TXT_ROI_Top.Font = new System.Drawing.Font("Microsoft Sans Serif", 27.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.TXT_ROI_Top.Location = new System.Drawing.Point(168, 43);
+            this.TXT_ROI_Top.Location = new System.Drawing.Point(65, 595);
             this.TXT_ROI_Top.Name = "TXT_ROI_Top";
             this.TXT_ROI_Top.Size = new System.Drawing.Size(68, 49);
             this.TXT_ROI_Top.TabIndex = 85;
@@ -1027,7 +992,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             this.TXT_ROI_Left.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.TXT_ROI_Left.Font = new System.Drawing.Font("Microsoft Sans Serif", 27.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.TXT_ROI_Left.Location = new System.Drawing.Point(80, 94);
+            this.TXT_ROI_Left.Location = new System.Drawing.Point(65, 650);
             this.TXT_ROI_Left.Name = "TXT_ROI_Left";
             this.TXT_ROI_Left.Size = new System.Drawing.Size(73, 49);
             this.TXT_ROI_Left.TabIndex = 81;
@@ -1059,6 +1024,32 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Calibration";
             // 
+            // btnChangeUnitsInch
+            // 
+            this.btnChangeUnitsInch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnChangeUnitsInch.AutoSize = true;
+            this.btnChangeUnitsInch.BackColor = System.Drawing.Color.Silver;
+            this.btnChangeUnitsInch.Location = new System.Drawing.Point(275, 23);
+            this.btnChangeUnitsInch.Name = "btnChangeUnitsInch";
+            this.btnChangeUnitsInch.Size = new System.Drawing.Size(85, 42);
+            this.btnChangeUnitsInch.TabIndex = 121;
+            this.btnChangeUnitsInch.Text = "inch";
+            this.btnChangeUnitsInch.UseVisualStyleBackColor = false;
+            this.btnChangeUnitsInch.Click += new System.EventHandler(this.btnChangeUnitsInch_Click);
+            // 
+            // btnChangeUnitsMm
+            // 
+            this.btnChangeUnitsMm.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnChangeUnitsMm.AutoSize = true;
+            this.btnChangeUnitsMm.BackColor = System.Drawing.Color.Silver;
+            this.btnChangeUnitsMm.Location = new System.Drawing.Point(154, 23);
+            this.btnChangeUnitsMm.Name = "btnChangeUnitsMm";
+            this.btnChangeUnitsMm.Size = new System.Drawing.Size(85, 42);
+            this.btnChangeUnitsMm.TabIndex = 120;
+            this.btnChangeUnitsMm.Text = "mm";
+            this.btnChangeUnitsMm.UseVisualStyleBackColor = false;
+            this.btnChangeUnitsMm.Click += new System.EventHandler(this.button1_Click_1);
+            // 
             // euFactorTxt
             // 
             this.euFactorTxt.AutoSize = true;
@@ -1079,15 +1070,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.label7.TabIndex = 6;
             this.label7.Text = "Calibration Factor:";
             // 
-            // targetUnitsTxt
-            // 
-            this.targetUnitsTxt.AutoSize = true;
-            this.targetUnitsTxt.Location = new System.Drawing.Point(304, 508);
-            this.targetUnitsTxt.Name = "targetUnitsTxt";
-            this.targetUnitsTxt.Size = new System.Drawing.Size(29, 16);
-            this.targetUnitsTxt.TabIndex = 5;
-            this.targetUnitsTxt.Text = "mm";
-            // 
             // calibrateBtn
             // 
             this.calibrateBtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -1098,26 +1080,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.calibrateBtn.Text = "Calibrate";
             this.calibrateBtn.UseVisualStyleBackColor = true;
             this.calibrateBtn.Click += new System.EventHandler(this.calibrateButtom_Click);
-            // 
-            // txtCalibrationTarget
-            // 
-            this.txtCalibrationTarget.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtCalibrationTarget.Location = new System.Drawing.Point(228, 501);
-            this.txtCalibrationTarget.Name = "txtCalibrationTarget";
-            this.txtCalibrationTarget.Size = new System.Drawing.Size(69, 21);
-            this.txtCalibrationTarget.TabIndex = 3;
-            this.txtCalibrationTarget.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.txtCalibrationTarget.TextChanged += new System.EventHandler(this.txtCalibrationTarget_TextChanged);
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label5.Location = new System.Drawing.Point(94, 502);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(128, 20);
-            this.label5.TabIndex = 2;
-            this.label5.Text = "Target Diameter:";
             // 
             // label4
             // 
@@ -1149,9 +1111,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.imagePage.BackColor = System.Drawing.Color.Silver;
             this.imagePage.Controls.Add(this.originalBox);
             this.imagePage.Controls.Add(this.processROIBox);
-            this.imagePage.Controls.Add(this.CmbOperationModeSelection);
-            this.imagePage.Controls.Add(this.unitsTxt);
-            this.imagePage.Controls.Add(this.label6);
             this.imagePage.Cursor = System.Windows.Forms.Cursors.Cross;
             this.imagePage.Location = new System.Drawing.Point(4, 44);
             this.imagePage.Name = "imagePage";
@@ -1193,13 +1152,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // productsPage
             // 
             this.productsPage.Controls.Add(this.GroupBox13);
-            this.productsPage.Controls.Add(this.GroupBox12);
             this.productsPage.Controls.Add(this.CmdAdd);
             this.productsPage.Controls.Add(this.CmdUpdate);
             this.productsPage.Controls.Add(this.GroupBox10);
             this.productsPage.Controls.Add(this.CmdDelete);
             this.productsPage.Controls.Add(this.GroupBox9);
             this.productsPage.Controls.Add(this.Cmd_Save);
+            this.productsPage.Controls.Add(this.Chk_Digital_Knife);
             this.productsPage.Location = new System.Drawing.Point(4, 44);
             this.productsPage.Name = "productsPage";
             this.productsPage.Padding = new System.Windows.Forms.Padding(3);
@@ -1214,9 +1173,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.GroupBox13.Controls.Add(this.Chk_Right_Side);
             this.GroupBox13.Controls.Add(this.Txt_Tag);
             this.GroupBox13.Enabled = false;
-            this.GroupBox13.Location = new System.Drawing.Point(240, 327);
+            this.GroupBox13.Location = new System.Drawing.Point(506, 452);
             this.GroupBox13.Name = "GroupBox13";
-            this.GroupBox13.Size = new System.Drawing.Size(205, 151);
+            this.GroupBox13.Size = new System.Drawing.Size(205, 92);
             this.GroupBox13.TabIndex = 122;
             this.GroupBox13.TabStop = false;
             this.GroupBox13.Text = "Misc";
@@ -1250,103 +1209,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Txt_Tag.TabIndex = 94;
             this.Txt_Tag.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
-            // GroupBox12
-            // 
-            this.GroupBox12.Controls.Add(this.Label19);
-            this.GroupBox12.Controls.Add(this.Txt_Line_Width);
-            this.GroupBox12.Controls.Add(this.Label44);
-            this.GroupBox12.Controls.Add(this.Label45);
-            this.GroupBox12.Controls.Add(this.txt_under_size);
-            this.GroupBox12.Controls.Add(this.txt_over_size);
-            this.GroupBox12.Controls.Add(this.Label38);
-            this.GroupBox12.Controls.Add(this.Txt_Max_Threshold);
-            this.GroupBox12.Controls.Add(this.Chk_Digital_Knife);
-            this.GroupBox12.Enabled = false;
-            this.GroupBox12.Location = new System.Drawing.Point(28, 321);
-            this.GroupBox12.Name = "GroupBox12";
-            this.GroupBox12.Size = new System.Drawing.Size(197, 157);
-            this.GroupBox12.TabIndex = 121;
-            this.GroupBox12.TabStop = false;
-            this.GroupBox12.Text = "Parameters";
-            // 
-            // Label19
-            // 
-            this.Label19.AutoSize = true;
-            this.Label19.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Label19.Location = new System.Drawing.Point(13, 21);
-            this.Label19.Name = "Label19";
-            this.Label19.Size = new System.Drawing.Size(83, 16);
-            this.Label19.TabIndex = 82;
-            this.Label19.Text = "Line Width:";
-            // 
-            // Txt_Line_Width
-            // 
-            this.Txt_Line_Width.Location = new System.Drawing.Point(128, 19);
-            this.Txt_Line_Width.Name = "Txt_Line_Width";
-            this.Txt_Line_Width.Size = new System.Drawing.Size(63, 20);
-            this.Txt_Line_Width.TabIndex = 81;
-            this.Txt_Line_Width.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // Label44
-            // 
-            this.Label44.AutoSize = true;
-            this.Label44.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Label44.Location = new System.Drawing.Point(13, 53);
-            this.Label44.Name = "Label44";
-            this.Label44.Size = new System.Drawing.Size(87, 16);
-            this.Label44.TabIndex = 83;
-            this.Label44.Text = "Under Size:";
-            // 
-            // Label45
-            // 
-            this.Label45.AutoSize = true;
-            this.Label45.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Label45.Location = new System.Drawing.Point(13, 80);
-            this.Label45.Name = "Label45";
-            this.Label45.Size = new System.Drawing.Size(78, 16);
-            this.Label45.TabIndex = 84;
-            this.Label45.Text = "Over Size:";
-            // 
-            // txt_under_size
-            // 
-            this.txt_under_size.Location = new System.Drawing.Point(128, 51);
-            this.txt_under_size.Name = "txt_under_size";
-            this.txt_under_size.Size = new System.Drawing.Size(63, 20);
-            this.txt_under_size.TabIndex = 85;
-            this.txt_under_size.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // txt_over_size
-            // 
-            this.txt_over_size.Location = new System.Drawing.Point(128, 78);
-            this.txt_over_size.Name = "txt_over_size";
-            this.txt_over_size.Size = new System.Drawing.Size(63, 20);
-            this.txt_over_size.TabIndex = 86;
-            this.txt_over_size.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // Label38
-            // 
-            this.Label38.AutoSize = true;
-            this.Label38.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Label38.Location = new System.Drawing.Point(14, 108);
-            this.Label38.Name = "Label38";
-            this.Label38.Size = new System.Drawing.Size(113, 16);
-            this.Label38.TabIndex = 96;
-            this.Label38.Text = "Max Threshold:";
-            // 
-            // Txt_Max_Threshold
-            // 
-            this.Txt_Max_Threshold.Location = new System.Drawing.Point(128, 106);
-            this.Txt_Max_Threshold.Name = "Txt_Max_Threshold";
-            this.Txt_Max_Threshold.Size = new System.Drawing.Size(63, 20);
-            this.Txt_Max_Threshold.TabIndex = 97;
-            this.Txt_Max_Threshold.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
             // Chk_Digital_Knife
             // 
             this.Chk_Digital_Knife.AutoSize = true;
             this.Chk_Digital_Knife.Checked = true;
             this.Chk_Digital_Knife.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.Chk_Digital_Knife.Location = new System.Drawing.Point(59, 133);
+            this.Chk_Digital_Knife.Location = new System.Drawing.Point(113, 527);
             this.Chk_Digital_Knife.Name = "Chk_Digital_Knife";
             this.Chk_Digital_Knife.Size = new System.Drawing.Size(82, 17);
             this.Chk_Digital_Knife.TabIndex = 95;
@@ -1437,6 +1305,26 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.GroupBox9.TabIndex = 115;
             this.GroupBox9.TabStop = false;
             this.GroupBox9.Text = "Products Database";
+            // 
+            // txtMinDProductUnits
+            // 
+            this.txtMinDProductUnits.AutoSize = true;
+            this.txtMinDProductUnits.Font = new System.Drawing.Font("Alef", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtMinDProductUnits.Location = new System.Drawing.Point(235, 94);
+            this.txtMinDProductUnits.Name = "txtMinDProductUnits";
+            this.txtMinDProductUnits.Size = new System.Drawing.Size(36, 22);
+            this.txtMinDProductUnits.TabIndex = 126;
+            this.txtMinDProductUnits.Text = "mm";
+            // 
+            // txtMaxDProductUnits
+            // 
+            this.txtMaxDProductUnits.AutoSize = true;
+            this.txtMaxDProductUnits.Font = new System.Drawing.Font("Alef", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtMaxDProductUnits.Location = new System.Drawing.Point(235, 72);
+            this.txtMaxDProductUnits.Name = "txtMaxDProductUnits";
+            this.txtMaxDProductUnits.Size = new System.Drawing.Size(36, 22);
+            this.txtMaxDProductUnits.TabIndex = 125;
+            this.txtMaxDProductUnits.Text = "mm";
             // 
             // CmbGrid
             // 
@@ -1586,91 +1474,118 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Cmd_Save.UseVisualStyleBackColor = false;
             this.Cmd_Save.Click += new System.EventHandler(this.Cmd_Save_Click);
             // 
-            // txtAvgDiameterUnits
+            // inputLeftRoi
             // 
-            this.txtAvgDiameterUnits.AutoSize = true;
-            this.txtAvgDiameterUnits.Font = new System.Drawing.Font("Alef", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtAvgDiameterUnits.Location = new System.Drawing.Point(223, 30);
-            this.txtAvgDiameterUnits.Name = "txtAvgDiameterUnits";
-            this.txtAvgDiameterUnits.Size = new System.Drawing.Size(36, 22);
-            this.txtAvgDiameterUnits.TabIndex = 123;
-            this.txtAvgDiameterUnits.Text = "mm";
+            this.inputLeftRoi.Font = new System.Drawing.Font("Microsoft Sans Serif", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.inputLeftRoi.Location = new System.Drawing.Point(80, 103);
+            this.inputLeftRoi.Maximum = new decimal(new int[] {
+            310,
+            0,
+            0,
+            0});
+            this.inputLeftRoi.Minimum = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
+            this.inputLeftRoi.Name = "inputLeftRoi";
+            this.inputLeftRoi.Size = new System.Drawing.Size(84, 40);
+            this.inputLeftRoi.TabIndex = 124;
+            this.inputLeftRoi.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.inputLeftRoi.Value = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
             // 
-            // txtAvgMaxDiameterUnits
+            // inputTopRoi
             // 
-            this.txtAvgMaxDiameterUnits.AutoSize = true;
-            this.txtAvgMaxDiameterUnits.Font = new System.Drawing.Font("Alef", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtAvgMaxDiameterUnits.Location = new System.Drawing.Point(223, 56);
-            this.txtAvgMaxDiameterUnits.Name = "txtAvgMaxDiameterUnits";
-            this.txtAvgMaxDiameterUnits.Size = new System.Drawing.Size(36, 22);
-            this.txtAvgMaxDiameterUnits.TabIndex = 124;
-            this.txtAvgMaxDiameterUnits.Text = "mm";
+            this.inputTopRoi.Font = new System.Drawing.Font("Microsoft Sans Serif", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.inputTopRoi.Location = new System.Drawing.Point(165, 48);
+            this.inputTopRoi.Maximum = new decimal(new int[] {
+            235,
+            0,
+            0,
+            0});
+            this.inputTopRoi.Minimum = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
+            this.inputTopRoi.Name = "inputTopRoi";
+            this.inputTopRoi.Size = new System.Drawing.Size(84, 40);
+            this.inputTopRoi.TabIndex = 125;
+            this.inputTopRoi.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.inputTopRoi.Value = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
             // 
-            // txtAvgMinDiameterUnits
+            // inputRightRoi
             // 
-            this.txtAvgMinDiameterUnits.AutoSize = true;
-            this.txtAvgMinDiameterUnits.Font = new System.Drawing.Font("Alef", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtAvgMinDiameterUnits.Location = new System.Drawing.Point(223, 85);
-            this.txtAvgMinDiameterUnits.Name = "txtAvgMinDiameterUnits";
-            this.txtAvgMinDiameterUnits.Size = new System.Drawing.Size(36, 22);
-            this.txtAvgMinDiameterUnits.TabIndex = 125;
-            this.txtAvgMinDiameterUnits.Text = "mm";
+            this.inputRightRoi.Font = new System.Drawing.Font("Microsoft Sans Serif", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.inputRightRoi.Location = new System.Drawing.Point(241, 103);
+            this.inputRightRoi.Maximum = new decimal(new int[] {
+            635,
+            0,
+            0,
+            0});
+            this.inputRightRoi.Minimum = new decimal(new int[] {
+            330,
+            0,
+            0,
+            0});
+            this.inputRightRoi.Name = "inputRightRoi";
+            this.inputRightRoi.Size = new System.Drawing.Size(84, 40);
+            this.inputRightRoi.TabIndex = 126;
+            this.inputRightRoi.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.inputRightRoi.Value = new decimal(new int[] {
+            330,
+            0,
+            0,
+            0});
             // 
-            // txtControlDiameterUnits
+            // inputBottomRoi
             // 
-            this.txtControlDiameterUnits.AutoSize = true;
-            this.txtControlDiameterUnits.Font = new System.Drawing.Font("Alef", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtControlDiameterUnits.Location = new System.Drawing.Point(92, 19);
-            this.txtControlDiameterUnits.Name = "txtControlDiameterUnits";
-            this.txtControlDiameterUnits.Size = new System.Drawing.Size(36, 22);
-            this.txtControlDiameterUnits.TabIndex = 126;
-            this.txtControlDiameterUnits.Text = "mm";
+            this.inputBottomRoi.Font = new System.Drawing.Font("Microsoft Sans Serif", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.inputBottomRoi.Location = new System.Drawing.Point(165, 149);
+            this.inputBottomRoi.Maximum = new decimal(new int[] {
+            475,
+            0,
+            0,
+            0});
+            this.inputBottomRoi.Minimum = new decimal(new int[] {
+            245,
+            0,
+            0,
+            0});
+            this.inputBottomRoi.Name = "inputBottomRoi";
+            this.inputBottomRoi.Size = new System.Drawing.Size(84, 40);
+            this.inputBottomRoi.TabIndex = 127;
+            this.inputBottomRoi.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.inputBottomRoi.Value = new decimal(new int[] {
+            245,
+            0,
+            0,
+            0});
             // 
-            // txtMaxDProductUnits
+            // toolStripSeparator2
             // 
-            this.txtMaxDProductUnits.AutoSize = true;
-            this.txtMaxDProductUnits.Font = new System.Drawing.Font("Alef", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtMaxDProductUnits.Location = new System.Drawing.Point(235, 72);
-            this.txtMaxDProductUnits.Name = "txtMaxDProductUnits";
-            this.txtMaxDProductUnits.Size = new System.Drawing.Size(36, 22);
-            this.txtMaxDProductUnits.TabIndex = 125;
-            this.txtMaxDProductUnits.Text = "mm";
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
             // 
-            // txtMinDProductUnits
+            // timeElapsedLabel
             // 
-            this.txtMinDProductUnits.AutoSize = true;
-            this.txtMinDProductUnits.Font = new System.Drawing.Font("Alef", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtMinDProductUnits.Location = new System.Drawing.Point(235, 94);
-            this.txtMinDProductUnits.Name = "txtMinDProductUnits";
-            this.txtMinDProductUnits.Size = new System.Drawing.Size(36, 22);
-            this.txtMinDProductUnits.TabIndex = 126;
-            this.txtMinDProductUnits.Text = "mm";
+            this.timeElapsedLabel.Name = "timeElapsedLabel";
+            this.timeElapsedLabel.Size = new System.Drawing.Size(152, 22);
+            this.timeElapsedLabel.Text = "Time Elapsed in Last Frame:";
+            this.timeElapsedLabel.Click += new System.EventHandler(this.timeElapsedLabel_Click);
             // 
-            // btnChangeUnitsMm
+            // timeElapsed
             // 
-            this.btnChangeUnitsMm.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnChangeUnitsMm.AutoSize = true;
-            this.btnChangeUnitsMm.BackColor = System.Drawing.Color.Silver;
-            this.btnChangeUnitsMm.Location = new System.Drawing.Point(154, 23);
-            this.btnChangeUnitsMm.Name = "btnChangeUnitsMm";
-            this.btnChangeUnitsMm.Size = new System.Drawing.Size(85, 42);
-            this.btnChangeUnitsMm.TabIndex = 120;
-            this.btnChangeUnitsMm.Text = "mm";
-            this.btnChangeUnitsMm.UseVisualStyleBackColor = false;
-            this.btnChangeUnitsMm.Click += new System.EventHandler(this.button1_Click_1);
-            // 
-            // btnChangeUnitsInch
-            // 
-            this.btnChangeUnitsInch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnChangeUnitsInch.AutoSize = true;
-            this.btnChangeUnitsInch.BackColor = System.Drawing.Color.Silver;
-            this.btnChangeUnitsInch.Location = new System.Drawing.Point(275, 23);
-            this.btnChangeUnitsInch.Name = "btnChangeUnitsInch";
-            this.btnChangeUnitsInch.Size = new System.Drawing.Size(85, 42);
-            this.btnChangeUnitsInch.TabIndex = 121;
-            this.btnChangeUnitsInch.Text = "inch";
-            this.btnChangeUnitsInch.UseVisualStyleBackColor = false;
-            this.btnChangeUnitsInch.Click += new System.EventHandler(this.btnChangeUnitsInch_Click);
+            this.timeElapsed.Name = "timeElapsed";
+            this.timeElapsed.Size = new System.Drawing.Size(0, 22);
             // 
             // GigECameraDemoDlg
             // 
@@ -1686,6 +1601,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "GigECameraDemoDlg";
             this.Text = "InspecTorT T300";
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.GigECameraDemoDlg_FormClosed);
             this.Load += new System.EventHandler(this.GigECameraDemoDlg_Load);
             this.toolStrip1.ResumeLayout(false);
@@ -1710,15 +1626,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.configurationPage.PerformLayout();
             this.GB_Threshold.ResumeLayout(false);
             this.GB_Threshold.PerformLayout();
-            this.groupBox3.ResumeLayout(false);
-            this.groupBox3.PerformLayout();
             this.GroupBox11.ResumeLayout(false);
             this.GroupBox11.PerformLayout();
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
             this.mainTabs.ResumeLayout(false);
             this.imagePage.ResumeLayout(false);
-            this.imagePage.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.originalBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.processROIBox)).EndInit();
             this.tablePage.ResumeLayout(false);
@@ -1726,11 +1639,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.productsPage.PerformLayout();
             this.GroupBox13.ResumeLayout(false);
             this.GroupBox13.PerformLayout();
-            this.GroupBox12.ResumeLayout(false);
-            this.GroupBox12.PerformLayout();
             this.GroupBox10.ResumeLayout(false);
             this.GroupBox9.ResumeLayout(false);
             this.GroupBox9.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.inputLeftRoi)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.inputTopRoi)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.inputRightRoi)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.inputBottomRoi)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1798,15 +1713,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         internal Label Label47;
         internal CheckBox Chk_Right_Side;
         internal TextBox Txt_Tag;
-        internal GroupBox GroupBox12;
-        internal Label Label19;
-        internal TextBox Txt_Line_Width;
-        internal Label Label44;
-        internal Label Label45;
-        internal TextBox txt_under_size;
-        internal TextBox txt_over_size;
-        internal Label Label38;
-        internal TextBox Txt_Max_Threshold;
         internal CheckBox Chk_Digital_Knife;
         internal Button CmdAdd;
         internal Button CmdUpdate;
@@ -1834,12 +1740,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         internal Button virtualTriggerBtn;
         private GroupBox groupBox4;
         private Label label4;
-        private Label label5;
         private Button calibrateBtn;
-        private TextBox txtCalibrationTarget;
-        private Label targetUnitsTxt;
-        private Label unitsTxt;
-        private Label label6;
         private Label minDiameterUnitsTxt;
         private Label maxDiameterUnitsTxt;
         private Label euFactorTxt;
@@ -1855,13 +1756,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         internal Label Label35;
         internal Label Label36;
         internal Label Label37;
-        private CheckBox imageCorrectionCheck;
-        private ComboBox CmbOperationModeSelection;
         internal Label label9;
         private ComboBox CmbGrid;
-        internal GroupBox groupBox3;
-        private TextBox modbusServerIPTxt;
-        private Label label10;
         internal GroupBox GB_Threshold;
         internal CheckBox Chk_Threshold_Mode;
         internal TextBox Txt_Threshold;
@@ -1885,6 +1781,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private Label txtMaxDProductUnits;
         internal Button btnChangeUnitsInch;
         internal Button btnChangeUnitsMm;
+        private NumericUpDown inputLeftRoi;
+        private NumericUpDown inputBottomRoi;
+        private NumericUpDown inputRightRoi;
+        private NumericUpDown inputTopRoi;
+        private ToolStripSeparator toolStripSeparator2;
+        private ToolStripLabel timeElapsedLabel;
+        private ToolStripLabel timeElapsed;
     }
 }
 
