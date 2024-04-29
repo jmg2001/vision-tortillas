@@ -172,9 +172,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         string ipAddress = "127.0.0.1";
         int port = 503;
 
-        // Delegate to display number of frame acquired 
-        // Delegate is needed because .NEt framework does not support  cross thread control modification
-        private delegate void DisplayFrameAcquired(int number, bool trash);
+        string archivo = "";
+
+// Delegate to display number of frame acquired 
+// Delegate is needed because .NEt framework does not support  cross thread control modification
+private delegate void DisplayFrameAcquired(int number, bool trash);
         //
         // This function is called each time an image has been transferred into system memory by the transfer object
 
@@ -204,6 +206,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 string actualDIrectory = AppDomain.CurrentDomain.BaseDirectory;
                 csvPath = userDir + "\\InspecTorT_db.csv";
                 configPath = userDir + "\\InspecTorTConfig";
+                archivo = userDir + "\\datos.txt";
 
                 originalBox.MouseMove += originalBox_MouseMove;
                 processROIBox.MouseMove += processBox_MouseMove;
@@ -422,36 +425,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void ModbusServerIPTxt_KeyPress(object sender, KeyPressEventArgs e)
         {
-            //// Verificar si la tecla presionada es "Enter" (código ASCII 13)
-            //if (e.KeyChar == (char)Keys.Enter)
-            //{
-            //    string ipText = modbusServerIPTxt.Text.Trim();
-            //    if (IsValidIP(ipText))
-            //    {
-            //        ipAddress = modbusServerIPTxt.Text;
-            //        // MessageBox.Show("Dirección IP válida: " + ipText);
-            //        if (modbusClient.Connected)
-            //        {
-            //            modbusClient.Disconnect();
-            //            Console.WriteLine("Modbus Client Disconnected");
-            //        }
 
-            //        modbusClient = new ModbusClient(ipAddress, port);
-            //        MessageBox.Show("Modbus Server IP Address changed");
-            //    }
-            //    else
-            //    {
-            //        MessageBox.Show("Invalid IP Addres: " + ipText);
-            //    }
-            //}
-
-            //bool IsValidIP(string ip)
-            //{
-            //    // Patrón de expresión regular para validar una dirección IP
-            //    string pattern = @"^(([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.){3}([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])$";
-            //    Regex regex = new Regex(pattern);
-            //    return regex.IsMatch(ip);
-            //}
         }
 
         // Clase de los productos
@@ -467,43 +441,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             public int Grid { get; set; }
 
         }
-
-
-        //public class CsvFileManager<Product>
-        //{
-        //    private readonly string filePath;
-
-        //    public CsvFileManager(string filePath)
-        //    {
-        //        this.filePath = filePath;
-        //    }
-
-        //    public IEnumerable<Product> ReadCsv()
-        //    {
-        //        if (!File.Exists(filePath))
-        //        {
-        //            // Si el archivo no existe, devuelve una lista vacía
-        //            return Enumerable.Empty<Product>();
-        //        }
-
-        //        using (var reader = new StreamReader(filePath))
-        //        using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)))
-        //        {
-        //            return csv.GetRecords<Product>().ToList();
-        //        }
-        //    }
-
-        //    public void WriteCsv(IEnumerable<Product> records)
-        //    {
-        //        using (var writer = new StreamWriter(filePath))
-        //        using (var csv = new CsvWriter(writer, new CsvConfiguration(CultureInfo.InvariantCulture)))
-        //        {
-        //            csv.WriteRecords(records);
-        //        }
-        //    }
-
-        //}
-
 
 
         // Clase para representar el grid
@@ -606,6 +543,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     if (!processing)
                     {
                         processing = true;
+                        // Crear un Stopwatch
+                        Stopwatch stopwatch = new Stopwatch();
+
+                        // Iniciar el cronómetro
+                        stopwatch.Start();
 
                         if (operationMode == 2)
                         {
@@ -650,6 +592,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         }
 
                         processing = false;
+                        // Detener el cronómetro
+                        stopwatch.Stop();
+
+                        // Crear un StreamWriter para escribir en el archivo
+                        using (StreamWriter writer = File.AppendText(archivo))
+                        {
+                            // Escribir datos en el archivo
+                            writer.WriteLine(stopwatch.ElapsedMilliseconds + " ms para el frame " + frameCounter);
+                        }
+                        stopwatch.Restart();
+                        Console.WriteLine("Datos agregados al archivo.");
                     }
                 });
             }
@@ -712,8 +665,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             processImageBtn.Enabled = true;
 
-            originalImage = saveImage();
-            // originalImage = new Bitmap(@"C:\Users\Jesús\Documents\Python\cam_calib\imagenOrigen.bmp");
+            //originalImage = saveImage();
+            originalImage = new Bitmap(userDir + "\\imagenOrigen.bmp");
 
             // Convertir el objeto Bitmap a una matriz de Emgu CV (Image<Bgr, byte>)
             Image<Bgr, byte> tempImage = originalImage.ToImage<Bgr, byte>();
@@ -1051,7 +1004,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             frameCounter++;
 
-            originalBox.Visible = true;
+            //originalBox.Visible = true;
             processROIBox.Visible = true; // Mostrar el PictureBox ROI
             Mat binarizedImage = new Mat();
 
@@ -1066,28 +1019,43 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 Console.WriteLine("Binarization problem");
                 return;
             }
-            
 
-            //// Se extrae el ROI de la imagen binarizada
+            // Se extrae el ROI de la imagen binarizada
             Mat roiImage = extractROI(binarizedImage);
 
             // Colocamos el picturebox del ROI
             SetPictureBoxPositionAndSize(processROIBox, imagePage);
 
-            //// Procesamos el ROI
-            blobProces(roiImage.ToBitmap(), processROIBox);
-
-            if (Blobs.Count >= (int)(gridType.Grid.Item1 * gridType.Grid.Item2 / 2))
+            try
             {
-                setModbusData();
+                // Procesamos el ROI
+                blobProces(roiImage.ToBitmap(), processROIBox);
+                processROIBox.Image = roiImage.ToBitmap();
             }
+            catch
+            {
+                MessageBox.Show("Error en el blob");
+            }
+
+            try
+            {
+                if (Blobs.Count >= (int)(gridType.Grid.Item1 * gridType.Grid.Item2 / 2))
+                {
+                    setModbusData();
+                }
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+            
 
             // Liberamos las imagenes
             //binarizedImage.Dispose();
             //roiImage.Dispose();
 
-            //originalImage.Dispose();
-            //originalImageIsDisposed = true;
+            originalImage.Dispose();
+            originalImageIsDisposed = true;
 
             processImageBtn.Enabled = false;
         }
@@ -1453,20 +1421,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // Dibujar el rectángulo en la imagen
             CvInvoke.Rectangle(image, new System.Drawing.Rectangle(x, y, ancho, alto), color, grosor);
 
-
-            //using (Graphics g = Graphics.FromImage(image))
-            //{
-            //    using (Pen p = new Pen(Color.Cyan, 1))
-            //    {
-            //        g.DrawRectangle(p, rect);
-
-            //    }
-
-            //    using (Pen p = new Pen(Color.Red, 2))
-            //    {
-            //        g.DrawEllipse(p, (int)originalImage.Width / 2, (int)originalImage.Height / 2, 2, 2);
-            //    }
-            //}    
         }
 
 
@@ -1518,77 +1472,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     break;
             }
         }
-
-        //private void initModbusClient()
-        //{
-        //    // Dirección IP y puerto del dispositivo Modbus
-        //    string ipAddress = "127.0.0.1";
-        //    int port = 503;
-
-        //    // Crear un cliente Modbus TCP
-        //    modbusClient = new ModbusClient(ipAddress, port);
-
-        //    // Dirección del registro a leer y cantidad de registros a leer
-        //    int startAddress = 0; // Dirección del primer registro a leer
-        //    int numRegisters = 10; // Cantidad de registros a leer
-
-        //    // Crear e iniciar un hilo para la lectura continua de registros Modbus
-        //    thread = new Thread(() =>
-        //    {
-        //        while (true)
-        //        {
-        //            try
-        //            {
-        //                // Conectar al dispositivo Modbus
-        //                modbusClient.Connect();
-
-        //                try
-        //                {
-        //                    // Leer registros del dispositivo Modbus
-        //                    int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
-
-        //                    // Mostrar los valores de los registros leídos
-        //                    // Console.WriteLine("Valores de los registros leídos:");
-        //                    ushort[] registerValue = new ushort[] { (ushort)registers[0], (ushort)registers[1] }; // Valores de ejemplo en registros
-        //                    // Combina los dos valores de 16 bits en un solo valor entero de 32 bits
-        //                    int intValue = (registerValue[0] << 16) | registerValue[1];
-        //                    // Convierte el valor entero de 32 bits a un valor flotante
-        //                    float floatValue = BitConverter.ToSingle(BitConverter.GetBytes(intValue), 0);
-        //                    maxDiameter = (double)floatValue/euFactor;
-
-        //                    // Mostrar los valores de los registros leídos
-        //                    // Console.WriteLine("Valores de los registros leídos:");
-        //                    registerValue = new ushort[] { (ushort)registers[2], (ushort)registers[3] }; // Valores de ejemplo en registros
-        //                    // Combina los dos valores de 16 bits en un solo valor entero de 32 bits
-        //                    intValue = (registerValue[0] << 16) | registerValue[1];
-        //                    // Convierte el valor entero de 32 bits a un valor flotante
-        //                    floatValue = BitConverter.ToSingle(BitConverter.GetBytes(intValue), 0);
-        //                    minDiameter = (double)floatValue/euFactor;
-
-        //                    //Txt_MaxDiameter.Text = maxDiameter.ToString();
-        //                    //Txt_MinDiameter.Text = minDiameter.ToString();
-        //                }
-        //                catch (Exception ex)
-        //                {
-        //                    // Manejar errores de comunicación con el dispositivo Modbus
-        //                    Console.WriteLine($"Error: {ex.Message}");
-        //                }
-        //                finally
-        //                {
-        //                    // Desconectar del dispositivo Modbus
-        //                    modbusClient.Disconnect();
-        //                }
-        //            }
-        //            catch
-        //            {
-        //                Console.WriteLine("No se pudo conectar al servidor modbus");
-        //            }
-
-        //            // Esperar 5 segundos antes de realizar la próxima lectura
-        //            Thread.Sleep(1000); // 5000 milisegundos = 5 segundos
-        //        }
-        //    });
-        //}
 
         private void changeProduct(Product record)
         {
@@ -1855,6 +1738,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 // Mostrar la información del píxel
                 PixelDataValue.Text = $"  [ bx= {mousePos.X + UserROI.Left} y= {mousePos.Y + UserROI.Top}, Value: {(int)(Math.Round(pixelColor.GetBrightness(),3)*255)}]";
             }
+            //bitmap.Dispose();
         }
 
 
@@ -2648,8 +2532,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     int area = areas[i].Count;
                     int perimeter = perimeters[i].Count;
 
-                    Console.WriteLine(area);
-
                     double tempFactor = euFactor;
 
                     // Este diametro lo vamos a dejar para despues
@@ -2738,7 +2620,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
 
             // Colocamos la imagen con todos los dibujos en el picturebox
-            processROIBox.Image = image;
+            //processROIBox.Image = image;
 
             // Calculamos el promedio de los diametros
             avgControlD /= n;
