@@ -413,6 +413,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 if (triggerPLC)
                 {
+                    calibrateBtn.Enabled = false;
                     // triggerModeBtn.BackColor = DefaultBackColor;
                     txtTriggerSource.Text = "PLC";
                     txtTriggerSource.BackColor = Color.LightGreen;
@@ -602,6 +603,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         }
 
                         processing = false;
+
                         // Detener el cronómetro
                         stopwatch.Stop();
                         timeElapsed.Text = stopwatch.ElapsedMilliseconds.ToString() + " ms";
@@ -668,9 +670,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             processImageBtn.Enabled = true;
 
-            //originalImage = saveImage();
-            originalImage = new Bitmap(userDir + "\\imagenOrigen.bmp");
-
+            if (cameraImage.Checked)
+            {
+                originalImage = saveImage();
+            }
+            else
+            {
+                originalImage = new Bitmap(userDir + "\\imagenOrigen.bmp");
+            }
             // Convertir el objeto Bitmap a una matriz de Emgu CV (Image<Bgr, byte>)
             Image<Bgr, byte> tempImage = originalImage.ToImage<Bgr, byte>();
             
@@ -2390,7 +2397,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         public Bitmap saveImage()
         {
-            Txt_Threshold.Text = threshold.ToString(); // Convertir int a string y asignarlo al TextBox
+            //Txt_Threshold.Text = threshold.ToString(); // Convertir int a string y asignarlo al TextBox
 
             string imagePath = imagesPath + "imagenOrigen.bmp" ;
 
@@ -2850,6 +2857,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 if (autoThreshold)
                 {
                     threshold = CalculateOtsuThreshold();
+                    Txt_Threshold.Text = threshold.ToString();
                 }
                 else
                 {
@@ -3194,6 +3202,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 // triggerModeBtn.BackColor = DefaultBackColor;
                 txtTriggerSource.Text = "PLC";
+                calibrateBtn.Enabled = false;
                 txtTriggerSource.BackColor = Color.LightGreen;
                 virtualTriggerBtn.Enabled = false;
                 virtualTriggerBtn.BackColor = Color.DarkGray;
@@ -3211,6 +3220,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
             else
             {
+                calibrateBtn.Enabled = true;
                 m_AcqDevice.LoadFeatures(configPath + "\\TriggerOFF.ccf");
                 //triggerModeBtn.BackColor = Color.Silver;
                 virtualTriggerBtn.Enabled = true;
@@ -3228,7 +3238,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     if (abort.ShowDialog() != DialogResult.OK)
                         m_Xfer.Abort();
                     UpdateControls();
-                    //viewModeBtn.BackColor = Color.Silver; // Cambiar el color de fondo a gris
                 }
 
                 txtTriggerSource.Text = "SOFTWARE";
@@ -3456,7 +3465,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void Chk_Threshold_Mode_CheckedChanged(object sender, EventArgs e)
         {
-            autoThreshold = !autoThreshold;
+            if (Chk_Threshold_Mode.Checked)
+            {
+                autoThreshold = true;
+            }
+            else
+            {
+                autoThreshold = false;
+            }
+            
         }
 
         private void virtualTriggerBtn_Click(object sender, EventArgs e)
