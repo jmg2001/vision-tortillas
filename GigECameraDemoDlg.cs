@@ -148,6 +148,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         SapTransfer transfer = new SapTransfer();
 
+        bool cameraActive = false;
+
         // Hasta aqui las creadas por mi
 
         // Crear una DataTable para almacenar la información
@@ -172,6 +174,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         string archivo = "";
 
+        string simulateImagePath = "";
+
         double targetCalibrationSize = 0;
 
         // Delegate to display number of frame acquired 
@@ -187,229 +191,202 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             m_Xfer = null;
             m_View = null;
 
-            AcqConfigDlg acConfigDlg = new AcqConfigDlg(null, "", AcqConfigDlg.ServerCategory.ServerAcqDevice, true);
-            if (acConfigDlg.ShowDialog() == DialogResult.OK)
+            InitializeComponent();
+            InitializeDataTable();
+
+            simulateImagePath = userDir + "\\imagenOrigen.bmp";
+
+            configurationPage.Enabled = true;
+
+            string actualDIrectory = AppDomain.CurrentDomain.BaseDirectory;
+            csvPath = userDir + "\\InspecTorT_db.csv";
+            configPath = userDir + "\\InspecTorTConfig";
+            archivo = userDir + "\\datos.txt";
+
+            btnSetPointPLC.BackColor = Color.LightGreen;
+
+            operationMode = 2;
+            productsPage.Enabled = false;
+            GroupActualTargetSize.Enabled = false;
+            GroupSelectGrid.Enabled = false;
+
+            processImageBtn.Enabled = false;
+
+            units = settings.Units;
+            maxDiameterUnitsTxt.Text = units;
+            minDiameterUnitsTxt.Text = units;
+
+            txtAvgDiameterUnits.Text = units;
+            txtAvgMaxDiameterUnits.Text = units;
+            txtAvgMinDiameterUnits.Text = units;
+            txtControlDiameterUnits.Text = units;
+
+            txtMaxDProductUnits.Text = units;
+            txtMinDProductUnits.Text = units;
+
+            txtTriggerSource.BackColor = Color.LightGreen;
+            txtViewMode.BackColor = Color.Khaki;
+
+            switch (units)
             {
-                InitializeComponent();
-                InitializeDataTable();
+                case "mm":
+                    btnChangeUnitsMm.BackColor = Color.LightGreen;
+                    btnChangeUnitsInch.BackColor = Color.Silver;
+                    break;
+                case "inch":
+                    btnChangeUnitsMm.BackColor = Color.Silver;
+                    btnChangeUnitsInch.BackColor = Color.LightGreen;
+                    break;
+            }
 
-                configurationPage.Enabled = true;
+            euFactor = settings.EUFactor;
+            euFactorTxt.Text = Math.Round(euFactor, 3).ToString();
 
-                string actualDIrectory = AppDomain.CurrentDomain.BaseDirectory;
-                csvPath = userDir + "\\InspecTorT_db.csv";
-                configPath = userDir + "\\InspecTorTConfig";
-                archivo = userDir + "\\datos.txt";
+            formatTxt.Text = settings.Format;
 
-                //originalBox.MouseMove += originalBox_MouseMove;
-                //processROIBox.MouseMove += processBox_MouseMove;
-
-                //CmbOperationModeSelection.Text = "PLC";
-                btnSetPointPLC.BackColor = Color.LightGreen;
-
-
-                operationMode = 2;
-                productsPage.Enabled = false;
-                GroupActualTargetSize.Enabled = false;
-                GroupSelectGrid.Enabled = false;
-
-                // Suscribir al evento SelectedIndexChanged del TabControl
-                mainTabs.SelectedIndexChanged += TabControl2_SelectedIndexChanged;
-
-                processImageBtn.Enabled = false;
-
-                units = settings.Units;
-                maxDiameterUnitsTxt.Text = units;
-                minDiameterUnitsTxt.Text = units;
-
-                txtAvgDiameterUnits.Text = units;
-                txtAvgMaxDiameterUnits.Text = units;
-                txtAvgMinDiameterUnits.Text = units;
-                txtControlDiameterUnits.Text = units;
-
-                txtMaxDProductUnits.Text = units;
-                txtMinDProductUnits.Text = units;
-
-                txtTriggerSource.BackColor = Color.LightGreen;
-                txtViewMode.BackColor = Color.Khaki;
-
-                switch (units)
+            // Verificar si el archivo existe
+            if (File.Exists(csvPath))
+            {
+                using (var reader = new StreamReader(new FileStream(csvPath, FileMode.Open), System.Text.Encoding.UTF8))
+                using (var csvReader = new CsvReader(reader, CultureInfo.CurrentCulture))
                 {
-                    case "mm":
-                        btnChangeUnitsMm.BackColor = Color.LightGreen;
-                        btnChangeUnitsInch.BackColor = Color.Silver;
-                        break;
-                    case "inch":
-                        btnChangeUnitsMm.BackColor = Color.Silver;
-                        btnChangeUnitsInch.BackColor = Color.LightGreen;
-                        break;
-                }
-
-                euFactor = settings.EUFactor;
-                euFactorTxt.Text = Math.Round(euFactor, 3).ToString();
-
-                formatTxt.Text = settings.Format;
-
-                // Verificar si el archivo existe
-                if (File.Exists(csvPath))
-                {
-                    using (var reader = new StreamReader(new FileStream(csvPath, FileMode.Open), System.Text.Encoding.UTF8))
-                    using (var csvReader = new CsvReader(reader, CultureInfo.CurrentCulture))
+                    var records = csvReader.GetRecords<Product>();
+                    //records.Add(new Product { Code = 1, MaxD = 130, MinD = 110, MaxOvality = 0.5, MaxCompacity = 12 });
+                    //csvWriter.WriteRecords(records);
+                    foreach (var record in records)
                     {
-                        var records = csvReader.GetRecords<Product>();
-                        //records.Add(new Product { Code = 1, MaxD = 130, MinD = 110, MaxOvality = 0.5, MaxCompacity = 12 });
-                        //csvWriter.WriteRecords(records);
-                        foreach (var record in records)
-                        {
-                            CmbProducts.Items.Add(record.Code);
-                            //if (record.Code == settings.productCode)
-                            //{
-                            //    changeProduct(record);
-                            //}
-                        }
+                        CmbProducts.Items.Add(record.Code);
+                        //if (record.Code == settings.productCode)
+                        //{
+                        //    changeProduct(record);
+                        //}
                     }
                 }
-                else
-                {
-                    // Encabezados del archivo CSV
-                    string[] headers = { "Id","Code", "Name", "MaxD", "MinD", "MaxOvality", "MaxCompacity", "Grid" };
+            }
+            else
+            {
+                // Encabezados del archivo CSV
+                string[] headers = { "Id", "Code", "Name", "MaxD", "MinD", "MaxOvality", "MaxCompacity", "Grid" };
 
-                    // Contenido de los registros
-                    string[][] data = {
+                // Contenido de los registros
+                string[][] data = {
                     new string[] { "1","1", "Default", "90", "50", "0.5", "12", "1" },
                     };
 
-                    // Escribir los datos en el archivo CSV
-                    WriteCsvFile(csvPath, headers, data);
+                // Escribir los datos en el archivo CSV
+                WriteCsvFile(csvPath, headers, data);
 
-                    Console.WriteLine("CSV File created succesfully.");
+                Console.WriteLine("CSV File created succesfully.");
 
-                    using (var reader = new StreamReader(new FileStream(csvPath, FileMode.Open), System.Text.Encoding.UTF8))
-                    using (var csvReader = new CsvReader(reader, CultureInfo.CurrentCulture))
-                    {
-                        var records = csvReader.GetRecords<Product>();
-                        foreach (var record in records)
-                        {
-                            CmbProducts.Items.Add(record.Code);
-                            changeProduct(record);
-                        }
-                    }
-                }
-
-                // Suscribirse al evento SelectedIndexChanged del ComboBox
-                CmbProducts.SelectedIndexChanged += CmbProducts_SelectedIndexChanged;
-
-                modbusServer.Port = 502;
-                modbusServer.Listen();
-                Console.WriteLine("Modbus Server running...");
-
-                // Aquí vamos a agregar todos los formatos
-                // 3x3
-                int[] quadrantsOfinterest = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-                gridTypes.Add(new GridType(1, (3, 3), quadrantsOfinterest));
-                // 5
-                quadrantsOfinterest = new int[] { 1, 3, 5, 7, 9 };
-                gridTypes.Add(new GridType(2, (3, 3), quadrantsOfinterest));
-                // 4x4
-                quadrantsOfinterest = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
-                gridTypes.Add(new GridType(3, (4, 4), quadrantsOfinterest));
-                // 2x2
-                quadrantsOfinterest = new int[] { 1, 2, 3, 4 };
-                gridTypes.Add(new GridType(4, (2, 2), quadrantsOfinterest));
-
-                grid = settings.GridType;
-
-                // Cargamos el GridType inicial
-                foreach (GridType gridT in gridTypes)
+                using (var reader = new StreamReader(new FileStream(csvPath, FileMode.Open), System.Text.Encoding.UTF8))
+                using (var csvReader = new CsvReader(reader, CultureInfo.CurrentCulture))
                 {
-                    if (gridT.Type == grid)
+                    var records = csvReader.GetRecords<Product>();
+                    foreach (var record in records)
                     {
-                        gridType = gridT;
+                        CmbProducts.Items.Add(record.Code);
+                        changeProduct(record);
                     }
                 }
+            }
 
-                sizes.Add("Null");
-                sizes.Add("Normal");
-                sizes.Add("Big");
-                sizes.Add("Small");
-                sizes.Add("Oval");
-                sizes.Add("Oversize");
-                sizes.Add("Shape");
+            // Suscribirse al evento SelectedIndexChanged del ComboBox
+            CmbProducts.SelectedIndexChanged += CmbProducts_SelectedIndexChanged;
 
-                //objeto ROI
-                UserROI.Top = settings.ROI_Top;
-                UserROI.Left = settings.ROI_Left;
-                UserROI.Right = settings.ROI_Right;
-                UserROI.Bottom = settings.ROI_Bottom;
+            modbusServer.Port = 502;
+            modbusServer.Listen();
+            Console.WriteLine("Modbus Server running...");
 
-                inputLeftRoi.Value = UserROI.Left;
-                inputRightRoi.Value = UserROI.Right;
-                inputTopRoi.Value = UserROI.Top;
-                inputBottomRoi.Value = UserROI.Bottom;
+            // Aquí vamos a agregar todos los formatos
+            // 3x3
+            int[] quadrantsOfinterest = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+            gridTypes.Add(new GridType(1, (3, 3), quadrantsOfinterest));
+            // 5
+            quadrantsOfinterest = new int[] { 1, 3, 5, 7, 9 };
+            gridTypes.Add(new GridType(2, (3, 3), quadrantsOfinterest));
+            // 4x4
+            quadrantsOfinterest = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+            gridTypes.Add(new GridType(3, (4, 4), quadrantsOfinterest));
+            // 2x2
+            quadrantsOfinterest = new int[] { 1, 2, 3, 4 };
+            gridTypes.Add(new GridType(4, (2, 2), quadrantsOfinterest));
 
-                maxOvality = settings.maxOvality;
-                maxCompactness = settings.maxCompacity;
-                maxDiameter = (float)settings.maxDiameter;
-                minDiameter = (float)settings.minDiameter;
+            grid = settings.GridType;
 
-                Txt_MaxDiameter.Text = Math.Round(maxDiameter * euFactor, 3).ToString();
-                Txt_MinDiameter.Text = Math.Round(minDiameter * euFactor, 3).ToString();
-                Txt_MaxCompacity.Text = maxCompactness.ToString();
-                Txt_MaxOvality.Text = maxOvality.ToString();
+            // Cargamos el GridType inicial
+            foreach (GridType gridT in gridTypes)
+            {
+                if (gridT.Type == grid)
+                {
+                    gridType = gridT;
+                }
+            }
 
-                // txtCalibrationTarget.Text = calibrationTarget.ToString();
+            sizes.Add("Null");
+            sizes.Add("Normal");
+            sizes.Add("Big");
+            sizes.Add("Small");
+            sizes.Add("Oval");
+            sizes.Add("Oversize");
+            sizes.Add("Shape");
 
-                //InitializeInterface();
-                // Suscribir al evento KeyPress del TextBox
-                Txt_Threshold.KeyPress += Txt_Threshold_KeyPress;
-                Txt_MaxDiameter.KeyPress += Txt_MaxDiameter_KeyPress;
-                Txt_MinDiameter.KeyPress += Txt_MinDiameter_KeyPress;
-                Txt_MaxCompacity.KeyPress += Txt_MaxCompacity_KeyPress;
-                Txt_MaxOvality.KeyPress += Txt_MaxOvality_KeyPress;
-                
+            //objeto ROI
+            UserROI.Top = settings.ROI_Top;
+            UserROI.Left = settings.ROI_Left;
+            UserROI.Right = settings.ROI_Right;
+            UserROI.Bottom = settings.ROI_Bottom;
 
-                TXT_ROI_Left.KeyPress += Txt_UserROILeft_KeyPress;
-                TXT_ROI_Right.KeyPress += Txt_UserROIRight_KeyPress;
-                TXT_ROI_Top.KeyPress += Txt_UserROITop_KeyPress;
-                TXT_ROI_Bottom.KeyPress += Txt_UserROIBottom_KeyPress;
+            maxOvality = settings.maxOvality;
+            maxCompactness = settings.maxCompacity;
+            maxDiameter = (float)settings.maxDiameter;
+            minDiameter = (float)settings.minDiameter;
 
-                inputLeftRoi.ValueChanged += inputLeftRoi_ValueChanged;
-                inputRightRoi.ValueChanged += inputRightRoi_ValueChanged;
-                inputTopRoi.ValueChanged += inputTopRoi_ValueChanged;
-                inputBottomRoi.ValueChanged += inputBottomRoi_ValueChanged;
+            Txt_MaxDiameter.Text = Math.Round(maxDiameter * euFactor, 3).ToString();
+            Txt_MinDiameter.Text = Math.Round(minDiameter * euFactor, 3).ToString();
+            Txt_MaxCompacity.Text = maxCompactness.ToString();
+            Txt_MaxOvality.Text = maxOvality.ToString();
 
-                // Suscribir la función al evento SelectedIndexChanged del ComboBox
+            TXT_ROI_Left.Text = settings.ROI_Left.ToString();
 
-                // Crear un TabControl
-                TabControl tabControl1 = new TabControl();
-                tabControl1.Location = new Point(10, 10);
-                tabControl1.Size = new Size(680, 520);
-                this.Controls.Add(tabControl1);
+            TXT_ROI_Left.KeyPress += Txt_UserROILeft_KeyPress;
+            TXT_ROI_Right.KeyPress += Txt_UserROIRight_KeyPress;
+            TXT_ROI_Top.KeyPress += Txt_UserROITop_KeyPress;
+            TXT_ROI_Bottom.KeyPress += Txt_UserROIBottom_KeyPress;
 
-                // Agregar m_ImageBox al TabPage
-                this.m_ImageBox = new DALSA.SaperaLT.SapClassGui.ImageBox();
-                this.m_ImageBox.Location = new Point(OffsetLeft, OffsetTop);
-                this.m_ImageBox.Name = "m_ImageBox";
-                this.m_ImageBox.PixelValueDisplay = this.PixelDataValue;
-                this.m_ImageBox.Size = new Size(640, 480);
-                this.m_ImageBox.SliderEnable = true;
-                this.m_ImageBox.SliderMaximum = 10;
-                this.m_ImageBox.SliderMinimum = 0;
-                this.m_ImageBox.SliderValue = 0;
-                this.m_ImageBox.SliderVisible = false;
-                this.m_ImageBox.TabIndex = 12;
-                this.m_ImageBox.TrackerEnable = false;
-                this.m_ImageBox.View = null;
-                imagePage.Controls.Add(this.m_ImageBox);
+            // Suscribir la función al evento SelectedIndexChanged del ComboBox
+
+            // Crear un TabControl
+            TabControl tabControl1 = new TabControl();
+            tabControl1.Location = new Point(10, 10);
+            tabControl1.Size = new Size(680, 520);
+            this.Controls.Add(tabControl1);
+
+            // Agregar m_ImageBox al TabPage
+            this.m_ImageBox = new DALSA.SaperaLT.SapClassGui.ImageBox();
+            this.m_ImageBox.Location = new Point(OffsetLeft, OffsetTop);
+            this.m_ImageBox.Name = "m_ImageBox";
+            this.m_ImageBox.PixelValueDisplay = this.PixelDataValue;
+            this.m_ImageBox.Size = new Size(640, 480);
+            this.m_ImageBox.SliderEnable = true;
+            this.m_ImageBox.SliderMaximum = 10;
+            this.m_ImageBox.SliderMinimum = 0;
+            this.m_ImageBox.SliderValue = 0;
+            this.m_ImageBox.SliderVisible = false;
+            this.m_ImageBox.TabIndex = 12;
+            this.m_ImageBox.TrackerEnable = false;
+            this.m_ImageBox.View = null;
+            imagePage.Controls.Add(this.m_ImageBox);
 
 
 
-                if (!CreateNewObjects(acConfigDlg, false))
-                    this.Close();
+            AcqConfigDlg acConfigDlg = new AcqConfigDlg(null, "", AcqConfigDlg.ServerCategory.ServerAcqDevice, true);
+            if (acConfigDlg.ShowDialog() == DialogResult.OK)
+            {
 
-                // Cargamos la configuracion por default
-                m_AcqDevice.LoadFeatures(configPath + "\\TriggerON.ccf");
+                cameraActive = true;
 
-                // triggerPLC = true;
+                //originalBox.MouseMove += originalBox_MouseMove;
+                //processROIBox.MouseMove += processBox_MouseMove;
 
                 if (triggerPLC)
                 {
@@ -424,20 +401,50 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     viewModeBtn.Enabled = false;
                     processImageBtn.Enabled = false;
                     processImageBtn.Text = "PROCESSING";
-
                 }
+
+                if (!CreateNewObjects(acConfigDlg, false))
+                    this.Close();
+
+                // Cargamos la configuracion por default
+                m_AcqDevice.LoadFeatures(configPath + "\\TriggerON.ccf");
+
+                inputLeftRoi.Value = UserROI.Left;
+                inputRightRoi.Value = UserROI.Right;
+                inputTopRoi.Value = UserROI.Top;
+                inputBottomRoi.Value = UserROI.Bottom;
             }
             else
             {
-                MessageBox.Show("No cameras found or selected");
-                this.Close();
+                MessageBox.Show("Not camera found or selected, working with images pre-loaded");
+
+                mode = 0;
+                triggerPLC = false;
+
+                cameraImage.Enabled = false;
+                btnLoadImage.Visible = true;
+                labelPath.Visible = true;
+                simulateImagePath = userDir + "\\imagenOrigen.bmp";
+                txtSimulatePath.Text = simulateImagePath;
+
+                viewModeBtn.Enabled = false;
+                triggerModeBtn.Enabled = false;
+                triggerModeBtn.BackColor = Color.DarkGray;
+                viewModeBtn.BackColor = Color.DarkGray;
+
+                virtualTriggerBtn.BackColor = Color.Silver;
+                processImageBtn.BackColor = Color.Silver;
+
+                // Suscribir al evento SelectedIndexChanged del TabControl
+                //mainTabs.SelectedIndexChanged += TabControl2_SelectedIndexChanged;
+
+                inputLeftRoi.Value = UserROI.Left;
+                inputRightRoi.Value = UserROI.Right;
+                inputTopRoi.Value = UserROI.Top;
+                inputBottomRoi.Value = UserROI.Bottom;
             }
         }
 
-        private void ModbusServerIPTxt_KeyPress(object sender, KeyPressEventArgs e)
-        {
-
-        }
 
         // Clase de los productos
         public class Product
@@ -676,7 +683,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
             else
             {
-                originalImage = new Bitmap(userDir + "\\imagenOrigen.bmp");
+                if (File.Exists(simulateImagePath))
+                {
+                    originalImage = new Bitmap(simulateImagePath);
+                }
+                else
+                {
+                    return;
+                }
+                
             }
             // Convertir el objeto Bitmap a una matriz de Emgu CV (Image<Bgr, byte>)
             Image<Bgr, byte> tempImage = originalImage.ToImage<Bgr, byte>();
@@ -699,7 +714,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             originalBox.BringToFront();
             processROIBox.SendToBack();
             m_ImageBox.SendToBack();
-            m_View.Hide();
+            //m_View.Hide();
 
             Quadrants = new List<Quadrant>();
 
@@ -2520,7 +2535,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             int n = 0;
 
             bgArea = new List<List<Point>>();
-            bgArea = FindBackground(image, backgroundColor, 1, maxArea);
+            bgArea = FindBackground(image, backgroundColor, 0, maxArea);
 
             foreach (List<Point> contour in bgArea)
             {
@@ -3290,7 +3305,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         }
 
         // Modificar el threshold manualmente
-        private void Txt_Threshold_KeyPress(object sender, KeyPressEventArgs e)
+        public void Txt_Threshold_KeyPress(object sender, KeyPressEventArgs e)
         {
             // Verificar si la tecla presionada es "Enter" (código ASCII 13)
             if (e.KeyChar == (char)Keys.Enter)
@@ -3478,16 +3493,30 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void virtualTriggerBtn_Click(object sender, EventArgs e)
         {
-            processROIBox.Visible = false;
-
-            AbortDlg abort = new AbortDlg(m_Xfer);
-
-            if (m_Xfer.Snap())
+            if (cameraActive)
             {
-                if (abort.ShowDialog() != DialogResult.OK)
-                    m_Xfer.Abort();
-                UpdateControls();
+                processROIBox.Visible = false;
+
+                AbortDlg abort = new AbortDlg(m_Xfer);
+
+                if (m_Xfer.Snap())
+                {
+                    if (abort.ShowDialog() != DialogResult.OK)
+                        m_Xfer.Abort();
+                    UpdateControls();
+                }
             }
+            else
+            {
+                captureWithoutCamera();
+            }
+
+        }
+
+        private void captureWithoutCamera()
+        {
+
+            preProcess();
 
         }
 
@@ -4037,10 +4066,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             changeProductSetPoint();
         }
 
-        private void Txt_MaxCompacity_TextChanged(object sender, EventArgs e)
-        {
-
-        }
 
         private void button1_Click_1(object sender, EventArgs e)
         {
@@ -4056,10 +4081,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             updateUnits("inch");
         }
 
-        private void progressBar1_Click(object sender, EventArgs e)
-        {
-
-        }
 
         private void inputLeftRoi_ValueChanged(object sender, EventArgs e)
         {
@@ -4173,5 +4194,64 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
 
         }
+
+        private void folderBrowserDialog1_HelpRequest(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnLoadImage_Click(object sender, EventArgs e)
+        {
+            // Crear un OpenFileDialog
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+
+            // Configurar el OpenFileDialog
+            openFileDialog.Title = "Selecciona una imagen";
+            openFileDialog.Filter = "Archivos de Imagen|*.jpg;*.jpeg;*.png;*.gif;*.bmp";
+
+            // Mostrar el diálogo
+            DialogResult result = openFileDialog.ShowDialog();
+
+            // Si el usuario selecciona un archivo
+            if (result == DialogResult.OK)
+            {
+                // Obtener la ruta del archivo seleccionado y asignarla al TextBox
+                simulateImagePath = openFileDialog.FileName;
+                txtSimulatePath.Text = simulateImagePath;
+            }
+        }
+
+        private void btnIncrementLeftRoi_Click(object sender, EventArgs e)
+        {
+            int actual = int.Parse(TXT_ROI_Left.Text);
+            TXT_ROI_Left.Text = (actual + 1).ToString();
+        }
+
+        private void btnDecrementLeftRoi_Click(object sender, EventArgs e)
+        {
+            int actual = int.Parse(TXT_ROI_Left.Text);
+            TXT_ROI_Left.Text = (actual - 1).ToString();
+        }
+
+        private void TXT_ROI_Right_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void TXT_ROI_Left_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void TXT_ROI_Top_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void TXT_ROI_Bottom_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
     }
 }
