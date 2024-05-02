@@ -559,6 +559,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         // Iniciar el cronómetro
                         stopwatch.Start();
 
+                        long temperature;
+                        bool succes = m_AcqDevice.GetFeatureValue(49, out temperature);
+                        if (succes)
+                        {
+                            Console.WriteLine(temperature);
+                        }
+
+
                         if (operationMode == 2)
                         {
                             requestModbusData();
@@ -668,8 +676,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             processImageBtn.Enabled = true;
 
-            //originalImage = saveImage();
-            originalImage = new Bitmap(userDir + "\\imagenOrigen.bmp");
+            originalImage = saveImage();
+            //originalImage = new Bitmap(userDir + "\\imagenOrigen.bmp");
 
             // Convertir el objeto Bitmap a una matriz de Emgu CV (Image<Bgr, byte>)
             Image<Bgr, byte> tempImage = originalImage.ToImage<Bgr, byte>();
@@ -2513,7 +2521,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             int n = 0;
 
             bgArea = new List<List<Point>>();
-            bgArea = FindBackground(image, backgroundColor, 1, maxArea);
+            bgArea = FindBackground(image, backgroundColor, 0, maxArea);
 
             foreach (List<Point> contour in bgArea)
             {
