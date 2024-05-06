@@ -156,6 +156,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Label28 = new System.Windows.Forms.Label();
             this.Cmd_Save = new System.Windows.Forms.Button();
             this.Chk_Digital_Knife = new System.Windows.Forms.CheckBox();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.deviceTempLabel = new System.Windows.Forms.ToolStripLabel();
+            this.deviceTemp = new System.Windows.Forms.ToolStripLabel();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+            this.sensorTempLabel = new System.Windows.Forms.ToolStripLabel();
+            this.sensorTemp = new System.Windows.Forms.ToolStripLabel();
             this.toolStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.GroupBox1.SuspendLayout();
@@ -198,7 +204,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.PixelDataValue,
             this.toolStripSeparator2,
             this.timeElapsedLabel,
-            this.timeElapsed});
+            this.timeElapsed,
+            this.toolStripSeparator3,
+            this.deviceTempLabel,
+            this.deviceTemp,
+            this.toolStripSeparator4,
+            this.sensorTempLabel,
+            this.sensorTemp});
             this.toolStrip1.Location = new System.Drawing.Point(0, 724);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
@@ -343,7 +355,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // virtualTriggerBtn
             // 
             this.virtualTriggerBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.virtualTriggerBtn.BackColor = System.Drawing.Color.DarkGray;
+            this.virtualTriggerBtn.BackColor = System.Drawing.Color.Silver;
             this.virtualTriggerBtn.Location = new System.Drawing.Point(218, 20);
             this.virtualTriggerBtn.Name = "virtualTriggerBtn";
             this.virtualTriggerBtn.Size = new System.Drawing.Size(75, 55);
@@ -354,7 +366,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             // processImageBtn
             // 
-            this.processImageBtn.BackColor = System.Drawing.Color.DarkGray;
+            this.processImageBtn.BackColor = System.Drawing.Color.Silver;
             this.processImageBtn.Location = new System.Drawing.Point(304, 20);
             this.processImageBtn.Name = "processImageBtn";
             this.processImageBtn.Size = new System.Drawing.Size(90, 55);
@@ -378,7 +390,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // viewModeBtn
             // 
             this.viewModeBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.viewModeBtn.BackColor = System.Drawing.Color.DarkGray;
+            this.viewModeBtn.BackColor = System.Drawing.Color.Silver;
             this.viewModeBtn.Location = new System.Drawing.Point(9, 20);
             this.viewModeBtn.Name = "viewModeBtn";
             this.viewModeBtn.RightToLeft = System.Windows.Forms.RightToLeft.No;
@@ -515,6 +527,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Txt_MinDiameter.Size = new System.Drawing.Size(90, 40);
             this.Txt_MinDiameter.TabIndex = 91;
             this.Txt_MinDiameter.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.Txt_MinDiameter.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Txt_MinDiameter_KeyPress);
             // 
             // Label53
             // 
@@ -556,6 +569,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Txt_MaxDiameter.Size = new System.Drawing.Size(92, 40);
             this.Txt_MaxDiameter.TabIndex = 87;
             this.Txt_MaxDiameter.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.Txt_MaxDiameter.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Txt_MaxDiameter_KeyPress);
             // 
             // GroupSelectGrid
             // 
@@ -666,7 +680,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             // dataGridView1
             // 
-            this.dataGridView1.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.dataGridView1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.dataGridView1.BackgroundColor = System.Drawing.SystemColors.ControlDark;
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridView1.Location = new System.Drawing.Point(3, 3);
@@ -918,12 +933,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Txt_Threshold.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.Txt_Threshold.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.Txt_Threshold.Font = new System.Drawing.Font("Microsoft Sans Serif", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Txt_Threshold.Location = new System.Drawing.Point(181, 20);
+            this.Txt_Threshold.Location = new System.Drawing.Point(140, 20);
             this.Txt_Threshold.Name = "Txt_Threshold";
-            this.Txt_Threshold.Size = new System.Drawing.Size(38, 40);
+            this.Txt_Threshold.Size = new System.Drawing.Size(79, 40);
             this.Txt_Threshold.TabIndex = 12;
             this.Txt_Threshold.Text = "0";
             this.Txt_Threshold.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.Txt_Threshold.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Txt_Threshold_KeyPress);
             // 
             // GroupBox11
             // 
@@ -1257,7 +1273,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.tablePage.Location = new System.Drawing.Point(4, 44);
             this.tablePage.Name = "tablePage";
             this.tablePage.Padding = new System.Windows.Forms.Padding(3);
-            this.tablePage.Size = new System.Drawing.Size(1192, 707);
+            this.tablePage.Size = new System.Drawing.Size(1192, 677);
             this.tablePage.TabIndex = 1;
             this.tablePage.Text = "Table";
             this.tablePage.UseVisualStyleBackColor = true;
@@ -1275,7 +1291,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.productsPage.Location = new System.Drawing.Point(4, 44);
             this.productsPage.Name = "productsPage";
             this.productsPage.Padding = new System.Windows.Forms.Padding(3);
-            this.productsPage.Size = new System.Drawing.Size(1192, 707);
+            this.productsPage.Size = new System.Drawing.Size(1192, 677);
             this.productsPage.TabIndex = 2;
             this.productsPage.Text = "Products";
             this.productsPage.UseVisualStyleBackColor = true;
@@ -1587,6 +1603,38 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Chk_Digital_Knife.Text = "Digital Knife";
             this.Chk_Digital_Knife.UseVisualStyleBackColor = true;
             // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
+            // 
+            // deviceTempLabel
+            // 
+            this.deviceTempLabel.Name = "deviceTempLabel";
+            this.deviceTempLabel.Size = new System.Drawing.Size(104, 22);
+            this.deviceTempLabel.Text = "Device Temp. (°C):";
+            // 
+            // deviceTemp
+            // 
+            this.deviceTemp.Name = "deviceTemp";
+            this.deviceTemp.Size = new System.Drawing.Size(0, 22);
+            // 
+            // toolStripSeparator4
+            // 
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(6, 25);
+            // 
+            // sensorTempLabel
+            // 
+            this.sensorTempLabel.Name = "sensorTempLabel";
+            this.sensorTempLabel.Size = new System.Drawing.Size(104, 22);
+            this.sensorTempLabel.Text = "Sensor Temp. (°C):";
+            // 
+            // sensorTemp
+            // 
+            this.sensorTemp.Name = "sensorTemp";
+            this.sensorTemp.Size = new System.Drawing.Size(0, 22);
+            // 
             // GigECameraDemoDlg
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1788,6 +1836,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private ToolStripSeparator toolStripSeparator2;
         private ToolStripLabel timeElapsedLabel;
         private ToolStripLabel timeElapsed;
+        private ToolStripSeparator toolStripSeparator3;
+        private ToolStripLabel deviceTempLabel;
+        private ToolStripLabel deviceTemp;
+        private ToolStripSeparator toolStripSeparator4;
+        private ToolStripLabel sensorTempLabel;
+        private ToolStripLabel sensorTemp;
     }
 }
 
