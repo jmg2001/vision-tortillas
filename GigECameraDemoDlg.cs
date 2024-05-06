@@ -591,6 +591,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         // Iniciar el cronómetro
                         stopwatch.Start();
 
+                        if (operationMode == 2)
+                        {
+                            requestModbusData();
+                        }
+
                         updateTemperatures();
 
                         if (!originalImageIsDisposed)
@@ -791,14 +796,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             //centralSector.Save(imagesPath + "centralSector.bmp");
 
-            var (perimeters, centers, areas) = FindContoursWithEdgesAndCenters(roiImage);
+            var (contours, centers, areas, perimeters) = FindContoursWithEdgesAndCenters(roiImage);
 
             Point centro = new Point();
 
             for (int i = 0; i < areas.Count; i++)
             {
                 int area = (int)areas[i];
-                //int perimeter = perimeters[i].Count;
+                int perimeter = (int)perimeters[i];
                 centro = centers[i];
 
                 int sector = CalculateSector(centro, roiImage.Width, roiImage.Height, 3, 3) + 1;
@@ -2594,7 +2599,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             image.Save(imagesPath + "roi.bmp");
 
-            var (perimeters,centers, areas) = FindContoursWithEdgesAndCenters(image);
+            var (contours ,centers, areas, perimeters) = FindContoursWithEdgesAndCenters(image);
 
             //image = ConvertToCompatibleFormat(image);
 
@@ -2608,19 +2613,19 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             double avgD = 0;
             int n = 0;
 
-            bgArea = new List<List<Point>>();
-            bgArea = FindBackground(image.ToBitmap(), backgroundColor, 0, 1000);
+            //bgArea = new List<List<Point>>();
+            //bgArea = FindBackground(image.ToBitmap(), backgroundColor, 0, 1000);
 
-            if (perimeters.Size > 0)
-            {
-                foreach (List<Point> contour in bgArea)
-                {
-                    foreach (Point point in contour)
-                    {
-                        image.ToBitmap().SetPixel(point.X, point.Y, Color.Aqua);
-                    }
-                }
-            }
+            //if (contours.Size > 0)
+            //{
+            //    foreach (List<Point> contour in bgArea)
+            //    {
+            //        foreach (Point point in contour)
+            //        {
+            //            image.ToBitmap().SetPixel(point.X, point.Y, Color.Aqua);
+            //        }
+            //    }
+            //}
             
 
             List<(int,bool)> drawFlags = new List<(int, bool)>();
@@ -2652,7 +2657,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     }
 
                     double area = areas[i];
-                    double perimeter = perimeters[i].Size;
+                    double perimeter = perimeters[i];
 
                     double tempFactor = euFactor;
 
@@ -2680,7 +2685,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     // Agregamos los datos a la tabla
                     dataTable.Rows.Add(sector, area, Math.Round(diametroIA * tempFactor, 3), Math.Round(diameterTriangles * tempFactor, 3), Math.Round(maxDiameter * tempFactor, 3), Math.Round(minDiameter * tempFactor, 3), Math.Round(compactness, 3), Math.Round(ovalidad, 3));
 
-                    Blob blob = new Blob(area, perimeter, perimeters[i], diameterTriangles, diametroIA, centro, maxDiameter, minDiameter, sector, compactness, size, ovalidad);
+                    Blob blob = new Blob(area, perimeter, contours[i], diameterTriangles, diametroIA, centro, maxDiameter, minDiameter, sector, compactness, size, ovalidad);
 
                     // Agregamos el elemento a la lista
                     Blobs.Add(blob);
@@ -2724,7 +2729,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 }
             }
 
-            drawPerimeters(image, perimeters,1);
+            drawPerimeters(image, contours, 1);
 
             try
             {
@@ -2873,7 +2878,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         // Función para dibujar un punto con un grosor dado
         void drawPerimeters(Mat image, VectorOfVectorOfPoint perimeter, int thickness)
         {
-            CvInvoke.DrawContours(image, perimeter, -1, new MCvScalar(0, 255, 0), thickness);
+            CvInvoke.DrawContours(image, perimeter, -1, new MCvScalar(255, 255, 0), thickness);
         }
 
         private double calculateOvality(double maxDiameter, double minDiameter)
@@ -2956,7 +2961,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             int xOffset = 5;
             int yOffset = 5;
 
-            CvInvoke.PutText(image, (sector + 1).ToString(), new Point(center.X + xOffset, center.Y + yOffset), FontFace.HersheySimplex, 0.7, new MCvScalar(255, 255, 0), 2);
+            CvInvoke.PutText(image, (sector + 1).ToString(), new Point(center.X + xOffset, center.Y + yOffset), FontFace.HersheySimplex, 0.7, new MCvScalar(0, 0, 255), 2);
 
         }
 
@@ -3577,32 +3582,70 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             txtDiameters = !txtDiameters;
         }
 
-        private (VectorOfVectorOfPoint, List<Point>, List<double>) FindContoursWithEdgesAndCenters(Mat image)
+        private (VectorOfVectorOfPoint, List<Point>, List<double>, List<double>) FindContoursWithEdgesAndCenters(Mat image)
         {
             Mat grayImage = new Mat();
-            // Cargar la imagen
             CvInvoke.CvtColor(image, grayImage, ColorConversion.Bgr2Gray);
+
             // Encontrar contornos
-            image.Save("hola.jpg");
             VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint();
             VectorOfVectorOfPoint filteredContours = new VectorOfVectorOfPoint();
-            CvInvoke.FindContours(grayImage, contours, null, RetrType.List, ChainApproxMethod.ChainApproxSimple);
+            Mat jerarquia = new Mat();
 
-            // Filtrar contornos por área mínima y máxima, y calcular centroides
             List<Point> centroids = new List<Point>();
-            //double minArea = 3000; // Área mínima deseada
-            //double maxArea = 8000; // Área máxima deseada
-
             List<double> areas = new List<double>();
+            List<double> perimeters = new List<double>();
+
+            CvInvoke.FindContours(grayImage, contours, jerarquia, RetrType.Tree, ChainApproxMethod.ChainApproxSimple);
+
+
+            // Coloreamos todos los pixeles de fondo
+            Array array = jerarquia.GetData();
+            for (int i = 0; i < contours.Size; i++)
+            {
+                // Si el contorno tiene un contorno padre
+                int a = (int)array.GetValue(0, i, 3);
+                int area = (int)CvInvoke.ContourArea(contours[i]);
+                //MessageBox.Show(array.GetValue(0,i,3).ToString());
+                if (a != -1 && area > 0 && area < minArea)
+                {
+                    // Dibujar el contorno interno en verde
+                    CvInvoke.DrawContours(image, contours, i, new MCvScalar(255, 255, 0), -1);
+                }
+            }
+
+            
 
             for (int i = 0; i < contours.Size; i++)
             {
                 double area = CvInvoke.ContourArea(contours[i]);
                 if (area >= minArea && area <= maxArea)
                 {
+                    double perimeter = CvInvoke.ArcLength(contours[i], true);
+                    int indicePrimerHijo = Convert.ToInt32(array.GetValue(0, i, 2));
+                    if (indicePrimerHijo != -1)
+                    {
+                        // El contorno tiene al menos un hijo
+                        // Iterar sobre los hijos y hacer lo que necesites
+                        int indiceHijoActual = indicePrimerHijo;
+                        do
+                        {
+                            // Acceder al contorno hijo en el vector de contornos
+                            VectorOfPoint contornoHijo = contours[indiceHijoActual];
+
+                            area -= CvInvoke.ContourArea(contornoHijo);
+                            perimeter += CvInvoke.ArcLength(contornoHijo, true);
+
+                            // Obtener el índice del siguiente hijo del contorno padre actual
+                            indiceHijoActual = Convert.ToInt32(array.GetValue(0, indiceHijoActual, 0));
+
+                        } while (indiceHijoActual != -1); // Continuar mientras haya más hijos
+                    }
+
                     areas.Add(area);
                     filteredContours.Push(contours[i]);
-                    // Calcular momentos
+                    perimeters.Add(perimeter);
+
                     var moments = CvInvoke.Moments(contours[i]);
                     if (moments.M00 != 0)
                     {
@@ -3614,7 +3657,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 }
             }
 
-            return (filteredContours, centroids, areas);
+            return (filteredContours, centroids, areas, perimeters);
         }
 
 
