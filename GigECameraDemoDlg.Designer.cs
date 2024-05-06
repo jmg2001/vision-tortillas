@@ -50,6 +50,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.sensorTempLabel = new System.Windows.Forms.ToolStripLabel();
             this.sensorTemp = new System.Windows.Forms.ToolStripLabel();
+            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
+            this.framesProcessedLabel = new System.Windows.Forms.ToolStripLabel();
+            this.framesProcessed = new System.Windows.Forms.ToolStripLabel();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.videoSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loginToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -166,9 +169,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Label28 = new System.Windows.Forms.Label();
             this.Cmd_Save = new System.Windows.Forms.Button();
             this.Chk_Digital_Knife = new System.Windows.Forms.CheckBox();
-            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
-            this.framesProcessedLabel = new System.Windows.Forms.ToolStripLabel();
-            this.framesProcessed = new System.Windows.Forms.ToolStripLabel();
             this.toolStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.GroupBox1.SuspendLayout();
@@ -314,6 +314,22 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             this.sensorTemp.Name = "sensorTemp";
             this.sensorTemp.Size = new System.Drawing.Size(0, 22);
+            // 
+            // toolStripSeparator5
+            // 
+            this.toolStripSeparator5.Name = "toolStripSeparator5";
+            this.toolStripSeparator5.Size = new System.Drawing.Size(6, 25);
+            // 
+            // framesProcessedLabel
+            // 
+            this.framesProcessedLabel.Name = "framesProcessedLabel";
+            this.framesProcessedLabel.Size = new System.Drawing.Size(104, 22);
+            this.framesProcessedLabel.Text = "Frames Processed:";
+            // 
+            // framesProcessed
+            // 
+            this.framesProcessed.Name = "framesProcessed";
+            this.framesProcessed.Size = new System.Drawing.Size(0, 22);
             // 
             // menuStrip1
             // 
@@ -1089,6 +1105,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Chk_Threshold_Mode.TabIndex = 13;
             this.Chk_Threshold_Mode.Text = "Automatic";
             this.Chk_Threshold_Mode.UseVisualStyleBackColor = true;
+            this.Chk_Threshold_Mode.CheckedChanged += new System.EventHandler(this.Chk_Threshold_Mode_CheckedChanged);
             // 
             // Txt_Threshold
             // 
@@ -1692,22 +1709,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Chk_Digital_Knife.TabIndex = 95;
             this.Chk_Digital_Knife.Text = "Digital Knife";
             this.Chk_Digital_Knife.UseVisualStyleBackColor = true;
-            // 
-            // toolStripSeparator5
-            // 
-            this.toolStripSeparator5.Name = "toolStripSeparator5";
-            this.toolStripSeparator5.Size = new System.Drawing.Size(6, 25);
-            // 
-            // framesProcessedLabel
-            // 
-            this.framesProcessedLabel.Name = "framesProcessedLabel";
-            this.framesProcessedLabel.Size = new System.Drawing.Size(104, 22);
-            this.framesProcessedLabel.Text = "Frames Processed:";
-            // 
-            // framesProcessed
-            // 
-            this.framesProcessed.Name = "framesProcessed";
-            this.framesProcessed.Size = new System.Drawing.Size(0, 22);
             // 
             // GigECameraDemoDlg
             // 

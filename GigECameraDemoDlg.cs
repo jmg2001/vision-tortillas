@@ -446,22 +446,22 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
-        private void changeTriggerMode(string mode)
+        private void changeTriggerMode(string modeStr)
         {
             int param = -1;
-            switch (mode)
+            switch (modeStr)
             {
                 case "PLC":
-                    param = 1;
-                    break;
-                case "SOFTWARE":
                     param = 0;
                     break;
+                case "SOFTWARE":
+                    param = 3;
+                    break;
             }
-            bool succes = m_AcqDevice.SetFeatureValue("TriggerMode", param);
+            bool succes = m_AcqDevice.SetFeatureValue("TriggerSource", param);
             if (succes)
             {
-                Console.WriteLine("Trigger " + mode);
+                Console.WriteLine("Trigger " + modeStr);
             }
         }
 
@@ -651,8 +651,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 deviceTemperature = Math.Round(deviceTemperature, 2);
                 deviceTemp.Text = deviceTemperature.ToString();
             }
-            //succes = m_AcqDevice.SetFeatureValue("DeviceTemperatureSelector", 2);
-            if (succes) succes = m_AcqDevice.GetFeatureValue("sensorTemperatureRaw", out sensorTemperature);
+            succes = m_AcqDevice.SetFeatureValue("DeviceTemperatureSelector", 2);
+            if (succes) succes = m_AcqDevice.GetFeatureValue("DeviceTemperature", out sensorTemperature);
             if (succes)
             {
                 sensorTemperature = Math.Round(sensorTemperature, 2);
@@ -757,116 +757,116 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void calibrate()
         {
-            //// Cambiamos al modo de grid 3x3 para calibrar con la del centro
-            //updateGridType(1);
+            // Cambiamos al modo de grid 3x3 para calibrar con la del centro
+            updateGridType(1);
 
-            //Mat binarizedImage = new Mat();
+            Mat binarizedImage = new Mat();
 
-            //// Se binariza la imagen
-            //try
-            //{
-            //    //binarizedImage = binarizeImage(originalImage, 0);
-            //    binarizedImage = binarizeImage(originalImageCV, 0);
-            //}
-            //catch
-            //{
-            //    Console.WriteLine("Binarization problem");
-            //    return;
-            //}
+            // Se binariza la imagen
+            try
+            {
+                //binarizedImage = binarizeImage(originalImage, 0);
+                binarizedImage = binarizeImage(originalImageCV, 0);
+            }
+            catch
+            {
+                Console.WriteLine("Binarization problem");
+                return;
+            }
 
 
-            ////// Se extrae el ROI de la imagen binarizada
-            //Mat roiImage = extractROI(binarizedImage);
+            //// Se extrae el ROI de la imagen binarizada
+            Mat roiImage = extractROI(binarizedImage);
 
-            //int sectorSel = 5;
+            int sectorSel = 5;
 
-            //// Se extrae el sector central
-            //Bitmap centralSector = extractSector(roiImage.ToBitmap(), sectorSel);
+            // Se extrae el sector central
+            Bitmap centralSector = extractSector(roiImage.ToBitmap(), sectorSel);
 
-            //float diametroIA = 0;
-            ////double diameter = 0;
-            ////double maxD = 0;
-            ////double minD = 0;
-            //bool calibrationValidate = false;
+            float diametroIA = 0;
+            //double diameter = 0;
+            //double maxD = 0;
+            //double minD = 0;
+            bool calibrationValidate = false;
 
             //centralSector.Save(imagesPath + "centralSector.bmp");
 
-            //var (areas, centers, perimeters) = FindContoursWithEdgesAndCenters(roiImage.ToBitmap(), minArea, maxArea, tortillaColor);
+            var (perimeters, centers, areas) = FindContoursWithEdgesAndCenters(roiImage);
 
-            //Point centro = new Point();
+            Point centro = new Point();
 
-            //for (int i = 0; i < areas.Count; i++)
-            //{
-            //    int area = areas[i].Count;
-            //    //int perimeter = perimeters[i].Count;
-            //    centro = centers[i];
+            for (int i = 0; i < areas.Count; i++)
+            {
+                int area = (int)areas[i];
+                //int perimeter = perimeters[i].Count;
+                centro = centers[i];
 
-            //    int sector = CalculateSector(centro, roiImage.Width, roiImage.Height, 3, 3) + 1;
+                int sector = CalculateSector(centro, roiImage.Width, roiImage.Height, 3, 3) + 1;
 
-            //    if (sector == sectorSel)
-            //    {
-            //        if (itsInCenter(centralSector, centro, 10))
-            //        {
-            //            diametroIA = (float)CalculateDiameterFromArea(area);
+                if (sector == sectorSel)
+                {
+                    if (itsInCenter(centralSector, centro, 10))
+                    {
+                        diametroIA = (float)CalculateDiameterFromArea(area);
 
-            //            // (diameter, maxD, minD) = calculateAndDrawDiameterTrianglesAlghoritm(centro, roiImage, sector, false);
+                        // (diameter, maxD, minD) = calculateAndDrawDiameterTrianglesAlghoritm(centro, roiImage, sector, false);
 
-            //            calibrationValidate = true;
-            //            break;
-            //        }
-            //    }
-            //}
+                        calibrationValidate = true;
+                        break;
+                    }
+                }
+            }
 
-            //// Obtener las coordenadas del centro de la imagen
-            //int centroX = originalImage.Width / 2;
-            //int centroY = originalImage.Height / 2;
+            // Obtener las coordenadas del centro de la imagen
+            int centroX = originalImage.Width / 2;
+            int centroY = originalImage.Height / 2;
 
-            //if (calibrationValidate)
-            //{
-            //    double tempFactor = targetCalibrationSize / diametroIA; // unit/pixels
-            //                                                                             // Mostrar un MessageBox con un mensaje y botones de opción
-            //    DialogResult result = MessageBox.Show($"A factor of {tempFactor} was obtained. Do you want to continue?", "Warning", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
+            if (calibrationValidate)
+            {
+                double tempFactor = targetCalibrationSize / diametroIA; // unit/pixels
+                                                                        // Mostrar un MessageBox con un mensaje y botones de opción
+                DialogResult result = MessageBox.Show($"A factor of {tempFactor} was obtained. Do you want to continue?", "Warning", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
 
-            //    // Verificar la opción seleccionada por el usuario
-            //    if (result == DialogResult.OK)
-            //    {
-            //        // Si el usuario elige "Sí", continuar con la acción deseada
-            //        // Agrega aquí el código que deseas ejecutar después de que el usuario confirme
-            //        euFactor = tempFactor;
-            //        settings.EUFactor = euFactor;
-            //        euFactorTxt.Text = Math.Round(euFactor, 3).ToString();
-            //        maxDiameter = double.Parse(Txt_MaxDiameter.Text) / euFactor;
-            //        minDiameter = double.Parse(Txt_MinDiameter.Text) / euFactor;
-            //        settings.maxDiameter = maxDiameter;
-            //        settings.minDiameter = minDiameter;
+                // Verificar la opción seleccionada por el usuario
+                if (result == DialogResult.OK)
+                {
+                    // Si el usuario elige "Sí", continuar con la acción deseada
+                    // Agrega aquí el código que deseas ejecutar después de que el usuario confirme
+                    euFactor = tempFactor;
+                    settings.EUFactor = euFactor;
+                    euFactorTxt.Text = Math.Round(euFactor, 3).ToString();
+                    maxDiameter = double.Parse(Txt_MaxDiameter.Text) / euFactor;
+                    minDiameter = double.Parse(Txt_MinDiameter.Text) / euFactor;
+                    settings.maxDiameter = maxDiameter;
+                    settings.minDiameter = minDiameter;
 
-            //        MessageBox.Show("Calibration Succesful, Factor: " + euFactor);
-            //    }
-            //    else
-            //    {
-            //        // Si el usuario elige "No", puedes hacer algo o simplemente salir
-            //        MessageBox.Show("Operation canceled.");
-            //    }
-            //}
-            //else
-            //{
-            //    Console.WriteLine(centro.X + " " + centro.Y);
-            //    MessageBox.Show("Place the calibration target in the middle. Error = X:" + (centro.X + UserROI.Left - centroX) + ", Y:" + (centroY - (centro.Y + UserROI.Top)));
-            //}
+                    MessageBox.Show("Calibration Succesful, Factor: " + euFactor);
+                }
+                else
+                {
+                    // Si el usuario elige "No", puedes hacer algo o simplemente salir
+                    MessageBox.Show("Operation canceled.");
+                }
+            }
+            else
+            {
+                Console.WriteLine(centro.X + " " + centro.Y);
+                MessageBox.Show("Place the calibration target in the middle. Error = X:" + (centro.X + UserROI.Left - centroX) + ", Y:" + (centroY - (centro.Y + UserROI.Top)));
+            }
 
-            //updateGridType(grid);
+            updateGridType(grid);
 
-            //// Liberamos las imagenes
-            //binarizedImage.Dispose();
-            //roiImage.Dispose();
-            //centralSector.Dispose();
+            // Liberamos las imagenes
+            binarizedImage.Dispose();
+            roiImage.Dispose();
+            centralSector.Dispose();
 
-            //originalImage.Dispose();
-            //originalImageIsDisposed = true;
+            originalImage.Dispose();
+            originalImageIsDisposed = true;
 
-            //processImageBtn.Enabled = false;
+            processImageBtn.Enabled = false;
 
-            //calibrating = false;
+            calibrating = false;
         }
 
         public Bitmap undistortImage(Bitmap imagen)
@@ -2440,7 +2440,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         public Bitmap saveImage()
         {
-            Txt_Threshold.Text = threshold.ToString(); // Convertir int a string y asignarlo al TextBox
+            //Txt_Threshold.Text = threshold.ToString(); // Convertir int a string y asignarlo al TextBox
 
             string imagePath = imagesPath + "imagenOrigen.bmp" ;
 
@@ -2532,7 +2532,53 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void Cmd_Trigger_Click(object sender, EventArgs e)
         {
-            startStop();
+            AbortDlg abort = new AbortDlg(m_Xfer);
+
+            if (m_Xfer.Freeze())
+            {
+                if (abort.ShowDialog() != DialogResult.OK)
+                    m_Xfer.Abort();
+                UpdateControls();
+
+            }
+
+            int modeNew;
+            m_AcqDevice.GetFeatureValue("TriggerMode", out modeNew);
+
+            if (modeNew == 0)
+            {
+                bool succes = m_AcqDevice.SetFeatureValue("TriggerMode", 1);
+                triggerModeBtn.Enabled = true;
+                triggerModeBtn.BackColor = Color.Silver;
+                //viewModeBtn.BackColor = Color.Silver; // Cambiar el color de fondo a gris
+                txtViewMode.Text = "FRAME"; // Cambiar el texto cuando está desactivado
+                txtViewMode.BackColor = Color.Khaki;
+                mode = 0;
+                processImageBtn.Enabled = true;
+                processImageBtn.BackColor = Color.Silver;
+                virtualTriggerBtn.Enabled = true;
+                virtualTriggerBtn.BackColor = Color.Silver;
+
+            }
+            else
+            {
+                bool succes = m_AcqDevice.SetFeatureValue("TriggerMode", 0);
+                triggerModeBtn.Enabled = false;
+                triggerModeBtn.BackColor = Color.DarkGray;
+                // viewModeBtn.BackColor = DefaultBackColor; // Restaurar el color de fondo predeterminado
+                txtViewMode.Text = "LIVE";
+                txtViewMode.BackColor = Color.LightGreen;
+                virtualTriggerBtn.Enabled = false;
+                virtualTriggerBtn.BackColor = Color.DarkGray;
+                processImageBtn.Enabled = false;
+                processImageBtn.BackColor = Color.DarkGray;
+                mode = 1;
+            }
+
+            if (m_Xfer.Grab())
+            {
+                UpdateControls();
+            }
         }
 
 
@@ -2563,7 +2609,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             int n = 0;
 
             bgArea = new List<List<Point>>();
-            bgArea = FindBackground(image.ToBitmap(), backgroundColor, 0, maxArea);
+            bgArea = FindBackground(image.ToBitmap(), backgroundColor, 0, 1000);
 
             if (perimeters.Size > 0)
             {
@@ -2869,6 +2915,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 if (autoThreshold)
                 {
                     threshold = CalculateOtsuThreshold();
+                    Txt_Threshold.Text = threshold.ToString();
                 }
                 else
                 {
@@ -2879,7 +2926,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
 
             }
-
+            
             // Aplicar umbralización (binarización)
             Mat imagenBinarizada = new Mat();
             CvInvoke.Threshold(image, imagenBinarizada, threshold, 255, ThresholdType.Binary);
@@ -3209,8 +3256,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 startStop();
 
-                //m_AcqDevice.LoadFeatures(configPath + "\\TriggerON.ccf");
-
                 viewModeBtn.Enabled = false;
                 viewModeBtn.BackColor = Color.DarkGray;
                 processImageBtn.Enabled = false;
@@ -3221,8 +3266,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             else
             {
                 changeTriggerMode("SOFTWARE");
-                //m_AcqDevice.LoadFeatures(configPath + "\\TriggerOFF.ccf");
-                //triggerModeBtn.BackColor = Color.Silver;
+
+                if (m_Xfer.Grab())
+                {
+                    UpdateControls();
+                }
+
                 virtualTriggerBtn.Enabled = true;
                 virtualTriggerBtn.BackColor = Color.Silver;
 
@@ -3230,16 +3279,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 viewModeBtn.BackColor = Color.Silver;
                 processImageBtn.Enabled = true;
                 processImageBtn.BackColor = Color.Silver;
-
-                //AbortDlg abort = new AbortDlg(m_Xfer);
-
-                //if (m_Xfer.Freeze())
-                //{
-                //    if (abort.ShowDialog() != DialogResult.OK)
-                //        m_Xfer.Abort();
-                //    UpdateControls();
-                //    viewModeBtn.BackColor = Color.Silver; // Cambiar el color de fondo a gris
-                //}
 
                 txtTriggerSource.Text = "SOFTWARE";
                 txtTriggerSource.BackColor = Color.Khaki;
@@ -3473,14 +3512,20 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             processROIBox.Visible = false;
 
-            AbortDlg abort = new AbortDlg(m_Xfer);
-
-            if (m_Xfer.Snap())
+            bool succes = m_AcqDevice.SetFeatureValue("TriggerSoftware", true);
+            if (succes)
             {
-                if (abort.ShowDialog() != DialogResult.OK)
-                    m_Xfer.Abort();
-                UpdateControls();
+                Console.WriteLine("VirtualTrigger");
+                processImageBtn.Enabled = true;
             }
+            //AbortDlg abort = new AbortDlg(m_Xfer);
+
+            //if (m_Xfer.Snap())
+            //{
+            //    if (abort.ShowDialog() != DialogResult.OK)
+            //        m_Xfer.Abort();
+            //    UpdateControls();
+            //}
 
         }
 
@@ -3625,7 +3670,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             //}
             calibrating = true;
 
-            if (!m_Xfer.Grabbing || mode == 1)
+            if (!triggerPLC && mode == 0)
             {
                 using (var inputForm = new InputDlg(units))
                 {
@@ -3633,15 +3678,16 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     {
                         targetCalibrationSize = inputForm.targetSize;
 
-                        AbortDlg abort = new AbortDlg(m_Xfer);
+                        //AbortDlg abort = new AbortDlg(m_Xfer);
 
-                        if (m_Xfer.Snap())
-                        {
-                            if (abort.ShowDialog() != DialogResult.OK)
-                                m_Xfer.Abort();
-                            UpdateControls();
-                        }
+                        //if (m_Xfer.Snap())
+                        //{
+                        //    if (abort.ShowDialog() != DialogResult.OK)
+                        //        m_Xfer.Abort();
+                        //    UpdateControls();
+                        //}
 
+                        m_AcqDevice.SetFeatureValue("TriggerSoftware", true);
                     }
                 }
             }
@@ -4376,6 +4422,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         }
 
         private void toolStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+
+        }
+
+        private void Chk_Threshold_Mode_CheckedChanged_1(object sender, EventArgs e)
         {
 
         }
