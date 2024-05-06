@@ -44,6 +44,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.timeElapsedLabel = new System.Windows.Forms.ToolStripLabel();
             this.timeElapsed = new System.Windows.Forms.ToolStripLabel();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.deviceTempLabel = new System.Windows.Forms.ToolStripLabel();
+            this.deviceTemp = new System.Windows.Forms.ToolStripLabel();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+            this.sensorTempLabel = new System.Windows.Forms.ToolStripLabel();
+            this.sensorTemp = new System.Windows.Forms.ToolStripLabel();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.videoSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loginToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -99,18 +105,25 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.label8 = new System.Windows.Forms.Label();
             this.formatTxt = new System.Windows.Forms.Label();
             this.configurationPage = new System.Windows.Forms.TabPage();
+            this.inputTopRoi = new System.Windows.Forms.NumericUpDown();
+            this.Label35 = new System.Windows.Forms.Label();
+            this.inputRightRoi = new System.Windows.Forms.NumericUpDown();
+            this.inputLeftRoi = new System.Windows.Forms.NumericUpDown();
+            this.inputBottomRoi = new System.Windows.Forms.NumericUpDown();
+            this.Label34 = new System.Windows.Forms.Label();
             this.GB_Threshold = new System.Windows.Forms.GroupBox();
             this.Chk_Threshold_Mode = new System.Windows.Forms.CheckBox();
             this.Txt_Threshold = new System.Windows.Forms.TextBox();
             this.GroupBox11 = new System.Windows.Forms.GroupBox();
-            this.inputBottomRoi = new System.Windows.Forms.NumericUpDown();
-            this.inputRightRoi = new System.Windows.Forms.NumericUpDown();
-            this.inputTopRoi = new System.Windows.Forms.NumericUpDown();
-            this.inputLeftRoi = new System.Windows.Forms.NumericUpDown();
-            this.Label37 = new System.Windows.Forms.Label();
-            this.Label35 = new System.Windows.Forms.Label();
+            this.btnDecrementRoiHeight = new System.Windows.Forms.Button();
+            this.btnIncrementRoiHeight = new System.Windows.Forms.Button();
+            this.txtRoiHeight = new System.Windows.Forms.TextBox();
+            this.btnDecrementRoiWidth = new System.Windows.Forms.Button();
+            this.btnIncrementRoiWidth = new System.Windows.Forms.Button();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.txtRoiWidth = new System.Windows.Forms.TextBox();
             this.Label36 = new System.Windows.Forms.Label();
-            this.Label34 = new System.Windows.Forms.Label();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.btnChangeUnitsInch = new System.Windows.Forms.Button();
             this.btnChangeUnitsMm = new System.Windows.Forms.Button();
@@ -118,10 +131,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.label7 = new System.Windows.Forms.Label();
             this.calibrateBtn = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
-            this.TXT_ROI_Bottom = new System.Windows.Forms.TextBox();
-            this.TXT_ROI_Top = new System.Windows.Forms.TextBox();
-            this.TXT_ROI_Left = new System.Windows.Forms.TextBox();
-            this.TXT_ROI_Right = new System.Windows.Forms.TextBox();
+            this.Label37 = new System.Windows.Forms.Label();
             this.mainTabs = new System.Windows.Forms.TabControl();
             this.imagePage = new System.Windows.Forms.TabPage();
             this.originalBox = new System.Windows.Forms.PictureBox();
@@ -156,12 +166,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Label28 = new System.Windows.Forms.Label();
             this.Cmd_Save = new System.Windows.Forms.Button();
             this.Chk_Digital_Knife = new System.Windows.Forms.CheckBox();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.deviceTempLabel = new System.Windows.Forms.ToolStripLabel();
-            this.deviceTemp = new System.Windows.Forms.ToolStripLabel();
-            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
-            this.sensorTempLabel = new System.Windows.Forms.ToolStripLabel();
-            this.sensorTemp = new System.Windows.Forms.ToolStripLabel();
+            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
+            this.framesProcessedLabel = new System.Windows.Forms.ToolStripLabel();
+            this.framesProcessed = new System.Windows.Forms.ToolStripLabel();
             this.toolStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.GroupBox1.SuspendLayout();
@@ -174,12 +181,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.groupBox5.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.configurationPage.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.inputTopRoi)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.inputRightRoi)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.inputLeftRoi)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.inputBottomRoi)).BeginInit();
             this.GB_Threshold.SuspendLayout();
             this.GroupBox11.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.inputBottomRoi)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.inputRightRoi)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.inputTopRoi)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.inputLeftRoi)).BeginInit();
             this.groupBox4.SuspendLayout();
             this.mainTabs.SuspendLayout();
             this.imagePage.SuspendLayout();
@@ -210,13 +217,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.deviceTemp,
             this.toolStripSeparator4,
             this.sensorTempLabel,
-            this.sensorTemp});
+            this.sensorTemp,
+            this.toolStripSeparator5,
+            this.framesProcessedLabel,
+            this.framesProcessed});
             this.toolStrip1.Location = new System.Drawing.Point(0, 724);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
             this.toolStrip1.Size = new System.Drawing.Size(775, 25);
             this.toolStrip1.TabIndex = 10;
             this.toolStrip1.Text = "toolStrip1";
+            this.toolStrip1.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.toolStrip1_ItemClicked);
             // 
             // StatusLabel
             // 
@@ -266,12 +277,43 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.timeElapsedLabel.Name = "timeElapsedLabel";
             this.timeElapsedLabel.Size = new System.Drawing.Size(152, 22);
             this.timeElapsedLabel.Text = "Time Elapsed in Last Frame:";
-            this.timeElapsedLabel.Click += new System.EventHandler(this.timeElapsedLabel_Click);
             // 
             // timeElapsed
             // 
             this.timeElapsed.Name = "timeElapsed";
             this.timeElapsed.Size = new System.Drawing.Size(0, 22);
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
+            // 
+            // deviceTempLabel
+            // 
+            this.deviceTempLabel.Name = "deviceTempLabel";
+            this.deviceTempLabel.Size = new System.Drawing.Size(104, 22);
+            this.deviceTempLabel.Text = "Device Temp. (°C):";
+            // 
+            // deviceTemp
+            // 
+            this.deviceTemp.Name = "deviceTemp";
+            this.deviceTemp.Size = new System.Drawing.Size(0, 22);
+            // 
+            // toolStripSeparator4
+            // 
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(6, 25);
+            // 
+            // sensorTempLabel
+            // 
+            this.sensorTempLabel.Name = "sensorTempLabel";
+            this.sensorTempLabel.Size = new System.Drawing.Size(104, 22);
+            this.sensorTempLabel.Text = "Sensor Temp. (°C):";
+            // 
+            // sensorTemp
+            // 
+            this.sensorTemp.Name = "sensorTemp";
+            this.sensorTemp.Size = new System.Drawing.Size(0, 22);
             // 
             // menuStrip1
             // 
@@ -888,14 +930,18 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // configurationPage
             // 
             this.configurationPage.BackColor = System.Drawing.Color.LightSteelBlue;
+            this.configurationPage.Controls.Add(this.inputTopRoi);
+            this.configurationPage.Controls.Add(this.Label35);
+            this.configurationPage.Controls.Add(this.inputRightRoi);
+            this.configurationPage.Controls.Add(this.inputLeftRoi);
+            this.configurationPage.Controls.Add(this.inputBottomRoi);
+            this.configurationPage.Controls.Add(this.Label34);
             this.configurationPage.Controls.Add(this.GB_Threshold);
             this.configurationPage.Controls.Add(this.GroupBox11);
+            this.configurationPage.Controls.Add(this.Label36);
             this.configurationPage.Controls.Add(this.groupBox4);
-            this.configurationPage.Controls.Add(this.TXT_ROI_Bottom);
+            this.configurationPage.Controls.Add(this.Label37);
             this.configurationPage.Controls.Add(this.btnsave);
-            this.configurationPage.Controls.Add(this.TXT_ROI_Top);
-            this.configurationPage.Controls.Add(this.TXT_ROI_Left);
-            this.configurationPage.Controls.Add(this.TXT_ROI_Right);
             this.configurationPage.Font = new System.Drawing.Font("Alef", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.configurationPage.Location = new System.Drawing.Point(4, 44);
             this.configurationPage.Name = "configurationPage";
@@ -903,6 +949,122 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.configurationPage.Size = new System.Drawing.Size(417, 677);
             this.configurationPage.TabIndex = 1;
             this.configurationPage.Text = "Configuration";
+            // 
+            // inputTopRoi
+            // 
+            this.inputTopRoi.Font = new System.Drawing.Font("Microsoft Sans Serif", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.inputTopRoi.Location = new System.Drawing.Point(179, 588);
+            this.inputTopRoi.Maximum = new decimal(new int[] {
+            235,
+            0,
+            0,
+            0});
+            this.inputTopRoi.Minimum = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
+            this.inputTopRoi.Name = "inputTopRoi";
+            this.inputTopRoi.Size = new System.Drawing.Size(84, 40);
+            this.inputTopRoi.TabIndex = 125;
+            this.inputTopRoi.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.inputTopRoi.Value = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
+            // 
+            // Label35
+            // 
+            this.Label35.AutoSize = true;
+            this.Label35.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Label35.Location = new System.Drawing.Point(192, 559);
+            this.Label35.Name = "Label35";
+            this.Label35.Size = new System.Drawing.Size(47, 24);
+            this.Label35.TabIndex = 82;
+            this.Label35.Text = "Top";
+            // 
+            // inputRightRoi
+            // 
+            this.inputRightRoi.Font = new System.Drawing.Font("Microsoft Sans Serif", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.inputRightRoi.Location = new System.Drawing.Point(258, 542);
+            this.inputRightRoi.Maximum = new decimal(new int[] {
+            635,
+            0,
+            0,
+            0});
+            this.inputRightRoi.Minimum = new decimal(new int[] {
+            330,
+            0,
+            0,
+            0});
+            this.inputRightRoi.Name = "inputRightRoi";
+            this.inputRightRoi.Size = new System.Drawing.Size(84, 40);
+            this.inputRightRoi.TabIndex = 126;
+            this.inputRightRoi.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.inputRightRoi.Value = new decimal(new int[] {
+            330,
+            0,
+            0,
+            0});
+            // 
+            // inputLeftRoi
+            // 
+            this.inputLeftRoi.Font = new System.Drawing.Font("Microsoft Sans Serif", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.inputLeftRoi.Location = new System.Drawing.Point(75, 522);
+            this.inputLeftRoi.Maximum = new decimal(new int[] {
+            310,
+            0,
+            0,
+            0});
+            this.inputLeftRoi.Minimum = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
+            this.inputLeftRoi.Name = "inputLeftRoi";
+            this.inputLeftRoi.Size = new System.Drawing.Size(84, 40);
+            this.inputLeftRoi.TabIndex = 124;
+            this.inputLeftRoi.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.inputLeftRoi.Value = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
+            // 
+            // inputBottomRoi
+            // 
+            this.inputBottomRoi.Font = new System.Drawing.Font("Microsoft Sans Serif", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.inputBottomRoi.Location = new System.Drawing.Point(71, 580);
+            this.inputBottomRoi.Maximum = new decimal(new int[] {
+            475,
+            0,
+            0,
+            0});
+            this.inputBottomRoi.Minimum = new decimal(new int[] {
+            245,
+            0,
+            0,
+            0});
+            this.inputBottomRoi.Name = "inputBottomRoi";
+            this.inputBottomRoi.Size = new System.Drawing.Size(84, 40);
+            this.inputBottomRoi.TabIndex = 127;
+            this.inputBottomRoi.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.inputBottomRoi.Value = new decimal(new int[] {
+            245,
+            0,
+            0,
+            0});
+            // 
+            // Label34
+            // 
+            this.Label34.AutoSize = true;
+            this.Label34.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Label34.Location = new System.Drawing.Point(26, 532);
+            this.Label34.Name = "Label34";
+            this.Label34.Size = new System.Drawing.Size(43, 24);
+            this.Label34.TabIndex = 81;
+            this.Label34.Text = "Left";
             // 
             // GB_Threshold
             // 
@@ -943,14 +1105,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             // GroupBox11
             // 
-            this.GroupBox11.Controls.Add(this.inputBottomRoi);
-            this.GroupBox11.Controls.Add(this.inputRightRoi);
-            this.GroupBox11.Controls.Add(this.inputTopRoi);
-            this.GroupBox11.Controls.Add(this.inputLeftRoi);
-            this.GroupBox11.Controls.Add(this.Label37);
-            this.GroupBox11.Controls.Add(this.Label35);
-            this.GroupBox11.Controls.Add(this.Label36);
-            this.GroupBox11.Controls.Add(this.Label34);
+            this.GroupBox11.Controls.Add(this.btnDecrementRoiHeight);
+            this.GroupBox11.Controls.Add(this.btnIncrementRoiHeight);
+            this.GroupBox11.Controls.Add(this.txtRoiHeight);
+            this.GroupBox11.Controls.Add(this.btnDecrementRoiWidth);
+            this.GroupBox11.Controls.Add(this.btnIncrementRoiWidth);
+            this.GroupBox11.Controls.Add(this.label3);
+            this.GroupBox11.Controls.Add(this.label2);
+            this.GroupBox11.Controls.Add(this.txtRoiWidth);
             this.GroupBox11.Location = new System.Drawing.Point(6, 263);
             this.GroupBox11.Name = "GroupBox11";
             this.GroupBox11.Size = new System.Drawing.Size(405, 232);
@@ -958,141 +1120,103 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.GroupBox11.TabStop = false;
             this.GroupBox11.Text = "ROI Definition";
             // 
-            // inputBottomRoi
+            // btnDecrementRoiHeight
             // 
-            this.inputBottomRoi.Font = new System.Drawing.Font("Microsoft Sans Serif", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.inputBottomRoi.Location = new System.Drawing.Point(165, 149);
-            this.inputBottomRoi.Maximum = new decimal(new int[] {
-            475,
-            0,
-            0,
-            0});
-            this.inputBottomRoi.Minimum = new decimal(new int[] {
-            245,
-            0,
-            0,
-            0});
-            this.inputBottomRoi.Name = "inputBottomRoi";
-            this.inputBottomRoi.Size = new System.Drawing.Size(84, 40);
-            this.inputBottomRoi.TabIndex = 127;
-            this.inputBottomRoi.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.inputBottomRoi.Value = new decimal(new int[] {
-            245,
-            0,
-            0,
-            0});
+            this.btnDecrementRoiHeight.Font = new System.Drawing.Font("Alef", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnDecrementRoiHeight.Location = new System.Drawing.Point(317, 150);
+            this.btnDecrementRoiHeight.Name = "btnDecrementRoiHeight";
+            this.btnDecrementRoiHeight.Size = new System.Drawing.Size(75, 48);
+            this.btnDecrementRoiHeight.TabIndex = 134;
+            this.btnDecrementRoiHeight.Text = "-";
+            this.btnDecrementRoiHeight.UseVisualStyleBackColor = true;
+            this.btnDecrementRoiHeight.Click += new System.EventHandler(this.btnDecrementRoiHeight_Click);
             // 
-            // inputRightRoi
+            // btnIncrementRoiHeight
             // 
-            this.inputRightRoi.Font = new System.Drawing.Font("Microsoft Sans Serif", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.inputRightRoi.Location = new System.Drawing.Point(241, 103);
-            this.inputRightRoi.Maximum = new decimal(new int[] {
-            635,
-            0,
-            0,
-            0});
-            this.inputRightRoi.Minimum = new decimal(new int[] {
-            330,
-            0,
-            0,
-            0});
-            this.inputRightRoi.Name = "inputRightRoi";
-            this.inputRightRoi.Size = new System.Drawing.Size(84, 40);
-            this.inputRightRoi.TabIndex = 126;
-            this.inputRightRoi.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.inputRightRoi.Value = new decimal(new int[] {
-            330,
-            0,
-            0,
-            0});
+            this.btnIncrementRoiHeight.Font = new System.Drawing.Font("Alef", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnIncrementRoiHeight.Location = new System.Drawing.Point(317, 97);
+            this.btnIncrementRoiHeight.Name = "btnIncrementRoiHeight";
+            this.btnIncrementRoiHeight.Size = new System.Drawing.Size(75, 48);
+            this.btnIncrementRoiHeight.TabIndex = 133;
+            this.btnIncrementRoiHeight.Text = "+";
+            this.btnIncrementRoiHeight.UseVisualStyleBackColor = true;
+            this.btnIncrementRoiHeight.Click += new System.EventHandler(this.btnIncrementRoiHeight_Click);
             // 
-            // inputTopRoi
+            // txtRoiHeight
             // 
-            this.inputTopRoi.Font = new System.Drawing.Font("Microsoft Sans Serif", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.inputTopRoi.Location = new System.Drawing.Point(165, 48);
-            this.inputTopRoi.Maximum = new decimal(new int[] {
-            235,
-            0,
-            0,
-            0});
-            this.inputTopRoi.Minimum = new decimal(new int[] {
-            5,
-            0,
-            0,
-            0});
-            this.inputTopRoi.Name = "inputTopRoi";
-            this.inputTopRoi.Size = new System.Drawing.Size(84, 40);
-            this.inputTopRoi.TabIndex = 125;
-            this.inputTopRoi.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.inputTopRoi.Value = new decimal(new int[] {
-            5,
-            0,
-            0,
-            0});
+            this.txtRoiHeight.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.txtRoiHeight.Font = new System.Drawing.Font("Microsoft Sans Serif", 27.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtRoiHeight.Location = new System.Drawing.Point(211, 120);
+            this.txtRoiHeight.Name = "txtRoiHeight";
+            this.txtRoiHeight.Size = new System.Drawing.Size(100, 49);
+            this.txtRoiHeight.TabIndex = 132;
+            this.txtRoiHeight.Text = "0";
+            this.txtRoiHeight.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtRoiHeight.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtRoiHeight_KeyPress);
             // 
-            // inputLeftRoi
+            // btnDecrementRoiWidth
             // 
-            this.inputLeftRoi.Font = new System.Drawing.Font("Microsoft Sans Serif", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.inputLeftRoi.Location = new System.Drawing.Point(80, 103);
-            this.inputLeftRoi.Maximum = new decimal(new int[] {
-            310,
-            0,
-            0,
-            0});
-            this.inputLeftRoi.Minimum = new decimal(new int[] {
-            5,
-            0,
-            0,
-            0});
-            this.inputLeftRoi.Name = "inputLeftRoi";
-            this.inputLeftRoi.Size = new System.Drawing.Size(84, 40);
-            this.inputLeftRoi.TabIndex = 124;
-            this.inputLeftRoi.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.inputLeftRoi.Value = new decimal(new int[] {
-            5,
-            0,
-            0,
-            0});
+            this.btnDecrementRoiWidth.Font = new System.Drawing.Font("Alef", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnDecrementRoiWidth.Location = new System.Drawing.Point(130, 150);
+            this.btnDecrementRoiWidth.Name = "btnDecrementRoiWidth";
+            this.btnDecrementRoiWidth.Size = new System.Drawing.Size(75, 48);
+            this.btnDecrementRoiWidth.TabIndex = 131;
+            this.btnDecrementRoiWidth.Text = "-";
+            this.btnDecrementRoiWidth.UseVisualStyleBackColor = true;
+            this.btnDecrementRoiWidth.Click += new System.EventHandler(this.btnDecrementRoiWidth_Click);
             // 
-            // Label37
+            // btnIncrementRoiWidth
             // 
-            this.Label37.AutoSize = true;
-            this.Label37.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Label37.Location = new System.Drawing.Point(165, 200);
-            this.Label37.Name = "Label37";
-            this.Label37.Size = new System.Drawing.Size(74, 24);
-            this.Label37.TabIndex = 84;
-            this.Label37.Text = "Bottom";
+            this.btnIncrementRoiWidth.Font = new System.Drawing.Font("Alef", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnIncrementRoiWidth.Location = new System.Drawing.Point(130, 97);
+            this.btnIncrementRoiWidth.Name = "btnIncrementRoiWidth";
+            this.btnIncrementRoiWidth.Size = new System.Drawing.Size(75, 48);
+            this.btnIncrementRoiWidth.TabIndex = 130;
+            this.btnIncrementRoiWidth.Text = "+";
+            this.btnIncrementRoiWidth.UseVisualStyleBackColor = true;
+            this.btnIncrementRoiWidth.Click += new System.EventHandler(this.btnIncrementRoiWidth_Click);
             // 
-            // Label35
+            // label3
             // 
-            this.Label35.AutoSize = true;
-            this.Label35.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Label35.Location = new System.Drawing.Point(178, 19);
-            this.Label35.Name = "Label35";
-            this.Label35.Size = new System.Drawing.Size(47, 24);
-            this.Label35.TabIndex = 82;
-            this.Label35.Text = "Top";
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.Location = new System.Drawing.Point(256, 55);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(112, 24);
+            this.label3.TabIndex = 129;
+            this.label3.Text = "ROI Height";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.Location = new System.Drawing.Point(45, 55);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(104, 24);
+            this.label2.TabIndex = 128;
+            this.label2.Text = "ROI Width";
+            // 
+            // txtRoiWidth
+            // 
+            this.txtRoiWidth.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.txtRoiWidth.Font = new System.Drawing.Font("Microsoft Sans Serif", 27.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtRoiWidth.Location = new System.Drawing.Point(24, 120);
+            this.txtRoiWidth.Name = "txtRoiWidth";
+            this.txtRoiWidth.Size = new System.Drawing.Size(100, 49);
+            this.txtRoiWidth.TabIndex = 87;
+            this.txtRoiWidth.Text = "0";
+            this.txtRoiWidth.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtRoiWidth.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtRoiWidth_KeyPress);
             // 
             // Label36
             // 
             this.Label36.AutoSize = true;
             this.Label36.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Label36.Location = new System.Drawing.Point(331, 113);
+            this.Label36.Location = new System.Drawing.Point(348, 552);
             this.Label36.Name = "Label36";
             this.Label36.Size = new System.Drawing.Size(58, 24);
             this.Label36.TabIndex = 83;
             this.Label36.Text = "Right";
-            // 
-            // Label34
-            // 
-            this.Label34.AutoSize = true;
-            this.Label34.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Label34.Location = new System.Drawing.Point(31, 113);
-            this.Label34.Name = "Label34";
-            this.Label34.Size = new System.Drawing.Size(43, 24);
-            this.Label34.TabIndex = 81;
-            this.Label34.Text = "Left";
             // 
             // groupBox4
             // 
@@ -1176,49 +1300,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.label4.TabIndex = 1;
             this.label4.Text = "Units:";
             // 
-            // TXT_ROI_Bottom
+            // Label37
             // 
-            this.TXT_ROI_Bottom.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.TXT_ROI_Bottom.Font = new System.Drawing.Font("Microsoft Sans Serif", 27.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.TXT_ROI_Bottom.Location = new System.Drawing.Point(160, 635);
-            this.TXT_ROI_Bottom.Name = "TXT_ROI_Bottom";
-            this.TXT_ROI_Bottom.Size = new System.Drawing.Size(68, 49);
-            this.TXT_ROI_Bottom.TabIndex = 87;
-            this.TXT_ROI_Bottom.Text = "0";
-            this.TXT_ROI_Bottom.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // TXT_ROI_Top
-            // 
-            this.TXT_ROI_Top.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.TXT_ROI_Top.Font = new System.Drawing.Font("Microsoft Sans Serif", 27.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.TXT_ROI_Top.Location = new System.Drawing.Point(65, 580);
-            this.TXT_ROI_Top.Name = "TXT_ROI_Top";
-            this.TXT_ROI_Top.Size = new System.Drawing.Size(68, 49);
-            this.TXT_ROI_Top.TabIndex = 85;
-            this.TXT_ROI_Top.Text = "0";
-            this.TXT_ROI_Top.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // TXT_ROI_Left
-            // 
-            this.TXT_ROI_Left.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.TXT_ROI_Left.Font = new System.Drawing.Font("Microsoft Sans Serif", 27.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.TXT_ROI_Left.Location = new System.Drawing.Point(65, 635);
-            this.TXT_ROI_Left.Name = "TXT_ROI_Left";
-            this.TXT_ROI_Left.Size = new System.Drawing.Size(73, 49);
-            this.TXT_ROI_Left.TabIndex = 81;
-            this.TXT_ROI_Left.Text = "0";
-            this.TXT_ROI_Left.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // TXT_ROI_Right
-            // 
-            this.TXT_ROI_Right.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.TXT_ROI_Right.Font = new System.Drawing.Font("Microsoft Sans Serif", 27.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.TXT_ROI_Right.Location = new System.Drawing.Point(158, 580);
-            this.TXT_ROI_Right.Name = "TXT_ROI_Right";
-            this.TXT_ROI_Right.Size = new System.Drawing.Size(73, 49);
-            this.TXT_ROI_Right.TabIndex = 86;
-            this.TXT_ROI_Right.Text = "0";
-            this.TXT_ROI_Right.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.Label37.AutoSize = true;
+            this.Label37.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Label37.Location = new System.Drawing.Point(71, 631);
+            this.Label37.Name = "Label37";
+            this.Label37.Size = new System.Drawing.Size(74, 24);
+            this.Label37.TabIndex = 84;
+            this.Label37.Text = "Bottom";
             // 
             // mainTabs
             // 
@@ -1603,37 +1693,21 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Chk_Digital_Knife.Text = "Digital Knife";
             this.Chk_Digital_Knife.UseVisualStyleBackColor = true;
             // 
-            // toolStripSeparator3
+            // toolStripSeparator5
             // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
+            this.toolStripSeparator5.Name = "toolStripSeparator5";
+            this.toolStripSeparator5.Size = new System.Drawing.Size(6, 25);
             // 
-            // deviceTempLabel
+            // framesProcessedLabel
             // 
-            this.deviceTempLabel.Name = "deviceTempLabel";
-            this.deviceTempLabel.Size = new System.Drawing.Size(104, 22);
-            this.deviceTempLabel.Text = "Device Temp. (°C):";
+            this.framesProcessedLabel.Name = "framesProcessedLabel";
+            this.framesProcessedLabel.Size = new System.Drawing.Size(104, 22);
+            this.framesProcessedLabel.Text = "Frames Processed:";
             // 
-            // deviceTemp
+            // framesProcessed
             // 
-            this.deviceTemp.Name = "deviceTemp";
-            this.deviceTemp.Size = new System.Drawing.Size(0, 22);
-            // 
-            // toolStripSeparator4
-            // 
-            this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(6, 25);
-            // 
-            // sensorTempLabel
-            // 
-            this.sensorTempLabel.Name = "sensorTempLabel";
-            this.sensorTempLabel.Size = new System.Drawing.Size(104, 22);
-            this.sensorTempLabel.Text = "Sensor Temp. (°C):";
-            // 
-            // sensorTemp
-            // 
-            this.sensorTemp.Name = "sensorTemp";
-            this.sensorTemp.Size = new System.Drawing.Size(0, 22);
+            this.framesProcessed.Name = "framesProcessed";
+            this.framesProcessed.Size = new System.Drawing.Size(0, 22);
             // 
             // GigECameraDemoDlg
             // 
@@ -1672,14 +1746,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.groupBox2.PerformLayout();
             this.configurationPage.ResumeLayout(false);
             this.configurationPage.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.inputTopRoi)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.inputRightRoi)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.inputLeftRoi)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.inputBottomRoi)).EndInit();
             this.GB_Threshold.ResumeLayout(false);
             this.GB_Threshold.PerformLayout();
             this.GroupBox11.ResumeLayout(false);
             this.GroupBox11.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.inputBottomRoi)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.inputRightRoi)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.inputTopRoi)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.inputLeftRoi)).EndInit();
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
             this.mainTabs.ResumeLayout(false);
@@ -1796,10 +1870,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private Label formatTxt;
         private Label label8;
         internal GroupBox GroupBox11;
-        internal TextBox TXT_ROI_Bottom;
-        internal TextBox TXT_ROI_Right;
-        internal TextBox TXT_ROI_Top;
-        internal TextBox TXT_ROI_Left;
         internal Label Label34;
         internal Label Label35;
         internal Label Label36;
@@ -1842,6 +1912,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private ToolStripSeparator toolStripSeparator4;
         private ToolStripLabel sensorTempLabel;
         private ToolStripLabel sensorTemp;
+        internal Label label3;
+        internal Label label2;
+        private Button btnIncrementRoiWidth;
+        private Button btnDecrementRoiWidth;
+        private Button btnDecrementRoiHeight;
+        private Button btnIncrementRoiHeight;
+        internal TextBox txtRoiHeight;
+        internal TextBox txtRoiWidth;
+        private ToolStripSeparator toolStripSeparator5;
+        private ToolStripLabel framesProcessedLabel;
+        private ToolStripLabel framesProcessed;
     }
 }
 

@@ -341,10 +341,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 UserROI.Right = settings.ROI_Right;
                 UserROI.Bottom = settings.ROI_Bottom;
 
-                inputLeftRoi.Value = UserROI.Left;
-                inputRightRoi.Value = UserROI.Right;
-                inputTopRoi.Value = UserROI.Top;
-                inputBottomRoi.Value = UserROI.Bottom;
+                //inputLeftRoi.Value = UserROI.Left;
+                //inputRightRoi.Value = UserROI.Right;
+                //inputTopRoi.Value = UserROI.Top;
+                //inputBottomRoi.Value = UserROI.Bottom;
+
+                int roiWidth = UserROI.Right - UserROI.Left;
+                txtRoiWidth.Text = roiWidth.ToString();
+
+                int roiHeight = UserROI.Bottom - UserROI.Top;
+                txtRoiHeight.Text = roiHeight.ToString();
+
 
                 maxOvality = settings.maxOvality;
                 maxCompactness = settings.maxCompacity;
@@ -367,10 +374,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 Txt_MaxOvality.KeyPress += Txt_MaxOvality_KeyPress;
                 
 
-                TXT_ROI_Left.KeyPress += Txt_UserROILeft_KeyPress;
-                TXT_ROI_Right.KeyPress += Txt_UserROIRight_KeyPress;
-                TXT_ROI_Top.KeyPress += Txt_UserROITop_KeyPress;
-                TXT_ROI_Bottom.KeyPress += Txt_UserROIBottom_KeyPress;
+                //TXT_ROI_Left.KeyPress += Txt_UserROILeft_KeyPress;
+                //TXT_ROI_Right.KeyPress += Txt_UserROIRight_KeyPress;
+                //TXT_ROI_Top.KeyPress += Txt_UserROITop_KeyPress;
+                //TXT_ROI_Bottom.KeyPress += Txt_UserROIBottom_KeyPress;
 
                 inputLeftRoi.ValueChanged += inputLeftRoi_ValueChanged;
                 inputRightRoi.ValueChanged += inputRightRoi_ValueChanged;
@@ -644,8 +651,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 deviceTemperature = Math.Round(deviceTemperature, 2);
                 deviceTemp.Text = deviceTemperature.ToString();
             }
-            succes = m_AcqDevice.SetFeatureValue("DeviceTemperatureSelector", 2);
-            if (succes) succes = m_AcqDevice.GetFeatureValue("DeviceTemperature", out sensorTemperature);
+            //succes = m_AcqDevice.SetFeatureValue("DeviceTemperatureSelector", 2);
+            if (succes) succes = m_AcqDevice.GetFeatureValue("sensorTemperatureRaw", out sensorTemperature);
             if (succes)
             {
                 sensorTemperature = Math.Round(sensorTemperature, 2);
@@ -1051,6 +1058,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private void process()
         {
             frameCounter++;
+            framesProcessed.Text = frameCounter.ToString();
 
             //originalBox.Visible = true;
             processROIBox.Visible = true; // Mostrar el PictureBox ROI
@@ -1571,203 +1579,203 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         }
 
-        private void Txt_UserROIBottom_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            // Verificar si la tecla presionada es "Enter" (código ASCII 13)
-            if (e.KeyChar == (char)Keys.Enter)
-            {
-                if (File.Exists(imagesPath + "updatedROI.jpg"))
-                {
-                    // Intentar convertir el texto del TextBox a un número entero
-                    if (int.TryParse(TXT_ROI_Bottom.Text, out UserROI.Bottom))
-                    {
-                        // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-                        //MessageBox.Show("Data Saved: " + UserROI.Right, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        if (!triggerPLC && mode == 0)
-                        {
-                            if (UserROI.Bottom > 250 && UserROI.Bottom < 475)
-                            {
-                                settings.ROI_Bottom = UserROI.Bottom;
-                                updateROI();
-                            }
-                            else
-                            {
-                                MessageBox.Show("Out of range");
-                                UserROI.Bottom = settings.ROI_Bottom;
-                                TXT_ROI_Bottom.Text = settings.ROI_Bottom.ToString();
-                            }
+        //private void Txt_UserROIBottom_KeyPress(object sender, KeyPressEventArgs e)
+        //{
+        //    // Verificar si la tecla presionada es "Enter" (código ASCII 13)
+        //    if (e.KeyChar == (char)Keys.Enter)
+        //    {
+        //        if (File.Exists(imagesPath + "updatedROI.jpg"))
+        //        {
+        //            // Intentar convertir el texto del TextBox a un número entero
+        //            if (int.TryParse(TXT_ROI_Bottom.Text, out UserROI.Bottom))
+        //            {
+        //                // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
+        //                //MessageBox.Show("Data Saved: " + UserROI.Right, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        //                if (!triggerPLC && mode == 0)
+        //                {
+        //                    if (UserROI.Bottom > 250 && UserROI.Bottom < 475)
+        //                    {
+        //                        settings.ROI_Bottom = UserROI.Bottom;
+        //                        updateROI();
+        //                    }
+        //                    else
+        //                    {
+        //                        MessageBox.Show("Out of range");
+        //                        UserROI.Bottom = settings.ROI_Bottom;
+        //                        TXT_ROI_Bottom.Text = settings.ROI_Bottom.ToString();
+        //                    }
 
-                        }
-                        else
-                        {
-                            MessageBox.Show("Change the operation mode");
-                            UserROI.Bottom = settings.ROI_Bottom;
-                            TXT_ROI_Bottom.Text = settings.ROI_Bottom.ToString();
-                        }
-                    }
-                    else
-                    {
-                        // Manejar el caso en que el texto no sea un número válido
-                        MessageBox.Show("usea a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
-                else
-                {
-                    UserROI.Bottom = settings.ROI_Bottom;
-                    TXT_ROI_Bottom.Text = settings.ROI_Bottom.ToString();
-                    MessageBox.Show("Please first take a frame");
-                }
+        //                }
+        //                else
+        //                {
+        //                    MessageBox.Show("Change the operation mode");
+        //                    UserROI.Bottom = settings.ROI_Bottom;
+        //                    TXT_ROI_Bottom.Text = settings.ROI_Bottom.ToString();
+        //                }
+        //            }
+        //            else
+        //            {
+        //                // Manejar el caso en que el texto no sea un número válido
+        //                MessageBox.Show("usea a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //            }
+        //        }
+        //        else
+        //        {
+        //            UserROI.Bottom = settings.ROI_Bottom;
+        //            TXT_ROI_Bottom.Text = settings.ROI_Bottom.ToString();
+        //            MessageBox.Show("Please first take a frame");
+        //        }
                 
-            }
-        }
+        //    }
+        //}
 
-        private void Txt_UserROITop_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            // Verificar si la tecla presionada es "Enter" (código ASCII 13)
-            if (e.KeyChar == (char)Keys.Enter)
-            {
-                if (File.Exists(imagesPath + "updatedROI.jpg"))
-                {
-                    // Intentar convertir el texto del TextBox a un número entero
-                    if (int.TryParse(TXT_ROI_Top.Text, out UserROI.Top))
-                    {
-                        // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-                        //MessageBox.Show("Data Saved: " + UserROI.Right, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        if (!triggerPLC && mode == 0)
-                        {
-                            if (UserROI.Top > 5 && UserROI.Top < 230)
-                            {
-                                settings.ROI_Top = UserROI.Top;
-                                updateROI();
-                            }
-                            else
-                            {
-                                MessageBox.Show("Out of range");
-                                UserROI.Top = settings.ROI_Top;
-                                TXT_ROI_Top.Text = settings.ROI_Top.ToString();
-                            }
+        //private void Txt_UserROITop_KeyPress(object sender, KeyPressEventArgs e)
+        //{
+        //    // Verificar si la tecla presionada es "Enter" (código ASCII 13)
+        //    if (e.KeyChar == (char)Keys.Enter)
+        //    {
+        //        if (File.Exists(imagesPath + "updatedROI.jpg"))
+        //        {
+        //            // Intentar convertir el texto del TextBox a un número entero
+        //            if (int.TryParse(TXT_ROI_Top.Text, out UserROI.Top))
+        //            {
+        //                // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
+        //                //MessageBox.Show("Data Saved: " + UserROI.Right, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        //                if (!triggerPLC && mode == 0)
+        //                {
+        //                    if (UserROI.Top > 5 && UserROI.Top < 230)
+        //                    {
+        //                        settings.ROI_Top = UserROI.Top;
+        //                        updateROI();
+        //                    }
+        //                    else
+        //                    {
+        //                        MessageBox.Show("Out of range");
+        //                        UserROI.Top = settings.ROI_Top;
+        //                        TXT_ROI_Top.Text = settings.ROI_Top.ToString();
+        //                    }
 
-                        }
-                        else
-                        {
-                            MessageBox.Show("Change the operation mode");
-                            UserROI.Top = settings.ROI_Top;
-                            TXT_ROI_Top.Text = settings.ROI_Top.ToString();
-                        }
-                    }
-                    else
-                    {
-                        // Manejar el caso en que el texto no sea un número válido
-                        MessageBox.Show("usea a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
-                else
-                {
-                    UserROI.Top = settings.ROI_Top;
-                    TXT_ROI_Top.Text = settings.ROI_Top.ToString();
-                    MessageBox.Show("Please first take a frame");
-                }
-            }
-        }
+        //                }
+        //                else
+        //                {
+        //                    MessageBox.Show("Change the operation mode");
+        //                    UserROI.Top = settings.ROI_Top;
+        //                    TXT_ROI_Top.Text = settings.ROI_Top.ToString();
+        //                }
+        //            }
+        //            else
+        //            {
+        //                // Manejar el caso en que el texto no sea un número válido
+        //                MessageBox.Show("usea a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //            }
+        //        }
+        //        else
+        //        {
+        //            UserROI.Top = settings.ROI_Top;
+        //            TXT_ROI_Top.Text = settings.ROI_Top.ToString();
+        //            MessageBox.Show("Please first take a frame");
+        //        }
+        //    }
+        //}
 
-        private void Txt_UserROIRight_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            // Verificar si la tecla presionada es "Enter" (código ASCII 13)
-            if (e.KeyChar == (char)Keys.Enter)
-            {
-                if (File.Exists(imagesPath + "updatedROI.jpg"))
-                {
-                    // Intentar convertir el texto del TextBox a un número entero
-                    if (int.TryParse(TXT_ROI_Right.Text, out UserROI.Right))
-                    {
-                        // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-                        //MessageBox.Show("Data Saved: " + UserROI.Right, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        if (!triggerPLC && mode == 0)
-                        {
-                            if (UserROI.Right > 330 && UserROI.Right < 630)
-                            {
-                                settings.ROI_Right = UserROI.Right;
-                                updateROI();
-                            }
-                            else
-                            {
-                                MessageBox.Show("Out of range");
-                                UserROI.Right = settings.ROI_Right;
-                                TXT_ROI_Right.Text = settings.ROI_Right.ToString();
-                            }
+        //private void Txt_UserROIRight_KeyPress(object sender, KeyPressEventArgs e)
+        //{
+        //    // Verificar si la tecla presionada es "Enter" (código ASCII 13)
+        //    if (e.KeyChar == (char)Keys.Enter)
+        //    {
+        //        if (File.Exists(imagesPath + "updatedROI.jpg"))
+        //        {
+        //            // Intentar convertir el texto del TextBox a un número entero
+        //            if (int.TryParse(TXT_ROI_Right.Text, out UserROI.Right))
+        //            {
+        //                // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
+        //                //MessageBox.Show("Data Saved: " + UserROI.Right, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        //                if (!triggerPLC && mode == 0)
+        //                {
+        //                    if (UserROI.Right > 330 && UserROI.Right < 630)
+        //                    {
+        //                        settings.ROI_Right = UserROI.Right;
+        //                        updateROI();
+        //                    }
+        //                    else
+        //                    {
+        //                        MessageBox.Show("Out of range");
+        //                        UserROI.Right = settings.ROI_Right;
+        //                        TXT_ROI_Right.Text = settings.ROI_Right.ToString();
+        //                    }
 
-                        }
-                        else
-                        {
-                            MessageBox.Show("Change the operation mode");
-                            UserROI.Right = settings.ROI_Right;
-                            TXT_ROI_Right.Text = settings.ROI_Right.ToString();
-                        }
-                    }
-                    else
-                    {
-                        // Manejar el caso en que el texto no sea un número válido
-                        MessageBox.Show("usea a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
-                else
-                {
-                    UserROI.Right = settings.ROI_Right;
-                    TXT_ROI_Right.Text = settings.ROI_Right.ToString();
-                    MessageBox.Show("Please first take a frame");
-                }
+        //                }
+        //                else
+        //                {
+        //                    MessageBox.Show("Change the operation mode");
+        //                    UserROI.Right = settings.ROI_Right;
+        //                    TXT_ROI_Right.Text = settings.ROI_Right.ToString();
+        //                }
+        //            }
+        //            else
+        //            {
+        //                // Manejar el caso en que el texto no sea un número válido
+        //                MessageBox.Show("usea a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //            }
+        //        }
+        //        else
+        //        {
+        //            UserROI.Right = settings.ROI_Right;
+        //            TXT_ROI_Right.Text = settings.ROI_Right.ToString();
+        //            MessageBox.Show("Please first take a frame");
+        //        }
                 
-            }
-        }
+        //    }
+        //}
 
-        private void Txt_UserROILeft_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            // Verificar si la tecla presionada es "Enter" (código ASCII 13)
-            if (e.KeyChar == (char)Keys.Enter)
-            {
-                if (File.Exists(imagesPath + "updatedROI.jpg"))
-                {
-                    // Intentar convertir el texto del TextBox a un número entero
-                    if (int.TryParse(TXT_ROI_Left.Text, out UserROI.Left))
-                    {
-                        // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-                        // MessageBox.Show("Data saved: " + UserROI.Left, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        if (!triggerPLC && mode == 0)
-                        {
-                            if (UserROI.Left > 10 && UserROI.Left < 310)
-                            {
-                                settings.ROI_Left = UserROI.Left;
-                                updateROI();
-                            }
-                            else
-                            {
-                                MessageBox.Show("Out of range");
-                                UserROI.Left = settings.ROI_Left;
-                                TXT_ROI_Left.Text = settings.ROI_Left.ToString();
-                            }
+        //private void Txt_UserROILeft_KeyPress(object sender, KeyPressEventArgs e)
+        //{
+        //    // Verificar si la tecla presionada es "Enter" (código ASCII 13)
+        //    if (e.KeyChar == (char)Keys.Enter)
+        //    {
+        //        if (File.Exists(imagesPath + "updatedROI.jpg"))
+        //        {
+        //            // Intentar convertir el texto del TextBox a un número entero
+        //            if (int.TryParse(TXT_ROI_Left.Text, out UserROI.Left))
+        //            {
+        //                // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
+        //                // MessageBox.Show("Data saved: " + UserROI.Left, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        //                if (!triggerPLC && mode == 0)
+        //                {
+        //                    if (UserROI.Left > 10 && UserROI.Left < 310)
+        //                    {
+        //                        settings.ROI_Left = UserROI.Left;
+        //                        updateROI();
+        //                    }
+        //                    else
+        //                    {
+        //                        MessageBox.Show("Out of range");
+        //                        UserROI.Left = settings.ROI_Left;
+        //                        TXT_ROI_Left.Text = settings.ROI_Left.ToString();
+        //                    }
 
-                        }
-                        else
-                        {
-                            MessageBox.Show("Change the operation mode");
-                            UserROI.Left = settings.ROI_Left;
-                            TXT_ROI_Left.Text = settings.ROI_Left.ToString();
-                        }
-                    }
-                    else
-                    {
-                        // Manejar el caso en que el texto no sea un número válido
-                        MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
-                else
-                {
-                    UserROI.Left = settings.ROI_Left;
-                    TXT_ROI_Left.Text = settings.ROI_Left.ToString();
-                    MessageBox.Show("Please first take a frame");
-                }
-            }
-        }
+        //                }
+        //                else
+        //                {
+        //                    MessageBox.Show("Change the operation mode");
+        //                    UserROI.Left = settings.ROI_Left;
+        //                    TXT_ROI_Left.Text = settings.ROI_Left.ToString();
+        //                }
+        //            }
+        //            else
+        //            {
+        //                // Manejar el caso en que el texto no sea un número válido
+        //                MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //            }
+        //        }
+        //        else
+        //        {
+        //            UserROI.Left = settings.ROI_Left;
+        //            TXT_ROI_Left.Text = settings.ROI_Left.ToString();
+        //            MessageBox.Show("Please first take a frame");
+        //        }
+        //    }
+        //}
 
         private void updateROI()
         {
@@ -3186,22 +3194,21 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             if (m_Xfer.Grabbing)
             {
                 m_Xfer.Abort();
-                //viewModeBtn.PerformClick();
                 processImageBtn.Enabled = true;
                 processImageBtn.BackColor = Color.Silver;
             }
 
             if (triggerPLC)
             {
-                // triggerModeBtn.BackColor = DefaultBackColor;
                 txtTriggerSource.Text = "PLC";
                 txtTriggerSource.BackColor = Color.LightGreen;
                 virtualTriggerBtn.Enabled = false;
                 virtualTriggerBtn.BackColor = Color.DarkGray;
 
+                changeTriggerMode("PLC");
+
                 startStop();
 
-                changeTriggerMode("PLC");
                 //m_AcqDevice.LoadFeatures(configPath + "\\TriggerON.ccf");
 
                 viewModeBtn.Enabled = false;
@@ -3224,15 +3231,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 processImageBtn.Enabled = true;
                 processImageBtn.BackColor = Color.Silver;
 
-                AbortDlg abort = new AbortDlg(m_Xfer);
+                //AbortDlg abort = new AbortDlg(m_Xfer);
 
-                if (m_Xfer.Freeze())
-                {
-                    if (abort.ShowDialog() != DialogResult.OK)
-                        m_Xfer.Abort();
-                    UpdateControls();
-                    //viewModeBtn.BackColor = Color.Silver; // Cambiar el color de fondo a gris
-                }
+                //if (m_Xfer.Freeze())
+                //{
+                //    if (abort.ShowDialog() != DialogResult.OK)
+                //        m_Xfer.Abort();
+                //    UpdateControls();
+                //    viewModeBtn.BackColor = Color.Silver; // Cambiar el color de fondo a gris
+                //}
 
                 txtTriggerSource.Text = "SOFTWARE";
                 txtTriggerSource.BackColor = Color.Khaki;
@@ -4108,7 +4115,267 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
-        private void timeElapsedLabel_Click(object sender, EventArgs e)
+        private void btnIncrementRoiWidth_Click(object sender, EventArgs e)
+        {
+            if (File.Exists(imagesPath + "updatedROI.jpg"))
+            {
+                int roiWidth = (UserROI.Right - UserROI.Left) + 6;
+                if (roiWidth > 630) roiWidth = (630);
+                if (roiWidth % 2 == 0)
+                {
+                    UserROI.Left = 320 - roiWidth / 2;
+                    UserROI.Right = 320 + roiWidth / 2;
+                }
+                else
+                {
+                    UserROI.Left = 320 - (int)(roiWidth / 2) + 1;
+                    UserROI.Right = 320 + (int)(roiWidth / 2);
+                }
+
+                if (!triggerPLC && mode == 0)
+                {
+                    settings.ROI_Left = UserROI.Left;
+                    settings.ROI_Right = UserROI.Right;
+                    txtRoiWidth.Text = roiWidth.ToString();
+                    updateROI();
+                }
+                else
+                {
+                    MessageBox.Show("Change the operation mode");
+                    UserROI.Left = settings.ROI_Left;
+                    UserROI.Right = settings.ROI_Right;
+                    txtRoiWidth.Text = (settings.ROI_Right - settings.ROI_Left).ToString();
+                }
+            }
+            else
+            {
+                MessageBox.Show("Please first take a frame");
+            }
+        }
+
+        private void btnDecrementRoiWidth_Click(object sender, EventArgs e)
+        {
+            if (File.Exists(imagesPath + "updatedROI.jpg"))
+            {
+                int roiWidth = (UserROI.Right - UserROI.Left) - 6;
+                if (roiWidth < 12) roiWidth = (12);
+                if (roiWidth % 2 == 0)
+                {
+                    UserROI.Left = 320 - roiWidth / 2;
+                    UserROI.Right = 320 + roiWidth / 2;
+                }
+                else
+                {
+                    UserROI.Left = 320 - (int)(roiWidth / 2) + 1;
+                    UserROI.Right = 320 + (int)(roiWidth / 2);
+                }
+
+                if (!triggerPLC && mode == 0)
+                {
+                    settings.ROI_Left = UserROI.Left;
+                    settings.ROI_Right = UserROI.Right;
+                    txtRoiWidth.Text = roiWidth.ToString();
+                    updateROI();
+                }
+                else
+                {
+                    MessageBox.Show("Change the operation mode");
+                    UserROI.Left = settings.ROI_Left;
+                    UserROI.Right = settings.ROI_Right;
+                    txtRoiWidth.Text = (settings.ROI_Right - settings.ROI_Left).ToString();
+                }
+            }
+            else
+            {
+                MessageBox.Show("Please first take a frame");
+            }
+        }
+
+        private void btnIncrementRoiHeight_Click(object sender, EventArgs e)
+        {
+            if (File.Exists(imagesPath + "updatedROI.jpg"))
+            {
+                int roiHeight = (UserROI.Bottom - UserROI.Top) + 6;
+                if (roiHeight > 470) roiHeight = (470);
+                if (roiHeight % 2 == 0)
+                {
+                    UserROI.Top = 240 - roiHeight / 2;
+                    UserROI.Bottom = 240 + roiHeight / 2;
+                }
+                else
+                {
+                    UserROI.Top = 240 - (int)(roiHeight / 2) + 1;
+                    UserROI.Bottom = 240 + (int)(roiHeight / 2);
+                }
+
+                if (!triggerPLC && mode == 0)
+                {
+                    settings.ROI_Top = UserROI.Top;
+                    settings.ROI_Bottom = UserROI.Bottom;
+                    txtRoiHeight.Text = roiHeight.ToString();
+                    updateROI();
+                }
+                else
+                {
+                    MessageBox.Show("Change the operation mode");
+                    UserROI.Top = settings.ROI_Top;
+                    UserROI.Bottom = settings.ROI_Bottom;
+                    txtRoiHeight.Text = (settings.ROI_Bottom - settings.ROI_Top).ToString();
+                }
+            }
+            else
+            {
+                MessageBox.Show("Please first take a frame");
+            }
+        }
+
+        private void btnDecrementRoiHeight_Click(object sender, EventArgs e)
+        {
+            if (File.Exists(imagesPath + "updatedROI.jpg"))
+            {
+                int roiHeight = (UserROI.Bottom - UserROI.Top) - 6;
+                if (roiHeight < 12) roiHeight = (12);
+                if (roiHeight % 2 == 0)
+                {
+                    UserROI.Top = 240 - roiHeight / 2;
+                    UserROI.Bottom = 240 + roiHeight / 2;
+                }
+                else
+                {
+                    UserROI.Top = 240 - (int)(roiHeight / 2) + 1;
+                    UserROI.Bottom = 240 + (int)(roiHeight / 2);
+                }
+
+                if (!triggerPLC && mode == 0)
+                {
+                    settings.ROI_Top = UserROI.Top;
+                    settings.ROI_Bottom = UserROI.Bottom;
+                    txtRoiHeight.Text = roiHeight.ToString();
+                    updateROI();
+                }
+                else
+                {
+                    MessageBox.Show("Change the operation mode");
+                    UserROI.Top = settings.ROI_Top;
+                    UserROI.Bottom = settings.ROI_Bottom;
+                    txtRoiHeight.Text = (settings.ROI_Bottom - settings.ROI_Top).ToString();
+                }
+            }
+            else
+            {
+                MessageBox.Show("Please first take a frame");
+            }
+        }
+
+        private void txtRoiWidth_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Verificar si la tecla presionada es "Enter" (código ASCII 13)
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                if (File.Exists(imagesPath + "updatedROI.jpg"))
+                {
+                    int roiWidth;
+                    if (int.TryParse(txtRoiWidth.Text, out roiWidth))
+                    {
+                        //int roiWidth = int.Parse(txtRoiWidth.Text);
+                        if (roiWidth > 630) roiWidth = (630);
+                        if (roiWidth < 12) roiWidth = (12);
+                        if (roiWidth % 2 == 0)
+                        {
+                            UserROI.Left = 320 - roiWidth / 2;
+                            UserROI.Right = 320 + roiWidth / 2;
+                        }
+                        else
+                        {
+                            UserROI.Left = 320 - (int)(roiWidth / 2) + 1;
+                            UserROI.Right = 320 + (int)(roiWidth / 2);
+                        }
+
+                        if (!triggerPLC && mode == 0)
+                        {
+                            settings.ROI_Left = UserROI.Left;
+                            settings.ROI_Right = UserROI.Right;
+                            txtRoiWidth.Text = roiWidth.ToString();
+                            updateROI();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Change the operation mode");
+                            UserROI.Left = settings.ROI_Left;
+                            UserROI.Right = settings.ROI_Right;
+                            txtRoiWidth.Text = (settings.ROI_Right - settings.ROI_Left).ToString();
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Use a valid number");
+                        txtRoiWidth.Text = (settings.ROI_Right - settings.ROI_Left).ToString();
+                    }
+
+                }
+                else
+                {
+                    MessageBox.Show("Please first take a frame");
+                    txtRoiWidth.Text = (settings.ROI_Right - settings.ROI_Left).ToString();
+                }
+            }
+        }
+
+        private void txtRoiHeight_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Verificar si la tecla presionada es "Enter" (código ASCII 13)
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                if (File.Exists(imagesPath + "updatedROI.jpg"))
+                {
+                    int roiHeight;
+                    if (int.TryParse(txtRoiHeight.Text, out roiHeight))
+                    {
+                        //int roiHeight = int.Parse(txtRoiHeight.Text);
+                        if (roiHeight > 470) roiHeight = (470);
+                        if (roiHeight < 12) roiHeight = (12);
+                        if (roiHeight % 2 == 0)
+                        {
+                            UserROI.Top = 240 - roiHeight / 2;
+                            UserROI.Bottom = 240 + roiHeight / 2;
+                        }
+                        else
+                        {
+                            UserROI.Top = 240 - (int)(roiHeight / 2) + 1;
+                            UserROI.Bottom = 240 + (int)(roiHeight / 2);
+                        }
+
+                        if (!triggerPLC && mode == 0)
+                        {
+                            settings.ROI_Top = UserROI.Top;
+                            settings.ROI_Bottom = UserROI.Bottom;
+                            txtRoiHeight.Text = roiHeight.ToString();
+                            updateROI();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Change the operation mode");
+                            UserROI.Top = settings.ROI_Top;
+                            UserROI.Bottom = settings.ROI_Bottom;
+                            txtRoiHeight.Text = (settings.ROI_Bottom - settings.ROI_Top).ToString();
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Use a valid number");
+                        txtRoiHeight.Text = (settings.ROI_Bottom - settings.ROI_Top).ToString();
+                    }
+
+                }
+                else
+                {
+                    MessageBox.Show("Please first take a frame");
+                    txtRoiHeight.Text = (settings.ROI_Bottom - settings.ROI_Top).ToString();
+                }
+            }
+        }
+
+        private void toolStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
 
         }
