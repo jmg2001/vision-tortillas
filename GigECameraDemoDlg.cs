@@ -62,6 +62,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         bool authenticated = false;
         string user = "admin";
 
+        bool freezeFrame = false;
+
         Properties.Settings settings = new Properties.Settings();
 
         // Color de la tortilla en la imagen binarizada
@@ -740,7 +742,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             drawROI(ref originalImageCV);
 
-            originalBox.Image = originalImageCV.ToBitmap();
+            if (!freezeFrame) originalBox.Image = originalImageCV.ToBitmap();
             originalBox.SizeMode = PictureBoxSizeMode.AutoSize;
             originalBox.Visible = true;
             originalBox.BringToFront();
@@ -1091,7 +1093,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 // Procesamos el ROI
                 blobProces(roiImage, processROIBox);
-                processROIBox.Image = roiImage.ToBitmap();
+                if (!freezeFrame) processROIBox.Image = roiImage.ToBitmap();
             }
             catch
             {
@@ -2604,7 +2606,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             //image = ConvertToCompatibleFormat(image);
 
             // Limpiamos la tabla
-            dataTable.Clear();
+            if (!freezeFrame) dataTable.Clear();
 
             // Inicializamos variables
             double avgControlD = 0;
@@ -2683,7 +2685,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     ushort size = calculateSize(maxDiameter, minDiameter, compactness, ovalidad);
 
                     // Agregamos los datos a la tabla
-                    dataTable.Rows.Add(sector, area, Math.Round(diametroIA * tempFactor, 3), Math.Round(diameterTriangles * tempFactor, 3), Math.Round(maxDiameter * tempFactor, 3), Math.Round(minDiameter * tempFactor, 3), Math.Round(compactness, 3), Math.Round(ovalidad, 3));
+                    if (!freezeFrame) dataTable.Rows.Add(sector, area, Math.Round(diametroIA * tempFactor, 3), Math.Round(diameterTriangles * tempFactor, 3), Math.Round(maxDiameter * tempFactor, 3), Math.Round(minDiameter * tempFactor, 3), Math.Round(compactness, 3), Math.Round(ovalidad, 3));
 
                     Blob blob = new Blob(area, perimeter, contours[i], diameterTriangles, diametroIA, centro, maxDiameter, minDiameter, sector, compactness, size, ovalidad);
 
@@ -2750,13 +2752,16 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             avgD /= n;
 
             // Asignamos el texto del promedio de los diametros
-            avg_diameter.Text = Math.Round(avgControlD, 3).ToString();
-            txtAvgMaxD.Text = Math.Round(avgMaxD, 3).ToString();
-            txtAvgMinD.Text = Math.Round(avgMinD, 3).ToString();
-            txtControlDiameter.Text = Math.Round(avgD, 3).ToString();
+            if (!freezeFrame)
+            {
+                avg_diameter.Text = Math.Round(avgControlD, 3).ToString();
+                txtAvgMaxD.Text = Math.Round(avgMaxD, 3).ToString();
+                txtAvgMinD.Text = Math.Round(avgMinD, 3).ToString();
+                txtControlDiameter.Text = Math.Round(avgD, 3).ToString();
 
-            // Asignar la DataTable al DataGridView
-            dataGridView1.DataSource = dataTable;
+                // Asignar la DataTable al DataGridView
+                dataGridView1.DataSource = dataTable;
+            }
 
         }
 
@@ -4472,6 +4477,20 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private void Chk_Threshold_Mode_CheckedChanged_1(object sender, EventArgs e)
         {
 
+        }
+
+        private void btnFreezeFrame_Click(object sender, EventArgs e)
+        {
+            if (freezeFrame)
+            {
+                freezeFrame = false;
+                btnFreezeFrame.BackColor = Color.Silver;
+            }
+            else
+            {
+                freezeFrame = true;
+                btnFreezeFrame.BackColor = Color.LightGreen;
+            }
         }
     }
 }

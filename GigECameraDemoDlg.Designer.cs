@@ -169,6 +169,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Label28 = new System.Windows.Forms.Label();
             this.Cmd_Save = new System.Windows.Forms.Button();
             this.Chk_Digital_Knife = new System.Windows.Forms.CheckBox();
+            this.btnFreezeFrame = new System.Windows.Forms.Button();
             this.toolStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.GroupBox1.SuspendLayout();
@@ -653,6 +654,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.grid_16.Size = new System.Drawing.Size(67, 42);
             this.grid_16.TabIndex = 75;
             this.grid_16.UseVisualStyleBackColor = false;
+            this.grid_16.Visible = false;
             this.grid_16.Click += new System.EventHandler(this.Cmd_Program_6_Click);
             // 
             // grid_12
@@ -664,6 +666,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.grid_12.Size = new System.Drawing.Size(67, 42);
             this.grid_12.TabIndex = 74;
             this.grid_12.UseVisualStyleBackColor = false;
+            this.grid_12.Visible = false;
             this.grid_12.Click += new System.EventHandler(this.Cmd_Program_5_Click);
             // 
             // grid_6
@@ -677,6 +680,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.grid_6.TabIndex = 73;
             this.grid_6.Text = "4x4";
             this.grid_6.UseVisualStyleBackColor = false;
+            this.grid_6.Visible = false;
             this.grid_6.Click += new System.EventHandler(this.grid_6_Click);
             // 
             // grid_5
@@ -690,6 +694,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.grid_5.TabIndex = 72;
             this.grid_5.Text = "5";
             this.grid_5.UseVisualStyleBackColor = false;
+            this.grid_5.Visible = false;
             this.grid_5.Click += new System.EventHandler(this.grid_5_Click);
             // 
             // grid_4
@@ -715,6 +720,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.grid_9.TabIndex = 70;
             this.grid_9.Text = "2x2";
             this.grid_9.UseVisualStyleBackColor = false;
+            this.grid_9.Visible = false;
             this.grid_9.Click += new System.EventHandler(this.grid_9_Click);
             // 
             // label1
@@ -765,10 +771,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // mainControlPage
             // 
             this.mainControlPage.BackColor = System.Drawing.Color.LightSteelBlue;
+            this.mainControlPage.Controls.Add(this.btnFreezeFrame);
             this.mainControlPage.Controls.Add(this.groupBox5);
             this.mainControlPage.Controls.Add(this.groupBox2);
-            this.mainControlPage.Controls.Add(this.label8);
-            this.mainControlPage.Controls.Add(this.formatTxt);
             this.mainControlPage.Controls.Add(this.GroupSelectGrid);
             this.mainControlPage.Controls.Add(this.GroupBox1);
             this.mainControlPage.Controls.Add(this.GroupBox8);
@@ -898,7 +903,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.groupBox2.Controls.Add(this.txtControlDiameter);
             this.groupBox2.Location = new System.Drawing.Point(6, 240);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(406, 49);
+            this.groupBox2.Size = new System.Drawing.Size(258, 49);
             this.groupBox2.TabIndex = 114;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Control Diameter";
@@ -927,7 +932,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             this.label8.AutoSize = true;
             this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label8.Location = new System.Drawing.Point(13, 655);
+            this.label8.Location = new System.Drawing.Point(644, 609);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(65, 29);
             this.label8.TabIndex = 117;
@@ -937,7 +942,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             this.formatTxt.AutoSize = true;
             this.formatTxt.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.formatTxt.Location = new System.Drawing.Point(84, 655);
+            this.formatTxt.Location = new System.Drawing.Point(715, 609);
             this.formatTxt.Name = "formatTxt";
             this.formatTxt.Size = new System.Drawing.Size(50, 29);
             this.formatTxt.TabIndex = 118;
@@ -1347,6 +1352,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.imagePage.BackColor = System.Drawing.Color.Silver;
             this.imagePage.Controls.Add(this.originalBox);
             this.imagePage.Controls.Add(this.processROIBox);
+            this.imagePage.Controls.Add(this.label8);
+            this.imagePage.Controls.Add(this.formatTxt);
             this.imagePage.Cursor = System.Windows.Forms.Cursors.Cross;
             this.imagePage.Location = new System.Drawing.Point(4, 44);
             this.imagePage.Name = "imagePage";
@@ -1710,6 +1717,18 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Chk_Digital_Knife.Text = "Digital Knife";
             this.Chk_Digital_Knife.UseVisualStyleBackColor = true;
             // 
+            // btnFreezeFrame
+            // 
+            this.btnFreezeFrame.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnFreezeFrame.BackColor = System.Drawing.Color.Silver;
+            this.btnFreezeFrame.Location = new System.Drawing.Point(290, 243);
+            this.btnFreezeFrame.Name = "btnFreezeFrame";
+            this.btnFreezeFrame.Size = new System.Drawing.Size(107, 49);
+            this.btnFreezeFrame.TabIndex = 129;
+            this.btnFreezeFrame.Text = "FREEZE FRAME";
+            this.btnFreezeFrame.UseVisualStyleBackColor = false;
+            this.btnFreezeFrame.Click += new System.EventHandler(this.btnFreezeFrame_Click);
+            // 
             // GigECameraDemoDlg
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1740,7 +1759,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.controlsTabs.ResumeLayout(false);
             this.mainControlPage.ResumeLayout(false);
-            this.mainControlPage.PerformLayout();
             this.groupBox5.ResumeLayout(false);
             this.groupBox5.PerformLayout();
             this.groupBox2.ResumeLayout(false);
@@ -1759,6 +1777,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.groupBox4.PerformLayout();
             this.mainTabs.ResumeLayout(false);
             this.imagePage.ResumeLayout(false);
+            this.imagePage.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.originalBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.processROIBox)).EndInit();
             this.tablePage.ResumeLayout(false);
@@ -1924,6 +1943,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private ToolStripSeparator toolStripSeparator5;
         private ToolStripLabel framesProcessedLabel;
         private ToolStripLabel framesProcessed;
+        internal Button btnFreezeFrame;
     }
 }
 
