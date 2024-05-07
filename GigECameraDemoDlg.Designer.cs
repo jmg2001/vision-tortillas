@@ -92,6 +92,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.controlsTabs = new System.Windows.Forms.TabControl();
             this.mainControlPage = new System.Windows.Forms.TabPage();
+            this.btnFreezeFrame = new System.Windows.Forms.Button();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.txtAvgMinDiameterUnits = new System.Windows.Forms.Label();
             this.txtAvgMaxDiameterUnits = new System.Windows.Forms.Label();
@@ -105,8 +106,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.txtControlDiameterUnits = new System.Windows.Forms.Label();
             this.txtControlDiameter = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
-            this.formatTxt = new System.Windows.Forms.Label();
             this.configurationPage = new System.Windows.Forms.TabPage();
             this.inputTopRoi = new System.Windows.Forms.NumericUpDown();
             this.Label35 = new System.Windows.Forms.Label();
@@ -135,6 +134,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.calibrateBtn = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
             this.Label37 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.formatTxt = new System.Windows.Forms.Label();
             this.mainTabs = new System.Windows.Forms.TabControl();
             this.imagePage = new System.Windows.Forms.TabPage();
             this.originalBox = new System.Windows.Forms.PictureBox();
@@ -169,7 +170,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Label28 = new System.Windows.Forms.Label();
             this.Cmd_Save = new System.Windows.Forms.Button();
             this.Chk_Digital_Knife = new System.Windows.Forms.CheckBox();
-            this.btnFreezeFrame = new System.Windows.Forms.Button();
             this.toolStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.GroupBox1.SuspendLayout();
@@ -771,7 +771,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // mainControlPage
             // 
             this.mainControlPage.BackColor = System.Drawing.Color.LightSteelBlue;
-            this.mainControlPage.Controls.Add(this.btnFreezeFrame);
             this.mainControlPage.Controls.Add(this.groupBox5);
             this.mainControlPage.Controls.Add(this.groupBox2);
             this.mainControlPage.Controls.Add(this.GroupSelectGrid);
@@ -788,8 +787,21 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.mainControlPage.TabIndex = 0;
             this.mainControlPage.Text = "Operation";
             // 
+            // btnFreezeFrame
+            // 
+            this.btnFreezeFrame.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnFreezeFrame.BackColor = System.Drawing.Color.Silver;
+            this.btnFreezeFrame.Location = new System.Drawing.Point(285, 44);
+            this.btnFreezeFrame.Name = "btnFreezeFrame";
+            this.btnFreezeFrame.Size = new System.Drawing.Size(107, 49);
+            this.btnFreezeFrame.TabIndex = 129;
+            this.btnFreezeFrame.Text = "FREEZE FRAME";
+            this.btnFreezeFrame.UseVisualStyleBackColor = false;
+            this.btnFreezeFrame.Click += new System.EventHandler(this.btnFreezeFrame_Click);
+            // 
             // groupBox5
             // 
+            this.groupBox5.Controls.Add(this.btnFreezeFrame);
             this.groupBox5.Controls.Add(this.txtAvgMinDiameterUnits);
             this.groupBox5.Controls.Add(this.txtAvgMaxDiameterUnits);
             this.groupBox5.Controls.Add(this.txtAvgDiameterUnits);
@@ -903,7 +915,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.groupBox2.Controls.Add(this.txtControlDiameter);
             this.groupBox2.Location = new System.Drawing.Point(6, 240);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(258, 49);
+            this.groupBox2.Size = new System.Drawing.Size(406, 49);
             this.groupBox2.TabIndex = 114;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Control Diameter";
@@ -927,26 +939,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.txtControlDiameter.Size = new System.Drawing.Size(24, 25);
             this.txtControlDiameter.TabIndex = 0;
             this.txtControlDiameter.Text = "0";
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label8.Location = new System.Drawing.Point(644, 609);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(65, 29);
-            this.label8.TabIndex = 117;
-            this.label8.Text = "Grid:";
-            // 
-            // formatTxt
-            // 
-            this.formatTxt.AutoSize = true;
-            this.formatTxt.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.formatTxt.Location = new System.Drawing.Point(715, 609);
-            this.formatTxt.Name = "formatTxt";
-            this.formatTxt.Size = new System.Drawing.Size(50, 29);
-            this.formatTxt.TabIndex = 118;
-            this.formatTxt.Text = "3x3";
             // 
             // configurationPage
             // 
@@ -1332,6 +1324,26 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Label37.TabIndex = 84;
             this.Label37.Text = "Bottom";
             // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label8.Location = new System.Drawing.Point(644, 609);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(65, 29);
+            this.label8.TabIndex = 117;
+            this.label8.Text = "Grid:";
+            // 
+            // formatTxt
+            // 
+            this.formatTxt.AutoSize = true;
+            this.formatTxt.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.formatTxt.Location = new System.Drawing.Point(715, 609);
+            this.formatTxt.Name = "formatTxt";
+            this.formatTxt.Size = new System.Drawing.Size(50, 29);
+            this.formatTxt.TabIndex = 118;
+            this.formatTxt.Text = "3x3";
+            // 
             // mainTabs
             // 
             this.mainTabs.Appearance = System.Windows.Forms.TabAppearance.FlatButtons;
@@ -1716,18 +1728,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Chk_Digital_Knife.TabIndex = 95;
             this.Chk_Digital_Knife.Text = "Digital Knife";
             this.Chk_Digital_Knife.UseVisualStyleBackColor = true;
-            // 
-            // btnFreezeFrame
-            // 
-            this.btnFreezeFrame.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnFreezeFrame.BackColor = System.Drawing.Color.Silver;
-            this.btnFreezeFrame.Location = new System.Drawing.Point(290, 243);
-            this.btnFreezeFrame.Name = "btnFreezeFrame";
-            this.btnFreezeFrame.Size = new System.Drawing.Size(107, 49);
-            this.btnFreezeFrame.TabIndex = 129;
-            this.btnFreezeFrame.Text = "FREEZE FRAME";
-            this.btnFreezeFrame.UseVisualStyleBackColor = false;
-            this.btnFreezeFrame.Click += new System.EventHandler(this.btnFreezeFrame_Click);
             // 
             // GigECameraDemoDlg
             // 

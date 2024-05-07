@@ -190,5 +190,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Properties {
                 this["productCode"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public long frames {
+            get {
+                return ((long)(this["frames"]));
+            }
+            set {
+                this["frames"] = value;
+            }
+        }
     }
 }

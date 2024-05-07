@@ -196,6 +196,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 InitializeComponent();
                 InitializeDataTable();
 
+                //----------------Only for Debug, delete on production-----------------
+                MessageBox.Show(settings.frames.ToString() + " frames processed in the last execution");
+                settings.frames = 0;
+                settings.Save();
+                //----------------Only for Debug, delete on production-----------------
+
                 configurationPage.Enabled = true;
 
                 string actualDIrectory = AppDomain.CurrentDomain.BaseDirectory;
@@ -415,6 +421,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 if (!CreateNewObjects(acConfigDlg, false))
                     this.Close();
 
+                //----------------Only for Debug, delete on production-----------------
+                m_View.AutoEmpty = true;
+                MessageBox.Show(m_View.AutoEmpty.ToString());
+                //----------------Only for Debug, delete on production-----------------
+
 
                 // Cargamos la configuracion por default
                 m_AcqDevice.LoadFeatures(configPath + "\\STIconfig.ccf");
@@ -612,7 +623,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                             }
                         }
 
-                        GigeDlg.m_View.Show();
+                        m_View.Show();
 
                         switch (mode)
                         {
@@ -1066,6 +1077,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             frameCounter++;
             framesProcessed.Text = frameCounter.ToString();
+            //----------------Only for Debug, delete on production-----------------
+            settings.frames++;
+            settings.Save();
+            //----------------Only for Debug, delete on production-----------------
 
             //originalBox.Visible = true;
             processROIBox.Visible = true; // Mostrar el PictureBox ROI
@@ -2011,22 +2026,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // Verificar si la pestaña seleccionada es la que deseas
             if (mainTabs.SelectedTab == productsPage) // Cambia tabPage1 al nombre real de tu pestaña
             {
-                //CmbProducts.Items.Clear();
-                //using (var writer = new StreamWriter(new FileStream(@"C:\Users\Jesús\Desktop\test.csv", FileMode.Open), System.Text.Encoding.UTF8))
-                //using (var csvWriter = new CsvWriter(writer, CultureInfo.CurrentCulture))
-                //{
-                //    var records = new List<Product>();
-                //    //records.Add(new Product { Code = 1, MaxD = 130, MinD = 110, MaxOvality = 0.5, MaxCompacity = 12 });
-                //    //csvWriter.WriteRecords(records);
-                //    foreach (var record in records)
-                //    {
-                //        CmbProducts.Items.Add(record.Code);
-                //        if (record.Code == settings.productCode)
-                //        {
-                //            CmbProducts.SelectedItem = record.Code;
-                //        }
-                //    }
-                //}
+
             }
 
 
@@ -2037,12 +2037,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
           String str;
           if (trash)
           {
-             str = String.Format("Frames acquired in trash buffer: {0}", number);
+             // str = String.Format("Frames acquired in trash buffer: {0}", number);
+             str = String.Format("TrashBuffer: {0}", number);
              this.StatusLabelInfoTrash.Text = str;
           }
           else
           {
-             str = String.Format("Frames acquired :{0}", number);
+             // str = String.Format("Frames acquired :{0}", number);
+             str = String.Format("{0}", number);
              this.StatusLabelInfo.Text = str;
           }
        }
@@ -2075,7 +2077,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             m_Xfer.XferNotifyContext = this;
             StatusLabelInfo.Text = "Online... Waiting grabbed images";
 
-
+            
 
             if (!CreateObjects())
             {
