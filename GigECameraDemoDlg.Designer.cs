@@ -92,8 +92,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.controlsTabs = new System.Windows.Forms.TabControl();
             this.mainControlPage = new System.Windows.Forms.TabPage();
-            this.btnFreezeFrame = new System.Windows.Forms.Button();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.btnFreezeFrame = new System.Windows.Forms.Button();
             this.txtAvgMinDiameterUnits = new System.Windows.Forms.Label();
             this.txtAvgMaxDiameterUnits = new System.Windows.Forms.Label();
             this.txtAvgDiameterUnits = new System.Windows.Forms.Label();
@@ -228,7 +228,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.toolStrip1.Size = new System.Drawing.Size(775, 25);
             this.toolStrip1.TabIndex = 10;
             this.toolStrip1.Text = "toolStrip1";
-            this.toolStrip1.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.toolStrip1_ItemClicked);
             // 
             // StatusLabel
             // 
@@ -415,7 +414,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             this.virtualTriggerBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.virtualTriggerBtn.BackColor = System.Drawing.Color.Silver;
-            this.virtualTriggerBtn.Location = new System.Drawing.Point(218, 20);
+            this.virtualTriggerBtn.Location = new System.Drawing.Point(216, 20);
             this.virtualTriggerBtn.Name = "virtualTriggerBtn";
             this.virtualTriggerBtn.Size = new System.Drawing.Size(75, 55);
             this.virtualTriggerBtn.TabIndex = 74;
@@ -426,9 +425,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // processImageBtn
             // 
             this.processImageBtn.BackColor = System.Drawing.Color.Silver;
-            this.processImageBtn.Location = new System.Drawing.Point(304, 20);
+            this.processImageBtn.Location = new System.Drawing.Point(296, 20);
             this.processImageBtn.Name = "processImageBtn";
-            this.processImageBtn.Size = new System.Drawing.Size(90, 55);
+            this.processImageBtn.Size = new System.Drawing.Size(107, 55);
             this.processImageBtn.TabIndex = 73;
             this.processImageBtn.Text = "PROCESS FRAME";
             this.processImageBtn.UseVisualStyleBackColor = false;
@@ -438,7 +437,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             this.triggerModeBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.triggerModeBtn.BackColor = System.Drawing.Color.Silver;
-            this.triggerModeBtn.Location = new System.Drawing.Point(118, 20);
+            this.triggerModeBtn.Location = new System.Drawing.Point(115, 20);
             this.triggerModeBtn.Name = "triggerModeBtn";
             this.triggerModeBtn.Size = new System.Drawing.Size(93, 55);
             this.triggerModeBtn.TabIndex = 72;
@@ -450,7 +449,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             this.viewModeBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.viewModeBtn.BackColor = System.Drawing.Color.Silver;
-            this.viewModeBtn.Location = new System.Drawing.Point(9, 20);
+            this.viewModeBtn.Location = new System.Drawing.Point(7, 20);
             this.viewModeBtn.Name = "viewModeBtn";
             this.viewModeBtn.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.viewModeBtn.Size = new System.Drawing.Size(103, 55);
@@ -787,18 +786,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.mainControlPage.TabIndex = 0;
             this.mainControlPage.Text = "Operation";
             // 
-            // btnFreezeFrame
-            // 
-            this.btnFreezeFrame.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnFreezeFrame.BackColor = System.Drawing.Color.Silver;
-            this.btnFreezeFrame.Location = new System.Drawing.Point(285, 44);
-            this.btnFreezeFrame.Name = "btnFreezeFrame";
-            this.btnFreezeFrame.Size = new System.Drawing.Size(107, 49);
-            this.btnFreezeFrame.TabIndex = 129;
-            this.btnFreezeFrame.Text = "FREEZE FRAME";
-            this.btnFreezeFrame.UseVisualStyleBackColor = false;
-            this.btnFreezeFrame.Click += new System.EventHandler(this.btnFreezeFrame_Click);
-            // 
             // groupBox5
             // 
             this.groupBox5.Controls.Add(this.btnFreezeFrame);
@@ -817,6 +804,18 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.groupBox5.TabIndex = 115;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Frame Results";
+            // 
+            // btnFreezeFrame
+            // 
+            this.btnFreezeFrame.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnFreezeFrame.BackColor = System.Drawing.Color.Silver;
+            this.btnFreezeFrame.Location = new System.Drawing.Point(285, 31);
+            this.btnFreezeFrame.Name = "btnFreezeFrame";
+            this.btnFreezeFrame.Size = new System.Drawing.Size(107, 62);
+            this.btnFreezeFrame.TabIndex = 129;
+            this.btnFreezeFrame.Text = "FREEZE FRAME";
+            this.btnFreezeFrame.UseVisualStyleBackColor = false;
+            this.btnFreezeFrame.Click += new System.EventHandler(this.btnFreezeFrame_Click);
             // 
             // txtAvgMinDiameterUnits
             // 
