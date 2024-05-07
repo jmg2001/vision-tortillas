@@ -13,11 +13,19 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         [STAThread]
         static void Main()
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            GigECameraDemoDlg form = new GigECameraDemoDlg();
-            if (!form.IsDisposed)
-                Application.Run(form);
+            try
+            {
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                GigECameraDemoDlg form = new GigECameraDemoDlg();
+                if (!form.IsDisposed)
+                    Application.Run(form);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Se produjo un error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
         }
     }
 }

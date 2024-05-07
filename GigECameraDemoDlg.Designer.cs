@@ -374,6 +374,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             // GroupBox1
             // 
+            this.GroupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.GroupBox1.Controls.Add(this.txtTriggerSource);
             this.GroupBox1.Controls.Add(this.txtViewMode);
             this.GroupBox1.Controls.Add(this.virtualTriggerBtn);
@@ -788,6 +790,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             // groupBox5
             // 
+            this.groupBox5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox5.Controls.Add(this.btnFreezeFrame);
             this.groupBox5.Controls.Add(this.txtAvgMinDiameterUnits);
             this.groupBox5.Controls.Add(this.txtAvgMaxDiameterUnits);
