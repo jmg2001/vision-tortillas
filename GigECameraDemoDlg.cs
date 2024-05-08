@@ -30,6 +30,7 @@ using DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Util;
 using static System.Net.Mime.MediaTypeNames;
+using System.Diagnostics.Eventing.Reader;
 
 
 // using System.Security.Cryptography;
@@ -65,6 +66,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         bool freezeFrame = false;
 
         Properties.Settings settings = new Properties.Settings();
+
+        // Datos de la lente
+        double lenF = 8.52;
+        double lenWidth = 10.88;
+        double lenHeight = 8.16;
 
         // Color de la tortilla en la imagen binarizada
         int tortillaColor = 1; // 1 - Blanco, 0 - Negro
@@ -107,6 +113,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         double maxDiameterAvg = 0;
         double minDiameterAvg = 0;
         double diameterControl = 0;
+
+        // Pagina Avanzado
+        int minBlobObjects;
+        float alpha;
+
+        // Filtro
+        double controlDiameterOld = 0;
+        double controlDiameter = 0;
 
         // Parametros para la calibración (Se van a cargar de un archivo)
         float calibrationTarget = 120;
@@ -177,8 +191,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         // Obtener el directorio de inicio del usuario actual
         string userDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
-        Filtro filtro = new Filtro(10);
-
         string archivo = "";
 
         double targetCalibrationSize = 0;
@@ -239,6 +251,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 txtAvgMaxDiameterUnits.Text = units;
                 txtAvgMinDiameterUnits.Text = units;
                 txtControlDiameterUnits.Text = units;
+                txtEquivalentDiameterUnits.Text += units;
 
                 txtMaxDProductUnits.Text = units;
                 txtMinDProductUnits.Text = units;
@@ -263,6 +276,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 formatTxt.Text = settings.Format;
 
+                minBlobObjects = settings.minBlobObjects;
+                txtMinBlobObjects.Text = minBlobObjects.ToString();
+
+                alpha = settings.alpha;
+                txtAlpha.Text = alpha.ToString();
+
                 // Verificar si el archivo existe
                 if (File.Exists(csvPath))
                 {
@@ -270,15 +289,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     using (var csvReader = new CsvReader(reader, CultureInfo.CurrentCulture))
                     {
                         var records = csvReader.GetRecords<Product>();
-                        //records.Add(new Product { Code = 1, MaxD = 130, MinD = 110, MaxOvality = 0.5, MaxCompacity = 12 });
-                        //csvWriter.WriteRecords(records);
                         foreach (var record in records)
                         {
                             CmbProducts.Items.Add(record.Code);
-                            //if (record.Code == settings.productCode)
-                            //{
-                            //    changeProduct(record);
-                            //}
                         }
                     }
                 }
@@ -355,11 +368,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 UserROI.Right = settings.ROI_Right;
                 UserROI.Bottom = settings.ROI_Bottom;
 
-                //inputLeftRoi.Value = UserROI.Left;
-                //inputRightRoi.Value = UserROI.Right;
-                //inputTopRoi.Value = UserROI.Top;
-                //inputBottomRoi.Value = UserROI.Bottom;
-
                 int roiWidth = UserROI.Right - UserROI.Left;
                 txtRoiWidth.Text = roiWidth.ToString();
 
@@ -377,28 +385,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 Txt_MaxCompacity.Text = maxCompactness.ToString();
                 Txt_MaxOvality.Text = maxOvality.ToString();
 
-                // txtCalibrationTarget.Text = calibrationTarget.ToString();
-
                 //InitializeInterface();
-                // Suscribir al evento KeyPress del TextBox
-                // Txt_Threshold.KeyPress += Txt_Threshold_KeyPress;
-                // Txt_MaxDiameter.KeyPress += Txt_MaxDiameter_KeyPress;
-                // Txt_MinDiameter.KeyPress += Txt_MinDiameter_KeyPress;
                 Txt_MaxCompacity.KeyPress += Txt_MaxCompacity_KeyPress;
                 Txt_MaxOvality.KeyPress += Txt_MaxOvality_KeyPress;
-                
-
-                //TXT_ROI_Left.KeyPress += Txt_UserROILeft_KeyPress;
-                //TXT_ROI_Right.KeyPress += Txt_UserROIRight_KeyPress;
-                //TXT_ROI_Top.KeyPress += Txt_UserROITop_KeyPress;
-                //TXT_ROI_Bottom.KeyPress += Txt_UserROIBottom_KeyPress;
-
-                inputLeftRoi.ValueChanged += inputLeftRoi_ValueChanged;
-                inputRightRoi.ValueChanged += inputRightRoi_ValueChanged;
-                inputTopRoi.ValueChanged += inputTopRoi_ValueChanged;
-                inputBottomRoi.ValueChanged += inputBottomRoi_ValueChanged;
-
-                // Suscribir la función al evento SelectedIndexChanged del ComboBox
 
                 // Crear un TabControl
                 TabControl tabControl1 = new TabControl();
@@ -457,6 +446,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     processImageBtn.Enabled = false;
                     processImageBtn.Text = "PROCESSING";
                 }
+
+                if (autoThreshold)
+                {
+                    btnAutoThreshold.BackColor = Color.LightGreen;
+                    btnManualThreshold.BackColor = Color.Silver;
+                }
+                else
+                {
+                    btnAutoThreshold.BackColor = Color.Silver;
+                    btnManualThreshold.BackColor = Color.LightGreen;
+                }
             }
             else
             {
@@ -465,41 +465,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
-        public class Filtro
+        public double Filtro(double k)
         {
-            private Queue<double> buffer;
-            private int ventana;
-
-            public Filtro(int ventana)
-            {
-                this.ventana = ventana;
-                buffer = new Queue<double>(ventana);
-            }
-
-            public double Aplicar(double nuevaMedida, double maxD, double minD)
-            {
-                buffer.Enqueue(nuevaMedida);
-                if (buffer.Count > ventana)
-                {
-                    buffer.Dequeue();
-                }
-
-                double suma = 0;
-                foreach (double valor in buffer)
-                {
-                    suma += valor;
-                }
-
-                if (buffer.Count < ventana)
-                {
-                    return (maxD + minD) / 2;
-                }
-                else
-                {
-                    return suma / buffer.Count;
-
-                }
-            }
+            double newK = k * (1 - alpha) + controlDiameterOld * alpha;
+            controlDiameterOld = newK;
+            return newK;
         }
 
         private void changeTriggerMode(string modeStr)
@@ -875,7 +845,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             avgMinD /= n;
             avgD /= n;
 
-            avgControlD = filtro.Aplicar(avgControlD, maxDiameter * euFactor, minDiameter * euFactor);
+            //avgControlD = filtro.Aplicar(avgControlD, maxDiameter * euFactor, minDiameter * euFactor);
 
             maxDiameterAvg = avgMaxD;
             minDiameterAvg = avgMinD;
@@ -1369,7 +1339,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             try
             {
-                if (Blobs.Count >= (int)(gridType.Grid.Item1 * gridType.Grid.Item2 / 2))
+                if (Blobs.Count >= minBlobObjects)
                 {
                     setModbusData(true);
                 }
@@ -2154,6 +2124,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 txtAvgMaxDiameterUnits.Text = units;
                 txtAvgMinDiameterUnits.Text = units;
                 txtControlDiameterUnits.Text = units;
+                txtEquivalentDiameterUnits.Text = units;
 
                 txtMaxDProductUnits.Text = units;
                 txtMinDProductUnits.Text = units;   
@@ -2889,32 +2860,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             var (contours ,centers, areas, perimeters) = FindContoursWithEdgesAndCenters(image);
 
-            //image = ConvertToCompatibleFormat(image);
-
             // Limpiamos la tabla
             dataTable.Clear();
 
             // Inicializamos variables
-            double avgControlD = 0;
             double avgMaxD = 0;
             double avgMinD = 0;
             double avgD = 0;
+            double avgDIA = 0;
             int n = 0;
-
-            //bgArea = new List<List<Point>>();
-            //bgArea = FindBackground(image.ToBitmap(), backgroundColor, 0, 1000);
-
-            //if (contours.Size > 0)
-            //{
-            //    foreach (List<Point> contour in bgArea)
-            //    {
-            //        foreach (Point point in contour)
-            //        {
-            //            image.ToBitmap().SetPixel(point.X, point.Y, Color.Aqua);
-            //        }
-            //    }
-            //}
-            
 
             List<(int,bool)> drawFlags = new List<(int, bool)>();
 
@@ -2968,7 +2922,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     Blob blob = new Blob((double)area, perimeter, contours[i], diameterTriangles, diametroIA, centro, maxDiameter, minDiameter, sector, compactness, size, ovalidad);
 
                     // Sumamos para promediar
-                    avgControlD += (diametroIA * tempFactor);
+                    avgDIA += (diametroIA * tempFactor);
                     avgMaxD += (maxDiameter * tempFactor);
                     avgMinD += (minDiameter * tempFactor);
                     avgD += (diameterTriangles * tempFactor);
@@ -3002,17 +2956,16 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                     if (drawFlag)
                     {
+                        // Dibujamos el centro
+                        drawCenter(centro, 2, image);
 
-                            // Dibujamos el centro
-                            drawCenter(centro, 2, image);
+                        // Dibujamos el sector
+                        drawSector(image, sector);
 
-                            // Dibujamos el sector
-                            drawSector(image, sector);
+                        // Dibujamos el numero del sector
+                        drawSectorNumber(image, centro, sector - 1);
 
-                            // Dibujamos el numero del sector
-                            drawSectorNumber(image, centro, sector - 1);
-
-                            drawSize(image, sector, size);
+                        drawSize(image, sector, size);
                     }
                 }
             }
@@ -3028,22 +2981,38 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 Console.WriteLine(e);
             }
 
-            // Colocamos la imagen con todos los dibujos en el picturebox
-            //processROIBox.Image = image;
-
             // Calculamos el promedio de los diametros
-            avgControlD /= n;
+            avgDIA /= n;
             avgMaxD /= n;
             avgMinD /= n;
             avgD /= n;
 
-            avgControlD = filtro.Aplicar(avgControlD, maxDiameter*euFactor, minDiameter*euFactor);
+
+
+            if (!double.IsNaN(avgDIA))
+            {
+                double validateControl = Filtro(avgDIA);
+                if (validateControl > maxDiameter * euFactor * 3)
+                {
+                    validateControl = maxDiameter * euFactor * 3;
+                }
+                else if (validateControl < 0)
+                {
+                    validateControl = 0;
+                }
+                controlDiameter = validateControl;
+            }
+            else
+            {
+                controlDiameter = Filtro(0);
+            }
 
             // Asignamos el texto del promedio de los diametros
             avg_diameter.Text = Math.Round(avgD, 3).ToString();
             txtAvgMaxD.Text = Math.Round(avgMaxD, 3).ToString();
             txtAvgMinD.Text = Math.Round(avgMinD, 3).ToString();
-            txtControlDiameter.Text = Math.Round(avgControlD, 3).ToString();
+            txtEquivalentDiameter.Text = Math.Round(avgDIA, 3).ToString();
+            txtControlDiameter.Text = Math.Round(controlDiameter, 3).ToString();
 
             // Asignar la DataTable al DataGridView
             dataGridView1.DataSource = dataTable;
@@ -3741,11 +3710,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         }
 
-        private void tabPage3_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void grid_4_Click(object sender, EventArgs e)
         {
             updateGridType(1, "3x3");
@@ -3816,59 +3780,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 Console.WriteLine("VirtualTrigger");
                 processImageBtn.Enabled = true;
             }
-            //AbortDlg abort = new AbortDlg(m_Xfer);
-
-            //if (m_Xfer.Snap())
-            //{
-            //    if (abort.ShowDialog() != DialogResult.OK)
-            //        m_Xfer.Abort();
-            //    UpdateControls();
-            //}
 
         }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-        }
-
-        //static async Task<string> request(string query)
-        //{
-        //    // URL del servidor donde está alojada la ruta para recibir consultas SQL
-        //    string serverUrl = "http://localhost:5000/query"; // Cambia la dirección y el puerto según corresponda
-
-        //    // Consulta SQL que deseas enviar al servidor
-        //    // string query = "SELECT * FROM usuarios";
-
-        //    try
-        //    {
-        //        // Crear un cliente HTTP
-        //        using (HttpClient client = new HttpClient())
-        //        {
-        //            // Crear un objeto JSON con la consulta
-        //            var json = new { query = query };
-
-        //            // Convertir el objeto JSON a una cadena y crear una solicitud HTTP POST
-        //            var content = new StringContent(JsonConvert.SerializeObject(json), System.Text.Encoding.UTF8, "application/json");
-
-        //            // Enviar la solicitud HTTP POST al servidor
-        //            var response = await client.PostAsync(serverUrl, content);
-
-        //            // Leer la respuesta del servidor
-        //            string responseContent = await response.Content.ReadAsStringAsync();
-
-        //            // Imprimir la respuesta del servidor
-        //            // Console.WriteLine("Respuesta del servidor:");
-        //            // Console.WriteLine(responseContent);
-
-        //            return responseContent;
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine("Error al enviar la solicitud: " + ex.Message);
-        //        return string.Empty;
-        //    }
-        //}
 
         private void diametersTxtCheck_CheckedChanged(object sender, EventArgs e)
         {
@@ -3989,21 +3902,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         // CLick en el boton de calibración
         private void calibrateButtom_Click(object sender, EventArgs e)
         {
-            //// Mostrar un MessageBox con un mensaje y botones de opción
-            //DialogResult result = MessageBox.Show($"You are going to perform a calibration with a {txtCalibrationTarget.Text} {unitsTxt.Text} target. Do you want to continue?", "Warning", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
-
-            //// Verificar la opción seleccionada por el usuario
-            //if (result == DialogResult.OK)
-            //{
-            //    // Si el usuario elige "Sí", continuar con la acción deseada
-            //    // Agrega aquí el código que deseas ejecutar después de que el usuario confirme
-            //    calibrateBtnClick();
-            //}
-            //else
-            //{
-            //    // Si el usuario elige "No", puedes hacer algo o simplemente salir
-            //    MessageBox.Show("Operation canceled.");
-            //}
             calibrating = true;
 
             if (!triggerPLC && mode == 0)
@@ -4013,15 +3911,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     if (inputForm.ShowDialog() == DialogResult.OK)
                     {
                         targetCalibrationSize = inputForm.targetSize;
-
-                        //AbortDlg abort = new AbortDlg(m_Xfer);
-
-                        //if (m_Xfer.Snap())
-                        //{
-                        //    if (abort.ShowDialog() != DialogResult.OK)
-                        //        m_Xfer.Abort();
-                        //    UpdateControls();
-                        //}
 
                         m_AcqDevice.SetFeatureValue("TriggerSoftware", true);
                     }
@@ -4033,21 +3922,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 calibrating = false;
             }
 
-            
-        }
-
-        private void calibrateBtnClick()
-        {
-            
-        }
-
-        private void txtCalibrationTarget_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void button2_Click_1(object sender, EventArgs e)
-        {
             
         }
 
@@ -4173,22 +4047,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         }
 
-        private void Txt_MaxDiameter_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
         private void CmdDelete_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label9_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void CmbGridSelection_SelectedIndexChanged(object sender, EventArgs e)
         {
 
         }
@@ -4382,119 +4241,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             btnChangeUnitsMm.BackColor = Color.Silver;
             btnChangeUnitsInch.BackColor = Color.LightGreen;
             updateUnits("inch");
-        }
-
-        private void progressBar1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void inputLeftRoi_ValueChanged(object sender, EventArgs e)
-        {
-            if (File.Exists(imagesPath + "updatedROI.jpg"))
-            {
-                UserROI.Left = (int)inputLeftRoi.Value;
-                // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-                // MessageBox.Show("Data saved: " + UserROI.Left, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                if (!triggerPLC && mode == 0)
-                {
-                    settings.ROI_Left = UserROI.Left;
-                    updateROI();
-                }
-                else
-                {
-                    MessageBox.Show("Change the operation mode");
-                    UserROI.Left = settings.ROI_Left;
-                    inputLeftRoi.Value = settings.ROI_Left;
-                }
-            }
-            else
-            {
-                UserROI.Left = settings.ROI_Left;
-                inputLeftRoi.Value = settings.ROI_Left;
-                MessageBox.Show("Please first take a frame");
-            }
-        }
-
-        private void inputRightRoi_ValueChanged(object sender, EventArgs e)
-        {
-            if (File.Exists(imagesPath + "updatedROI.jpg"))
-            {
-                UserROI.Right = (int)inputRightRoi.Value;
-                // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-                // MessageBox.Show("Data saved: " + UserROI.Left, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                if (!triggerPLC && mode == 0)
-                {
-                    settings.ROI_Right = UserROI.Right;
-                    updateROI();
-                }
-                else
-                {
-                    MessageBox.Show("Change the operation mode");
-                    UserROI.Right = settings.ROI_Right;
-                    inputRightRoi.Value = settings.ROI_Right;
-                }
-            }
-            else
-            {
-                UserROI.Right = settings.ROI_Right;
-                inputRightRoi.Value = settings.ROI_Right;
-                MessageBox.Show("Please first take a frame");
-            }
-        }
-
-        private void inputTopRoi_ValueChanged(object sender, EventArgs e)
-        {
-            if (File.Exists(imagesPath + "updatedROI.jpg"))
-            {
-                UserROI.Top = (int)inputTopRoi.Value;
-                // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-                // MessageBox.Show("Data saved: " + UserROI.Left, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                if (!triggerPLC && mode == 0)
-                {
-                    settings.ROI_Top = UserROI.Top;
-                    updateROI();
-                }
-                else
-                {
-                    MessageBox.Show("Change the operation mode");
-                    UserROI.Top = settings.ROI_Top;
-                    inputTopRoi.Value = settings.ROI_Top;
-                }
-            }
-            else
-            {
-                UserROI.Top = settings.ROI_Top;
-                inputTopRoi.Value = settings.ROI_Top;
-                MessageBox.Show("Please first take a frame");
-            }
-        }
-
-        private void inputBottomRoi_ValueChanged(object sender, EventArgs e)
-        {
-            if (File.Exists(imagesPath + "updatedROI.jpg"))
-            {
-                UserROI.Bottom = (int)inputBottomRoi.Value;
-                // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-                // MessageBox.Show("Data saved: " + UserROI.Left, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                if (!triggerPLC && mode == 0)
-                {
-                    settings.ROI_Bottom = UserROI.Bottom;
-                    updateROI();
-                }
-                else
-                {
-                    MessageBox.Show("Change the operation mode");
-                    UserROI.Bottom = settings.ROI_Bottom;
-                    inputBottomRoi.Value = settings.ROI_Bottom;
-                }
-            }
-            else
-            {
-                UserROI.Bottom = settings.ROI_Bottom;
-                inputBottomRoi.Value = settings.ROI_Bottom;
-                MessageBox.Show("Please first take a frame");
-            }
         }
 
         private void btnIncrementRoiWidth_Click(object sender, EventArgs e)
@@ -4766,6 +4512,108 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 freezeFrame = true;
                 btnFreezeFrame.BackColor = Color.LightGreen;
                 btnFreezeFrame.Text = "FREEZED";
+            }
+        }
+
+        private void btnManualThreshold_Click(object sender, EventArgs e)
+        {
+            btnManualThreshold.BackColor = Color.LightGreen;
+            btnAutoThreshold.BackColor = Color.Silver;
+            autoThreshold = false;
+        }
+
+        private void btnAutoThreshold_Click(object sender, EventArgs e)
+        {
+            btnManualThreshold.BackColor = Color.Silver;
+            btnAutoThreshold.BackColor = Color.LightGreen;
+            autoThreshold = true; ;
+        }
+
+        private void txtAlpha_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                float value;
+                if (float.TryParse(txtAlpha.Text, out value)){
+                    if (value >= 0 && value <= 1)
+                    {
+                        alpha = value;
+                        settings.alpha = alpha;
+                        settings.Save();
+                        MessageBox.Show("Data saved");
+                    }
+                    else
+                    {
+                        MessageBox.Show("Please use a valid number");
+                        txtAlpha.Text = alpha.ToString();
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Please use a valid number");
+                    txtAlpha.Text = alpha.ToString();
+                }
+            }
+        }
+
+        private void txtMinBlobObjects_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                int value;
+                if (int.TryParse(txtMinBlobObjects.Text, out value))
+                {
+                    if (value >= 0 && value <= 20)
+                    {
+                        minBlobObjects = value;
+                        settings.minBlobObjects = minBlobObjects;
+                        settings.Save();
+                        MessageBox.Show("Data saved");
+                    }
+                    else
+                    {
+                        MessageBox.Show("Please use a valid number");
+                        txtMinBlobObjects.Text = minBlobObjects.ToString();
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Please use a valid number");
+                    txtMinBlobObjects.Text = minBlobObjects.ToString();
+                }
+            }
+        }
+
+        private void btnCalibrateByHeight_Click(object sender, EventArgs e)
+        {
+            if (!triggerPLC && mode == 0)
+            {
+                using (var inputForm = new InputDlg2(units))
+                {
+                    if (inputForm.ShowDialog() == DialogResult.OK)
+                    {
+                        double height = inputForm.cameraHeight;
+
+                        double fov = 2 * Math.Atan(lenWidth/(2*lenF));
+
+                        fov = 2 * Math.Tan(fov/2) * height;
+
+                        euFactor = fov/640;
+                        settings.EUFactor = euFactor;
+                        euFactorTxt.Text = Math.Round(euFactor, 3).ToString();
+                        maxDiameter = double.Parse(Txt_MaxDiameter.Text) / euFactor;
+                        minDiameter = double.Parse(Txt_MinDiameter.Text) / euFactor;
+                        settings.maxDiameter = maxDiameter;
+                        settings.minDiameter = minDiameter;
+
+                        MessageBox.Show("Calibration Succesful, Factor: " + euFactor);
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("Change the operation mode");
+                //calibrating = false;
             }
         }
     }

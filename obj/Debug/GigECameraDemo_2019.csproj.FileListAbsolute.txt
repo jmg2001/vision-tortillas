@@ -71,3 +71,4 @@ C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\STI.exe
 C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\STI.pdb
 C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp.InputDlg.resources
 C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Properties.Resources.resources
+C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp.InputDlg2.resources

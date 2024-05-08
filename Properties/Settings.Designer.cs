@@ -202,5 +202,29 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Properties {
                 this["frames"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.8")]
+        public float alpha {
+            get {
+                return ((float)(this["alpha"]));
+            }
+            set {
+                this["alpha"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("6")]
+        public int minBlobObjects {
+            get {
+                return ((int)(this["minBlobObjects"]));
+            }
+            set {
+                this["minBlobObjects"] = value;
+            }
+        }
     }
 }

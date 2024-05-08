@@ -57,6 +57,7 @@ C:\Users\Jesús\Documents\vision-tortillas\obj\Release\DALSA.SaperaLT.SapClassGu
 C:\Users\Jesús\Documents\vision-tortillas\obj\Release\DALSA.SaperaLT.SapClassGui.BufferDlg.resources
 C:\Users\Jesús\Documents\vision-tortillas\obj\Release\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp.InputDlg.resources
 C:\Users\Jesús\Documents\vision-tortillas\obj\Release\DALSA.SaperaLT.SapClassGui.ImageBox.resources
+C:\Users\Jesús\Documents\vision-tortillas\obj\Release\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp.InputDlg2.resources
 C:\Users\Jesús\Documents\vision-tortillas\obj\Release\DALSA.SaperaLT.SapClassGui.JpegFileDlg.resources
 C:\Users\Jesús\Documents\vision-tortillas\obj\Release\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp.LoginDlg.resources
 C:\Users\Jesús\Documents\vision-tortillas\obj\Release\DALSA.SaperaLT.SapClassGui.RawFileDlg.resources
