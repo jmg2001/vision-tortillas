@@ -212,6 +212,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             if (acConfigDlg.ShowDialog() == DialogResult.OK)
             {
                 InitializeComponent();
+                initializeElements();
                 InitializeDataTable();
 
                 //----------------Only for Debug, delete on production-----------------
@@ -219,181 +220,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 settings.frames = 0;
                 settings.Save();
                 //----------------Only for Debug, delete on production-----------------
-
-                configurationPage.Enabled = true;
-
-                string actualDIrectory = AppDomain.CurrentDomain.BaseDirectory;
-                csvPath = userDir + "\\InspecTorT_db.csv";
-                configPath = userDir + "\\InspecTorTConfig";
-                archivo = userDir + "\\datos.txt";
-
-                //originalBox.MouseMove += originalBox_MouseMove;
-                //processROIBox.MouseMove += processBox_MouseMove;
-
-                //CmbOperationModeSelection.Text = "PLC";
-                btnSetPointPLC.BackColor = Color.LightGreen;
-
-                operationMode = 2;
-                productsPage.Enabled = false;
-                GroupActualTargetSize.Enabled = false;
-                GroupSelectGrid.Enabled = false;
-
-                // Suscribir al evento SelectedIndexChanged del TabControl
-                mainTabs.SelectedIndexChanged += TabControl2_SelectedIndexChanged;
-
-                processImageBtn.Enabled = false;
-
-                units = settings.Units;
-                maxDiameterUnitsTxt.Text = units;
-                minDiameterUnitsTxt.Text = units;
-
-                txtAvgDiameterUnits.Text = units;
-                txtAvgMaxDiameterUnits.Text = units;
-                txtAvgMinDiameterUnits.Text = units;
-                txtControlDiameterUnits.Text = units;
-                txtEquivalentDiameterUnits.Text += units;
-
-                txtMaxDProductUnits.Text = units;
-                txtMinDProductUnits.Text = units;
-
-                txtTriggerSource.BackColor = Color.LightGreen;
-                txtViewMode.BackColor = Color.Khaki;
-
-                switch (units)
-                {
-                    case "mm":
-                        btnChangeUnitsMm.BackColor = Color.LightGreen;
-                        btnChangeUnitsInch.BackColor = Color.Silver;
-                        break;
-                    case "inch":
-                        btnChangeUnitsMm.BackColor = Color.Silver;
-                        btnChangeUnitsInch.BackColor = Color.LightGreen;
-                        break;
-                }
-
-                euFactor = settings.EUFactor;
-                euFactorTxt.Text = Math.Round(euFactor, 3).ToString();
-
-                formatTxt.Text = settings.Format;
-
-                minBlobObjects = settings.minBlobObjects;
-                txtMinBlobObjects.Text = minBlobObjects.ToString();
-
-                alpha = settings.alpha;
-                txtAlpha.Text = alpha.ToString();
-
-                // Verificar si el archivo existe
-                if (File.Exists(csvPath))
-                {
-                    using (var reader = new StreamReader(new FileStream(csvPath, FileMode.Open), System.Text.Encoding.UTF8))
-                    using (var csvReader = new CsvReader(reader, CultureInfo.CurrentCulture))
-                    {
-                        var records = csvReader.GetRecords<Product>();
-                        foreach (var record in records)
-                        {
-                            CmbProducts.Items.Add(record.Code);
-                        }
-                    }
-                }
-                else
-                {
-                    // Encabezados del archivo CSV
-                    string[] headers = { "Id","Code", "Name", "MaxD", "MinD", "MaxOvality", "MaxCompacity", "Grid" };
-
-                    // Contenido de los registros
-                    string[][] data = {
-                    new string[] { "1","1", "Default", "90", "50", "0.5", "12", "1" },
-                    };
-
-                    // Escribir los datos en el archivo CSV
-                    WriteCsvFile(csvPath, headers, data);
-
-                    Console.WriteLine("CSV File created succesfully.");
-
-                    using (var reader = new StreamReader(new FileStream(csvPath, FileMode.Open), System.Text.Encoding.UTF8))
-                    using (var csvReader = new CsvReader(reader, CultureInfo.CurrentCulture))
-                    {
-                        var records = csvReader.GetRecords<Product>();
-                        foreach (var record in records)
-                        {
-                            CmbProducts.Items.Add(record.Code);
-                            changeProduct(record);
-                        }
-                    }
-                }
-
-                // Suscribirse al evento SelectedIndexChanged del ComboBox
-                CmbProducts.SelectedIndexChanged += CmbProducts_SelectedIndexChanged;
-
-                modbusServer.Port = 502;
-                modbusServer.Listen();
-                Console.WriteLine("Modbus Server running...");
-
-                // Aquí vamos a agregar todos los formatos
-                // 3x3
-                int[] quadrantsOfinterest = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-                gridTypes.Add(new GridType(1, (3, 3), quadrantsOfinterest));
-                // 5
-                quadrantsOfinterest = new int[] { 1, 3, 5, 7, 9 };
-                gridTypes.Add(new GridType(2, (3, 3), quadrantsOfinterest));
-                // 4x4
-                quadrantsOfinterest = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
-                gridTypes.Add(new GridType(3, (4, 4), quadrantsOfinterest));
-                // 2x2
-                quadrantsOfinterest = new int[] { 1, 2, 3, 4 };
-                gridTypes.Add(new GridType(4, (2, 2), quadrantsOfinterest));
-
-                grid = settings.GridType;
-
-                // Cargamos el GridType inicial
-                foreach (GridType gridT in gridTypes)
-                {
-                    if (gridT.Type == grid)
-                    {
-                        gridType = gridT;
-                    }
-                }
-
-                sizes.Add("Null");
-                sizes.Add("Normal");
-                sizes.Add("Big");
-                sizes.Add("Small");
-                sizes.Add("Oval");
-                sizes.Add("Oversize");
-                sizes.Add("Shape");
-
-                //objeto ROI
-                UserROI.Top = settings.ROI_Top;
-                UserROI.Left = settings.ROI_Left;
-                UserROI.Right = settings.ROI_Right;
-                UserROI.Bottom = settings.ROI_Bottom;
-
-                int roiWidth = UserROI.Right - UserROI.Left;
-                txtRoiWidth.Text = roiWidth.ToString();
-
-                int roiHeight = UserROI.Bottom - UserROI.Top;
-                txtRoiHeight.Text = roiHeight.ToString();
-
-
-                maxOvality = settings.maxOvality;
-                maxCompactness = settings.maxCompacity;
-                maxDiameter = (float)settings.maxDiameter;
-                minDiameter = (float)settings.minDiameter;
-
-                Txt_MaxDiameter.Text = Math.Round(maxDiameter * euFactor, 3).ToString();
-                Txt_MinDiameter.Text = Math.Round(minDiameter * euFactor, 3).ToString();
-                Txt_MaxCompacity.Text = maxCompactness.ToString();
-                Txt_MaxOvality.Text = maxOvality.ToString();
-
-                //InitializeInterface();
-                Txt_MaxCompacity.KeyPress += Txt_MaxCompacity_KeyPress;
-                Txt_MaxOvality.KeyPress += Txt_MaxOvality_KeyPress;
-
-                // Crear un TabControl
-                TabControl tabControl1 = new TabControl();
-                tabControl1.Location = new Point(10, 10);
-                tabControl1.Size = new Size(680, 520);
-                this.Controls.Add(tabControl1);
 
                 // Agregar m_ImageBox al TabPage
                 this.m_ImageBox = new DALSA.SaperaLT.SapClassGui.ImageBox();
@@ -446,22 +272,202 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     processImageBtn.Enabled = false;
                     processImageBtn.Text = "PROCESSING";
                 }
-
-                if (autoThreshold)
-                {
-                    btnAutoThreshold.BackColor = Color.LightGreen;
-                    btnManualThreshold.BackColor = Color.Silver;
-                }
-                else
-                {
-                    btnAutoThreshold.BackColor = Color.Silver;
-                    btnManualThreshold.BackColor = Color.LightGreen;
-                }
             }
             else
             {
                 MessageBox.Show("No cameras found or selected");
                 this.Close();
+            }
+        }
+
+        private void initializeElements()
+        {
+
+            configurationPage.Enabled = true;
+            advancedPage.Enabled = true;
+
+            string actualDIrectory = AppDomain.CurrentDomain.BaseDirectory;
+            csvPath = userDir + "\\InspecTorT_db.csv";
+            configPath = userDir + "\\InspecTorTConfig";
+            archivo = userDir + "\\datos.txt";
+
+            //originalBox.MouseMove += originalBox_MouseMove;
+            //processROIBox.MouseMove += processBox_MouseMove;
+
+            //CmbOperationModeSelection.Text = "PLC";
+            btnSetPointPLC.BackColor = Color.LightGreen;
+
+            operationMode = 2;
+            productsPage.Enabled = false;
+            GroupActualTargetSize.Enabled = false;
+            GroupSelectGrid.Enabled = false;
+
+            // Suscribir al evento SelectedIndexChanged del TabControl
+            mainTabs.SelectedIndexChanged += TabControl2_SelectedIndexChanged;
+
+            processImageBtn.Enabled = false;
+
+            units = settings.Units;
+            maxDiameterUnitsTxt.Text = units;
+            minDiameterUnitsTxt.Text = units;
+
+            txtAvgDiameterUnits.Text = units;
+            txtAvgMaxDiameterUnits.Text = units;
+            txtAvgMinDiameterUnits.Text = units;
+            txtControlDiameterUnits.Text = units;
+            txtEquivalentDiameterUnits.Text = units;
+
+            txtMaxDProductUnits.Text = units;
+            txtMinDProductUnits.Text = units;
+
+            txtTriggerSource.BackColor = Color.LightGreen;
+            txtViewMode.BackColor = Color.Khaki;
+
+            switch (units)
+            {
+                case "mm":
+                    btnChangeUnitsMm.BackColor = Color.LightGreen;
+                    btnChangeUnitsInch.BackColor = Color.Silver;
+                    break;
+                case "inch":
+                    btnChangeUnitsMm.BackColor = Color.Silver;
+                    btnChangeUnitsInch.BackColor = Color.LightGreen;
+                    break;
+            }
+
+            euFactor = settings.EUFactor;
+            euFactorTxt.Text = Math.Round(euFactor, 3).ToString();
+
+            formatTxt.Text = settings.Format;
+
+            minBlobObjects = settings.minBlobObjects;
+            txtMinBlobObjects.Text = minBlobObjects.ToString();
+
+            alpha = settings.alpha;
+            txtAlpha.Text = alpha.ToString();
+
+            // Verificar si el archivo existe
+            if (File.Exists(csvPath))
+            {
+                using (var reader = new StreamReader(new FileStream(csvPath, FileMode.Open), System.Text.Encoding.UTF8))
+                using (var csvReader = new CsvReader(reader, CultureInfo.CurrentCulture))
+                {
+                    var records = csvReader.GetRecords<Product>();
+                    foreach (var record in records)
+                    {
+                        CmbProducts.Items.Add(record.Code);
+                    }
+                }
+            }
+            else
+            {
+                // Encabezados del archivo CSV
+                string[] headers = { "Id", "Code", "Name", "MaxD", "MinD", "MaxOvality", "MaxCompacity", "Grid" };
+
+                // Contenido de los registros
+                string[][] data = {
+                    new string[] { "1","1", "Default", "90", "50", "0.5", "12", "1" },
+                    };
+
+                // Escribir los datos en el archivo CSV
+                WriteCsvFile(csvPath, headers, data);
+
+                Console.WriteLine("CSV File created succesfully.");
+
+                using (var reader = new StreamReader(new FileStream(csvPath, FileMode.Open), System.Text.Encoding.UTF8))
+                using (var csvReader = new CsvReader(reader, CultureInfo.CurrentCulture))
+                {
+                    var records = csvReader.GetRecords<Product>();
+                    foreach (var record in records)
+                    {
+                        CmbProducts.Items.Add(record.Code);
+                        changeProduct(record);
+                    }
+                }
+            }
+
+            // Suscribirse al evento SelectedIndexChanged del ComboBox
+            CmbProducts.SelectedIndexChanged += CmbProducts_SelectedIndexChanged;
+
+            modbusServer.Port = 502;
+            modbusServer.Listen();
+            Console.WriteLine("Modbus Server running...");
+
+            // Aquí vamos a agregar todos los formatos
+            // 3x3
+            int[] quadrantsOfinterest = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+            gridTypes.Add(new GridType(1, (3, 3), quadrantsOfinterest));
+            // 5
+            quadrantsOfinterest = new int[] { 1, 3, 5, 7, 9 };
+            gridTypes.Add(new GridType(2, (3, 3), quadrantsOfinterest));
+            // 4x4
+            quadrantsOfinterest = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+            gridTypes.Add(new GridType(3, (4, 4), quadrantsOfinterest));
+            // 2x2
+            quadrantsOfinterest = new int[] { 1, 2, 3, 4 };
+            gridTypes.Add(new GridType(4, (2, 2), quadrantsOfinterest));
+
+            grid = settings.GridType;
+
+            // Cargamos el GridType inicial
+            foreach (GridType gridT in gridTypes)
+            {
+                if (gridT.Type == grid)
+                {
+                    gridType = gridT;
+                }
+            }
+
+            sizes.Add("Null");
+            sizes.Add("Normal");
+            sizes.Add("Big");
+            sizes.Add("Small");
+            sizes.Add("Oval");
+            sizes.Add("Oversize");
+            sizes.Add("Shape");
+
+            //objeto ROI
+            UserROI.Top = settings.ROI_Top;
+            UserROI.Left = settings.ROI_Left;
+            UserROI.Right = settings.ROI_Right;
+            UserROI.Bottom = settings.ROI_Bottom;
+
+            int roiWidth = UserROI.Right - UserROI.Left;
+            txtRoiWidth.Text = roiWidth.ToString();
+
+            int roiHeight = UserROI.Bottom - UserROI.Top;
+            txtRoiHeight.Text = roiHeight.ToString();
+
+
+            maxOvality = settings.maxOvality;
+            maxCompactness = settings.maxCompacity;
+            maxDiameter = (float)settings.maxDiameter;
+            minDiameter = (float)settings.minDiameter;
+
+            Txt_MaxDiameter.Text = Math.Round(maxDiameter * euFactor, 3).ToString();
+            Txt_MinDiameter.Text = Math.Round(minDiameter * euFactor, 3).ToString();
+            Txt_MaxCompacity.Text = maxCompactness.ToString();
+            Txt_MaxOvality.Text = maxOvality.ToString();
+
+            //InitializeInterface();
+            Txt_MaxCompacity.KeyPress += Txt_MaxCompacity_KeyPress;
+            Txt_MaxOvality.KeyPress += Txt_MaxOvality_KeyPress;
+
+            // Crear un TabControl
+            TabControl tabControl1 = new TabControl();
+            tabControl1.Location = new Point(10, 10);
+            tabControl1.Size = new Size(680, 520);
+            this.Controls.Add(tabControl1);
+
+            if (autoThreshold)
+            {
+                btnAutoThreshold.BackColor = Color.LightGreen;
+                btnManualThreshold.BackColor = Color.Silver;
+            }
+            else
+            {
+                btnAutoThreshold.BackColor = Color.Silver;
+                btnManualThreshold.BackColor = Color.LightGreen;
             }
         }
 
@@ -4139,6 +4145,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             if (authenticated)
             {
                 configurationPage.Enabled = false;
+                advancedPage.Enabled = false;
                 authenticated = false;
                 MessageBox.Show("Logged Off");
             }
@@ -4159,6 +4166,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 {
                     authenticated = true;
                     configurationPage.Enabled = true;
+                    advancedPage.Enabled = true;
                     MessageBox.Show("Authentication Succesfull");
                 }
                 else
@@ -4624,7 +4632,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             else
             {
                 MessageBox.Show("Change the operation mode");
-                //calibrating = false;
             }
         }
     }
