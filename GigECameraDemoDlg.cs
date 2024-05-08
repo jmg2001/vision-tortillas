@@ -2968,7 +2968,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     if (drawFlag)
                     {
                         // Dibujamos el centro
-                        drawCenter(centro, -1, image);
+                        drawCenter(centro, 2, image);
 
                         // Dibujamos el sector
                         drawSector(image, sector);
