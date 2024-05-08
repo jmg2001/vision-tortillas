@@ -243,6 +243,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.StatusLabel.Name = "StatusLabel";
             this.StatusLabel.Size = new System.Drawing.Size(45, 22);
             this.StatusLabel.Text = "Status :";
+            this.StatusLabel.Visible = false;
             // 
             // StatusLabelInfo
             // 
@@ -250,16 +251,19 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.StatusLabelInfo.Name = "StatusLabelInfo";
             this.StatusLabelInfo.Size = new System.Drawing.Size(49, 22);
             this.StatusLabelInfo.Text = "nothing";
+            this.StatusLabelInfo.Visible = false;
             // 
             // StatusLabelInfoTrash
             // 
             this.StatusLabelInfoTrash.Name = "StatusLabelInfoTrash";
             this.StatusLabelInfoTrash.Size = new System.Drawing.Size(0, 22);
+            this.StatusLabelInfoTrash.Visible = false;
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
+            this.toolStripSeparator1.Visible = false;
             // 
             // PixelLabel
             // 

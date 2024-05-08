@@ -2162,8 +2162,19 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 
                 if (operationMode == 1)
                 {
-                    Txt_MaxD.Text = Math.Round(double.Parse(Txt_MaxD.Text)*fact,3).ToString();
-                    Txt_MinD.Text = Math.Round(double.Parse(Txt_MinD.Text)*fact,3).ToString();
+                    Txt_MaxD.Text = Math.Round(double.Parse(Txt_MaxD.Text) * fact, 3).ToString();
+                    Txt_MinD.Text = Math.Round(double.Parse(Txt_MinD.Text) * fact, 3).ToString();
+
+                    //if (unitsNew == "inch")
+                    //{
+                    //    Txt_MaxD.Text = Math.Round(double.Parse(Txt_MaxD.Text) * fact, 3).ToString();
+                    //    Txt_MinD.Text = Math.Round(double.Parse(Txt_MinD.Text) * fact, 3).ToString();
+                    //}
+                    //else
+                    //{
+                    //    Txt_MaxD.Text = (int.Parse(Txt_MaxD.Text) * fact).ToString();
+                    //    Txt_MinD.Text = (int.Parse(Txt_MinD.Text) * fact).ToString();
+                    //}
                 }
 
 
@@ -2957,7 +2968,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     if (drawFlag)
                     {
                         // Dibujamos el centro
-                        drawCenter(centro, 2, image);
+                        drawCenter(centro, -1, image);
 
                         // Dibujamos el sector
                         drawSector(image, sector);
