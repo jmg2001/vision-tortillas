@@ -621,7 +621,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                             bool freeze = freezeFrame;
                             processing = true;
 
-                            
+                            if (!freeze)
+                            {
+                                disposeImages();
+                            }
 
                             // Crear un Stopwatch
                             Stopwatch stopwatch = new Stopwatch();
@@ -702,6 +705,20 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         MessageBox.Show("Error: " + ex.Message);
                     }
                 });
+            }
+        }
+
+        private void disposeImages()
+        {
+            if (processROIBox.Image != null)
+            {
+                processROIBox.Image.Dispose();
+                processROIBox.Image = null;
+            }
+            if (originalBox.Image != null)
+            {
+                originalBox.Image.Dispose();
+                originalBox.Image = null;
             }
         }
 
