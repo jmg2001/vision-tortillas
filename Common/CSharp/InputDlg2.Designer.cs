@@ -84,7 +84,7 @@
             this.Controls.Add(this.inputHeight);
             this.Controls.Add(this.label1);
             this.Name = "InputDlg2";
-            this.Text = "InputDlg2";
+            this.Text = "Calibration by Height";
             this.Load += new System.EventHandler(this.InputDlg2_Load);
             this.ResumeLayout(false);
             this.PerformLayout();

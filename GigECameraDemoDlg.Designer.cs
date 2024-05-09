@@ -1769,7 +1769,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "GigECameraDemoDlg";
-            this.Text = "InspecTorT T300";
+            this.Text = "STI";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.GigECameraDemoDlg_FormClosed);
             this.Load += new System.EventHandler(this.GigECameraDemoDlg_Load);

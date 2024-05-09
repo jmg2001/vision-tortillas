@@ -620,6 +620,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         {
                             bool freeze = freezeFrame;
                             processing = true;
+
+                            
+
                             // Crear un Stopwatch
                             Stopwatch stopwatch = new Stopwatch();
 
@@ -656,6 +659,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                                     }
                                     else
                                     {
+                                        processROIBox.Image = null;
+                                        originalBox.Image = null;
                                         preProcess();
                                     }
                                     break;
@@ -910,10 +915,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             try
             {
                 var registers = modbusServer.holdingRegisters.localArray;
-                // Console.WriteLine(registers);
 
                 int numData = 5;
-                int startAddress = 248;
+                int startAddress = 250;
                 List<float> setPoints = new List<float>();
 
                 for ( int i = startAddress; i < (startAddress + (numData*2)); i+=2 )
@@ -2291,8 +2295,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
             else
             {
-                //processROIBox.Image = new Bitmap(imagesPath + "final.bmp");
-                //processROIBox.Refresh();
+                if (freezeFrame)
+                {
+                    processROIBox.Image = new Bitmap(imagesPath + "final.bmp");
+                    processROIBox.Refresh();
+                }
                 updateImages = true;
             }
             // Verificar si la pestaña seleccionada es la que deseas
@@ -2973,21 +2980,36 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                     if (drawFlag)
                     {
-                        // Dibujamos el centro
-                        drawCenter(centro, 2, image);
+                        try
+                        {
+                            // Dibujamos el centro
+                            drawCenter(centro, 2, image);
 
-                        // Dibujamos el sector
-                        drawSector(image, sector);
+                            // Dibujamos el sector
+                            drawSector(image, sector);
 
-                        // Dibujamos el numero del sector
-                        drawSectorNumber(image, centro, sector - 1);
+                            // Dibujamos el numero del sector
+                            drawSectorNumber(image, centro, sector - 1);
 
-                        drawSize(image, sector, size);
+                            drawSize(image, sector, size);
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show(ex.Message + "Error dibujando en la imagen");
+                        }
                     }
                 }
             }
 
-            drawPerimeters(image, contours, 1);
+            try
+            {
+                drawPerimeters(image, contours, 1);
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message + "Error dibujando perimetros");
+            }
 
             try
             {
@@ -3003,8 +3025,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             avgMaxD /= n;
             avgMinD /= n;
             avgD /= n;
-
-
 
             if (!double.IsNaN(avgDIA))
             {
@@ -3327,12 +3347,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                     pixelColor = image.GetPixel(newX, newY);
 
-                    if (pixelColor.GetBrightness() == 0)
-                    {
-                        newX -= (int)(deltaX[i] / 2);
-                        newY -= (int)(deltaY[i] / 2);
-                        break;
-                    }
+                    //if (pixelColor.GetBrightness() == 0)
+                    //{
+                    //    newX -= (int)(deltaX[i] / 2);
+                    //    newY -= (int)(deltaY[i] / 2);
+                    //    break;
+                    //}
 
                     if (iteration >= maxIteration)
                     {
@@ -3342,9 +3362,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 }
 
+                double hipotenusa = Math.Sqrt(Math.Pow(deltaX[i], 2) + Math.Pow(deltaY[i], 2));
+
                 listXY.Add(new Point(newX, newY));
 
-                radialLenght[i] = Math.Sqrt(Math.Pow((x - newX), 2) + Math.Pow((y - newY), 2)); //+ correction[i];
+                radialLenght[i] = Math.Sqrt(Math.Pow((x - newX), 2) + Math.Pow((y - newY), 2)) - hipotenusa/2; //+ correction[i];
 
                 avg_diameter += radialLenght[i];
                 newX = x; newY = y;
