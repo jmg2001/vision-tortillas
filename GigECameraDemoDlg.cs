@@ -221,6 +221,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 //----------------Only for Debug, delete on production-----------------
                 MessageBox.Show(settings.frames.ToString() + " frames processed in the last execution");
+
                 settings.frames = 0;
                 settings.Save();
                 //----------------Only for Debug, delete on production-----------------
@@ -480,8 +481,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 btnManualThreshold.BackColor = Color.LightGreen;
             }
 
-            originalBox.ImageLocation = imagesPath + "roiDraw.jpg";
-            processROIBox.ImageLocation = imagesPath + "final.bmp";
+            //originalBox.ImageLocation = imagesPath + "roiDraw.jpg";
+            //processROIBox.ImageLocation = imagesPath + "final.jpg";
         }
 
         public double Filtro(double k)
@@ -715,25 +716,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 processROIBox.Image.Dispose();
                 processROIBox.Image = null;
-                processROIBox.Refresh();
             }
             if (originalBox.Image != null)
             {
                 originalBox.Image.Dispose();
                 originalBox.Image = null;
-                originalBox.Refresh();
-            }
-
-            if (!originalImageIsDisposed)
-            {
-                try
-                {
-                    originalImage.Dispose();
-                }
-                catch
-                {
-
-                }
             }
         }
 
@@ -1000,19 +987,24 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private void preProcess()
         {
             processImageBtn.Enabled = true;
-
+            originalImageCV = new Mat();
 
             string path = saveImage();
-            originalImage = new Bitmap(path);
-            originalImageIsDisposed = false;
 
-            // Convertir el objeto Bitmap a una matriz de Emgu CV (Image<Bgr, byte>)
-            Image<Bgr, byte> tempImage = originalImage.ToImage<Bgr, byte>();
-            ImageHistogram(originalImage);
-            originalImageIsDisposed = true;
+            using( Bitmap originalImage = new Bitmap(path))
+            {
 
-            originalImageCV = new Mat();
-            originalImageCV = imageCorrection(tempImage);
+                originalImageIsDisposed = false;
+
+                // Convertir el objeto Bitmap a una matriz de Emgu CV (Image<Bgr, byte>)
+                Image<Bgr, byte> tempImage = originalImage.ToImage<Bgr, byte>();
+                ImageHistogram(originalImage);
+
+                originalImageIsDisposed = true;
+                
+                originalImageCV = imageCorrection(tempImage);
+            }
+            
 
             originalImageCV.Save(imagesPath + "updatedROI.jpg");
 
@@ -1022,8 +1014,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             originalBox.SizeMode = PictureBoxSizeMode.AutoSize;
             originalBox.Visible = true;
-            //originalBox.Image = originalImageCV.ToBitmap();
-            originalBox.LoadAsync();
+            updateImage(originalBox, new Bitmap(imagesPath + "roiDraw.jpg"));
             
 
             originalBox.BringToFront();
@@ -1040,6 +1031,21 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 Quadrant qua = new Quadrant(i, "", false, 0, 0, 0, 0, blb);
                 Quadrants.Add(qua);
             }
+        }
+
+        private void updateImage(PictureBox pictureBox, Bitmap image)
+        {
+            // Liberar recursos de la imagen anterior, si existe
+            if (pictureBox.Image != null)
+            {
+                pictureBox.Image.Dispose();
+            }
+
+            // Actualizar la imagen en el PictureBox
+            pictureBox.Image = image;
+
+            // Forzar el repintado del PictureBox para reflejar los cambios
+            pictureBox.Invalidate();
         }
 
         private void calibrate()
@@ -1379,7 +1385,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 // Procesamos el ROI
                 blobProces(roiImage, processROIBox);
-                processROIBox.LoadAsync();
+                updateImage(processROIBox, new Bitmap(imagesPath + "final.jpg"));
             }
             catch
             {
@@ -1901,13 +1907,20 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             processROIBox.Visible = false;
 
+            if(originalBox.Image != null)
+            {
+                originalBox.Image.Dispose();
+                originalBox.Image = null;
+            }
+
             Mat originalROIImage = CvInvoke.Imread(imagesPath + "updatedROI.jpg");
 
             drawROI(originalROIImage);
 
             originalROIImage.Save(imagesPath + "roiDraw.jpg");
 
-            originalBox.LoadAsync();
+            //originalBox.LoadAsync();
+            updateImage(originalBox, new Bitmap(imagesPath + "roiDraw.jpg"));
             originalBox.SizeMode = PictureBoxSizeMode.AutoSize;
             originalBox.Visible = true;
 
@@ -2136,9 +2149,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 if (freezeFrame)
                 {
-                    //processROIBox.Image = new Bitmap(imagesPath + "final.bmp");
-                    processROIBox.LoadAsync();
-                    processROIBox.Refresh();
+
+                    updateImage(originalBox, new Bitmap(imagesPath + "roiDraw.jpg"));
+                    updateImage(processROIBox, new Bitmap(imagesPath + "final.jpg"));
+                    
                 }
                 else
                 {
@@ -2146,15 +2160,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     {
                         originalBox.Image.Dispose();
                         originalBox.Image = null;
-                        //originalBox.Image = new Bitmap(imagesPath + "updatedROI.jpg");
-                        originalBox.LoadAsync();
-                        originalBox.Refresh();
+                        updateImage(originalBox, new Bitmap(imagesPath + "roiDraw.jpg"));
 
                         processROIBox.Image.Dispose();
                         processROIBox.Image = null;
-                        //processROIBox.Image = new Bitmap(imagesPath + "final.bmp");
-                        processROIBox.LoadAsync();
-                        processROIBox.Refresh();
+                        updateImage(processROIBox, new Bitmap(imagesPath + "final.jpg"));
+
                     }
                     catch (Exception ex)
                     {
@@ -2725,7 +2736,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             pictureBox.SizeMode = PictureBoxSizeMode.AutoSize;
 
             // Mostrar la imagen en el PictureBox
-            pictureBox.Image = image.ToBitmap();
+            //pictureBox.Image = image.ToBitmap();
 
             image.Save(imagesPath + "roi.bmp");
 
@@ -2860,7 +2871,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             try
             {
-                image.Save(imagesPath + "final.bmp");
+                image.Save(imagesPath + "final.jpg");
             }
             catch (Exception e)
             {
@@ -3081,7 +3092,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             //image.Dispose();
 
             // Guardar la imagen binarizada
-            imagenBinarizada.Save("imagen_binarizada.jpg");
+            imagenBinarizada.Save(imagesPath + "imagen_binarizada.jpg");
 
             return imagenBinarizada;
         }
