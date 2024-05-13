@@ -285,6 +285,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void initializeElements()
         {
+            //imagesPath = userDir + "\\";
 
             configurationPage.Enabled = true;
             advancedPage.Enabled = true;
@@ -478,6 +479,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 btnAutoThreshold.BackColor = Color.Silver;
                 btnManualThreshold.BackColor = Color.LightGreen;
             }
+
+            originalBox.ImageLocation = imagesPath + "roiDraw.jpg";
+            processROIBox.ImageLocation = imagesPath + "final.bmp";
         }
 
         public double Filtro(double k)
@@ -627,7 +631,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     {
                         if (!processing)
                         {
-
+                            Console.WriteLine(originalBox.WaitOnLoad.ToString());
 
                             bool freeze = freezeFrame;
                             processing = true;
@@ -711,11 +715,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 processROIBox.Image.Dispose();
                 processROIBox.Image = null;
+                processROIBox.Refresh();
             }
             if (originalBox.Image != null)
             {
                 originalBox.Image.Dispose();
                 originalBox.Image = null;
+                originalBox.Refresh();
             }
 
             if (!originalImageIsDisposed)
@@ -748,6 +754,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 //binarizedImage = binarizeImage(originalImage, 0);
                 binarizedImage = binarizeImage(originalImageCV, 0);
+                originalImageCV.Dispose();
             }
             catch
             {
@@ -901,7 +908,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             ImageHistogram(originalImage);
             originalImageIsDisposed = true;
 
-
             originalImageCV = new Mat();
             originalImageCV = imageCorrection(tempImage);
 
@@ -1011,10 +1017,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             originalImageCV.Save(imagesPath + "updatedROI.jpg");
 
             drawROI(originalImageCV);
-            
+
+            originalImageCV.Save(imagesPath + "roiDraw.jpg");
+
             originalBox.SizeMode = PictureBoxSizeMode.AutoSize;
             originalBox.Visible = true;
-            originalBox.Image = originalImageCV.ToBitmap();
+            //originalBox.Image = originalImageCV.ToBitmap();
+            originalBox.LoadAsync();
+            
 
             originalBox.BringToFront();
             processROIBox.SendToBack();
@@ -1336,6 +1346,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             frameCounter++;
             framesProcessed.Text = frameCounter.ToString();
+
             //----------------Only for Debug, delete on production-----------------
             settings.frames++;
             settings.Save();
@@ -1350,6 +1361,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 //binarizedImage = binarizeImage(originalImage, 0);
                 binarizedImage = binarizeImage(originalImageCV, 0);
+                originalImageCV.Dispose();
             }
             catch
             {
@@ -1367,7 +1379,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 // Procesamos el ROI
                 blobProces(roiImage, processROIBox);
-                processROIBox.Image = roiImage.ToBitmap();
+                processROIBox.LoadAsync();
             }
             catch
             {
@@ -1885,224 +1897,25 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         }
 
-        //private void Txt_UserROIBottom_KeyPress(object sender, KeyPressEventArgs e)
-        //{
-        //    // Verificar si la tecla presionada es "Enter" (código ASCII 13)
-        //    if (e.KeyChar == (char)Keys.Enter)
-        //    {
-        //        if (File.Exists(imagesPath + "updatedROI.jpg"))
-        //        {
-        //            // Intentar convertir el texto del TextBox a un número entero
-        //            if (int.TryParse(TXT_ROI_Bottom.Text, out UserROI.Bottom))
-        //            {
-        //                // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-        //                //MessageBox.Show("Data Saved: " + UserROI.Right, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        //                if (!triggerPLC && mode == 0)
-        //                {
-        //                    if (UserROI.Bottom > 250 && UserROI.Bottom < 475)
-        //                    {
-        //                        settings.ROI_Bottom = UserROI.Bottom;
-        //                        updateROI();
-        //                    }
-        //                    else
-        //                    {
-        //                        MessageBox.Show("Out of range");
-        //                        UserROI.Bottom = settings.ROI_Bottom;
-        //                        TXT_ROI_Bottom.Text = settings.ROI_Bottom.ToString();
-        //                    }
-
-        //                }
-        //                else
-        //                {
-        //                    MessageBox.Show("Change the operation mode");
-        //                    UserROI.Bottom = settings.ROI_Bottom;
-        //                    TXT_ROI_Bottom.Text = settings.ROI_Bottom.ToString();
-        //                }
-        //            }
-        //            else
-        //            {
-        //                // Manejar el caso en que el texto no sea un número válido
-        //                MessageBox.Show("usea a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //            }
-        //        }
-        //        else
-        //        {
-        //            UserROI.Bottom = settings.ROI_Bottom;
-        //            TXT_ROI_Bottom.Text = settings.ROI_Bottom.ToString();
-        //            MessageBox.Show("Please first take a frame");
-        //        }
-                
-        //    }
-        //}
-
-        //private void Txt_UserROITop_KeyPress(object sender, KeyPressEventArgs e)
-        //{
-        //    // Verificar si la tecla presionada es "Enter" (código ASCII 13)
-        //    if (e.KeyChar == (char)Keys.Enter)
-        //    {
-        //        if (File.Exists(imagesPath + "updatedROI.jpg"))
-        //        {
-        //            // Intentar convertir el texto del TextBox a un número entero
-        //            if (int.TryParse(TXT_ROI_Top.Text, out UserROI.Top))
-        //            {
-        //                // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-        //                //MessageBox.Show("Data Saved: " + UserROI.Right, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        //                if (!triggerPLC && mode == 0)
-        //                {
-        //                    if (UserROI.Top > 5 && UserROI.Top < 230)
-        //                    {
-        //                        settings.ROI_Top = UserROI.Top;
-        //                        updateROI();
-        //                    }
-        //                    else
-        //                    {
-        //                        MessageBox.Show("Out of range");
-        //                        UserROI.Top = settings.ROI_Top;
-        //                        TXT_ROI_Top.Text = settings.ROI_Top.ToString();
-        //                    }
-
-        //                }
-        //                else
-        //                {
-        //                    MessageBox.Show("Change the operation mode");
-        //                    UserROI.Top = settings.ROI_Top;
-        //                    TXT_ROI_Top.Text = settings.ROI_Top.ToString();
-        //                }
-        //            }
-        //            else
-        //            {
-        //                // Manejar el caso en que el texto no sea un número válido
-        //                MessageBox.Show("usea a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //            }
-        //        }
-        //        else
-        //        {
-        //            UserROI.Top = settings.ROI_Top;
-        //            TXT_ROI_Top.Text = settings.ROI_Top.ToString();
-        //            MessageBox.Show("Please first take a frame");
-        //        }
-        //    }
-        //}
-
-        //private void Txt_UserROIRight_KeyPress(object sender, KeyPressEventArgs e)
-        //{
-        //    // Verificar si la tecla presionada es "Enter" (código ASCII 13)
-        //    if (e.KeyChar == (char)Keys.Enter)
-        //    {
-        //        if (File.Exists(imagesPath + "updatedROI.jpg"))
-        //        {
-        //            // Intentar convertir el texto del TextBox a un número entero
-        //            if (int.TryParse(TXT_ROI_Right.Text, out UserROI.Right))
-        //            {
-        //                // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-        //                //MessageBox.Show("Data Saved: " + UserROI.Right, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        //                if (!triggerPLC && mode == 0)
-        //                {
-        //                    if (UserROI.Right > 330 && UserROI.Right < 630)
-        //                    {
-        //                        settings.ROI_Right = UserROI.Right;
-        //                        updateROI();
-        //                    }
-        //                    else
-        //                    {
-        //                        MessageBox.Show("Out of range");
-        //                        UserROI.Right = settings.ROI_Right;
-        //                        TXT_ROI_Right.Text = settings.ROI_Right.ToString();
-        //                    }
-
-        //                }
-        //                else
-        //                {
-        //                    MessageBox.Show("Change the operation mode");
-        //                    UserROI.Right = settings.ROI_Right;
-        //                    TXT_ROI_Right.Text = settings.ROI_Right.ToString();
-        //                }
-        //            }
-        //            else
-        //            {
-        //                // Manejar el caso en que el texto no sea un número válido
-        //                MessageBox.Show("usea a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //            }
-        //        }
-        //        else
-        //        {
-        //            UserROI.Right = settings.ROI_Right;
-        //            TXT_ROI_Right.Text = settings.ROI_Right.ToString();
-        //            MessageBox.Show("Please first take a frame");
-        //        }
-                
-        //    }
-        //}
-
-        //private void Txt_UserROILeft_KeyPress(object sender, KeyPressEventArgs e)
-        //{
-        //    // Verificar si la tecla presionada es "Enter" (código ASCII 13)
-        //    if (e.KeyChar == (char)Keys.Enter)
-        //    {
-        //        if (File.Exists(imagesPath + "updatedROI.jpg"))
-        //        {
-        //            // Intentar convertir el texto del TextBox a un número entero
-        //            if (int.TryParse(TXT_ROI_Left.Text, out UserROI.Left))
-        //            {
-        //                // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-        //                // MessageBox.Show("Data saved: " + UserROI.Left, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        //                if (!triggerPLC && mode == 0)
-        //                {
-        //                    if (UserROI.Left > 10 && UserROI.Left < 310)
-        //                    {
-        //                        settings.ROI_Left = UserROI.Left;
-        //                        updateROI();
-        //                    }
-        //                    else
-        //                    {
-        //                        MessageBox.Show("Out of range");
-        //                        UserROI.Left = settings.ROI_Left;
-        //                        TXT_ROI_Left.Text = settings.ROI_Left.ToString();
-        //                    }
-
-        //                }
-        //                else
-        //                {
-        //                    MessageBox.Show("Change the operation mode");
-        //                    UserROI.Left = settings.ROI_Left;
-        //                    TXT_ROI_Left.Text = settings.ROI_Left.ToString();
-        //                }
-        //            }
-        //            else
-        //            {
-        //                // Manejar el caso en que el texto no sea un número válido
-        //                MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //            }
-        //        }
-        //        else
-        //        {
-        //            UserROI.Left = settings.ROI_Left;
-        //            TXT_ROI_Left.Text = settings.ROI_Left.ToString();
-        //            MessageBox.Show("Please first take a frame");
-        //        }
-        //    }
-        //}
-
         private void updateROI()
         {
             processROIBox.Visible = false;
 
             Mat originalROIImage = CvInvoke.Imread(imagesPath + "updatedROI.jpg");
 
-            //ConvertToCompatibleFormat(originalROIImage);
-
             drawROI(originalROIImage);
 
-            originalBox.Image = originalROIImage.ToBitmap();
+            originalROIImage.Save(imagesPath + "roiDraw.jpg");
+
+            originalBox.LoadAsync();
             originalBox.SizeMode = PictureBoxSizeMode.AutoSize;
             originalBox.Visible = true;
 
-            //originalROIImage.Dispose();
             originalBox.BringToFront();
             processROIBox.SendToBack();
             m_ImageBox.SendToBack();
-            //m_View.Hide();
-            //originalROIImage.Dispose();
+
+            originalROIImage.Dispose();
         }
 
         private void originalBox_MouseMove(object sender, MouseEventArgs e)
@@ -2140,6 +1953,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 // Mostrar la información del píxel
                 PixelDataValue.Text = $"  [ bx= {mousePos.X + UserROI.Left} y= {mousePos.Y + UserROI.Top}, Value: {(int)(Math.Round(pixelColor.GetBrightness(),3)*255)}]";
             }
+            bitmap.Dispose();
         }
 
         private void updateUnits(string unitsNew)
@@ -2322,7 +2136,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 if (freezeFrame)
                 {
-                    processROIBox.Image = new Bitmap(imagesPath + "final.bmp");
+                    //processROIBox.Image = new Bitmap(imagesPath + "final.bmp");
+                    processROIBox.LoadAsync();
                     processROIBox.Refresh();
                 }
                 else
@@ -2331,13 +2146,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     {
                         originalBox.Image.Dispose();
                         originalBox.Image = null;
-                        originalBox.Image = new Bitmap(imagesPath + "updatedROI.jpg");
-                        //originalBox.Refresh();
+                        //originalBox.Image = new Bitmap(imagesPath + "updatedROI.jpg");
+                        originalBox.LoadAsync();
+                        originalBox.Refresh();
 
                         processROIBox.Image.Dispose();
                         processROIBox.Image = null;
-                        processROIBox.Image = new Bitmap(imagesPath + "final.bmp");
-                        //processROIBox.Refresh();
+                        //processROIBox.Image = new Bitmap(imagesPath + "final.bmp");
+                        processROIBox.LoadAsync();
+                        processROIBox.Refresh();
                     }
                     catch (Exception ex)
                     {
