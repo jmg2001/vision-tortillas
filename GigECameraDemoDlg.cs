@@ -632,8 +632,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     {
                         if (!processing)
                         {
-                            Console.WriteLine(originalBox.WaitOnLoad.ToString());
-
                             bool freeze = freezeFrame;
                             processing = true;
 
@@ -755,7 +753,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             try
             {
                 // Procesamos el ROI
-                blobProcessFreezed(roiImage, processROIBox);
+                blobProcessFreezed(roiImage);
             }
             catch
             {
@@ -784,14 +782,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             processImageBtn.Enabled = false;
         }
 
-        private void blobProcessFreezed(Mat image, PictureBox pictureBox)
+        private void blobProcessFreezed(Mat image)
         {
             Blobs = new List<Blob>();
 
             var (contours, centers, areas, perimeters) = FindContoursWithEdgesAndCenters(image);
 
             // Inicializamos variables
-            double avgControlD = 0;
+            double avgDIA = 0;
             double avgMaxD = 0;
             double avgMinD = 0;
             double avgD = 0;
@@ -827,7 +825,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     (double diameterTriangles, double maxDiameter, double minDiameter) = calculateAndDrawDiameterTrianglesAlghoritm(centro, image.ToBitmap(), sector, false);
 
                     // Sumamos para promediar
-                    avgControlD += (diametroIA * tempFactor);
+                    avgDIA += (diametroIA * tempFactor);
                     avgMaxD += (maxDiameter * tempFactor);
                     avgMinD += (minDiameter * tempFactor);
                     avgD += (diameterTriangles * tempFactor);
@@ -871,32 +869,56 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
 
             // Calculamos el promedio de los diametros
-            avgControlD /= n;
+            avgDIA /= n;
             avgMaxD /= n;
             avgMinD /= n;
             avgD /= n;
 
-            //avgControlD = filtro.Aplicar(avgControlD, maxDiameter * euFactor, minDiameter * euFactor);
+            if (!double.IsNaN(avgDIA))
+            {
+                double validateControl = Filtro(avgDIA);
+                if (validateControl > maxDiameter * euFactor * 3)
+                {
+                    validateControl = maxDiameter * euFactor * 3;
+                }
+                else if (validateControl < 0)
+                {
+                    validateControl = 0;
+                }
+                controlDiameter = validateControl;
+            }
+            else
+            {
+                controlDiameter = Filtro(0);
+            }
 
-            maxDiameterAvg = avgMaxD;
-            minDiameterAvg = avgMinD;
-            diameterControl = avgControlD;
+            // Asignamos el texto del promedio de los diametros
+            avg_diameter.Text = Math.Round(avgD, 3).ToString();
+            txtAvgMaxD.Text = Math.Round(avgMaxD, 3).ToString();
+            txtAvgMinD.Text = Math.Round(avgMinD, 3).ToString();
+            txtEquivalentDiameter.Text = Math.Round(avgDIA, 3).ToString();
+            txtControlDiameter.Text = Math.Round(controlDiameter, 3).ToString();
+
+            // Asignar la DataTable al DataGridView
+            dataGridView1.DataSource = dataTable;
         }
 
         private void preProcessFreezed()
         {
             processImageBtn.Enabled = true;
+            originalImageCV = new Mat();
 
             string path = saveImage();
-            originalImage = new Bitmap(path);
-            originalImageIsDisposed = false;
+            using (Bitmap originalImage = new Bitmap(path))
+            {
+                originalImageIsDisposed = false;
 
-            Image<Bgr, byte> tempImage = originalImage.ToImage<Bgr, byte>();
-            ImageHistogram(originalImage);
-            originalImageIsDisposed = true;
+                Image<Bgr, byte> tempImage = originalImage.ToImage<Bgr, byte>();
+                ImageHistogram(originalImage);
+                originalImageIsDisposed = true;
+                originalImageCV = imageCorrection(tempImage);
 
-            originalImageCV = new Mat();
-            originalImageCV = imageCorrection(tempImage);
+            }
 
             originalImageCV.Save(imagesPath + "updatedROI.jpg");
 
@@ -1384,7 +1406,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             try
             {
                 // Procesamos el ROI
-                blobProces(roiImage, processROIBox);
+                blobProces(roiImage);
                 updateImage(processROIBox, new Bitmap(imagesPath + "final.jpg"));
             }
             catch
@@ -2728,17 +2750,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         }
 
 
-        private void blobProces(Mat image, PictureBox pictureBox)
+        private void blobProces(Mat image)
         {
             Blobs = new List<Blob>();
 
-            // Configurar el PictureBox para ajustar automáticamente al tamaño de la imagen
-            pictureBox.SizeMode = PictureBoxSizeMode.AutoSize;
-
-            // Mostrar la imagen en el PictureBox
-            //pictureBox.Image = image.ToBitmap();
-
-            image.Save(imagesPath + "roi.bmp");
+            //image.Save(imagesPath + "roi.bmp");
 
             var (contours ,centers, areas, perimeters) = FindContoursWithEdgesAndCenters(image);
 
@@ -2862,7 +2878,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             try
             {
                 drawPerimeters(image, contours, 1);
-
             }
             catch (Exception ex)
             {
@@ -3591,6 +3606,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // Agregar el PictureBox a la misma TabPage que m_ImageBox
             tabPage.Controls.Add(pictureBox);
 
+            // Configurar el PictureBox para ajustar automáticamente al tamaño de la imagen
+            processROIBox.SizeMode = PictureBoxSizeMode.AutoSize;
 
             originalBox.SendToBack();
             m_ImageBox.SendToBack();
