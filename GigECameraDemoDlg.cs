@@ -205,6 +205,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         //
         // This function is called each time an image has been transferred into system memory by the transfer object
 
+        //imagesPath = userDir + "\\";
+        SapBuffer originalBuffer;
+        SapView originalView;
+
+        SapBuffer processBuffer;
+        SapView processView;
+
+       
+
         public GigECameraDemoDlg()
         {
             m_AcqDevice = null;
@@ -215,12 +224,35 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             AcqConfigDlg acConfigDlg = new AcqConfigDlg(null, "", AcqConfigDlg.ServerCategory.ServerAcqDevice, true);
             if (acConfigDlg.ShowDialog() == DialogResult.OK)
             {
+
                 InitializeComponent();
                 initializeElements();
                 InitializeDataTable();
 
+                originalBuffer = new SapBuffer(1, 640, 480, SapFormat.RGBP8, SapBuffer.MemoryType.ScatterGather);
+                originalView = new SapView(originalBuffer, boxOriginal);
+
+                bool succes = originalBuffer.Create();
+                succes = originalView.Create();
+
+                processBuffer = new SapBuffer(1, 357, 357, SapFormat.RGBP8, SapBuffer.MemoryType.ScatterGather);
+                processView = new SapView(processBuffer, boxProcess);
+
+                succes = processBuffer.Create();
+                succes = processView.Create();
+
+                if (succes)
+                {
+                    Console.WriteLine("Bufffers and Views Created");
+                }
+
+                //// Register events for the view
+                //this.Paint += new PaintEventHandler(Form_Paint);
+                //this.Resize += new EventHandler(Form_Resize);
+                //this.Move += new EventHandler(Form_Move);
+
                 //----------------Only for Debug, delete on production-----------------
-                MessageBox.Show(settings.frames.ToString() + " frames processed in the last execution");
+                //MessageBox.Show(settings.frames.ToString() + " frames processed in the last execution");
 
                 settings.frames = 0;
                 settings.Save();
@@ -248,7 +280,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 //----------------Only for Debug, delete on production-----------------
                 m_View.AutoEmpty = true;
-                MessageBox.Show(m_View.AutoEmpty.ToString());
+                originalView.AutoEmpty = true;
+                processView.AutoEmpty = true;
+                //MessageBox.Show(m_View.AutoEmpty.ToString());
                 //----------------Only for Debug, delete on production-----------------
 
 
@@ -286,8 +320,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void initializeElements()
         {
-            //imagesPath = userDir + "\\";
-
             configurationPage.Enabled = true;
             advancedPage.Enabled = true;
 
@@ -443,9 +475,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             int roiHeight = UserROI.Bottom - UserROI.Top;
             txtRoiHeight.Text = roiHeight.ToString();
 
-            processROIBox.Image = null;
-            originalBox.Image = null;
-
+            //processROIBox.Image = null;
+            //originalBox.Image = null;
 
             maxOvality = settings.maxOvality;
             maxCompactness = settings.maxCompacity;
@@ -461,8 +492,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             Txt_MaxCompacity.KeyPress += Txt_MaxCompacity_KeyPress;
             Txt_MaxOvality.KeyPress += Txt_MaxOvality_KeyPress;
 
-            originalBox.MouseClick += originalBox_MouseMove;
-            processROIBox.MouseClick += processBox_MouseMove;
+            //originalBox.MouseClick += originalBox_MouseMove;
+            //processROIBox.MouseClick += processBox_MouseMove;
 
             // Crear un TabControl
             TabControl tabControl1 = new TabControl();
@@ -662,15 +693,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                                     }
                                     else
                                     {
-                                        processROIBox.Image = null;
-                                        originalBox.Image = null;
+                                        //processROIBox.Image = null;
+                                        //originalBox.Image = null;
                                         preProcess();
                                     }
                                     break;
                                 case 1:
                                     m_ImageBox.BringToFront();
-                                    processROIBox.SendToBack();
-                                    originalBox.SendToBack();
+                                    //processROIBox.SendToBack();
+                                    //originalBox.SendToBack();
                                     break;
                             }
 
@@ -708,18 +739,40 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
+        //public static void Form_Paint(Object sender, PaintEventArgs args)
+        //{
+        //    // Find the SapView object corresponding to the form for this event
+        //    Form form = sender as Form;
+        //    SapView view = SapView.FindView(form);
+        //    view.OnPaint();
+        //}
+        //public static void Form_Resize(Object sender, EventArgs args)
+        //{
+        //    // Find the SapView object corresponding to the form for this event
+        //    Form form = sender as Form;
+        //    SapView view = SapView.FindView(form);
+        //    view.OnSize();
+        //}
+        //public static void Form_Move(Object sender, EventArgs args)
+        //{
+        //    // Find the SapView object corresponding to the form for this event
+        //    Form form = sender as Form;
+        //    SapView view = SapView.FindView(form);
+        //    view.OnMove();
+        //}
+
         private void disposeImages()
         {
-            if (processROIBox.Image != null)
-            {
-                processROIBox.Image.Dispose();
-                processROIBox.Image = null;
-            }
-            if (originalBox.Image != null)
-            {
-                originalBox.Image.Dispose();
-                originalBox.Image = null;
-            }
+            //if (processROIBox.Image != null)
+            //{
+            //    processROIBox.Image.Dispose();
+            //    processROIBox.Image = null;
+            //}
+            //if (originalBox.Image != null)
+            //{
+            //    originalBox.Image.Dispose();
+            //    originalBox.Image = null;
+            //}
         }
 
         private void processFreezed()
@@ -874,33 +927,36 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             avgMinD /= n;
             avgD /= n;
 
-            if (!double.IsNaN(avgDIA))
+            if (Blobs.Count >= minBlobObjects)
             {
-                double validateControl = Filtro(avgDIA);
-                if (validateControl > maxDiameter * euFactor * 3)
+                if (!double.IsNaN(avgDIA))
                 {
-                    validateControl = maxDiameter * euFactor * 3;
+                    double validateControl = Filtro(avgDIA);
+                    if (validateControl > maxDiameter * euFactor * 3)
+                    {
+                        validateControl = maxDiameter * euFactor * 3;
+                    }
+                    else if (validateControl < 0)
+                    {
+                        validateControl = 0;
+                    }
+                    controlDiameter = validateControl;
                 }
-                else if (validateControl < 0)
+                else
                 {
-                    validateControl = 0;
+                    controlDiameter = Filtro(0);
                 }
-                controlDiameter = validateControl;
-            }
-            else
-            {
-                controlDiameter = Filtro(0);
             }
 
             // Asignamos el texto del promedio de los diametros
-            avg_diameter.Text = Math.Round(avgD, 3).ToString();
-            txtAvgMaxD.Text = Math.Round(avgMaxD, 3).ToString();
-            txtAvgMinD.Text = Math.Round(avgMinD, 3).ToString();
-            txtEquivalentDiameter.Text = Math.Round(avgDIA, 3).ToString();
+            //avg_diameter.Text = Math.Round(avgD, 3).ToString();
+            //txtAvgMaxD.Text = Math.Round(avgMaxD, 3).ToString();
+            //txtAvgMinD.Text = Math.Round(avgMinD, 3).ToString();
+            //txtEquivalentDiameter.Text = Math.Round(avgDIA, 3).ToString();
             txtControlDiameter.Text = Math.Round(controlDiameter, 3).ToString();
 
             // Asignar la DataTable al DataGridView
-            dataGridView1.DataSource = dataTable;
+            //dataGridView1.DataSource = dataTable;
         }
 
         private void preProcessFreezed()
@@ -920,7 +976,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             }
 
-            originalImageCV.Save(imagesPath + "updatedROI.jpg");
+            originalImageCV.Save(imagesPath + "updatedROI.bmp");
 
             Quadrants = new List<Quadrant>();
 
@@ -1008,6 +1064,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void preProcess()
         {
+            boxOriginal.BringToFront();
+            boxProcess.Visible = false;
+
             processImageBtn.Enabled = true;
             originalImageCV = new Mat();
 
@@ -1028,20 +1087,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
             
 
-            originalImageCV.Save(imagesPath + "updatedROI.jpg");
+            originalImageCV.Save(imagesPath + "updatedROI.bmp");
 
-            drawROI(originalImageCV);
+            Mat temp = drawROI(originalImageCV.Clone());
 
-            originalImageCV.Save(imagesPath + "roiDraw.jpg");
+            temp.Save(imagesPath + "roiDraw.bmp");
 
-            originalBox.SizeMode = PictureBoxSizeMode.AutoSize;
-            originalBox.Visible = true;
-            updateImage(originalBox, new Bitmap(imagesPath + "roiDraw.jpg"));
-            
+            temp.Dispose();
 
-            originalBox.BringToFront();
-            processROIBox.SendToBack();
-            m_ImageBox.SendToBack();
+            updateView(originalBuffer, originalView, "roiDraw.bmp");
 
             Quadrants = new List<Quadrant>();
 
@@ -1381,7 +1435,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             //----------------Only for Debug, delete on production-----------------
 
             //originalBox.Visible = true;
-            processROIBox.Visible = true; // Mostrar el PictureBox ROI
+            //processROIBox.Visible = true; // Mostrar el PictureBox ROI
             Mat binarizedImage = new Mat();
 
             // Se binariza la imagen
@@ -1401,13 +1455,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             Mat roiImage = extractROI(binarizedImage);
 
             // Colocamos el picturebox del ROI
-            SetPictureBoxPositionAndSize(processROIBox, imagePage);
+            SetPictureBoxPositionAndSize(ref processBuffer, imagePage);
 
             try
             {
                 // Procesamos el ROI
                 blobProces(roiImage);
-                updateImage(processROIBox, new Bitmap(imagesPath + "final.jpg"));
+                updateView(processBuffer, processView, "final.bmp");
+                
             }
             catch
             {
@@ -1433,7 +1488,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             processImageBtn.Enabled = false;
             processImageBtn.BackColor = Color.DarkGray;
         }
-        
+
+        private void updateView(SapBuffer buffer, SapView view, string v)
+        {
+            buffer.Load(imagesPath + v, -1, "-format bmp");
+            view.Show();
+        }
+
         private void setModbusData(bool quadrantsOK)
         {
             // Frame Counter
@@ -1803,7 +1864,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return roiImage;
         }
 
-        private void drawROI(Mat image)
+        private Mat drawROI(Mat image)
         {
             //Rectangle rect = new Rectangle(UserROI.Left, UserROI.Top, UserROI.Right - UserROI.Left, UserROI.Bottom - UserROI.Top);
             // Coordenadas y tamaño del rectángulo
@@ -1818,11 +1879,18 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // Grosor del borde del rectángulo
             int grosor = 1;
 
-            //CvInvoke.Circle(image, new Point((int)originalImage.Size.Width/2,(int)originalImage.Size.Height/2),2,new MCvScalar(255,255,255),grosor);
+            drawHelpLines(image, color, grosor, ancho, alto);
 
             // Dibujar el rectángulo en la imagen
             CvInvoke.Rectangle(image, new Rectangle(x, y, ancho, alto), color, grosor);
 
+            return image;
+        }
+
+        private void drawHelpLines(Mat image, MCvScalar color, int grosor, int ancho, int alto)
+        {
+            CvInvoke.Line(image, new Point(UserROI.Left, UserROI.Top + ((int)(alto / 2))), new Point(UserROI.Right, UserROI.Top + ((int)(alto / 2))), color, grosor);
+            CvInvoke.Line(image, new Point(UserROI.Left + ((int)(ancho / 2)), UserROI.Top), new Point(UserROI.Left + ((int)(ancho / 2)), UserROI.Bottom), color, grosor);
         }
 
 
@@ -1927,68 +1995,63 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void updateROI()
         {
-            processROIBox.Visible = false;
+            //processROIBox.Visible = false;
+            boxProcess.Visible = false;
 
-            if(originalBox.Image != null)
-            {
-                originalBox.Image.Dispose();
-                originalBox.Image = null;
-            }
+            //if(originalBox.Image != null)
+            //{
+            //    originalBox.Image.Dispose();
+            //    originalBox.Image = null;
+            //}
 
             Mat originalROIImage = CvInvoke.Imread(imagesPath + "updatedROI.jpg");
 
             drawROI(originalROIImage);
 
-            originalROIImage.Save(imagesPath + "roiDraw.jpg");
+            originalROIImage.Save(imagesPath + "roiDraw.bmp");
 
             //originalBox.LoadAsync();
-            updateImage(originalBox, new Bitmap(imagesPath + "roiDraw.jpg"));
-            originalBox.SizeMode = PictureBoxSizeMode.AutoSize;
-            originalBox.Visible = true;
-
-            originalBox.BringToFront();
-            processROIBox.SendToBack();
-            m_ImageBox.SendToBack();
+            updateView(originalBuffer, originalView, "roiDraw.bmp");
 
             originalROIImage.Dispose();
         }
 
         private void originalBox_MouseMove(object sender, MouseEventArgs e)
         {
-            // Obtener la posición del ratón dentro del PictureBox
-            Point mousePos = e.Location;
+            //// Obtener la posición del ratón dentro del PictureBox
+            //Point mousePos = e.Location;
 
-            // Obtener la imagen del PictureBox
-            Bitmap bitmap = (Bitmap)originalBox.Image;
+            //// Obtener la imagen del PictureBox
+            //Bitmap bitmap = (Bitmap)originalBox.Image;
 
-            if (bitmap != null && originalBox.ClientRectangle.Contains(mousePos))
-            {
-                // Obtener el color del píxel en la posición del ratón
-                Color pixelColor = bitmap.GetPixel(mousePos.X, mousePos.Y);
+            //if (bitmap != null && originalBox.ClientRectangle.Contains(mousePos))
+            //{
+            //    // Obtener el color del píxel en la posición del ratón
+            //    Color pixelColor = bitmap.GetPixel(mousePos.X, mousePos.Y);
 
-                // Mostrar la información del píxel
-                PixelDataValue.Text = $"  [ ax= {mousePos.X} y= {mousePos.Y}, Value: {(int)(Math.Round(pixelColor.GetBrightness(),3)*255)}]";
-            }
-            bitmap.Dispose();
+            //    // Mostrar la información del píxel
+            //    PixelDataValue.Text = $"  [ ax= {mousePos.X} y= {mousePos.Y}, Value: {(int)(Math.Round(pixelColor.GetBrightness(),3)*255)}]";
+            //}
+            //bitmap.Dispose();
         }
 
         private void processBox_MouseMove(object sender, MouseEventArgs e)
         {
-            // Obtener la posición del ratón dentro del PictureBox
-            Point mousePos = e.Location;
+            //// Obtener la posición del ratón dentro del PictureBox
+            //Point mousePos = e.Location;
 
-            // Obtener la imagen del PictureBox
-            Bitmap bitmap = (Bitmap)processROIBox.Image;
+            //// Obtener la imagen del PictureBox
+            //Bitmap bitmap = (Bitmap)processBuffer.Read();
 
-            if (bitmap != null && processROIBox.ClientRectangle.Contains(mousePos))
-            {
-                // Obtener el color del píxel en la posición del ratón
-                Color pixelColor = bitmap.GetPixel(mousePos.X, mousePos.Y);
+            //if (bitmap != null && boxOriginal.ClientRectangle.Contains(mousePos))
+            //{
+            //    // Obtener el color del píxel en la posición del ratón
+            //    Color pixelColor = bitmap.GetPixel(mousePos.X, mousePos.Y);
 
-                // Mostrar la información del píxel
-                PixelDataValue.Text = $"  [ bx= {mousePos.X + UserROI.Left} y= {mousePos.Y + UserROI.Top}, Value: {(int)(Math.Round(pixelColor.GetBrightness(),3)*255)}]";
-            }
-            bitmap.Dispose();
+            //    // Mostrar la información del píxel
+            //    PixelDataValue.Text = $"  [ bx= {mousePos.X + UserROI.Left} y= {mousePos.Y + UserROI.Top}, Value: {(int)(Math.Round(pixelColor.GetBrightness(),3)*255)}]";
+            //}
+            //bitmap.Dispose();
         }
 
         private void updateUnits(string unitsNew)
@@ -2172,21 +2235,21 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 if (freezeFrame)
                 {
 
-                    updateImage(originalBox, new Bitmap(imagesPath + "roiDraw.jpg"));
-                    updateImage(processROIBox, new Bitmap(imagesPath + "final.jpg"));
-                    
+                    originalView.Show();
+                    processView.Show();
+                    //updateImage(originalBox, new Bitmap(imagesPath + "roiDraw.jpg"));
+                    //updateImage(processROIBox, new Bitmap(imagesPath + "final.jpg"));
+
                 }
                 else
                 {
                     try
                     {
-                        originalBox.Image.Dispose();
-                        originalBox.Image = null;
-                        updateImage(originalBox, new Bitmap(imagesPath + "roiDraw.jpg"));
-
-                        processROIBox.Image.Dispose();
-                        processROIBox.Image = null;
-                        updateImage(processROIBox, new Bitmap(imagesPath + "final.jpg"));
+                        //disposeImages();
+                        originalView.Show();
+                        processView.Show();
+                        //updateImage(originalBox, new Bitmap(imagesPath + "roiDraw.jpg"));
+                        //updateImage(processROIBox, new Bitmap(imagesPath + "final.jpg"));
 
                     }
                     catch (Exception ex)
@@ -2604,7 +2667,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 m_SystemMenu.AppendSeparator();
                 m_SystemMenu.AppendMenu(m_AboutID, "About this...");
             }
-
             // Register event handler which is invoked when logging off or shutting down
             SystemEvents.SessionEnded += new SessionEndedEventHandler(SystemEvents_SessionEnded);
         }
@@ -2886,7 +2948,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             try
             {
-                image.Save(imagesPath + "final.jpg");
+                image.Save(imagesPath + "final.bmp");
             }
             catch (Exception e)
             {
@@ -2899,22 +2961,25 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             avgMinD /= n;
             avgD /= n;
 
-            if (!double.IsNaN(avgDIA))
+            if (Blobs.Count >= minBlobObjects)
             {
-                double validateControl = Filtro(avgDIA);
-                if (validateControl > maxDiameter * euFactor * 3)
+                if (!double.IsNaN(avgDIA))
                 {
-                    validateControl = maxDiameter * euFactor * 3;
+                    double validateControl = Filtro(avgDIA);
+                    if (validateControl > maxDiameter * euFactor * 3)
+                    {
+                        validateControl = maxDiameter * euFactor * 3;
+                    }
+                    else if (validateControl < 0)
+                    {
+                        validateControl = 0;
+                    }
+                    controlDiameter = validateControl;
                 }
-                else if (validateControl < 0)
+                else
                 {
-                    validateControl = 0;
+                    controlDiameter = Filtro(0);
                 }
-                controlDiameter = validateControl;
-            }
-            else
-            {
-                controlDiameter = Filtro(0);
             }
 
             // Asignamos el texto del promedio de los diametros
@@ -3588,30 +3653,42 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             m_ImageBox.Refresh();
         }
 
-        private void SetPictureBoxPositionAndSize(PictureBox pictureBox, TabPage tabPage)
+        private void SetPictureBoxPositionAndSize(ref SapBuffer buffer, TabPage tabPage)
         {
             // Calcular el tamaño de la imagen
             int imageWidth = UserROI.Right - UserROI.Left;
             int imageHeight = UserROI.Bottom - UserROI.Top;
 
             // Configurar el PictureBox para ajustar automáticamente al tamaño de la imagen
-            pictureBox.SizeMode = PictureBoxSizeMode.StretchImage;
+            //pictureBox.SizeMode = PictureBoxSizeMode.StretchImage;
 
             // Establecer el tamaño del PictureBox
-            pictureBox.Size = new Size(imageWidth, imageHeight);
+            //groupBox.Size = new Size(imageWidth, imageHeight);
+            
 
             // Ubicar el PictureBox en la posición del ROI
-            pictureBox.Location = new Point(UserROI.Left + OffsetLeft, UserROI.Top + OffsetTop);
+            boxProcess.Location = new Point(UserROI.Left + OffsetLeft, UserROI.Top + OffsetTop);
+            boxProcess.Size = new Size(imageWidth, imageHeight);
 
+            buffer.Destroy();
+            processView.Destroy();
+            buffer.Width = imageWidth;
+            buffer.Height = imageHeight;
+            buffer.Create();
+            processView.Create();
             // Agregar el PictureBox a la misma TabPage que m_ImageBox
-            tabPage.Controls.Add(pictureBox);
+            //tabPage.Controls.Add(pictureBox);
 
             // Configurar el PictureBox para ajustar automáticamente al tamaño de la imagen
-            processROIBox.SizeMode = PictureBoxSizeMode.AutoSize;
+            //processROIBox.SizeMode = PictureBoxSizeMode.AutoSize;
 
-            originalBox.SendToBack();
-            m_ImageBox.SendToBack();
-            pictureBox.BringToFront();
+            //originalBox.SendToBack();
+            boxProcess.Visible = true;
+            boxProcess.BringToFront();
+            
+            //boxOriginal.SendToBack();
+            //m_ImageBox.SendToBack();
+            //pictureBox.BringToFront();
         }
 
         private void btnsave_Click(object sender, EventArgs e)
@@ -3689,7 +3766,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void virtualTriggerBtn_Click(object sender, EventArgs e)
         {
-            processROIBox.Visible = false;
+            boxProcess.Visible = false;
 
             bool succes = m_AcqDevice.SetFeatureValue("TriggerSoftware", true);
             if (succes)
@@ -4535,5 +4612,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 MessageBox.Show("Change the operation mode");
             }
         }
+
     }
 }
