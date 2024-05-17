@@ -216,6 +216,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         public GigECameraDemoDlg()
         {
+
             m_AcqDevice = null;
             m_Buffers = null;
             m_Xfer = null;
@@ -224,6 +225,29 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             AcqConfigDlg acConfigDlg = new AcqConfigDlg(null, "", AcqConfigDlg.ServerCategory.ServerAcqDevice, true);
             if (acConfigDlg.ShowDialog() == DialogResult.OK)
             {
+                configPath = userDir + "\\STI-config\\";
+                csvPath = configPath + "\\STI-db.csv";
+                imagesPath = userDir + "\\STI-images\\";
+
+                if (!Directory.Exists(configPath))
+                {
+                    // Si no existe, crearlo
+                    Directory.CreateDirectory(configPath);
+                    Console.WriteLine("Directorio creado: " + configPath);
+                }
+
+                if (!Directory.Exists(imagesPath))
+                {
+                    // Si no existe, crearlo
+                    Directory.CreateDirectory(imagesPath);
+                    Console.WriteLine("Directorio creado: " + imagesPath);
+                }
+
+                if (!File.Exists(configPath + "STIconfig.ccf"))
+                {
+                    MessageBox.Show("Archivo de configuracion no encontrado, por favor genere uno y coloquelo en el direcotrio: " + configPath + " con el nombre" + "STIconfig.ccf");
+                    this.Close();
+                }
 
                 InitializeComponent();
                 initializeElements();
@@ -246,14 +270,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     Console.WriteLine("Bufffers and Views Created");
                 }
 
-                //// Register events for the view
-                //this.Paint += new PaintEventHandler(Form_Paint);
-                //this.Resize += new EventHandler(Form_Resize);
-                //this.Move += new EventHandler(Form_Move);
-
                 //----------------Only for Debug, delete on production-----------------
-                //MessageBox.Show(settings.frames.ToString() + " frames processed in the last execution");
-
                 settings.frames = 0;
                 settings.Save();
                 //----------------Only for Debug, delete on production-----------------
@@ -282,12 +299,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 m_View.AutoEmpty = true;
                 originalView.AutoEmpty = true;
                 processView.AutoEmpty = true;
-                //MessageBox.Show(m_View.AutoEmpty.ToString());
                 //----------------Only for Debug, delete on production-----------------
 
 
                 // Cargamos la configuracion por default
-                m_AcqDevice.LoadFeatures(configPath + "\\STIconfig.ccf");
+                m_AcqDevice.LoadFeatures(configPath + "STIconfig.ccf");
 
                 // triggerPLC = true;
 
@@ -322,12 +338,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             configurationPage.Enabled = true;
             advancedPage.Enabled = true;
-
-            string actualDIrectory = AppDomain.CurrentDomain.BaseDirectory;
-            configPath = userDir + "\\STI-config";
-            csvPath = configPath + "\\STI-db.csv";
-            // archivo = userDir + "\\datos.txt";
-            imagesPath = userDir + "\\STI-images\\";
 
             //originalBox.MouseMove += originalBox_MouseMove;
             //processROIBox.MouseMove += processBox_MouseMove;
@@ -1915,39 +1925,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
-        //private void CmbOperationModeSelection_SelectedIndexChanged(object sender, EventArgs e)
-        //{
-        //    string selection = CmbOperationModeSelection.SelectedItem.ToString();
-
-        //    switch (selection)
-        //    {
-        //        case "Manual":
-        //            operationMode = 0;
-        //            productsPage.Enabled = false;
-        //            GroupActualTargetSize.Enabled = true;
-        //            GroupSelectGrid.Enabled = true;
-        //            // if (modbusClient.Connected) { modbusClient.Disconnect();  Console.WriteLine("Modbus Client Disconnected"); }
-        //            break;
-        //        case "Local":
-        //            operationMode = 1;
-        //            productsPage.Enabled = true;
-        //            GroupActualTargetSize.Enabled = false;
-        //            GroupSelectGrid.Enabled = false;
-        //            CmbProducts.SelectedIndex = 0;
-        //            changeProductSetPoint();
-
-        //            // if (modbusClient.Connected) { modbusClient.Disconnect(); Console.WriteLine("Modbus Client Disconnected"); }
-
-        //            break;
-        //        case "PLC":
-        //            operationMode = 2;
-        //            productsPage.Enabled = false;
-        //            GroupActualTargetSize.Enabled = false;
-        //            GroupSelectGrid.Enabled = false;
-        //            break;
-        //    }
-        //}
-
         private void changeProduct(Product record)
         {
             settings.productCode = record.Code;
@@ -2003,13 +1980,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             //processROIBox.Visible = false;
             boxProcess.Visible = false;
 
-            //if(originalBox.Image != null)
-            //{
-            //    originalBox.Image.Dispose();
-            //    originalBox.Image = null;
-            //}
-
-            Mat originalROIImage = CvInvoke.Imread(imagesPath + "updatedROI.jpg");
+            Mat originalROIImage = CvInvoke.Imread(imagesPath + "updatedROI.bmp");
 
             drawROI(originalROIImage);
 
@@ -3709,13 +3680,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             int imageWidth = UserROI.Right - UserROI.Left;
             int imageHeight = UserROI.Bottom - UserROI.Top;
 
-            // Configurar el PictureBox para ajustar automáticamente al tamaño de la imagen
-            //pictureBox.SizeMode = PictureBoxSizeMode.StretchImage;
-
-            // Establecer el tamaño del PictureBox
-            //groupBox.Size = new Size(imageWidth, imageHeight);
-            
-
             // Ubicar el PictureBox en la posición del ROI
             boxProcess.Location = new Point(UserROI.Left + OffsetLeft, UserROI.Top + OffsetTop);
             boxProcess.Size = new Size(imageWidth, imageHeight);
@@ -3726,19 +3690,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             buffer.Height = imageHeight;
             buffer.Create();
             processView.Create();
-            // Agregar el PictureBox a la misma TabPage que m_ImageBox
-            //tabPage.Controls.Add(pictureBox);
-
-            // Configurar el PictureBox para ajustar automáticamente al tamaño de la imagen
-            //processROIBox.SizeMode = PictureBoxSizeMode.AutoSize;
 
             //originalBox.SendToBack();
             boxProcess.Visible = true;
             boxProcess.BringToFront();
-            
-            //boxOriginal.SendToBack();
-            //m_ImageBox.SendToBack();
-            //pictureBox.BringToFront();
         }
 
         private void btnsave_Click(object sender, EventArgs e)
@@ -4292,7 +4247,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void btnIncrementRoiWidth_Click(object sender, EventArgs e)
         {
-            if (File.Exists(imagesPath + "updatedROI.jpg"))
+            if (File.Exists(imagesPath + "updatedROI.bmp"))
             {
                 int roiWidth = (UserROI.Right - UserROI.Left) + 6;
                 if (roiWidth > 630) roiWidth = (630);
@@ -4330,7 +4285,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void btnDecrementRoiWidth_Click(object sender, EventArgs e)
         {
-            if (File.Exists(imagesPath + "updatedROI.jpg"))
+            if (File.Exists(imagesPath + "updatedROI.bmp"))
             {
                 int roiWidth = (UserROI.Right - UserROI.Left) - 6;
                 if (roiWidth < 12) roiWidth = (12);
@@ -4368,7 +4323,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void btnIncrementRoiHeight_Click(object sender, EventArgs e)
         {
-            if (File.Exists(imagesPath + "updatedROI.jpg"))
+            if (File.Exists(imagesPath + "updatedROI.bmp"))
             {
                 int roiHeight = (UserROI.Bottom - UserROI.Top) + 6;
                 if (roiHeight > 470) roiHeight = (470);
@@ -4406,7 +4361,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void btnDecrementRoiHeight_Click(object sender, EventArgs e)
         {
-            if (File.Exists(imagesPath + "updatedROI.jpg"))
+            if (File.Exists(imagesPath + "updatedROI.bmp"))
             {
                 int roiHeight = (UserROI.Bottom - UserROI.Top) - 6;
                 if (roiHeight < 12) roiHeight = (12);
