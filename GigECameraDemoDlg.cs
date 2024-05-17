@@ -324,9 +324,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             advancedPage.Enabled = true;
 
             string actualDIrectory = AppDomain.CurrentDomain.BaseDirectory;
-            csvPath = userDir + "\\InspecTorT_db.csv";
-            configPath = userDir + "\\InspecTorTConfig";
-            archivo = userDir + "\\datos.txt";
+            configPath = userDir + "\\STI-config";
+            csvPath = configPath + "\\STI-db.csv";
+            // archivo = userDir + "\\datos.txt";
+            imagesPath = userDir + "\\STI-images\\";
 
             //originalBox.MouseMove += originalBox_MouseMove;
             //processROIBox.MouseMove += processBox_MouseMove;
@@ -700,6 +701,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                                     break;
                                 case 1:
                                     m_ImageBox.BringToFront();
+                                    m_View.Show();
+                                    //boxOriginal.Visible = false;
+                                    //boxProcess.Visible = false;
                                     //processROIBox.SendToBack();
                                     //originalBox.SendToBack();
                                     break;
@@ -1064,6 +1068,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void preProcess()
         {
+            boxOriginal.Visible = true;
             boxOriginal.BringToFront();
             boxProcess.Visible = false;
 
@@ -1089,13 +1094,22 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             originalImageCV.Save(imagesPath + "updatedROI.bmp");
 
-            Mat temp = drawROI(originalImageCV.Clone());
+            if (!triggerPLC)
+            {
 
-            temp.Save(imagesPath + "roiDraw.bmp");
+                Mat temp = drawROI(originalImageCV.Clone());
 
-            temp.Dispose();
+                temp.Save(imagesPath + "roiDraw.bmp");
 
-            updateView(originalBuffer, originalView, "roiDraw.bmp");
+                temp.Dispose();
+
+                updateView(originalBuffer, originalView, "roiDraw.bmp");
+            }
+            else
+            {
+                updateView(originalBuffer, originalView, "updatedROI.bmp");
+            }
+
 
             Quadrants = new List<Quadrant>();
 
@@ -2243,33 +2257,20 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 }
                 else
                 {
-                    try
+                    if (mode == 0)
                     {
-                        //disposeImages();
-                        originalView.Show();
-                        processView.Show();
-                        //updateImage(originalBox, new Bitmap(imagesPath + "roiDraw.jpg"));
-                        //updateImage(processROIBox, new Bitmap(imagesPath + "final.jpg"));
+                        try
+                        {
 
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(ex.Message);
+                            originalView.Show();
+                            processView.Show();
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show(ex.Message);
+                        }
                     }
                 }
-                //if (!processing)
-                //{
-                //    try
-                //    {
-                //        //originalBox.Update();
-                //        //processROIBox.Update();
-                //    }
-                //    catch (Exception ex)
-                //    {
-                //        Console.WriteLine(ex.Message);
-                //    }
-                //}
-
                 updateImages = true;
             }
         }
