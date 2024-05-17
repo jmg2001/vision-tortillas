@@ -258,7 +258,6 @@
     <Compile Include="Common\CSharp\ViewDlg.designer.cs">
       <DependentUpon>ViewDlg.cs</DependentUpon>
     </Compile>
-    <Compile Include="DIP.cs" />
     <Compile Include="GigECameraDemoDlg.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -328,12 +327,6 @@
     </EmbeddedResource>
     <None Include=".editorconfig" />
     <None Include="app.config" />
-    <Content Include="Common\Camera\TriggerOFF.ccf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Common\Camera\TriggerON.ccf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <None Include="GigECameraDemo_2019_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using Microsoft.Win32;
-// using System.Configuration;
 
 using DALSA.SaperaLT.SapClassBasic;
 using DALSA.SaperaLT.SapClassGui;
@@ -14,25 +13,24 @@ using System.Data;
 
 using EasyModbus;
 using CsvHelper;
-// using CsvHelper.Configuration;
 
 using System.Threading.Tasks;
-// using System.Net.Http;
-// using static DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.GigECameraDemoDlg;
+
 using Emgu.CV.Structure;
 using Emgu.CV;
 using System.Diagnostics;
-// using System.Drawing.Imaging;
 using System.Globalization;
-// using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using System.Threading;
+
 using DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Util;
-using static System.Net.Mime.MediaTypeNames;
-using System.Diagnostics.Eventing.Reader;
+
 using System.Runtime.ExceptionServices;
 using System.Security;
+
+using System.Configuration;
+using System.Runtime.CompilerServices;
+using DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Properties;
 
 
 // using System.Security.Cryptography;
@@ -54,12 +52,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         // Variables globales
         public RECT UserROI = new RECT();
         long[] Histogram = new long[256];
-
-
-        // private DIP DIP = new DIP();
-        // public int Blobs_Count;
-        // public int X_Lines;
-        // public int Y_Columns;
 
         // Creadas por mi
         bool authenticated = false;
@@ -156,10 +148,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         // Configurar el servidor Modbus TCP
         ModbusServer modbusServer = new ModbusServer();
-        //ModbusClient modbusClient = new ModbusClient();
-
-        Thread thread;
-        bool threadSuspended = false;
 
         List<GridType> gridTypes = new List<GridType>();
         GridType gridType = null;
@@ -171,8 +159,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         Bitmap originalROIImage = new Bitmap(640,480);
         Mat originalImageCV = new Mat();
-
-        SapTransfer transfer = new SapTransfer();
 
         // Hasta aqui las creadas por mi
 
@@ -208,20 +194,18 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         //imagesPath = userDir + "\\";
         SapBuffer originalBuffer;
         SapView originalView;
-
         SapBuffer processBuffer;
         SapView processView;
 
-       
 
         public GigECameraDemoDlg()
         {
-
             m_AcqDevice = null;
             m_Buffers = null;
             m_Xfer = null;
             m_View = null;
 
+            
             AcqConfigDlg acConfigDlg = new AcqConfigDlg(null, "", AcqConfigDlg.ServerCategory.ServerAcqDevice, true);
             if (acConfigDlg.ShowDialog() == DialogResult.OK)
             {
@@ -245,7 +229,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 if (!File.Exists(configPath + "STIconfig.ccf"))
                 {
-                    MessageBox.Show("Archivo de configuracion no encontrado, por favor genere uno y coloquelo en el direcotrio: " + configPath + " con el nombre" + "STIconfig.ccf");
+                    MessageBox.Show("Archivo de configuracion no encontrado, por favor genere uno y coloquelo en el direcotrio: " + configPath + " con el nombre: " + "STIconfig.ccf");
                     this.Close();
                 }
 

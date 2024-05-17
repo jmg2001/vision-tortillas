@@ -16,8 +16,6 @@ C:\Users\Jesús\Documents\vision-tortillas\bin\Release\x86\msvcp140_codecvt_ids.
 C:\Users\Jesús\Documents\vision-tortillas\bin\Release\x86\opencv_videoio_ffmpeg440.dll
 C:\Users\Jesús\Documents\vision-tortillas\bin\Release\x86\vcruntime140.dll
 C:\Users\Jesús\Documents\vision-tortillas\bin\Release\cvextern.dll
-C:\Users\Jesús\Documents\vision-tortillas\bin\Release\Common\Camera\TriggerOFF.ccf
-C:\Users\Jesús\Documents\vision-tortillas\bin\Release\Common\Camera\TriggerON.ccf
 C:\Users\Jesús\Documents\vision-tortillas\bin\Release\STI.exe.config
 C:\Users\Jesús\Documents\vision-tortillas\bin\Release\STI.exe.manifest
 C:\Users\Jesús\Documents\vision-tortillas\bin\Release\STI.application
