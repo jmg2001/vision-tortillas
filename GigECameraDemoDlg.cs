@@ -882,7 +882,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     (double diameterTriangles, double maxDiameter, double minDiameter) = calculateAndDrawDiameterTrianglesAlghoritm(centro, image.ToBitmap(), sector, false);
 
                     // Sumamos para promediar
-                    avgDIA += (diametroIA * tempFactor);
+                    avgDIA += (diametroIA);
                     avgMaxD += (maxDiameter * tempFactor);
                     avgMinD += (minDiameter * tempFactor);
                     avgD += (diameterTriangles * tempFactor);
@@ -931,36 +931,27 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             avgMinD /= n;
             avgD /= n;
 
-            if (Blobs.Count >= minBlobObjects)
+            if (!double.IsNaN(avgDIA))
             {
-                if (!double.IsNaN(avgDIA))
+                double validateControl = Filtro(avgDIA);
+                if (validateControl > maxDiameter * 3)
                 {
-                    double validateControl = Filtro(avgDIA);
-                    if (validateControl > maxDiameter * euFactor * 3)
-                    {
-                        validateControl = maxDiameter * euFactor * 3;
-                    }
-                    else if (validateControl < 0)
-                    {
-                        validateControl = 0;
-                    }
-                    controlDiameter = validateControl;
+                    validateControl = maxDiameter * 3;
                 }
-                else
+                else if (validateControl < 0)
                 {
-                    controlDiameter = Filtro(0);
+                    validateControl = 0;
                 }
+                controlDiameter = validateControl;
+            }
+            else
+            {
+                controlDiameter = Filtro(0);
             }
 
-            // Asignamos el texto del promedio de los diametros
-            //avg_diameter.Text = Math.Round(avgD, 3).ToString();
-            //txtAvgMaxD.Text = Math.Round(avgMaxD, 3).ToString();
-            //txtAvgMinD.Text = Math.Round(avgMinD, 3).ToString();
-            //txtEquivalentDiameter.Text = Math.Round(avgDIA, 3).ToString();
-            txtControlDiameter.Text = Math.Round(controlDiameter, 3).ToString();
-
-            // Asignar la DataTable al DataGridView
-            //dataGridView1.DataSource = dataTable;
+            maxDiameterAvg = avgMaxD;
+            minDiameterAvg = avgMinD;
+            diameterControl = controlDiameter;
         }
 
         private void preProcessFreezed()
@@ -2085,7 +2076,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 txtEquivalentDiameterUnits.Text = units;
 
                 txtMaxDProductUnits.Text = units;
-                txtMinDProductUnits.Text = units;   
+                txtMinDProductUnits.Text = units;
 
                 switch (unitsNew)
                 {
@@ -2101,7 +2092,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         euFactor *= 0.0393701; // inch/mm
                         fact = 0.0393701f;
                         break;
-                    // inch/px
+                        // inch/px
                 }
 
                 settings.Units = units;
@@ -2117,39 +2108,96 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         dataTable.Rows.Add(blob.Sector, blob.Area, Math.Round(blob.DiametroIA * euFactor, 3), Math.Round(blob.Diametro * euFactor, 3), Math.Round(blob.DMayor * euFactor, 3), Math.Round(blob.DMenor * euFactor, 3), Math.Round(blob.Compacidad, 3), Math.Round(blob.Ovalidad, 3));
                     }
                 }
-                
+
                 if (operationMode == 1)
                 {
-                    Txt_MaxD.Text = Math.Round(double.Parse(Txt_MaxD.Text) * fact, 3).ToString();
-                    Txt_MinD.Text = Math.Round(double.Parse(Txt_MinD.Text) * fact, 3).ToString();
 
-                    //if (unitsNew == "inch")
-                    //{
-                    //    Txt_MaxD.Text = Math.Round(double.Parse(Txt_MaxD.Text) * fact, 3).ToString();
-                    //    Txt_MinD.Text = Math.Round(double.Parse(Txt_MinD.Text) * fact, 3).ToString();
-                    //}
-                    //else
-                    //{
-                    //    Txt_MaxD.Text = (int.Parse(Txt_MaxD.Text) * fact).ToString();
-                    //    Txt_MinD.Text = (int.Parse(Txt_MinD.Text) * fact).ToString();
-                    //}
+                    if (unitsNew == "inch")
+                    {
+                        Txt_MaxD.Text = Math.Round(double.Parse(Txt_MaxD.Text) * fact, 3).ToString();
+                        Txt_MinD.Text = Math.Round(double.Parse(Txt_MinD.Text) * fact, 3).ToString();
+                    }
+                    else
+                    {
+                        Txt_MaxD.Text = Math.Round(double.Parse(Txt_MaxD.Text) * fact, 0).ToString();
+                        Txt_MinD.Text = Math.Round(double.Parse(Txt_MinD.Text) * fact, 0).ToString();
+                    }
                 }
 
+                if (unitsNew == "inch")
+                {
+                    double avgDiameter = 0;
+                    if (Double.TryParse(avg_diameter.Text, out avgDiameter)) ;
+                    avgDiameter *= fact;
+                    avg_diameter.Text = Math.Round(avgDiameter, 3).ToString();
 
-                double avgDiameter = 0;
-                if (Double.TryParse(avg_diameter.Text, out avgDiameter)) ;
-                avgDiameter *= fact;
-                avg_diameter.Text = Math.Round(avgDiameter, 3).ToString();
+                    double mxDiameter = 0;
+                    if (Double.TryParse(Txt_MaxDiameter.Text, out mxDiameter)) ;
+                    mxDiameter *= fact;
+                    Txt_MaxDiameter.Text = Math.Round(mxDiameter, 3).ToString();
 
-                double mxDiameter = 0;
-                if (Double.TryParse(Txt_MaxDiameter.Text, out mxDiameter)) ;
-                mxDiameter *= fact;
-                Txt_MaxDiameter.Text = Math.Round(mxDiameter, 3).ToString();
+                    double mnDiameter = 0;
+                    if (Double.TryParse(Txt_MinDiameter.Text, out mnDiameter)) ;
+                    mnDiameter *= fact;
+                    Txt_MinDiameter.Text = Math.Round(mnDiameter, 3).ToString();
 
-                double mnDiameter = 0;
-                if (Double.TryParse(Txt_MinDiameter.Text, out mnDiameter)) ;
-                mnDiameter *= fact;
-                Txt_MinDiameter.Text = Math.Round(mnDiameter, 3).ToString();
+                    double controlDiameter = 0;
+                    if (Double.TryParse(txtControlDiameter.Text, out controlDiameter)) ;
+                    controlDiameter *= fact;
+                    txtControlDiameter.Text = Math.Round(controlDiameter, 3).ToString();
+
+                    double avgMinDiameter = 0;
+                    if (Double.TryParse(txtAvgMinD.Text, out avgMinDiameter)) ;
+                    avgMinDiameter *= fact;
+                    txtAvgMinD.Text = Math.Round(avgMinDiameter, 3).ToString();
+
+                    double avgMaxDiameter = 0;
+                    if (Double.TryParse(txtAvgMaxD.Text, out avgMaxDiameter)) ;
+                    avgMaxDiameter *= fact;
+                    txtAvgMaxD.Text = Math.Round(avgMaxDiameter, 3).ToString();
+
+                    double equivalentDiameter = 0;
+                    if (Double.TryParse(txtEquivalentDiameter.Text, out equivalentDiameter)) ;
+                    equivalentDiameter *= fact;
+                    txtEquivalentDiameter.Text = Math.Round(equivalentDiameter, 3).ToString();
+                }
+                else
+                {
+                    double avgDiameter = 0;
+                    if (Double.TryParse(avg_diameter.Text, out avgDiameter)) ;
+                    avgDiameter *= fact;
+                    avg_diameter.Text = Math.Round(avgDiameter, 0).ToString();
+
+                    double mxDiameter = 0;
+                    if (Double.TryParse(Txt_MaxDiameter.Text, out mxDiameter)) ;
+                    mxDiameter *= fact;
+                    Txt_MaxDiameter.Text = Math.Round(mxDiameter, 0).ToString();
+
+                    double mnDiameter = 0;
+                    if (Double.TryParse(Txt_MinDiameter.Text, out mnDiameter)) ;
+                    mnDiameter *= fact;
+                    Txt_MinDiameter.Text = Math.Round(mnDiameter, 0).ToString();
+
+                    double controlDiameter = 0;
+                    if (Double.TryParse(txtControlDiameter.Text, out controlDiameter)) ;
+                    controlDiameter *= fact;
+                    txtControlDiameter.Text = Math.Round(controlDiameter, 0).ToString();
+
+                    double avgMinDiameter = 0;
+                    if (Double.TryParse(txtAvgMinD.Text, out avgMinDiameter)) ;
+                    avgMinDiameter *= fact;
+                    txtAvgMinD.Text = Math.Round(avgMinDiameter, 0).ToString();
+
+                    double avgMaxDiameter = 0;
+                    if (Double.TryParse(txtAvgMaxD.Text, out avgMaxDiameter)) ;
+                    avgMaxDiameter *= fact;
+                    txtAvgMaxD.Text = Math.Round(avgMaxDiameter, 0).ToString();
+
+                    double equivalentDiameter = 0;
+                    if (Double.TryParse(txtEquivalentDiameter.Text, out equivalentDiameter)) ;
+                    equivalentDiameter *= fact;
+                    txtEquivalentDiameter.Text = Math.Round(equivalentDiameter, 0).ToString();
+                }
             }
         }
 
@@ -2883,7 +2931,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     Blob blob = new Blob((double)area, perimeter, contours[i], diameterTriangles, diametroIA, centro, maxDiameter, minDiameter, sector, compactness, size, ovalidad);
 
                     // Sumamos para promediar
-                    avgDIA += (diametroIA * tempFactor);
+                    avgDIA += (diametroIA);
                     avgMaxD += (maxDiameter * tempFactor);
                     avgMinD += (minDiameter * tempFactor);
                     avgD += (diameterTriangles * tempFactor);
@@ -2956,39 +3004,40 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 Console.WriteLine(e);
             }
 
-            // Calculamos el promedio de los diametros
+           // Calculamos el promedio de los diametros
             avgDIA /= n;
             avgMaxD /= n;
             avgMinD /= n;
             avgD /= n;
 
-            if (Blobs.Count >= minBlobObjects)
+            if (!double.IsNaN(avgDIA))
             {
-                if (!double.IsNaN(avgDIA))
+                double validateControl = Filtro(avgDIA);
+                if (validateControl > maxDiameter * 3)
                 {
-                    double validateControl = Filtro(avgDIA);
-                    if (validateControl > maxDiameter * euFactor * 3)
-                    {
-                        validateControl = maxDiameter * euFactor * 3;
-                    }
-                    else if (validateControl < 0)
-                    {
-                        validateControl = 0;
-                    }
-                    controlDiameter = validateControl;
+                    validateControl = maxDiameter * 3;
                 }
-                else
+                else if (validateControl < 0)
                 {
-                    controlDiameter = Filtro(0);
+                    validateControl = 0;
                 }
+                controlDiameter = validateControl;
+            }
+            else
+            {
+                controlDiameter = Filtro(0);
             }
 
             // Asignamos el texto del promedio de los diametros
             avg_diameter.Text = Math.Round(avgD, 3).ToString();
             txtAvgMaxD.Text = Math.Round(avgMaxD, 3).ToString();
             txtAvgMinD.Text = Math.Round(avgMinD, 3).ToString();
-            txtEquivalentDiameter.Text = Math.Round(avgDIA, 3).ToString();
-            txtControlDiameter.Text = Math.Round(controlDiameter, 3).ToString();
+            txtEquivalentDiameter.Text = Math.Round(avgDIA * euFactor, 3).ToString();
+            txtControlDiameter.Text = Math.Round(controlDiameter*euFactor, 3).ToString();
+
+            maxDiameterAvg = avgMaxD;
+            minDiameterAvg = avgMinD;
+            diameterControl = controlDiameter;
 
             // Asignar la DataTable al DataGridView
             dataGridView1.DataSource = dataTable;
