@@ -3886,10 +3886,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         // CLick en el boton de calibración
         private void calibrateButtom_Click(object sender, EventArgs e)
         {
-            calibrating = true;
-
             if (!triggerPLC && mode == 0)
             {
+                calibrating = true;
+
                 using (var inputForm = new InputDlg(units))
                 {
                     if (inputForm.ShowDialog() == DialogResult.OK)

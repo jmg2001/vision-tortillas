@@ -28,10 +28,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         public Settings()
         {
-            this.ROI_Left = 100;
-            this.ROI_Right = 100;
-            this.ROI_Top = 100;
-            this.ROI_Bottom = 100;
+            this.ROI_Left = 120;
+            this.ROI_Right = 520;
+            this.ROI_Top = 40;
+            this.ROI_Bottom = 440;
 
             this.Units = "mm";
             this.EUFactor = 1.0;
