@@ -32,7 +32,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.ROI_Right = 520;
             this.ROI_Top = 40;
             this.ROI_Bottom = 440;
-
             this.Units = "mm";
             this.EUFactor = 1.0;
             this.GridType = 1;
