@@ -31,6 +31,8 @@ using System.Security;
 using System.Configuration;
 using System.Runtime.CompilerServices;
 using DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Properties;
+using static System.Net.Mime.MediaTypeNames;
+using System.Security.Policy;
 
 
 [StructLayout(LayoutKind.Sequential)]
@@ -52,7 +54,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         // Creadas por mi
         bool authenticated = false;
-        string user = "admin";
+        string userLogged = "";
+        int logginMinutes = 1;
+        int loggedSeconds = 0;
+
+        User currentUser = null; 
+
+        List<User> usersList = new List<User>();
 
         bool freezeFrame = false;
 
@@ -99,7 +107,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         double maxDiameter = 88;
         double minDiameter = 72;
         double maxCompactness = 16;
-        double maxOvality = 0.5;
+        double maxOvality = 88/72;
 
         // Resultados de los blobs, los que se colocan en el servidor Modbus
         double maxDiameterAvg = 0;
@@ -351,8 +359,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void initializeElements()
         {
-            configurationPage.Enabled = true;
-            advancedPage.Enabled = true;
+            initUsers();
 
             //originalBox.MouseMove += originalBox_MouseMove;
             //processROIBox.MouseMove += processBox_MouseMove;
@@ -424,11 +431,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             else
             {
                 // Encabezados del archivo CSV
-                string[] headers = { "Id", "Code", "Name", "MaxD", "MinD", "MaxOvality", "MaxCompacity", "Grid", "Units" };
+                string[] headers = { "Id", "Code", "Name", "MaxD", "MinD", "MaxCompacity", "Grid", "Units" };
 
                 // Contenido de los registros
                 string[][] data = {
-                    new string[] { "1","1", "Default", "130", "110", "0.5", "12", "1", "mm"},
+                    new string[] { "1","1", "Default", "130", "110", "12", "1", "mm"},
                     };
 
                 // Escribir los datos en el archivo CSV
@@ -500,7 +507,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             int roiHeight = UserROI.Bottom - UserROI.Top;
             txtRoiHeight.Text = roiHeight.ToString();
 
-            maxOvality = settings.maxOvality;
+            //maxOvality = settings.maxOvality;
             maxCompactness = settings.maxCompacity;
             maxDiameter = (float)settings.maxDiameter;
             minDiameter = (float)settings.minDiameter;
@@ -508,11 +515,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             Txt_MaxDiameter.Text = Math.Round(maxDiameter * euFactor, 3).ToString();
             Txt_MinDiameter.Text = Math.Round(minDiameter * euFactor, 3).ToString();
             Txt_MaxCompacity.Text = maxCompactness.ToString();
-            Txt_MaxOvality.Text = maxOvality.ToString();
+            //Txt_MaxOvality.Text = maxOvality.ToString();
 
             //InitializeInterface();
             Txt_MaxCompacity.KeyPress += Txt_MaxCompacity_KeyPress;
-            Txt_MaxOvality.KeyPress += Txt_MaxOvality_KeyPress;
+            //Txt_MaxOvality.KeyPress += Txt_MaxOvality_KeyPress;
 
             //originalBox.MouseClick += originalBox_MouseMove;
             //processROIBox.MouseClick += processBox_MouseMove;
@@ -536,6 +543,18 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             //originalBox.ImageLocation = imagesPath + "roiDraw.jpg";
             //processROIBox.ImageLocation = imagesPath + "final.jpg";
+        }
+
+        private void initUsers()
+        {
+            usersList.Add(new User("SIOS","2280",2));
+            usersList.Add(new User("SUP","12345",2));
+            usersList.Add(new User("MTTO","12345",1));
+
+            btnLogoff.Enabled = false;
+            btnLogoff.BackColor = Color.DarkGray;
+
+            checkAuthentication();
         }
 
         public double Filtro(double k)
@@ -563,10 +582,19 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 Console.WriteLine("Trigger " + modeStr);
             }
         }
-
-        private void ModbusServerIPTxt_KeyPress(object sender, KeyPressEventArgs e)
+        
+        public class User
         {
+            public string Name { get; set; }
+            public string Password { get; set; }
+            public int Level { get; set; }
 
+            public User (string name, string password, int level)
+            {
+                Name = name;
+                Password = password;
+                Level = level;
+            }
         }
 
         // Clase de los productos
@@ -577,7 +605,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             public string Name { get; set; }
             public double MaxD { get; set; }
             public double MinD { get; set; }
-            public double MaxOvality { get; set; }
+            //public double MaxOvality { get; set; }
             public double MaxCompacity { get; set; }
             public int Grid { get; set; }
             public string Units {  get; set; }
@@ -860,7 +888,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void blobProcessFreezed(Mat image)
         {
-            Blobs = new List<Blob>();
+            Blobs.Clear();
+            //Blobs = new List<Blob>();
 
             var (contours, centers, areas, perimeters, holePresent) = FindContoursWithEdgesAndCenters(image);
 
@@ -915,11 +944,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     double ovalidad = calculateOvality(maxDiameter, minDiameter);
 
                     ushort size = calculateSize(maxDiameter, minDiameter, compactness, ovalidad, hole);
-
-                    if (hole)
-                    {
-                        drawHole();
-                    }
 
                     Blob blob = new Blob(area, perimeter, contours[i], diameterTriangles, diametroIA, centro, maxDiameter, minDiameter, sector, compactness, size, ovalidad);
 
@@ -1055,8 +1079,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 minDiameter = setPoints[1] / euFactor;
                 settings.minDiameter = minDiameter;
 
-                maxOvality = setPoints[2];
-                settings.maxOvality = (float)maxOvality;
+                //maxOvality = setPoints[2];
+                //settings.maxOvality = (float)maxOvality;
 
                 maxCompactness = setPoints[3];
                 settings.maxCompacity = (float)maxCompactness;
@@ -1078,7 +1102,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             Txt_MaxDiameter.Text = (maxDiameter*euFactor).ToString();
             Txt_MinDiameter.Text = (minDiameter*euFactor).ToString();
-            Txt_MaxOvality.Text = (maxOvality).ToString();
+            //Txt_MaxOvality.Text = (maxOvality).ToString();
             Txt_MaxCompacity.Text = (maxCompactness).ToString();
         }
 
@@ -1948,7 +1972,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             Txt_Description.Text = record.Name;
             Txt_MaxD.Text = record.MaxD.ToString();
             Txt_MinD.Text = record.MinD.ToString();
-            Txt_Ovality.Text = record.MaxOvality.ToString();
+            //Txt_Ovality.Text = record.MaxOvality.ToString();
             Txt_Compacity.Text = record.MaxCompacity.ToString();
             //cmbProductUnits.SelectedItem = record.Units;
 
@@ -2106,10 +2130,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 if (dataTable.Rows.Count > 0)
                 {
                     dataTable.Clear();
-                    foreach (Blob blob in Blobs)
-                    {
-                        dataTable.Rows.Add(blob.Sector, blob.Area, Math.Round(blob.DiametroIA * euFactor, 3), Math.Round(blob.Diametro * euFactor, 3), Math.Round(blob.DMayor * euFactor, 3), Math.Round(blob.DMenor * euFactor, 3), Math.Round(blob.Compacidad, 3), Math.Round(blob.Ovalidad, 3));
-                    }
+                    setDataTable();
                 }
 
                 //if (operationMode == 1)
@@ -2212,22 +2233,22 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void Txt_MaxOvality_KeyPress(object sender, KeyPressEventArgs e)
         {
-            // Verificar si la tecla presionada es "Enter" (código ASCII 13)
-            if (e.KeyChar == (char)Keys.Enter)
-            {
-                // Intentar convertir el texto del TextBox a un número entero
-                if (double.TryParse(Txt_MaxOvality.Text, out maxOvality))
-                {
-                    // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
-                    MessageBox.Show("Data saved: " + maxOvality, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    settings.maxOvality = (float)maxOvality;
-                }
-                else
-                {
-                    // Manejar el caso en que el texto no sea un número válido
-                    MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
+            //// Verificar si la tecla presionada es "Enter" (código ASCII 13)
+            //if (e.KeyChar == (char)Keys.Enter)
+            //{
+            //    // Intentar convertir el texto del TextBox a un número entero
+            //    if (double.TryParse(Txt_MaxOvality.Text, out maxOvality))
+            //    {
+            //        // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
+            //        MessageBox.Show("Data saved: " + maxOvality, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            //        settings.maxOvality = (float)maxOvality;
+            //    }
+            //    else
+            //    {
+            //        // Manejar el caso en que el texto no sea un número válido
+            //        MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //    }
+            //}
         }
 
         private void Txt_MaxCompacity_KeyPress(object sender, KeyPressEventArgs e)
@@ -2768,7 +2789,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
 
             //return imagePath;
-            return @"C:\Users\Jesús\Desktop\test.bmp";
+            return @"C:\Users\Jesús\Desktop\test2.bmp";
         }
 
         private int CalculateOtsuThreshold()
@@ -2873,14 +2894,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void blobProces(Mat image)
         {
-            Blobs = new List<Blob>();
+            Blobs.Clear();
+            //Blobs = new List<Blob>();
 
             //image.Save(imagesPath + "roi.bmp");
 
             var (contours ,centers, areas, perimeters, holePresent) = FindContoursWithEdgesAndCenters(image);
-
-            // Limpiamos la tabla
-            dataTable.Clear();
 
             // Inicializamos variables
             double avgMaxD = 0;
@@ -2936,13 +2955,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                     ushort size = calculateSize(maxDiameter, minDiameter, compactness, ovalidad, hole);
 
-                    if (hole)
-                    {
-                        drawHole();
-                    }
-
                     // Agregamos los datos a la tabla
-                    dataTable.Rows.Add(sector, area, Math.Round(diametroIA * tempFactor, 3), Math.Round(diameterTriangles * tempFactor, 3), Math.Round(maxDiameter * tempFactor, 3), Math.Round(minDiameter * tempFactor, 3), Math.Round(compactness, 3), Math.Round(ovalidad, 3));
+                    // dataTable.Rows.Add(sector, area, Math.Round(diametroIA * tempFactor, 3), Math.Round(diameterTriangles * tempFactor, 3), Math.Round(maxDiameter * tempFactor, 3), Math.Round(minDiameter * tempFactor, 3), Math.Round(compactness, 3), Math.Round(ovalidad, 3));
 
                     Blob blob = new Blob((double)area, perimeter, contours[i], diameterTriangles, diametroIA, centro, maxDiameter, minDiameter, sector, compactness, size, ovalidad);
 
@@ -2951,6 +2965,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     avgMaxD += (maxDiameter * tempFactor);
                     avgMinD += (minDiameter * tempFactor);
                     avgD += (diameterTriangles * tempFactor);
+
                     // Aumentamos el numero de elementos para promediar
                     n++;
 
@@ -2993,6 +3008,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                             drawSectorNumber(image, centro, sector - 1);
 
                             drawSize(image, sector, size);
+                            
+                            if (hole)
+                            {
+                                drawHole(image,sector);
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -3001,6 +3021,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     }
                 }
             }
+
+            // Limpiamos la tabla
+            dataTable.Clear();
+            // Agregamos los datos a la tabla
+            setDataTable();
 
             try
             {
@@ -3060,9 +3085,33 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         }
 
-        private void drawHole()
+        private void setDataTable()
         {
-            
+            IEnumerable<Blob> blobs = Blobs.OrderBy(Blob => Blob.Sector);
+
+            foreach (Blob blob in blobs)
+            {
+                dataTable.Rows.Add(blob.Sector, blob.Area, Math.Round(blob.DiametroIA * euFactor, 3), Math.Round(blob.Diametro * euFactor, 3), Math.Round(blob.DMayor * euFactor, 3), Math.Round(blob.DMenor * euFactor, 3), Math.Round(blob.Compacidad, 3), Math.Round(blob.Ovalidad, 3));
+            }
+        }
+
+        private void drawHole(Mat image, int sector)
+        {
+            int sectorWidth = image.Width / gridType.Grid.Item2;
+            int sectorHeight = image.Height / gridType.Grid.Item1;
+
+            // Console.WriteLine(sectorWidth);
+
+            // Calcular las coordenadas del sector en el orden deseado
+            int textX = ((sector - 1) / gridType.Grid.Item2) * sectorWidth;
+            int textY = ((gridType.Grid.Item2 - 1) - ((sector - 1) % gridType.Grid.Item2)) * sectorHeight;
+
+            MCvScalar brush = new MCvScalar(0,0,255);
+
+            // Crear el texto a mostrar
+            string texto = "Hole";
+
+            CvInvoke.PutText(image, texto, new Point(textX+2, textY + sectorHeight - 10), FontFace.HersheySimplex, 0.5, brush, 1);
         }
 
         private void drawSize(Mat image, int sector, ushort size)
@@ -3215,6 +3264,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             //}
 
             ushort size = 1; // Normal
+            maxOvality = maxDiameter / minDiameter;
 
             if (compacidad > maxCompactness && !hole)
             {
@@ -3270,14 +3320,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private void InitializeDataTable()
         {
             dataTable = new DataTable();
-            dataTable.Columns.Add("Número de Sector");
-            dataTable.Columns.Add("Área");
-            dataTable.Columns.Add("Diámetro AI");
-            dataTable.Columns.Add("Diámetro Triangulos");
-            dataTable.Columns.Add("Diámetro mayor (triangulos)");
-            dataTable.Columns.Add("Diámetro menor (triangulos)");
-            dataTable.Columns.Add("Compacidad");
-            dataTable.Columns.Add("Ovalidad");
+            dataTable.Columns.Add("Sector");
+            dataTable.Columns.Add("Area (px)");
+            dataTable.Columns.Add("SEQ Diameter");
+            dataTable.Columns.Add("Diameter");
+            dataTable.Columns.Add("Max Diameter");
+            dataTable.Columns.Add("Min Diameter");
+            dataTable.Columns.Add("Compacity");
+            dataTable.Columns.Add("Ovality");
         }
 
         private void drawSectorNumber(Mat image, Point center, int sector)
@@ -4064,7 +4114,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                             Name = Txt_Description.Text,
                             MaxD = double.Parse(Txt_MaxD.Text),
                             MinD = double.Parse(Txt_MinD.Text),
-                            MaxOvality = double.Parse(Txt_Ovality.Text),
+                            //MaxOvality = double.Parse(Txt_Ovality.Text),
                             MaxCompacity = double.Parse(Txt_Compacity.Text),
                             Grid = grid,
                             Units = units
@@ -4110,8 +4160,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             Txt_MinDiameter.Text = Txt_MinD.Text;
             minDiameter = double.Parse(Txt_MinD.Text) / euFactor;
 
-            Txt_MaxOvality.Text = Txt_Ovality.Text;
-            maxOvality = double.Parse(Txt_Ovality.Text);
+            //Txt_MaxOvality.Text = Txt_Ovality.Text;
+            //maxOvality = double.Parse(Txt_Ovality.Text);
 
             Txt_MaxCompacity.Text = Txt_Compacity.Text;
             maxCompactness = double.Parse(Txt_Compacity.Text);
@@ -4192,7 +4242,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         Name = Txt_Description.Text,
                         MaxD = double.Parse(Txt_MaxD.Text),
                         MinD = double.Parse(Txt_MinD.Text),
-                        MaxOvality = double.Parse(Txt_Ovality.Text),
+                        //MaxOvality = double.Parse(Txt_Ovality.Text),
                         MaxCompacity = double.Parse(Txt_Compacity.Text),
                         Grid = grid,
                         Units = units
@@ -4219,47 +4269,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     CmbProducts.Items.Add(record.Code);
                 }
             }
-        }
-
-        private void logoffToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (authenticated)
-            {
-                configurationPage.Enabled = false;
-                advancedPage.Enabled = false;
-                authenticated = false;
-                MessageBox.Show("Logged Off");
-            }
-            else
-            {
-                MessageBox.Show("You aren't logged");
-            }
-        }
-
-        private void loginToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (!authenticated)
-            {
-                // Set new acquisition parameters
-                LoginDlg loginDlg = new LoginDlg(user);
-
-                if (loginDlg.ShowDialog() == DialogResult.OK)
-                {
-                    authenticated = true;
-                    configurationPage.Enabled = true;
-                    advancedPage.Enabled = true;
-                    MessageBox.Show("Authentication Succesfull");
-                }
-                else
-                {
-                    MessageBox.Show("Authentication Failed");
-                }
-            }
-            else
-            {
-                MessageBox.Show("You're already logged");
-            }
-            
         }
 
         private void txtAvgMinD_Click(object sender, EventArgs e)
@@ -4719,6 +4728,20 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
 
             updateTemperatures();
+
+            if (authenticated)
+            {
+                loggedSeconds++;
+                if (loggedSeconds >= logginMinutes * 60)
+                {
+                    Logoff();
+                    MessageBox.Show("Logged Off");
+                }
+                else
+                {
+                    lblLoggedRemainingTime.Text = ((logginMinutes * 60) - loggedSeconds).ToString() + " s";
+                }
+            }
         }
 
         private void cmbProductUnits_SelectedIndexChanged(object sender, EventArgs e)
@@ -4742,5 +4765,101 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             settings.frames = 0;
             settings.Save();
         }
+
+        private void btnLogin_Click(object sender, EventArgs e)
+        {
+            List<string> users = new List<string>();
+            foreach (User us in usersList)
+            {
+                users.Add(us.Name);
+            }
+
+            if (users.Contains(txtUser.Text))
+            {
+                int i = users.IndexOf(txtUser.Text);
+
+                if (txtPassword.Text == usersList[i].Password)
+                {
+                    currentUser = usersList[i];
+                    Login();
+                    MessageBox.Show("Loggin Succesfull");
+                }
+                else
+                {
+                    MessageBox.Show("Wrong Password");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Wrong User");
+            }
+        }
+
+        private void Login()
+        {
+            authenticated = true;
+            btnLogin.BackColor = Color.DarkGray;
+            btnLogoff.Enabled = true;
+            btnLogoff.BackColor = Color.Silver;
+            btnLogin.Enabled = false;
+
+            userLogged = txtUser.Text;
+            lblUserLogged.Text = userLogged;
+
+            txtUser.Text = "";
+            txtPassword.Text = "";
+
+            checkAuthentication();
+        }
+
+        private void checkAuthentication()
+        {
+            if (authenticated)
+            {
+                if (currentUser.Level == 1 || currentUser.Level == 2)
+                {
+                    boxROI.Enabled = true;
+                    boxUnits.Enabled = true;
+                    GB_Threshold.Enabled = true;
+                }
+                
+                if (currentUser.Level == 2)
+                {
+                    advancedPage.Enabled = true;
+                }
+            }
+            else
+            {
+                boxROI.Enabled = false;
+                boxUnits.Enabled = false;
+                GB_Threshold.Enabled = false;
+                advancedPage.Enabled = false;
+            }
+        }
+
+        private void btnLogoff_Click(object sender, EventArgs e)
+        {
+            Logoff();
+            MessageBox.Show("Logged Off");
+            currentUser = null;
+        }
+
+        private void Logoff()
+        {
+            loggedSeconds = 0;
+            lblLoggedRemainingTime.Text = "";
+
+            authenticated = false;
+            btnLogoff.BackColor = Color.DarkGray;
+            btnLogoff.Enabled = false;
+            btnLogin.BackColor = Color.Silver;
+            btnLogin.Enabled = true;
+
+            userLogged = "No logged";
+            lblUserLogged.Text = userLogged;
+
+            checkAuthentication();
+        }
+
     }
 }
