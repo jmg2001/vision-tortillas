@@ -1492,8 +1492,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             // CmdAdd
             // 
-            this.CmdAdd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.CmdAdd.AutoSize = true;
+            this.CmdAdd.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.CmdAdd.BackColor = System.Drawing.Color.Silver;
             this.CmdAdd.Location = new System.Drawing.Point(506, 176);
             this.CmdAdd.Name = "CmdAdd";
@@ -1505,8 +1504,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             // CmdUpdate
             // 
-            this.CmdUpdate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.CmdUpdate.AutoSize = true;
+            this.CmdUpdate.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.CmdUpdate.BackColor = System.Drawing.Color.Silver;
             this.CmdUpdate.Location = new System.Drawing.Point(581, 176);
             this.CmdUpdate.Name = "CmdUpdate";
@@ -1539,7 +1537,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             // CmdDelete
             // 
-            this.CmdDelete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.CmdDelete.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.CmdDelete.BackColor = System.Drawing.Color.Silver;
             this.CmdDelete.Enabled = false;
             this.CmdDelete.Location = new System.Drawing.Point(657, 177);
@@ -1732,7 +1730,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             // Cmd_Save
             // 
-            this.Cmd_Save.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.Cmd_Save.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.Cmd_Save.BackColor = System.Drawing.Color.Silver;
             this.Cmd_Save.Location = new System.Drawing.Point(508, 124);
             this.Cmd_Save.Name = "Cmd_Save";

@@ -59,7 +59,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         bool freezeFrame = false;
 
-        Properties.Settings settings = new Properties.Settings();
+        //Properties.Settings settings = new Properties.Settings();
+        Settings settings = Settings.Load();
 
         // Datos de la lente
         double lenF = 8.52;
@@ -470,9 +471,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             int roiHeight = UserROI.Bottom - UserROI.Top;
             txtRoiHeight.Text = roiHeight.ToString();
 
-            //processROIBox.Image = null;
-            //originalBox.Image = null;
-
             maxOvality = settings.maxOvality;
             maxCompactness = settings.maxCompacity;
             maxDiameter = (float)settings.maxDiameter;
@@ -654,86 +652,87 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 GigeDlg.Invoke((MethodInvoker) async delegate
                 {
-                    try
+                    // await mainProcess();
+                    mainProcess();
+                });
+            }
+        }
+
+        // private async Task mainProcess()
+        private void mainProcess()
+        {
+            try
+            {
+                if (!processing)
+                {
+                    bool freeze = freezeFrame;
+                    processing = true;
+
+                    if (!freeze)
                     {
-                        if (!processing)
+                        disposeImages();
+                    }
+
+                    // Crear un Stopwatch
+                    Stopwatch stopwatch = new Stopwatch();
+
+                    // Iniciar el cronómetro
+                    stopwatch.Start();
+
+                    if (operationMode == 2)
+                    {
+                        requestModbusData();
+                    }
+
+                    updateTemperatures();
+
+                    switch (mode)
+                    {
+                        case 0:
+                            if (freeze)
+                            {
+                                preProcessFreezed();
+                            }
+                            else
+                            {
+                                preProcess();
+                            }
+                            break;
+                        case 1:
+                            m_ImageBox.BringToFront();
+                            m_View.Show();
+                            break;
+                    }
+
+
+                    if (triggerPLC && !calibrating)
+                    {
+                        if (freeze)
                         {
-                            bool freeze = freezeFrame;
-                            processing = true;
-
-                            if (!freeze)
-                            {
-                                disposeImages();
-                            }
-
-                            // Crear un Stopwatch
-                            Stopwatch stopwatch = new Stopwatch();
-
-                            // Iniciar el cronómetro
-                            stopwatch.Start();
-
-                            if (operationMode == 2)
-                            {
-                                requestModbusData();
-                            }
-
-                            updateTemperatures();
-
-                            switch (mode)
-                            {
-                                case 0:
-                                    if (freeze)
-                                    {
-                                        preProcessFreezed();
-                                    }
-                                    else
-                                    {
-                                        //processROIBox.Image = null;
-                                        //originalBox.Image = null;
-                                        preProcess();
-                                    }
-                                    break;
-                                case 1:
-                                    m_ImageBox.BringToFront();
-                                    m_View.Show();
-                                    //boxOriginal.Visible = false;
-                                    //boxProcess.Visible = false;
-                                    //processROIBox.SendToBack();
-                                    //originalBox.SendToBack();
-                                    break;
-                            }
-
-
-                            if (triggerPLC && !calibrating)
-                            {
-                                if (freeze)
-                                {
-                                    processFreezed();
-                                }
-                                else
-                                {
-                                    process();
-                                }
-                            }
-
-                            if (calibrating)
-                            {
-                                calibrate();
-                            }
-
-                            processing = false;
-
-                            // Detener el cronómetro
-                            stopwatch.Stop();
-                            timeElapsed.Text = stopwatch.ElapsedMilliseconds.ToString() + " ms";
-                            stopwatch.Restart();
+                            processFreezed();
+                        }
+                        else
+                        {
+                            process();
                         }
                     }
-                    catch (Exception ex) 
+
+                    if (calibrating)
                     {
-                        MessageBox.Show("Error: " + ex.Message);
+                        calibrate();
                     }
-                });
+
+                    processing = false;
+
+                    // Detener el cronómetro
+                    stopwatch.Stop();
+                    timeElapsed.Text = stopwatch.ElapsedMilliseconds.ToString() + " ms";
+                    stopwatch.Restart();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message);
             }
         }
 
@@ -1064,7 +1063,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             using( Bitmap originalImage = new Bitmap(path))
             {
-
                 originalImageIsDisposed = false;
 
                 // Convertir el objeto Bitmap a una matriz de Emgu CV (Image<Bgr, byte>)
@@ -3484,7 +3482,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
-        private void triggerModeBtn_Click(object sender, EventArgs e)
+        private async void triggerModeBtn_Click(object sender, EventArgs e)
         {
             triggerPLC = !triggerPLC;
 
