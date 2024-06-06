@@ -70,3 +70,6 @@ C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\STI.pdb
 C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp.InputDlg.resources
 C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Properties.Resources.resources
 C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp.InputDlg2.resources
+C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp.KeyBoard.resources
+C:\Users\Jesús\Documents\vision-tortillas\bin\Debug\MetroFramework.dll
+C:\Users\Jesús\Documents\vision-tortillas\bin\Debug\MetroFramework.Fonts.dll

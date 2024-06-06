@@ -35,6 +35,7 @@ using static System.Net.Mime.MediaTypeNames;
 using System.Security.Policy;
 using System.Windows.Forms.VisualStyles;
 using System.Windows.Forms.DataVisualization.Charting;
+using MetroFramework.Forms;
 
 
 [StructLayout(LayoutKind.Sequential)]
@@ -114,6 +115,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         double initMaxDiameter = 0;
         double initMinDiameter = 0;
 
+        double oldMaxDiameter = 0;
+        double oldMinDiameter = 0;
         double maxDiameter = 88;
         double minDiameter = 72;
         double maxCompactness = 20;
@@ -268,6 +271,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     initMinDiameter = 60; //3inch
                 }
 
+                oldMaxDiameter = initMaxDiameter;
+                oldMinDiameter = initMinDiameter;
+
                 maxDiameter = initMaxDiameter; 
                 minDiameter = initMinDiameter;
 
@@ -416,6 +422,28 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             trendChart.Series["ControlDiameterSerie"].LegendText = "Control Diameter";
             trendChart.Series["ControlDiameterSerie"].XValueType = ChartValueType.Time;
 
+            trendChart.Series.Add("SEQDiameterSerie");
+            trendChart.Series["SEQDiameterSerie"].ChartType = SeriesChartType.Line;
+            trendChart.Series["SEQDiameterSerie"].Color = Color.Blue;
+            trendChart.Series["SEQDiameterSerie"].BorderWidth = lineWidth;
+            trendChart.Series["SEQDiameterSerie"].LegendText = "SEQ Diameter";
+            trendChart.Series["SEQDiameterSerie"].XValueType = ChartValueType.Time;
+
+            trendChart.Series.Add("MaxDiameterSP");
+            trendChart.Series["MaxDiameterSP"].ChartType = SeriesChartType.Line;
+            trendChart.Series["MaxDiameterSP"].Color = Color.Gray;
+            trendChart.Series["MaxDiameterSP"].BorderWidth = lineWidth;
+            trendChart.Series["MaxDiameterSP"].LegendText = "SP Max";
+            trendChart.Series["MaxDiameterSP"].XValueType = ChartValueType.Time;
+
+            trendChart.Series.Add("MinDiameterSP");
+            trendChart.Series["MinDiameterSP"].ChartType = SeriesChartType.Line;
+            trendChart.Series["MinDiameterSP"].Color = Color.Gray;
+            trendChart.Series["MinDiameterSP"].BorderWidth = lineWidth;
+            trendChart.Series["MinDiameterSP"].LegendText = "SP Min";
+            trendChart.Series["MinDiameterSP"].XValueType = ChartValueType.Time;
+
+            trendChart.ChartAreas[0].AxisY.Title = "Diameter in " + units;
             trendChart.ChartAreas[0].AxisX.LabelStyle.Format = "HH:mm";
             trendChart.ChartAreas[0].AxisX.Interval = 5; // Mostrar etiquetas cada minuto
             trendChart.ChartAreas[0].AxisX.IntervalType = DateTimeIntervalType.Minutes;
@@ -1040,6 +1068,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
 
             // Calculamos el promedio de los diametros
+            if(MinD == 99999)
+            {
+                MinD = 0;
+            }
             avgDIA /= n;
             avgD /= n;
 
@@ -1058,7 +1090,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 txtControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsInch).ToString();
             }
 
-            GraphResults(MaxD,MinD);
+            GraphResults(MaxD,MinD,avgDIA);
         }
 
         private void ProcessControlDiameter(double diam)
@@ -1067,6 +1099,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             txtValidObjects.Text = validObjects.ToString();
             if (validObjects >= minBlobObjects)
             {
+                txtValidObjects.ForeColor = Color.Green;
                 if (!double.IsNaN(diam))
                 {
                     double validateControl = Filtro(diam);
@@ -1084,6 +1117,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 {
                     controlDiameter = Filtro(0);
                 }
+            }
+            else
+            {
+                txtValidObjects.ForeColor = Color.Red;
             }
         }
 
@@ -1156,6 +1193,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                     minDiameter = setPoints[1] / euFactor;
                     settings.minDiameter = minDiameter;
+
+                    CheckChangeSetPointDiameters();
 
                     updateLabels();
 
@@ -2181,7 +2220,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     avgDiameter *= fact;
                     avg_diameter.Text = Math.Round(avgDiameter, nUnitsInch).ToString();
 
-                    if (operationMode != 1 || operationMode != 2)
+                    if (operationMode != 1)
                     {
                         double mxDiameter = 0;
                         if (Double.TryParse(Txt_MaxDiameter.Text, out mxDiameter)) ;
@@ -2221,7 +2260,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     avgDiameter *= fact;
                     avg_diameter.Text = Math.Round(avgDiameter, nUnitsMm).ToString();
 
-                    if (operationMode != 1 || operationMode != 2)
+                    if (operationMode != 1)
                     {
                         double mxDiameter = 0;
                         if (Double.TryParse(Txt_MaxDiameter.Text, out mxDiameter)) ;
@@ -2289,6 +2328,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     //MessageBox.Show("Data saved: " + minDiameter, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     minDiameter = minDiameter / euFactor;
                     settings.minDiameter = minDiameter / euFactor;
+                    CheckChangeSetPointDiameters();
                 }
                 else
                 {
@@ -2310,6 +2350,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     //MessageBox.Show("Data saved: " + maxDiameter, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     maxDiameter = maxDiameter / euFactor;
                     settings.maxDiameter = maxDiameter;
+                    CheckChangeSetPointDiameters();
                 }
                 else
                 {
@@ -3059,7 +3100,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
 
             // Calculamos el promedio de los diametros
-            // Calculamos el promedio de los diametros
+            if (MinD == 99999)
+            {
+                MinD = 0;
+            }
             avgDIA /= n;
             avgD /= n;
 
@@ -3069,14 +3113,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             minDiameterAvg = MinD*euFactor;
             diameterControl = controlDiameter;
 
-            GraphResults(MaxD, MinD);
+            GraphResults(MaxD,MinD,avgDIA);
 
             if (units == "mm")
             {
                 // Asignamos el texto del promedio de los diametros
                 avg_diameter.Text = Math.Round(avgD, nUnitsMm).ToString();
-                txtAvgMaxD.Text = Math.Round(MaxD, nUnitsMm).ToString();
-                txtAvgMinD.Text = Math.Round(MinD, nUnitsMm).ToString();
+                txtAvgMaxD.Text = Math.Round(MaxD*euFactor, nUnitsMm).ToString();
+                txtAvgMinD.Text = Math.Round(MinD*euFactor, nUnitsMm).ToString();
                 txtEquivalentDiameter.Text = Math.Round(avgDIA * euFactor, nUnitsMm).ToString();
                 txtControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsMm).ToString();
             }
@@ -3095,32 +3139,53 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         }
 
-        private void GraphResults(double maxDiameter, double minDiameter)
+        private void GraphResults(double MaxD,double MinD,double dIA)
         {
             try
             {
                 var now = DateTime.Now;
                 trendChart.ChartAreas[0].AxisX.Minimum = now.AddHours(-1).ToOADate();
-                var now2 = now.ToOADate();
-                trendChart.Series[0].Points.AddXY(now2, maxDiameter*euFactor);
-                trendChart.Series[1].Points.AddXY(now2, minDiameter*euFactor);
-                trendChart.Series[2].Points.AddXY(now2, diameterControl*euFactor);
+                var now2 = now.ToOADate();                
 
+                trendChart.Series[0].Points.AddXY(now2, MaxD*euFactor);
+                trendChart.Series[1].Points.AddXY(now2, MinD*euFactor);
+                trendChart.Series[2].Points.AddXY(now2, diameterControl*euFactor);
+                trendChart.Series[3].Points.AddXY(now2, dIA*euFactor);
+                trendChart.Series[4].Points.AddXY(now2, maxDiameter*euFactor);
+                trendChart.Series[5].Points.AddXY(now2, minDiameter*euFactor);
+
+                trendChart.ChartAreas[0].AxisY.Title = "Diameter in " + units;
+
+                //int max = 0;
+                //int min = 99999;
+
+                //for (int i = 0; i < trendChart.Series.Count; i++)
+                //{
+                //    for (int j = 0; j < trendChart.Series[i].Points.Count; j++)
+                //    {
+                //        if (trendChart.Series[i].Points[j].YValues[0] > max)
+                //        {
+                //            max = (int)trendChart.Series[i].Points[j].YValues[0];
+                //        }
+
+                //        if (trendChart.Series[i].Points[j].YValues[0] < min)
+                //        {
+                //            min = (int)trendChart.Series[i].Points[j].YValues[0];
+                //        }
+                //    }
+                //}
+
+                //trendChart.ChartAreas[0].AxisY.Minimum = Math.Round(minDiameter*euFactor*0.9,1);
+                //trendChart.ChartAreas[0].AxisY.Maximum = Math.Round(maxDiameter*euFactor*1.1,1);
 
                 // Eliminar datos que exceden la hora
-                while (trendChart.Series[0].Points.Count > 0 && trendChart.Series[0].Points[0].XValue < now.AddHours(-1).ToOADate())
-                {
-                    trendChart.Series[0].Points.RemoveAt(0);
-                }
 
-                while (trendChart.Series[1].Points.Count > 0 && trendChart.Series[1].Points[0].XValue < now.AddHours(-1).ToOADate())
+                for (int i = 0; i < trendChart.Series.Count;  i++)
                 {
-                    trendChart.Series[1].Points.RemoveAt(0);
-                }
-
-                while (trendChart.Series[2].Points.Count > 0 && trendChart.Series[2].Points[0].XValue < now.AddHours(-1).ToOADate())
-                {
-                    trendChart.Series[2].Points.RemoveAt(0);
+                    while (trendChart.Series[i].Points.Count > 0 && trendChart.Series[i].Points[0].XValue < now.AddHours(-1).ToOADate())
+                    {
+                        trendChart.Series[i].Points.RemoveAt(0);
+                    }
                 }
             }
             catch (Exception e)
@@ -4235,6 +4300,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             Txt_MinDiameter.Text = Txt_MinD.Text;
             minDiameter = double.Parse(Txt_MinD.Text) / euFactor;
 
+            CheckChangeSetPointDiameters();
+
             int grid = 0;
 
             switch (CmbGrid.SelectedItem.ToString())
@@ -4479,6 +4546,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             GroupActualTargetSize.Enabled = false;
             GroupSelectGrid.Enabled = false;
             CmbProducts.SelectedIndex = 0;
+            boxUnits.Enabled = false;
             
         }
 
@@ -4881,8 +4949,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             updateTemperatures();
 
-            GetDataTxt();
-
             if (authenticated)
             {
                 loggedSeconds++;
@@ -4904,8 +4970,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             if (!double.TryParse(Txt_MaxCompacity.Text, out maxCompactness))
             {
-                Console.WriteLine("Shape Upper Limit Invalid");
-                Txt_MaxCompacity.Text = "0";
+                Console.WriteLine("Shape Round Limit Invalid");
+                Txt_MaxCompacity.Text = maxCompactness.ToString();
             }
             else
             {
@@ -4913,8 +4979,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
             if (!double.TryParse(txtCompacityHoleLimit.Text, out maxCompactnessHole))
             {
-                Console.WriteLine("Shape Upper Limit Invalid");
-                txtCompacityHoleLimit.Text = "0";
+                Console.WriteLine("Shape Hole Limit Invalid");
+                txtCompacityHoleLimit.Text = maxCompactnessHole.ToString();
             }
             else
             {
@@ -4922,12 +4988,42 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
             if (!int.TryParse(txtMinBlobObjects.Text, out minBlobObjects))
             {
-                Console.WriteLine("Shape Upper Limit Invalid");
-                txtMinBlobObjects.Text = "0";
+                Console.WriteLine("Number of Objects Invalid");
+                txtMinBlobObjects.Text = minBlobObjects.ToString();
             }
             else
             {
                 settings.minBlobObjects = minBlobObjects;
+            }
+            if (!float.TryParse(txtAlpha.Text, out alpha))
+            {
+                Console.WriteLine("Alpha Value Invalid");
+                txtAlpha.Text = alpha.ToString();
+            }
+            else
+            {
+                settings.alpha = alpha;
+            }
+            if (double.TryParse(Txt_MaxDiameter.Text, out maxDiameter))
+            {
+                maxDiameter = maxDiameter / euFactor;
+                settings.maxDiameter = maxDiameter;
+                CheckChangeSetPointDiameters();
+            }
+            else
+            {
+                MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+            if (double.TryParse(Txt_MinDiameter.Text, out minDiameter))
+            {
+                minDiameter = minDiameter / euFactor;
+                settings.minDiameter = minDiameter / euFactor;
+                CheckChangeSetPointDiameters();
+            }
+            else
+            {
+                MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -4992,8 +5088,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             userLogged = txtUser.Text;
             lblUserLogged.Text = userLogged;
 
-            txtUser.Text = "";
-            txtPassword.Text = "";
+            txtUser.Enabled = false;
+            txtPassword.Enabled = false;
+            txtPassword.Clear();
 
             checkAuthentication();
         }
@@ -5005,7 +5102,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 if (currentUser.Level == 1 || currentUser.Level == 2)
                 {
                     boxROI.Enabled = true;
-                    boxUnits.Enabled = true;
+                    if(operationMode != 1) boxUnits.Enabled = true;
                     GB_Threshold.Enabled = true;
                     gbShapeIndicator.Enabled = true;
                 }
@@ -5036,6 +5133,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             loggedSeconds = 0;
             lblLoggedRemainingTime.Text = "";
+
+            txtUser.Clear();
+            txtUser.Enabled = true;
+            txtPassword.Enabled = true;
 
             authenticated = false;
             btnLogoff.BackColor = Color.DarkGray;
@@ -5140,11 +5241,129 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
-        public bool CheckChangeSetPointDiameters(double maxD, double minD)
+        public bool CheckChangeSetPointDiameters()
         {
-
+            if (maxDiameter != oldMaxDiameter || minDiameter != oldMinDiameter)
+            {
+                controlDiameter = (maxDiameter + minDiameter) / 2;
+                oldMaxDiameter = maxDiameter;
+                oldMinDiameter = minDiameter;
+            }
 
             return true;
+        }
+
+        private void btnClearChart_Click(object sender, EventArgs e)
+        {
+            trendChart.Series["MaxDiameterSerie"].Points.Clear();
+            trendChart.Series["MinDiameterSerie"].Points.Clear();
+            trendChart.Series["ControlDiameterSerie"].Points.Clear();
+        }
+
+        private void txtUser_Click(object sender, EventArgs e)
+        {
+            ShowInputKeyboard((TextBox)sender, 1);
+        }
+
+        private void txtPassword_Click(object sender, EventArgs e)
+        {
+            ShowInputKeyboard((TextBox)sender, 1, true);
+        }
+
+        private void Txt_Threshold_Click(object sender, EventArgs e)
+        {
+            ShowInputKeyboard((TextBox)sender, 0);
+        }
+
+        private void Txt_MaxCompacity_Click(object sender, EventArgs e)
+        {
+            ShowInputKeyboard((TextBox)sender, 0);
+        }
+
+        private void txtCompacityHoleLimit_Click(object sender, EventArgs e)
+        {
+            ShowInputKeyboard((TextBox)sender, 0);
+        }
+
+        private void ShowInputKeyboard(TextBox textBox, int v, bool password = false)
+        {
+            using (var keyboardForm = new KeyBoard(textBox, v, password))
+            {
+                DialogResult r = keyboardForm.ShowDialog();
+
+                if (r == DialogResult.OK)
+                {
+                    GetDataTxt();
+                    textBox.DeselectAll();
+
+                    if (password)
+                    {
+                        List<string> users = new List<string>();
+                        foreach (User us in usersList)
+                        {
+                            users.Add(us.Name);
+                        }
+
+                        if (users.Contains(txtUser.Text))
+                        {
+                            int i = users.IndexOf(txtUser.Text);
+
+                            if (txtPassword.Text == usersList[i].Password)
+                            {
+                                currentUser = usersList[i];
+                                Login();
+                                MessageBox.Show("Loggin Succesfull");
+                            }
+                            else
+                            {
+                                MessageBox.Show("Wrong Password");
+                                txtPassword.Clear();
+                            }
+                        }
+                        else
+                        {
+                            MessageBox.Show("Wrong User");
+                            txtPassword.Clear();
+                            txtUser.Clear();
+                        }
+                    }
+                }
+            }
+        }
+
+        private void txtRoiWidth_Click(object sender, EventArgs e)
+        {
+            ShowInputKeyboard((TextBox)sender, 0);
+        }
+
+        private void txtRoiHeight_Click(object sender, EventArgs e)
+        {
+            ShowInputKeyboard((TextBox)sender, 0);
+        }
+
+        private void txtAlpha_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void txtAlpha_Click(object sender, EventArgs e)
+        {
+            ShowInputKeyboard((TextBox)sender, 0);
+        }
+
+        private void txtMinBlobObjects_Click(object sender, EventArgs e)
+        {
+            ShowInputKeyboard((TextBox)sender, 0);
+        }
+
+        private void Txt_MaxDiameter_Click(object sender, EventArgs e)
+        {
+            ShowInputKeyboard((TextBox)sender, 0);
+        }
+
+        private void Txt_MinDiameter_Click(object sender, EventArgs e)
+        {
+            ShowInputKeyboard((TextBox)sender, 0);
         }
     }
 }

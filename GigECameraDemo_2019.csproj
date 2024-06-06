@@ -92,6 +92,16 @@
     <Reference Include="Emgu.CV.Platform.NetStandard, Version=4.4.0.4099, Culture=neutral, PublicKeyToken=7281126722ab4438, processorArchitecture=MSIL">
       <HintPath>packages\Emgu.CV.4.4.0.4099\lib\netstandard2.0\Emgu.CV.Platform.NetStandard.dll</HintPath>
     </Reference>
+    <Reference Include="MetroFramework, Version=1.2.0.3, Culture=neutral, PublicKeyToken=5f91a84759bf584a, processorArchitecture=MSIL">
+      <HintPath>packages\MetroFramework.RunTime.1.2.0.3\lib\net40-Client\MetroFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="MetroFramework.Design, Version=1.2.0.3, Culture=neutral, PublicKeyToken=5f91a84759bf584a, processorArchitecture=MSIL">
+      <HintPath>packages\MetroFramework.Design.1.2.0.3\lib\net40\MetroFramework.Design.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="MetroFramework.Fonts, Version=1.2.0.3, Culture=neutral, PublicKeyToken=5f91a84759bf584a, processorArchitecture=MSIL">
+      <HintPath>packages\MetroFramework.Fonts.1.2.0.3\lib\net40\MetroFramework.Fonts.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=7.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft.Bcl.AsyncInterfaces.7.0.0\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
     </Reference>
@@ -233,6 +243,12 @@
     <Compile Include="Common\CSharp\JpegFileDlg.Designer.cs">
       <DependentUpon>JpegFileDlg.cs</DependentUpon>
     </Compile>
+    <Compile Include="Common\CSharp\KeyBoard.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Common\CSharp\KeyBoard.Designer.cs">
+      <DependentUpon>KeyBoard.cs</DependentUpon>
+    </Compile>
     <Compile Include="Common\CSharp\LoadSaveDlg.cs" />
     <Compile Include="Common\CSharp\LoginDlg.cs">
       <SubType>Form</SubType>
@@ -276,6 +292,7 @@
     <Content Include="cvextern.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="MetroFramework.txt" />
     <None Include="Resources\SIOS-LOGOTIPO-AZUL.png" />
     <EmbeddedResource Include="Common\CSharp\AbortDlg.resx">
       <DependentUpon>AbortDlg.cs</DependentUpon>
@@ -306,6 +323,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Common\CSharp\JpegFileDlg.resx">
       <DependentUpon>JpegFileDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Common\CSharp\KeyBoard.resx">
+      <DependentUpon>KeyBoard.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Common\CSharp\LoginDlg.resx">
       <DependentUpon>LoginDlg.cs</DependentUpon>

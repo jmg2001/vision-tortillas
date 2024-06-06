@@ -35,9 +35,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea5 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend5 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series5 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.StatusLabel = new System.Windows.Forms.ToolStripLabel();
             this.StatusLabelInfo = new System.Windows.Forms.ToolStripLabel();
@@ -166,6 +166,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.boxOriginal = new System.Windows.Forms.GroupBox();
             this.boxProcess = new System.Windows.Forms.GroupBox();
             this.tablePage = new System.Windows.Forms.TabPage();
+            this.trendPage = new System.Windows.Forms.TabPage();
+            this.btnClearChart = new System.Windows.Forms.Button();
+            this.trendChart = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.productsPage = new System.Windows.Forms.TabPage();
             this.GroupBox13 = new System.Windows.Forms.GroupBox();
             this.Label47 = new System.Windows.Forms.Label();
@@ -196,8 +199,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Label27 = new System.Windows.Forms.Label();
             this.Label28 = new System.Windows.Forms.Label();
             this.tmrMB = new System.Windows.Forms.Timer(this.components);
-            this.trendPage = new System.Windows.Forms.TabPage();
-            this.trendChart = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.toolStrip1.SuspendLayout();
             this.GroupBox1.SuspendLayout();
             this.groupBox15.SuspendLayout();
@@ -226,12 +227,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.imagePage.SuspendLayout();
             this.boxOriginal.SuspendLayout();
             this.tablePage.SuspendLayout();
+            this.trendPage.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.trendChart)).BeginInit();
             this.productsPage.SuspendLayout();
             this.GroupBox13.SuspendLayout();
             this.GroupBox10.SuspendLayout();
             this.GroupBox9.SuspendLayout();
-            this.trendPage.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.trendChart)).BeginInit();
             this.SuspendLayout();
             // 
             // toolStrip1
@@ -646,6 +647,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Txt_MinDiameter.Size = new System.Drawing.Size(123, 40);
             this.Txt_MinDiameter.TabIndex = 91;
             this.Txt_MinDiameter.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.Txt_MinDiameter.Click += new System.EventHandler(this.Txt_MinDiameter_Click);
             this.Txt_MinDiameter.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Txt_MinDiameter_KeyPress);
             // 
             // Label54
@@ -678,6 +680,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Txt_MaxDiameter.Size = new System.Drawing.Size(125, 40);
             this.Txt_MaxDiameter.TabIndex = 87;
             this.Txt_MaxDiameter.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.Txt_MaxDiameter.Click += new System.EventHandler(this.Txt_MaxDiameter_Click);
             this.Txt_MaxDiameter.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Txt_MaxDiameter_KeyPress);
             // 
             // GroupSelectGrid
@@ -872,11 +875,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // txtValidObjects
             // 
             this.txtValidObjects.AutoSize = true;
-            this.txtValidObjects.BackColor = System.Drawing.Color.LightSteelBlue;
-            this.txtValidObjects.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtValidObjects.BackColor = System.Drawing.Color.Transparent;
+            this.txtValidObjects.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtValidObjects.Location = new System.Drawing.Point(62, 22);
             this.txtValidObjects.Name = "txtValidObjects";
-            this.txtValidObjects.Size = new System.Drawing.Size(24, 25);
+            this.txtValidObjects.Size = new System.Drawing.Size(25, 25);
             this.txtValidObjects.TabIndex = 127;
             this.txtValidObjects.Text = "0";
             // 
@@ -1105,6 +1108,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.txtCompacityHoleLimit.Size = new System.Drawing.Size(98, 40);
             this.txtCompacityHoleLimit.TabIndex = 136;
             this.txtCompacityHoleLimit.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtCompacityHoleLimit.Click += new System.EventHandler(this.txtCompacityHoleLimit_Click);
             // 
             // label20
             // 
@@ -1125,6 +1129,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Txt_MaxCompacity.Size = new System.Drawing.Size(98, 40);
             this.Txt_MaxCompacity.TabIndex = 129;
             this.Txt_MaxCompacity.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.Txt_MaxCompacity.Click += new System.EventHandler(this.Txt_MaxCompacity_Click);
             this.Txt_MaxCompacity.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Txt_MaxCompacity_KeyPress);
             // 
             // groupBox4
@@ -1199,17 +1204,21 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.txtPassword.Size = new System.Drawing.Size(164, 35);
             this.txtPassword.TabIndex = 125;
             this.txtPassword.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtPassword.Click += new System.EventHandler(this.txtPassword_Click);
             // 
             // txtUser
             // 
             this.txtUser.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.txtUser.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtUser.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
             this.txtUser.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F);
             this.txtUser.Location = new System.Drawing.Point(217, 23);
+            this.txtUser.MaxLength = 20;
             this.txtUser.Name = "txtUser";
             this.txtUser.Size = new System.Drawing.Size(164, 35);
             this.txtUser.TabIndex = 124;
             this.txtUser.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtUser.Click += new System.EventHandler(this.txtUser_Click);
             // 
             // GB_Threshold
             // 
@@ -1261,6 +1270,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Txt_Threshold.TabIndex = 12;
             this.Txt_Threshold.Text = "0";
             this.Txt_Threshold.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.Txt_Threshold.Click += new System.EventHandler(this.Txt_Threshold_Click);
             this.Txt_Threshold.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Txt_Threshold_KeyPress);
             // 
             // boxROI
@@ -1312,6 +1322,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.txtRoiHeight.TabIndex = 132;
             this.txtRoiHeight.Text = "0";
             this.txtRoiHeight.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtRoiHeight.Click += new System.EventHandler(this.txtRoiHeight_Click);
             this.txtRoiHeight.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtRoiHeight_KeyPress);
             // 
             // btnDecrementRoiWidth
@@ -1366,6 +1377,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.txtRoiWidth.TabIndex = 87;
             this.txtRoiWidth.Text = "0";
             this.txtRoiWidth.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtRoiWidth.Click += new System.EventHandler(this.txtRoiWidth_Click);
             this.txtRoiWidth.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtRoiWidth_KeyPress);
             // 
             // boxUnits
@@ -1487,6 +1499,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.txtMinBlobObjects.TabIndex = 88;
             this.txtMinBlobObjects.Text = "0";
             this.txtMinBlobObjects.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtMinBlobObjects.Click += new System.EventHandler(this.txtMinBlobObjects_Click);
             this.txtMinBlobObjects.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtMinBlobObjects_KeyPress);
             // 
             // label5
@@ -1510,6 +1523,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.txtAlpha.TabIndex = 88;
             this.txtAlpha.Text = "0";
             this.txtAlpha.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtAlpha.Click += new System.EventHandler(this.txtAlpha_Click);
             this.txtAlpha.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtAlpha_KeyPress);
             // 
             // groupBox3
@@ -1615,8 +1629,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.mainTabs.Appearance = System.Windows.Forms.TabAppearance.FlatButtons;
             this.mainTabs.Controls.Add(this.imagePage);
             this.mainTabs.Controls.Add(this.tablePage);
-            this.mainTabs.Controls.Add(this.productsPage);
             this.mainTabs.Controls.Add(this.trendPage);
+            this.mainTabs.Controls.Add(this.productsPage);
             this.mainTabs.Dock = System.Windows.Forms.DockStyle.Fill;
             this.mainTabs.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F);
             this.mainTabs.ItemSize = new System.Drawing.Size(42, 40);
@@ -1668,6 +1682,56 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.tablePage.TabIndex = 1;
             this.tablePage.Text = "Metrics Table";
             this.tablePage.UseVisualStyleBackColor = true;
+            // 
+            // trendPage
+            // 
+            this.trendPage.Controls.Add(this.btnClearChart);
+            this.trendPage.Controls.Add(this.trendChart);
+            this.trendPage.Location = new System.Drawing.Point(4, 44);
+            this.trendPage.Name = "trendPage";
+            this.trendPage.Size = new System.Drawing.Size(1259, 828);
+            this.trendPage.TabIndex = 3;
+            this.trendPage.Text = "Trend";
+            this.trendPage.UseVisualStyleBackColor = true;
+            // 
+            // btnClearChart
+            // 
+            this.btnClearChart.BackColor = System.Drawing.Color.Silver;
+            this.btnClearChart.Location = new System.Drawing.Point(340, 499);
+            this.btnClearChart.Name = "btnClearChart";
+            this.btnClearChart.Size = new System.Drawing.Size(179, 55);
+            this.btnClearChart.TabIndex = 120;
+            this.btnClearChart.Text = "CLEAR CHART";
+            this.btnClearChart.UseVisualStyleBackColor = false;
+            this.btnClearChart.Click += new System.EventHandler(this.btnClearChart_Click);
+            // 
+            // trendChart
+            // 
+            this.trendChart.BorderlineColor = System.Drawing.Color.Black;
+            this.trendChart.BorderlineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Solid;
+            this.trendChart.BorderlineWidth = 2;
+            chartArea5.AxisX.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Seconds;
+            chartArea5.AxisX.LabelStyle.Format = "HH:mm:ss";
+            chartArea5.AxisX.LabelStyle.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Auto;
+            chartArea5.AxisX.ScrollBar.Enabled = false;
+            chartArea5.AxisY.Maximum = 300D;
+            chartArea5.Name = "ChartArea1";
+            this.trendChart.ChartAreas.Add(chartArea5);
+            legend5.Docking = System.Windows.Forms.DataVisualization.Charting.Docking.Top;
+            legend5.Name = "Legend1";
+            this.trendChart.Legends.Add(legend5);
+            this.trendChart.Location = new System.Drawing.Point(0, 0);
+            this.trendChart.Name = "trendChart";
+            series5.ChartArea = "ChartArea1";
+            series5.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series5.Legend = "Legend1";
+            series5.LegendText = "Max Diameter";
+            series5.Name = "MaxDiameterSerie";
+            series5.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
+            this.trendChart.Series.Add(series5);
+            this.trendChart.Size = new System.Drawing.Size(806, 480);
+            this.trendChart.TabIndex = 0;
+            this.trendChart.Text = "chart1";
             // 
             // productsPage
             // 
@@ -2014,41 +2078,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.tmrMB.Interval = 1000;
             this.tmrMB.Tick += new System.EventHandler(this.tmrMB_Tick);
             // 
-            // trendPage
-            // 
-            this.trendPage.Controls.Add(this.trendChart);
-            this.trendPage.Location = new System.Drawing.Point(4, 44);
-            this.trendPage.Name = "trendPage";
-            this.trendPage.Size = new System.Drawing.Size(1259, 828);
-            this.trendPage.TabIndex = 3;
-            this.trendPage.Text = "Trend";
-            this.trendPage.UseVisualStyleBackColor = true;
-            // 
-            // trendChart
-            // 
-            chartArea1.AxisX.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Seconds;
-            chartArea1.AxisX.LabelStyle.Format = "HH:mm:ss";
-            chartArea1.AxisX.LabelStyle.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Auto;
-            chartArea1.AxisX.ScrollBar.Enabled = false;
-            chartArea1.AxisY.Maximum = 300D;
-            chartArea1.Name = "ChartArea1";
-            this.trendChart.ChartAreas.Add(chartArea1);
-            legend1.Docking = System.Windows.Forms.DataVisualization.Charting.Docking.Top;
-            legend1.Name = "Legend1";
-            this.trendChart.Legends.Add(legend1);
-            this.trendChart.Location = new System.Drawing.Point(0, 0);
-            this.trendChart.Name = "trendChart";
-            series1.ChartArea = "ChartArea1";
-            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series1.Legend = "Legend1";
-            series1.LegendText = "Max Diameter";
-            series1.Name = "MaxDiameterSerie";
-            series1.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
-            this.trendChart.Series.Add(series1);
-            this.trendChart.Size = new System.Drawing.Size(806, 480);
-            this.trendChart.TabIndex = 0;
-            this.trendChart.Text = "chart1";
-            // 
             // GigECameraDemoDlg
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -2109,14 +2138,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.imagePage.PerformLayout();
             this.boxOriginal.ResumeLayout(false);
             this.tablePage.ResumeLayout(false);
+            this.trendPage.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.trendChart)).EndInit();
             this.productsPage.ResumeLayout(false);
             this.GroupBox13.ResumeLayout(false);
             this.GroupBox13.PerformLayout();
             this.GroupBox10.ResumeLayout(false);
             this.GroupBox9.ResumeLayout(false);
             this.GroupBox9.PerformLayout();
-            this.trendPage.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.trendChart)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -2297,6 +2326,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         internal TextBox txtCompacityHoleLimit;
         private TabPage trendPage;
         private System.Windows.Forms.DataVisualization.Charting.Chart trendChart;
+        internal Button btnClearChart;
     }
 }
 
