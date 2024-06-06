@@ -20,6 +20,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         public double minDiameter { get; set; }
         public float maxOvality { get; set; }
         public float maxCompacity { get; set; }
+        public float maxCompacityHole { get; set; }
         public float targetCalibration {  get; set; }
         public int productCode {  get; set; }
         public long frames {  get; set; }
@@ -40,6 +41,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.minDiameter = 50;
             this.maxOvality = 0.5f;
             this.maxCompacity = 16;
+            this.maxCompacityHole = 18;
             this.targetCalibration = 0;
             this.productCode = 1;
             this.frames = 0;
