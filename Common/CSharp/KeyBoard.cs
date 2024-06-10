@@ -181,11 +181,22 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp
                 }
             }
             
-
+            textBox.KeyPress += new KeyPressEventHandler(KeyPress_TextBox);
             Controls.Add(tableLayoutPanel);
-            Text = "INPUT";
+            Text = "KEYBORAD";
             AutoSize = true;
             StartPosition = FormStartPosition.CenterParent;
+        }
+
+        private void KeyPress_TextBox(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                // Close the keyboard and indicate completion
+                this.DialogResult = DialogResult.OK;
+                targetTextBox.Text = textBox.Text;
+                Close();
+            }
         }
 
         private void KeyButton_Click(object sender, EventArgs e)
@@ -205,7 +216,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp
                 }
                 else if (key == "<---")
                 {
-                    if (targetTextBox.Text.Length > 0)
+                    if (textBox.Text.Length > 0)
                     {
                         textBox.Text = textBox.Text.Substring(0, textBox.Text.Length - 1);
                         textBox.SelectionStart = textBox.Text.Length;
@@ -225,6 +236,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp
                 else
                 {
                     textBox.AppendText(key);
+                }
+                if (key != "Enter")
+                {
+                    textBox.Focus();
                 }
             }
         }

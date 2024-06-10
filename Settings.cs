@@ -27,6 +27,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         public float alpha { get; set; }
         public int minBlobObjects { get; set; }
 
+        public int FH {  get; set; }
+        public int FFH { get; set; }
+        public float align {  get; set; }
+
+
         public Settings()
         {
             this.ROI_Left = 120;
@@ -47,6 +52,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.frames = 0;
             this.alpha = 0.8f;
             this.minBlobObjects = 6;
+            this.FH = 5;
+            this.FFH = 10;
+            this.align = 20;
         }
 
         public static Settings Load()

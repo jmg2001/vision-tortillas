@@ -36,6 +36,7 @@ using System.Security.Policy;
 using System.Windows.Forms.VisualStyles;
 using System.Windows.Forms.DataVisualization.Charting;
 using MetroFramework.Forms;
+using System.ComponentModel.Composition;
 
 
 [StructLayout(LayoutKind.Sequential)]
@@ -71,6 +72,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         //Properties.Settings settings = new Properties.Settings();
         Settings settings = Settings.Load();
+
+        Queue<int> holesQueue = new Queue<int>();
+        Queue<double> cvQueue = new Queue<double>();
+        int FH = 0;
+        int FFH = 0;
+        float align = 0;
 
         // Datos de la lente
         double lenF = 8.52;
@@ -227,7 +234,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             m_Xfer = null;
             m_View = null;
 
-            
             AcqConfigDlg acConfigDlg = new AcqConfigDlg(null, "", AcqConfigDlg.ServerCategory.ServerAcqDevice, true);
             if (acConfigDlg.ShowDialog() == DialogResult.OK)
             {
@@ -359,35 +365,35 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             else
             {
                 MessageBox.Show("No cameras found or selected");
-                noCamera = true;
+                //noCamera = true;
 
-                configPath = userDir + "\\STI-config\\";
-                csvPath = configPath + "\\STI-db.csv";
-                imagesPath = userDir + "\\STI-images\\";
-                InitializeComponent();
-                initializeElements();
-                InitializeDataTable();
+                //configPath = userDir + "\\STI-config\\";
+                //csvPath = configPath + "\\STI-db.csv";
+                //imagesPath = userDir + "\\STI-images\\";
+                //InitializeComponent();
+                //initializeElements();
+                //InitializeDataTable();
 
-                if (triggerPLC)
-                {
-                    //changeTriggerMode("PLC");
+                //if (triggerPLC)
+                //{
+                //    //changeTriggerMode("PLC");
 
-                    //triggerModeBtn.BackColor = DefaultBackColor;
-                    viewModeBtn.BackColor = Color.DarkGray;
-                    virtualTriggerBtn.BackColor = Color.DarkGray;
-                    processImageBtn.BackColor = Color.DarkGray;
+                //    //triggerModeBtn.BackColor = DefaultBackColor;
+                //    viewModeBtn.BackColor = Color.DarkGray;
+                //    virtualTriggerBtn.BackColor = Color.DarkGray;
+                //    processImageBtn.BackColor = Color.DarkGray;
 
-                    //txtSoftwareTrigger.Text = "PLC";
-                    txtSoftwareTrigger.BackColor = Color.Transparent;
-                    txtPlcTrigger.BackColor = Color.LightGreen;
-                    virtualTriggerBtn.Enabled = false;
+                //    //txtSoftwareTrigger.Text = "PLC";
+                //    txtSoftwareTrigger.BackColor = Color.Transparent;
+                //    txtPlcTrigger.BackColor = Color.LightGreen;
+                //    virtualTriggerBtn.Enabled = false;
 
-                    //startStop();
+                //    //startStop();
 
-                    viewModeBtn.Enabled = false;
-                    processImageBtn.Enabled = false;
-                    processImageBtn.Text = "PROCESSING";
-                }
+                //    viewModeBtn.Enabled = false;
+                //    processImageBtn.Enabled = false;
+                //    processImageBtn.Text = "PROCESSING";
+                //}
                 //Environment.Exit(0);
                 //this.Close();
             }
@@ -587,11 +593,23 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             sizes.Add("Oversize");
             sizes.Add("SHAPE");
 
+            FH = settings.FH;
+            FFH = settings.FFH;
+            align = settings.align;
+
             //objeto ROI
             UserROI.Top = settings.ROI_Top;
             UserROI.Left = settings.ROI_Left;
             UserROI.Right = settings.ROI_Right;
             UserROI.Bottom = settings.ROI_Bottom;
+
+            // Flags parameters
+            FH = settings.FH;
+            FFH = settings.FFH;
+            align = settings.align;
+            txtFH.Text = FH.ToString();
+            txtFFH.Text = FFH.ToString();
+            txtAlign.Text = align.ToString();
 
             int roiWidth = UserROI.Right - UserROI.Left;
             txtRoiWidth.Text = roiWidth.ToString();
@@ -641,7 +659,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void initUsers()
         {
-            usersList.Add(new User("SIOS","2280",2));
+            usersList.Add(new User("SIOS","2280",3));
             usersList.Add(new User("SUP","12345",2));
             usersList.Add(new User("MTTO","12345",1));
 
@@ -862,7 +880,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     {
                         calibrate();
                     }
-
                     processing = false;
 
                     // Detener el cronómetro
@@ -875,6 +892,37 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 MessageBox.Show("Error: " + ex.Message);
             }
+        }
+
+        private void CheckHoles(int holes)
+        {
+            QueueHoles(holes);
+            //Console.WriteLine(holesQueue.Sum());
+            flagFH.Text = holesQueue.Sum().ToString();
+            flagFFH.Text = holesQueue.Sum().ToString();
+            if (holesQueue.Sum() >= FFH)
+            {
+                flagFFH.BackColor = Color.Red;
+                flagFH.BackColor = Color.Orange;
+            }else if (holesQueue.Sum() >= FH)
+            {
+                flagFFH.BackColor = Color.Silver;
+                flagFH.BackColor = Color.Red;
+            }
+            else
+            {
+                flagFFH.BackColor = Color.Silver;
+                flagFH.BackColor = Color.Silver;
+            }
+        }
+
+        private void QueueHoles(int holes)
+        {
+            if (holesQueue.Count >= 10)
+            {
+                holesQueue.Dequeue();
+            }
+            holesQueue.Enqueue(holes);
         }
 
         //public static void Form_Paint(Object sender, PaintEventArgs args)
@@ -981,6 +1029,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             double MinD = 99999;
             double avgD = 0;
             int n = 0;
+            int nHoles = 0;
+            List<double> diametersCV = new List<double>();
 
             List<(int, bool)> drawFlags = new List<(int, bool)>();
 
@@ -1030,6 +1080,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         {
                             MinD = minDiameter;
                         }
+
+                        diametersCV.Add(diametroIA);
                         // Sumamos para promediar
                         avgDIA += (diametroIA);
                         avgD += (diameterTriangles * tempFactor);
@@ -1041,6 +1093,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                     // Agregamos el elemento a la lista
                     Blobs.Add(blob);
+
+                    if (hole)
+                    {
+                        nHoles++;
+                    }
 
                     foreach (Quadrant quadrant in Quadrants)
                     {
@@ -1066,6 +1123,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 }
                 
             }
+
+            CheckHoles(nHoles);
+
+            double cv = CalculateCV(diametersCV);
+            CheckCV(cv);
 
             // Calculamos el promedio de los diametros
             if(MinD == 99999)
@@ -2835,7 +2897,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
 
             //return imagePath;
-            return @"C:\Users\Jesús\Desktop\test2.bmp";
+            return @"C:\Users\Jesús\Desktop\test.bmp";
         }
 
         private int CalculateOtsuThreshold()
@@ -2951,6 +3013,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             double avgD = 0;
             double avgDIA = 0;
             int n = 0;
+            int nHoles = 0;
+
+            List<double> diametersDesv = new List<double>();
 
             List<(int,bool)> drawFlags = new List<(int, bool)>();
 
@@ -3016,6 +3081,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         {
                             MinD = minDiameter;
                         }
+                        diametersDesv.Add(diametroIA);
                         // Sumamos para promediar
                         avgDIA += (diametroIA);
                         avgD += (diameterTriangles * tempFactor);
@@ -3065,6 +3131,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                             if (hole && size != 6)
                             {
+                                nHoles++;
                                 drawHole(image, sector);
                             }
                         }
@@ -3080,6 +3147,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             dataTable.Clear();
             // Agregamos los datos a la tabla
             setDataTable();
+
+            //Agujeros
+            CheckHoles(nHoles);
+
+            // Coeficiente de variacion
+            double cv = CalculateCV(diametersDesv);
+            CheckCV(cv);
+            lblCV.Text = Math.Round(cv, 3).ToString();
 
             try
             {
@@ -3139,6 +3214,53 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         }
 
+        private void CheckCV(double cv)
+        {
+            QueueCV(cv);
+            flagAlign.Text = Math.Round(cvQueue.Sum(),2).ToString();
+            if (cvQueue.Sum() >= align)
+            {
+                flagAlign.BackColor = Color.Red;
+            }
+            else
+            {
+                flagAlign.BackColor = Color.Silver;
+            }
+            //Console.WriteLine(cv.ToString());
+            //Console.WriteLine(cvQueue.Sum());
+        }
+
+        private void QueueCV(double std)
+        {
+            if (cvQueue.Count >= 10)
+            {
+                cvQueue.Dequeue();
+            }
+            cvQueue.Enqueue(std);
+        }
+
+        static double CalculateCV(IEnumerable<double> values)
+        {
+            if (values == null || !values.Any())
+            {
+                throw new InvalidOperationException("La lista no debe estar vacía.");
+            }
+
+            // Calcular la media
+            double mean = values.Average();
+
+            // Calcular la suma de los cuadrados de las diferencias respecto a la media
+            double sumOfSquares = values.Sum(value => Math.Pow(value - mean, 2));
+
+            // Calcular la varianza (usamos Count - 1 para la muestra, Count para la población)
+            double variance = sumOfSquares / values.Count();
+
+            double std = Math.Sqrt(variance);
+
+            // Calcular la desviación estándar
+            return (std / mean) * 100;
+        }
+
         private void GraphResults(double MaxD,double MinD,double dIA)
         {
             try
@@ -3155,28 +3277,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 trendChart.Series[5].Points.AddXY(now2, minDiameter*euFactor);
 
                 trendChart.ChartAreas[0].AxisY.Title = "Diameter in " + units;
-
-                //int max = 0;
-                //int min = 99999;
-
-                //for (int i = 0; i < trendChart.Series.Count; i++)
-                //{
-                //    for (int j = 0; j < trendChart.Series[i].Points.Count; j++)
-                //    {
-                //        if (trendChart.Series[i].Points[j].YValues[0] > max)
-                //        {
-                //            max = (int)trendChart.Series[i].Points[j].YValues[0];
-                //        }
-
-                //        if (trendChart.Series[i].Points[j].YValues[0] < min)
-                //        {
-                //            min = (int)trendChart.Series[i].Points[j].YValues[0];
-                //        }
-                //    }
-                //}
-
-                //trendChart.ChartAreas[0].AxisY.Minimum = Math.Round(minDiameter*euFactor*0.9,1);
-                //trendChart.ChartAreas[0].AxisY.Maximum = Math.Round(maxDiameter*euFactor*1.1,1);
 
                 // Eliminar datos que exceden la hora
 
@@ -3218,6 +3318,25 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     dataTable.Rows.Add(blob.Sector, size, Math.Round(blob.DiametroIA * euFactor, nUnitsInch), Math.Round(blob.Diametro * euFactor, nUnitsInch), Math.Round(blob.DMayor * euFactor, nUnitsInch), Math.Round(blob.DMenor * euFactor, nUnitsInch), Math.Round(blob.Compacidad, 3), Math.Round(blob.Ovalidad, 3), blob.Area);
                 }
             }
+
+            try
+            {
+                if (dataGridView1.Columns.Contains("Area (px)"))
+                {
+                    if (currentUser != null && currentUser.Level == 3)
+                    {
+                        dataGridView1.Columns["Area (px)"].Visible = true;
+                    }
+                    else
+                    {
+                        dataGridView1.Columns["Area (px)"].Visible = false;
+                    }
+                }
+            }catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
         }
 
         private void drawHole(Mat image, int sector)
@@ -5025,6 +5144,33 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+
+            if (int.TryParse(txtFH.Text, out FH))
+            {
+                settings.FH = FH;
+            }
+            else
+            {
+                MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+            if (int.TryParse(txtFFH.Text, out FFH))
+            {
+                settings.FFH = FFH;
+            }
+            else
+            {
+                MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+            if (float.TryParse(txtAlign.Text, out align))
+            {
+                settings.align = align;
+            }
+            else
+            {
+                MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void cmbProductUnits_SelectedIndexChanged(object sender, EventArgs e)
@@ -5099,7 +5245,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             if (authenticated)
             {
-                if (currentUser.Level == 1 || currentUser.Level == 2)
+                if (currentUser != null)
                 {
                     boxROI.Enabled = true;
                     if(operationMode != 1) boxUnits.Enabled = true;
@@ -5107,7 +5253,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     gbShapeIndicator.Enabled = true;
                 }
                 
-                if (currentUser.Level == 2)
+                if (currentUser.Level >= 2)
                 {
                     advancedPage.Enabled = true;
                 }
@@ -5362,6 +5508,41 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         }
 
         private void Txt_MinDiameter_Click(object sender, EventArgs e)
+        {
+            ShowInputKeyboard((TextBox)sender, 0);
+        }
+
+        private void Txt_Code_Click(object sender, EventArgs e)
+        {
+            ShowInputKeyboard((TextBox)sender, 1);
+        }
+
+        private void Txt_Description_Click(object sender, EventArgs e)
+        {
+            ShowInputKeyboard((TextBox)sender, 1);
+        }
+
+        private void Txt_MaxD_Click(object sender, EventArgs e)
+        {
+            ShowInputKeyboard((TextBox)sender, 0);
+        }
+
+        private void Txt_MinD_Click(object sender, EventArgs e)
+        {
+            ShowInputKeyboard((TextBox)sender, 0);
+        }
+
+        private void txtFH_Click(object sender, EventArgs e)
+        {
+            ShowInputKeyboard((TextBox)sender, 0);
+        }
+
+        private void txtFFH_Click(object sender, EventArgs e)
+        {
+            ShowInputKeyboard((TextBox)sender, 0);
+        }
+
+        private void txtAlign_Click(object sender, EventArgs e)
         {
             ShowInputKeyboard((TextBox)sender, 0);
         }
