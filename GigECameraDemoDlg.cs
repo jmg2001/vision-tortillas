@@ -459,10 +459,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void initializeElements()
         {
-            initUsers();
+            InitUsers();
+            LoadSettings();
+            SetTexts();
 
             btnSetPointPLC.BackColor = Color.LightGreen;
-
             operationMode = 2;
             productsPage.Enabled = false;
             GroupActualTargetSize.Enabled = false;
@@ -473,19 +474,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             mainTabs.SelectedIndexChanged += TabControl2_SelectedIndexChanged;
 
             processImageBtn.Enabled = false;
-
-            units = settings.Units;
-            maxDiameterUnitsTxt.Text = units;
-            minDiameterUnitsTxt.Text = units;
-
-            txtAvgDiameterUnits.Text = units;
-            txtAvgMaxDiameterUnits.Text = units;
-            txtAvgMinDiameterUnits.Text = units;
-            txtControlDiameterUnits.Text = units;
-            txtEquivalentDiameterUnits.Text = units;
-
-            txtMaxDProductUnits.Text = units;
-            txtMinDProductUnits.Text = units;
 
             txtPlcTrigger.BackColor = Color.LightGreen;
             txtSoftwareTrigger.BackColor = Color.Transparent;
@@ -503,14 +491,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     break;
             }
 
-            euFactor = settings.EUFactor;
-            euFactorTxt.Text = Math.Round(euFactor, 3).ToString();
-
-            minBlobObjects = settings.minBlobObjects;
-            txtMinBlobObjects.Text = minBlobObjects.ToString();
-
-            alpha = settings.alpha;
-            txtAlpha.Text = alpha.ToString();
+            
+            
 
             // Verificar si el archivo existe
             if (File.Exists(csvPath))
@@ -574,8 +556,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             quadrantsOfinterest = new int[] { 1, 2, 3, 4 };
             gridTypes.Add(new GridType(4, (2, 2), quadrantsOfinterest));
 
-            grid = settings.GridType;
-
             // Cargamos el GridType inicial
             foreach (GridType gridT in gridTypes)
             {
@@ -593,48 +573,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             sizes.Add("Oversize");
             sizes.Add("SHAPE");
 
-            FH = settings.FH;
-            FFH = settings.FFH;
-            align = settings.align;
-
-            //objeto ROI
-            UserROI.Top = settings.ROI_Top;
-            UserROI.Left = settings.ROI_Left;
-            UserROI.Right = settings.ROI_Right;
-            UserROI.Bottom = settings.ROI_Bottom;
-
-            // Flags parameters
-            FH = settings.FH;
-            FFH = settings.FFH;
-            align = settings.align;
-            txtFH.Text = FH.ToString();
-            txtFFH.Text = FFH.ToString();
-            txtAlign.Text = align.ToString();
-
-            int roiWidth = UserROI.Right - UserROI.Left;
-            txtRoiWidth.Text = roiWidth.ToString();
-
-            int roiHeight = UserROI.Bottom - UserROI.Top;
-            txtRoiHeight.Text = roiHeight.ToString();
-
-            //maxOvality = settings.maxOvality;
-            maxCompactness = settings.maxCompacity;
-            maxCompactnessHole = settings.maxCompacityHole;
-            //maxDiameter = (float)settings.maxDiameter;
-            //minDiameter = (float)settings.minDiameter;
-
-            Txt_MaxDiameter.Text = Math.Round(maxDiameter * euFactor, 3).ToString();
-            Txt_MinDiameter.Text = Math.Round(minDiameter * euFactor, 3).ToString();
-            Txt_MaxCompacity.Text = maxCompactness.ToString();
-            txtCompacityHoleLimit.Text = maxCompactnessHole.ToString();
-            //Txt_MaxOvality.Text = maxOvality.ToString();
-
-            //InitializeInterface();
             Txt_MaxCompacity.KeyPress += Txt_MaxCompacity_KeyPress;
-            //Txt_MaxOvality.KeyPress += Txt_MaxOvality_KeyPress;
-
-            //originalBox.MouseClick += originalBox_MouseMove;
-            //processROIBox.MouseClick += processBox_MouseMove;
 
             // Crear un TabControl
             TabControl tabControl1 = new TabControl();
@@ -652,12 +591,81 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 btnAutoThreshold.BackColor = Color.Silver;
                 btnManualThreshold.BackColor = Color.LightGreen;
             }
-
-            //originalBox.ImageLocation = imagesPath + "roiDraw.jpg";
-            //processROIBox.ImageLocation = imagesPath + "final.jpg";
         }
 
-        private void initUsers()
+        private void SetTexts()
+        {
+            // Units
+            maxDiameterUnitsTxt.Text = units;
+            minDiameterUnitsTxt.Text = units;
+
+            txtAvgDiameterUnits.Text = units;
+            txtAvgMaxDiameterUnits.Text = units;
+            txtAvgMinDiameterUnits.Text = units;
+            txtControlDiameterUnits.Text = units;
+            txtEquivalentDiameterUnits.Text = units;
+
+            txtMaxDProductUnits.Text = units;
+            txtMinDProductUnits.Text = units;
+
+            // Parameters and Factor
+            euFactorTxt.Text = Math.Round(euFactor, 3).ToString();
+            txtMinBlobObjects.Text = minBlobObjects.ToString();
+            txtAlpha.Text = alpha.ToString();
+
+            // ROI
+            int roiWidth = UserROI.Right - UserROI.Left;
+            txtRoiWidth.Text = roiWidth.ToString();
+
+            int roiHeight = UserROI.Bottom - UserROI.Top;
+            txtRoiHeight.Text = roiHeight.ToString();
+
+            // Flags parameters
+            txtFH.Text = FH.ToString();
+            txtFFH.Text = FFH.ToString();
+            txtAlign.Text = align.ToString();
+
+            // Diameters
+            Txt_MaxDiameter.Text = Math.Round(maxDiameter * euFactor, 3).ToString();
+            Txt_MinDiameter.Text = Math.Round(minDiameter * euFactor, 3).ToString();
+
+            // Compacity
+            Txt_MaxCompacity.Text = maxCompactness.ToString();
+            txtCompacityHoleLimit.Text = maxCompactnessHole.ToString();
+        }
+
+        private void LoadSettings()
+        {
+            // Units
+            units = settings.Units;
+
+            // Factor
+            euFactor = settings.EUFactor;
+
+            // Objeto ROI
+            UserROI.Top = settings.ROI_Top;
+            UserROI.Left = settings.ROI_Left;
+            UserROI.Right = settings.ROI_Right;
+            UserROI.Bottom = settings.ROI_Bottom;
+
+            // Flags parameters
+            FH = settings.FH;
+            FFH = settings.FFH;
+            align = settings.align;
+
+            // Advanced parameters
+            minBlobObjects = settings.minBlobObjects;
+            alpha = settings.alpha;
+
+            // Compacity
+            maxCompactness = settings.maxCompacity;
+            maxCompactnessHole = settings.maxCompacityHole;
+
+            // Grid
+            grid = settings.GridType;
+        }
+
+        private void InitUsers()
         {
             usersList.Add(new User("SIOS","2280",3));
             usersList.Add(new User("SUP","12345",2));
@@ -829,7 +837,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
-        // private async Task mainProcess()
         private void mainProcess()
         {
             try
