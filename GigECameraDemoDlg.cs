@@ -262,7 +262,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 }
 
                 InitializeComponent();
-                initializeElements();
+
+                InitializeElements();
                 InitializeDataTable();
                 InitializeChart();
 
@@ -339,10 +340,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 // Cargamos la configuracion por default
                 m_AcqDevice.LoadFeatures(configPath + "STIconfig.ccf");
 
-                // triggerPLC = true;
-
                 if (triggerPLC)
                 {
+                    btnFreezeFrame.Enabled = true;
+
                     changeTriggerMode("PLC");
 
                     //triggerModeBtn.BackColor = DefaultBackColor;
@@ -365,37 +366,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             else
             {
                 MessageBox.Show("No cameras found or selected");
-                //noCamera = true;
-
-                //configPath = userDir + "\\STI-config\\";
-                //csvPath = configPath + "\\STI-db.csv";
-                //imagesPath = userDir + "\\STI-images\\";
-                //InitializeComponent();
-                //initializeElements();
-                //InitializeDataTable();
-
-                //if (triggerPLC)
-                //{
-                //    //changeTriggerMode("PLC");
-
-                //    //triggerModeBtn.BackColor = DefaultBackColor;
-                //    viewModeBtn.BackColor = Color.DarkGray;
-                //    virtualTriggerBtn.BackColor = Color.DarkGray;
-                //    processImageBtn.BackColor = Color.DarkGray;
-
-                //    //txtSoftwareTrigger.Text = "PLC";
-                //    txtSoftwareTrigger.BackColor = Color.Transparent;
-                //    txtPlcTrigger.BackColor = Color.LightGreen;
-                //    virtualTriggerBtn.Enabled = false;
-
-                //    //startStop();
-
-                //    viewModeBtn.Enabled = false;
-                //    processImageBtn.Enabled = false;
-                //    processImageBtn.Text = "PROCESSING";
-                //}
-                //Environment.Exit(0);
-                //this.Close();
+                Environment.Exit(0);
+                this.Close();
             }
         }
 
@@ -457,7 +429,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             trendChart.ChartAreas[0].AxisX.Minimum = DateTime.Now.AddHours(-1).ToOADate(); // Mostrar solo los datos de la última hora
         }
 
-        private void initializeElements()
+        private void InitializeElements()
         {
             InitUsers();
             LoadSettings();
@@ -490,9 +462,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     btnChangeUnitsInch.BackColor = Color.LightGreen;
                     break;
             }
-
-            
-            
 
             // Verificar si el archivo existe
             if (File.Exists(csvPath))
@@ -771,7 +740,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             public Blob(double area, double perimetro, VectorOfPoint perimetroPoints, double diametro, double diametroIA, Point centro, double dMayor, double dMenor, double sector, double compacidad, ushort size, double ovalidad, bool hole)
             {
                 Area = area;
-                //AreaPoints = areaPoints;
                 Perimetro = perimetro;
                 PerimetroPoints = perimetroPoints;
                 Diametro = diametro;
@@ -784,7 +752,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 Size = size;
                 Ovalidad = ovalidad;
                 Hole = hole;
-                //CorrectionFactor = correctionFactor;
             }
         }
 
@@ -847,7 +814,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     processing = true;
 
                     // Crear un Stopwatch
-                    Stopwatch stopwatch = new Stopwatch();
+                    stopwatch = new Stopwatch();
 
                     // Iniciar el cronómetro
                     stopwatch.Start();
@@ -889,10 +856,16 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     }
                     processing = false;
 
+
                     // Detener el cronómetro
                     stopwatch.Stop();
-                    timeElapsed.Text = stopwatch.ElapsedMilliseconds.ToString() + " ms";
-                    stopwatch.Restart();
+
+                    if (triggerPLC)
+                    {
+                        timeElapsed.Text = stopwatch.ElapsedMilliseconds.ToString() + " ms";
+                        stopwatch.Restart();
+                    }
+                    
                 }
             }
             catch (Exception ex)
@@ -906,19 +879,19 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             QueueHoles(holes);
             //Console.WriteLine(holesQueue.Sum());
             flagFH.Text = holesQueue.Sum().ToString();
-            flagFFH.Text = holesQueue.Sum().ToString();
+            //flagFFH.Text = holesQueue.Sum().ToString();
             if (holesQueue.Sum() >= FFH)
             {
-                flagFFH.BackColor = Color.Red;
-                flagFH.BackColor = Color.Orange;
+                //flagFFH.BackColor = Color.Red;
+                flagFH.BackColor = Color.Red;
             }else if (holesQueue.Sum() >= FH)
             {
-                flagFFH.BackColor = Color.Silver;
-                flagFH.BackColor = Color.Red;
+                //flagFFH.BackColor = Color.Silver;
+                flagFH.BackColor = Color.Orange;
             }
             else
             {
-                flagFFH.BackColor = Color.Silver;
+                //flagFFH.BackColor = Color.Silver;
                 flagFH.BackColor = Color.Silver;
             }
         }
@@ -971,6 +944,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private void processFreezed()
         {
             frameCounter++;
+            if (frameCounter >= 1000000)
+            {
+                frameCounter = 0;
+            }
             txtFramesCount.Text = frameCounter.ToString();
 
             //----------------Only for Debug, delete on production-----------------
@@ -1000,9 +977,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 // Procesamos el ROI
                 blobProcessFreezed(roiImage);
             }
-            catch
+            catch (Exception e)
             {
-                MessageBox.Show("Blob Error","Error",MessageBoxButtons.OK,MessageBoxIcon.Error);
+                MessageBox.Show("Blob Error " + e.Message,"Error",MessageBoxButtons.OK,MessageBoxIcon.Error);
             }
 
             try
@@ -1048,87 +1025,89 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             for (int i = 0; i < areas.Count; i++)
             {
-                Point centro = centers[i];
-
-                // Calcular el sector del contorno
-                int sector = CalculateSector(centro, image.Width, image.Height, gridType.Grid.Item1, gridType.Grid.Item2) + 1;
-
-                double area = areas[i];
-                double perimeter = perimeters[i];
-
-                // Calcular la compacidad
-                double compactness = CalculateCompactness((int)area, perimeter);
-
-                // Verificamos si el sector es uno de los que nos interesa
-                if (Array.IndexOf(gridType.QuadrantsOfInterest, sector) != -1)
+                if (!IsTouchingEdges(contours[i]))
                 {
+                    Point centro = centers[i];
 
-                    bool hole = holePresent[i];
+                    // Calcular el sector del contorno
+                    int sector = CalculateSector(centro, image.Width, image.Height, gridType.Grid.Item1, gridType.Grid.Item2) + 1;
 
-                    double tempFactor = euFactor;
+                    double area = areas[i];
+                    double perimeter = perimeters[i];
 
-                    // Este diametro lo vamos a dejar para despues
-                    double diametroIA = CalculateDiameterFromArea((int)area);
+                    // Calcular la compacidad
+                    double compactness = CalculateCompactness((int)area, perimeter);
 
-                    // Calculamos el diametro
-                    (double diameterTriangles, double maxDiameter, double minDiameter) = calculateAndDrawDiameterTrianglesAlghoritm(centro, image.ToBitmap(), sector, false);
-
-                    double ovalidad = calculateOvality(maxDiameter, minDiameter);
-
-                    ushort size = calculateSize(maxDiameter, minDiameter, compactness, ovalidad, hole);
-
-                    if (size != 6) // Shape
+                    // Verificamos si el sector es uno de los que nos interesa
+                    if (Array.IndexOf(gridType.QuadrantsOfInterest, sector) != -1)
                     {
-                        if (maxDiameter > MaxD)
+
+                        bool hole = holePresent[i];
+
+                        double tempFactor = euFactor;
+
+                        // Este diametro lo vamos a dejar para despues
+                        double diametroIA = CalculateDiameterFromArea((int)area);
+
+                        // Calculamos el diametro
+                        (double diameterTriangles, double maxDiameter, double minDiameter) = calculateAndDrawDiameterTrianglesAlghoritm(centro, image.ToBitmap(), sector, false);
+
+                        double ovalidad = calculateOvality(maxDiameter, minDiameter);
+
+                        ushort size = calculateSize(maxDiameter, minDiameter, compactness, ovalidad, hole);
+
+                        if (size != 6) // Shape
                         {
-                            MaxD = maxDiameter;
-                        }
-                        if (minDiameter < MinD)
-                        {
-                            MinD = minDiameter;
-                        }
-
-                        diametersCV.Add(diametroIA);
-                        // Sumamos para promediar
-                        avgDIA += (diametroIA);
-                        avgD += (diameterTriangles * tempFactor);
-                        // Aumentamos el numero de elementos para promediar
-                        n++;
-                    }
-
-                    Blob blob = new Blob(area, perimeter, contours[i], diameterTriangles, diametroIA, centro, maxDiameter, minDiameter, sector, compactness, size, ovalidad, hole);
-
-                    // Agregamos el elemento a la lista
-                    Blobs.Add(blob);
-
-                    if (hole)
-                    {
-                        nHoles++;
-                    }
-
-                    foreach (Quadrant quadrant in Quadrants)
-                    {
-                        if (quadrant.Number == sector)
-                        {
-                            quadrant.DiameterMax = maxDiameter;
-                            quadrant.DiameterMin = minDiameter;
-                            quadrant.Compacity = compactness;
-                            quadrant.Found = true;
-                            quadrant.Blob = blob;
-
-                            for (int l = 0; l < drawFlags.Count; l++)
+                            if (maxDiameter > MaxD)
                             {
-                                if (drawFlags[l].Item1 == sector)
-                                {
-                                    drawFlags[l] = (sector, false);
-                                }
+                                MaxD = maxDiameter;
+                            }
+                            if (minDiameter < MinD)
+                            {
+                                MinD = minDiameter;
                             }
 
-                            break;
+                            diametersCV.Add(diametroIA);
+                            // Sumamos para promediar
+                            avgDIA += (diametroIA);
+                            avgD += (diameterTriangles * tempFactor);
+                            // Aumentamos el numero de elementos para promediar
+                            n++;
+                        }
+
+                        Blob blob = new Blob(area, perimeter, contours[i], diameterTriangles, diametroIA, centro, maxDiameter, minDiameter, sector, compactness, size, ovalidad, hole);
+
+                        // Agregamos el elemento a la lista
+                        Blobs.Add(blob);
+
+                        if (hole)
+                        {
+                            nHoles++;
+                        }
+
+                        foreach (Quadrant quadrant in Quadrants)
+                        {
+                            if (quadrant.Number == sector)
+                            {
+                                quadrant.DiameterMax = maxDiameter;
+                                quadrant.DiameterMin = minDiameter;
+                                quadrant.Compacity = compactness;
+                                quadrant.Found = true;
+                                quadrant.Blob = blob;
+
+                                for (int l = 0; l < drawFlags.Count; l++)
+                                {
+                                    if (drawFlags[l].Item1 == sector)
+                                    {
+                                        drawFlags[l] = (sector, false);
+                                    }
+                                }
+
+                                break;
+                            }
                         }
                     }
                 }
-                
             }
 
             CheckHoles(nHoles);
@@ -1141,6 +1120,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 MinD = 0;
             }
+
             avgDIA /= n;
             avgD /= n;
 
@@ -1153,10 +1133,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             if (units == "mm")
             {
                 txtControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsMm).ToString();
+                dplControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsMm).ToString();
             }
             else
             {
                 txtControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsInch).ToString();
+                dplControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsInch).ToString();
             }
 
             GraphResults(MaxD,MinD,avgDIA);
@@ -1663,6 +1645,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private void process()
         {
             frameCounter++;
+            if (frameCounter >= 1000000)
+            {
+                frameCounter = 0;
+            }
             txtFramesCount.Text = frameCounter.ToString();
 
             //----------------Only for Debug, delete on production-----------------
@@ -1699,9 +1685,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 updateView(processBuffer, processView, "final.bmp");
                 
             }
-            catch
+            catch (Exception e)
             {
-                MessageBox.Show("Blob Error", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Blob Error " + e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
             try
@@ -2303,9 +2289,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     }
 
                     double controlDiameter = 0;
-                    if (Double.TryParse(txtControlDiameter.Text, out controlDiameter)) ;
+                    if (Double.TryParse(dplControlDiameter.Text, out controlDiameter)) ;
                     controlDiameter *= fact;
                     txtControlDiameter.Text = Math.Round(controlDiameter, nUnitsInch).ToString();
+                    dplControlDiameter.Text = Math.Round(controlDiameter, nUnitsInch).ToString();
 
                     double avgMinDiameter = 0;
                     if (Double.TryParse(txtAvgMinD.Text, out avgMinDiameter)) ;
@@ -2343,9 +2330,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     }
 
                     double controlDiameter = 0;
-                    if (Double.TryParse(txtControlDiameter.Text, out controlDiameter)) ;
+                    if (Double.TryParse(dplControlDiameter.Text, out controlDiameter)) ;
                     controlDiameter *= fact;
                     txtControlDiameter.Text = Math.Round(controlDiameter, nUnitsMm).ToString();
+                    dplControlDiameter.Text = Math.Round(controlDiameter, nUnitsMm).ToString();
 
                     double avgMinDiameter = 0;
                     if (Double.TryParse(txtAvgMinD.Text, out avgMinDiameter)) ;
@@ -3033,118 +3021,121 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             for (int i = 0; i < areas.Count; i++)
             {
-                Point centro = centers[i];
-
-                // Calcular el sector del contorno
-                int sector = CalculateSector(centro, image.Width, image.Height, gridType.Grid.Item1, gridType.Grid.Item2) + 1;
-
-                int area = (int)areas[i];
-                double perimeter = perimeters[i];
-
-                // Calcular la compacidad
-                double compactness = CalculateCompactness((int)area, perimeter);
-
-                // Verificamos si el sector es uno de los que nos interesa
-                if (Array.IndexOf(gridType.QuadrantsOfInterest, sector) != -1)
+                if (!IsTouchingEdges(contours[i]))
                 {
+                    Point centro = centers[i];
 
-                    bool drawFlag = true;
+                    // Calcular el sector del contorno
+                    int sector = CalculateSector(centro, image.Width, image.Height, gridType.Grid.Item1, gridType.Grid.Item2) + 1;
 
-                    foreach ((int, bool) tuple in drawFlags)
+                    int area = (int)areas[i];
+                    double perimeter = perimeters[i];
+
+                    // Calcular la compacidad
+                    double compactness = CalculateCompactness((int)area, perimeter);
+
+                    // Verificamos si el sector es uno de los que nos interesa
+                    if (Array.IndexOf(gridType.QuadrantsOfInterest, sector) != -1)
                     {
-                        if (sector == tuple.Item1)
+
+                        bool drawFlag = true;
+
+                        foreach ((int, bool) tuple in drawFlags)
                         {
-                            drawFlag = tuple.Item2;
-                        }
-                    }
-
-
-                    bool hole = holePresent[i];
-
-                    double tempFactor = euFactor;
-
-                    // Este diametro lo vamos a dejar para despues
-                    double diametroIA = CalculateDiameterFromArea((int)area);
-
-                    // Calculamos el diametro
-                    (double diameterTriangles, double maxDiameter, double minDiameter) = calculateAndDrawDiameterTrianglesAlghoritm(centro, image.ToBitmap(), sector, drawFlag);
-
-                    double ovalidad = calculateOvality(maxDiameter, minDiameter);
-
-                    ushort size = calculateSize(maxDiameter, minDiameter, compactness, ovalidad, hole);
-
-                    // Agregamos los datos a la tabla
-                    // dataTable.Rows.Add(sector, area, Math.Round(diametroIA * tempFactor, 3), Math.Round(diameterTriangles * tempFactor, 3), Math.Round(maxDiameter * tempFactor, 3), Math.Round(minDiameter * tempFactor, 3), Math.Round(compactness, 3), Math.Round(ovalidad, 3));
-
-                    Blob blob = new Blob((double)area, perimeter, contours[i], diameterTriangles, diametroIA, centro, maxDiameter, minDiameter, sector, compactness, size, ovalidad, hole);
-
-                    if (size != 6) // Shape
-                    {
-                        if (maxDiameter > MaxD)
-                        {
-                            MaxD = maxDiameter;
-                        }
-                        if (minDiameter < MinD)
-                        {
-                            MinD = minDiameter;
-                        }
-                        diametersDesv.Add(diametroIA);
-                        // Sumamos para promediar
-                        avgDIA += (diametroIA);
-                        avgD += (diameterTriangles * tempFactor);
-                        // Aumentamos el numero de elementos para promediar
-                        n++;
-                    }
-
-                    // Agregamos el elemento a la lista
-                    Blobs.Add(blob);
-
-                    foreach (Quadrant quadrant in Quadrants)
-                    {
-                        if (quadrant.Number == sector)
-                        {
-                            quadrant.DiameterMax = maxDiameter;
-                            quadrant.DiameterMin = minDiameter;
-                            quadrant.Compacity = compactness;
-                            quadrant.Found = true;
-                            quadrant.Blob = blob;
-
-                            for (int l = 0; l < drawFlags.Count; l++)
+                            if (sector == tuple.Item1)
                             {
-                                if (drawFlags[l].Item1 == sector)
+                                drawFlag = tuple.Item2;
+                            }
+                        }
+
+
+                        bool hole = holePresent[i];
+
+                        double tempFactor = euFactor;
+
+                        // Este diametro lo vamos a dejar para despues
+                        double diametroIA = CalculateDiameterFromArea((int)area);
+
+                        // Calculamos el diametro
+                        (double diameterTriangles, double maxDiameter, double minDiameter) = calculateAndDrawDiameterTrianglesAlghoritm(centro, image.ToBitmap(), sector, drawFlag);
+
+                        double ovalidad = calculateOvality(maxDiameter, minDiameter);
+
+                        ushort size = calculateSize(maxDiameter, minDiameter, compactness, ovalidad, hole);
+
+                        // Agregamos los datos a la tabla
+                        // dataTable.Rows.Add(sector, area, Math.Round(diametroIA * tempFactor, 3), Math.Round(diameterTriangles * tempFactor, 3), Math.Round(maxDiameter * tempFactor, 3), Math.Round(minDiameter * tempFactor, 3), Math.Round(compactness, 3), Math.Round(ovalidad, 3));
+
+                        Blob blob = new Blob((double)area, perimeter, contours[i], diameterTriangles, diametroIA, centro, maxDiameter, minDiameter, sector, compactness, size, ovalidad, hole);
+
+                        if (size != 6) // Shape
+                        {
+                            if (maxDiameter > MaxD)
+                            {
+                                MaxD = maxDiameter;
+                            }
+                            if (minDiameter < MinD)
+                            {
+                                MinD = minDiameter;
+                            }
+                            diametersDesv.Add(diametroIA);
+                            // Sumamos para promediar
+                            avgDIA += (diametroIA);
+                            avgD += (diameterTriangles * tempFactor);
+                            // Aumentamos el numero de elementos para promediar
+                            n++;
+                        }
+
+                        // Agregamos el elemento a la lista
+                        Blobs.Add(blob);
+
+                        foreach (Quadrant quadrant in Quadrants)
+                        {
+                            if (quadrant.Number == sector)
+                            {
+                                quadrant.DiameterMax = maxDiameter;
+                                quadrant.DiameterMin = minDiameter;
+                                quadrant.Compacity = compactness;
+                                quadrant.Found = true;
+                                quadrant.Blob = blob;
+
+                                for (int l = 0; l < drawFlags.Count; l++)
                                 {
-                                    drawFlags[l] = (sector, false);
+                                    if (drawFlags[l].Item1 == sector)
+                                    {
+                                        drawFlags[l] = (sector, false);
+                                    }
+                                }
+
+                                break;
+                            }
+                        }
+
+                        if (drawFlag)
+                        {
+                            try
+                            {
+                                // Dibujamos el centro
+                                drawCenter(centro, 2, image);
+
+                                // Dibujamos el sector
+                                drawSector(image, sector);
+
+                                // Dibujamos el numero del sector
+                                drawSectorNumber(image, centro, sector - 1);
+
+                                drawSize(image, sector, size);
+
+                                if (hole && size != 6)
+                                {
+                                    nHoles++;
+                                    drawHole(image, sector);
                                 }
                             }
-
-                            break;
-                        }
-                    }
-
-                    if (drawFlag)
-                    {
-                        try
-                        {
-                            // Dibujamos el centro
-                            drawCenter(centro, 2, image);
-
-                            // Dibujamos el sector
-                            drawSector(image, sector);
-
-                            // Dibujamos el numero del sector
-                            drawSectorNumber(image, centro, sector - 1);
-
-                            drawSize(image, sector, size);
-
-                            if (hole && size != 6)
+                            catch (Exception ex)
                             {
-                                nHoles++;
-                                drawHole(image, sector);
+                                MessageBox.Show(ex.Message);
                             }
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show(ex.Message);
                         }
                     }
                 }
@@ -3205,6 +3196,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 txtAvgMinD.Text = Math.Round(MinD*euFactor, nUnitsMm).ToString();
                 txtEquivalentDiameter.Text = Math.Round(avgDIA * euFactor, nUnitsMm).ToString();
                 txtControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsMm).ToString();
+                dplControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsMm).ToString();
+                if (controlDiameter > maxDiameter || controlDiameter < minDiameter)
+                {
+                    dplControlDiameter.BackColor = Color.Red;
+                }
+                else
+                {
+                    dplControlDiameter.BackColor = Color.LightGreen;
+                }
             }
             else
             {
@@ -3214,6 +3214,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 txtAvgMinD.Text = Math.Round(MinD, nUnitsInch).ToString();
                 txtEquivalentDiameter.Text = Math.Round(avgDIA * euFactor, nUnitsInch).ToString();
                 txtControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsInch).ToString();
+                dplControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsInch).ToString();
+                if (controlDiameter > maxDiameter || controlDiameter < minDiameter)
+                {
+                    dplControlDiameter.BackColor = Color.Red;
+                }
+                else
+                {
+                    dplControlDiameter.BackColor = Color.LightGreen;
+                }
             }
 
             // Asignar la DataTable al DataGridView
@@ -3250,7 +3259,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             if (values == null || !values.Any())
             {
-                throw new InvalidOperationException("La lista no debe estar vacía.");
+                return 0;
             }
 
             // Calcular la media
@@ -3799,7 +3808,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void processImageBtn_Click(object sender, EventArgs e)
         {
+            stopwatch.Start();
+
             process();
+
+            stopwatch.Stop();
+            timeElapsed.Text = stopwatch.ElapsedMilliseconds.ToString() + " ms";
+            stopwatch.Restart();
         }
 
         public void startStop()
@@ -3866,6 +3881,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             if (triggerPLC)
             {
+                btnFreezeFrame.Enabled = true;
+                btnFreezeFrame.BackColor = Color.Silver;
                 txtPlcTrigger.BackColor = Color.LightGreen;
                 txtSoftwareTrigger.BackColor = Color.Transparent;
                 virtualTriggerBtn.Enabled = false;
@@ -3884,6 +3901,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
             else
             {
+                btnFreezeFrame.Enabled = false;
+                btnFreezeFrame.BackColor = Color.DarkGray;
+
+
                 changeTriggerMode("SOFTWARE");
 
                 if (m_Xfer.Grab())
@@ -4058,9 +4079,19 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             MessageBox.Show("Configuration Saved", "Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        public void GuardarConfiguracion(string nombreUsuario, string valorConfiguracion)
+        public bool IsTouchingEdges(VectorOfPoint vector)
         {
+            foreach (Point a in vector.ToArray())
+            {
+                int x = a.X + UserROI.Left;
+                int y = a.Y + UserROI.Top;
+                if (x == UserROI.Left || x == UserROI.Right - 1 || y == UserROI.Top || y == UserROI.Bottom - 1)
+                {
+                    return true;
+                }
+            }
 
+            return false;
         }
 
         private void grid_4_Click(object sender, EventArgs e)
@@ -4957,7 +4988,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 freezeFrame = false;
                 btnFreezeFrame.BackColor = Color.Silver;
-                btnFreezeFrame.Text = "FREEZE FRAME";
+                btnFreezeFrame.Text = "FREEZE RESULTS";
             }
             else
             {
@@ -5062,7 +5093,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
             else
             {
-                MessageBox.Show("Change the operation mode");
+                MessageBox.Show("Change the operation mode", "Invalid Operation", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                calibrating = false;
             }
         }
 
@@ -5094,6 +5126,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void GetDataTxt()
         {
+            // Round Compacity
             if (!double.TryParse(Txt_MaxCompacity.Text, out maxCompactness))
             {
                 Console.WriteLine("Shape Round Limit Invalid");
@@ -5103,6 +5136,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 settings.maxCompacity = (float)maxCompactness;
             }
+            // Hole compacity
             if (!double.TryParse(txtCompacityHoleLimit.Text, out maxCompactnessHole))
             {
                 Console.WriteLine("Shape Hole Limit Invalid");
@@ -5112,6 +5146,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 settings.maxCompacityHole = (float)maxCompactnessHole;
             }
+            // Min objects
             if (!int.TryParse(txtMinBlobObjects.Text, out minBlobObjects))
             {
                 Console.WriteLine("Number of Objects Invalid");
@@ -5121,6 +5156,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 settings.minBlobObjects = minBlobObjects;
             }
+            // Alpha
             if (!float.TryParse(txtAlpha.Text, out alpha))
             {
                 Console.WriteLine("Alpha Value Invalid");
@@ -5130,6 +5166,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 settings.alpha = alpha;
             }
+            // Max diameter
             if (double.TryParse(Txt_MaxDiameter.Text, out maxDiameter))
             {
                 maxDiameter = maxDiameter / euFactor;
@@ -5140,7 +5177,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
+            // Min Diameter
             if (double.TryParse(Txt_MinDiameter.Text, out minDiameter))
             {
                 minDiameter = minDiameter / euFactor;
@@ -5151,7 +5188,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
+            // FH
             if (int.TryParse(txtFH.Text, out FH))
             {
                 settings.FH = FH;
@@ -5160,7 +5197,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
+            // FFH
             if (int.TryParse(txtFFH.Text, out FFH))
             {
                 settings.FFH = FFH;
@@ -5169,7 +5206,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
+            // Align
             if (float.TryParse(txtAlign.Text, out align))
             {
                 settings.align = align;
@@ -5177,6 +5214,120 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             else
             {
                 MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            // Threshold
+            if (int.TryParse(Txt_Threshold.Text, out threshold))
+            {
+            }
+            else
+            {
+                MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Txt_Threshold.Text = threshold.ToString();
+            }
+            //// ROI Width
+            //if()
+            //GetROI("W");
+            //// ROIR Height
+            //GetROI("H");
+        }
+
+        private void GetROI(string v)
+        {
+            if (v == "W")
+            {
+                if (File.Exists(imagesPath + "updatedROI.jpg"))
+                {
+                    int roiWidth;
+                    if (int.TryParse(txtRoiWidth.Text, out roiWidth))
+                    {
+                        if (roiWidth > 630) roiWidth = (630);
+                        if (roiWidth < 12) roiWidth = (12);
+                        if (roiWidth % 2 == 0)
+                        {
+                            UserROI.Left = 320 - roiWidth / 2;
+                            UserROI.Right = 320 + roiWidth / 2;
+                        }
+                        else
+                        {
+                            UserROI.Left = 320 - (int)(roiWidth / 2) + 1;
+                            UserROI.Right = 320 + (int)(roiWidth / 2);
+                        }
+
+                        if (!triggerPLC && mode == 0)
+                        {
+                            settings.ROI_Left = UserROI.Left;
+                            settings.ROI_Right = UserROI.Right;
+                            txtRoiWidth.Text = roiWidth.ToString();
+                            updateROI();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Change the operation mode");
+                            UserROI.Left = settings.ROI_Left;
+                            UserROI.Right = settings.ROI_Right;
+                            txtRoiWidth.Text = (settings.ROI_Right - settings.ROI_Left).ToString();
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Use a valid number");
+                        txtRoiWidth.Text = (settings.ROI_Right - settings.ROI_Left).ToString();
+                    }
+
+                }
+                else
+                {
+                    MessageBox.Show("Please first take a frame");
+                    txtRoiWidth.Text = (settings.ROI_Right - settings.ROI_Left).ToString();
+                }
+            }
+            else
+            {
+                if (File.Exists(imagesPath + "updatedROI.jpg"))
+                {
+                    int roiHeight;
+                    if (int.TryParse(txtRoiHeight.Text, out roiHeight))
+                    {
+                        if (roiHeight > 470) roiHeight = (470);
+                        if (roiHeight < 12) roiHeight = (12);
+                        if (roiHeight % 2 == 0)
+                        {
+                            UserROI.Top = 240 - roiHeight / 2;
+                            UserROI.Bottom = 240 + roiHeight / 2;
+                        }
+                        else
+                        {
+                            UserROI.Top = 240 - (int)(roiHeight / 2) + 1;
+                            UserROI.Bottom = 240 + (int)(roiHeight / 2);
+                        }
+
+                        if (!triggerPLC && mode == 0)
+                        {
+                            settings.ROI_Top = UserROI.Top;
+                            settings.ROI_Bottom = UserROI.Bottom;
+                            txtRoiHeight.Text = roiHeight.ToString();
+                            updateROI();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Change the operation mode");
+                            UserROI.Top = settings.ROI_Top;
+                            UserROI.Bottom = settings.ROI_Bottom;
+                            txtRoiHeight.Text = (settings.ROI_Bottom - settings.ROI_Top).ToString();
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Use a valid number");
+                        txtRoiHeight.Text = (settings.ROI_Bottom - settings.ROI_Top).ToString();
+                    }
+
+                }
+                else
+                {
+                    MessageBox.Show("Please first take a frame");
+                    txtRoiHeight.Text = (settings.ROI_Bottom - settings.ROI_Top).ToString();
+                }
             }
         }
 
