@@ -293,6 +293,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="MetroFramework.txt" />
+    <None Include="Resources\SIOS-LOGOTIPO-AZUL-SIMPLE.png" />
     <None Include="Resources\SIOS-LOGOTIPO-AZUL.png" />
     <EmbeddedResource Include="Common\CSharp\AbortDlg.resx">
       <DependentUpon>AbortDlg.cs</DependentUpon>

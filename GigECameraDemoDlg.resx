@@ -120,6 +120,13 @@
   <metadata name="toolStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
+  <data name="label18.Text" xml:space="preserve">
+    <value>This application provides intelligent tortilla
+measurement using thermal camera technology. 
+Designed for industrial applications, it ensures 
+precise and efficient quality control by analyzing
+the dimensions of each tortilla in real-time.</value>
+  </data>
   <metadata name="tmrMB.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>237, 17</value>
   </metadata>

@@ -11,6 +11,7 @@ using System.Text;
 using Microsoft.Win32;
 
 using DALSA.SaperaLT.SapClassBasic;
+using DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Properties;
 
 
 namespace DALSA.SaperaLT.SapClassGui
@@ -76,6 +77,9 @@ namespace DALSA.SaperaLT.SapClassGui
             // Initialize Servers Combo
             if (!InitServerCombo())
             {
+                //this.DialogResult = DialogResult.None;
+                //DialogResult = DialogResult.None;
+
                 this.Close();
             }
             else
@@ -134,6 +138,8 @@ namespace DALSA.SaperaLT.SapClassGui
         {
             comboBox_Device.Items.Clear();
 	        int i=0;
+            bool valid = false;
+            bool devicesFound = false;
             Object selectedItem = comboBox_Server.SelectedItem;
             // Add "Acq" resources (cameras) to combo
 	        for (i=0; i < SapManager.GetResourceCount(selectedItem.ToString(), SapManager.ResourceType.Acq); i++)
@@ -154,6 +160,7 @@ namespace DALSA.SaperaLT.SapClassGui
 	        // Add "AcqDevice" resources (cameras) to combo
             if (SapManager.GetResourceCount(selectedItem.ToString(), SapManager.ResourceType.Acq) == 0)
             {
+                devicesFound = true;
                 for (i = 0; i < SapManager.GetResourceCount(selectedItem.ToString(), SapManager.ResourceType.AcqDevice); i++)
                 {
                     string resourceName;
@@ -161,12 +168,22 @@ namespace DALSA.SaperaLT.SapClassGui
                     comboBox_Device.Items.Add(resourceName);
                     if (i == m_ResourceIndex)
                         comboBox_Device.SelectedItem = resourceName;
+                    if (resourceName == "M0001351")
+                        valid = true;
+                    Console.WriteLine(resourceName);    
                 }
             }
             m_ResourceIndex = comboBox_Device.SelectedIndex;
-            // Console.WriteLine(m_ResourceIndex);
-
-            if (autoClick) button_ok.PerformClick();
+            
+            if (valid)
+            {
+                if (autoClick) button_ok.PerformClick();
+            }
+            else
+            {
+                this.DialogResult = DialogResult.None;
+                this.Close();
+            }
         }
 
         private void button_browse_Click(object sender, EventArgs e)

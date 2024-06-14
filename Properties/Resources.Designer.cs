@@ -69,5 +69,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap SIOS_LOGOTIPO_AZUL_SIMPLE {
+            get {
+                object obj = ResourceManager.GetObject("SIOS-LOGOTIPO-AZUL-SIMPLE", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }

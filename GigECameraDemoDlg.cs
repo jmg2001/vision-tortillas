@@ -75,6 +75,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         Queue<int> holesQueue = new Queue<int>();
         Queue<double> cvQueue = new Queue<double>();
+        Queue<int> validFrames = new Queue<int>();
         int FH = 0;
         int FFH = 0;
         float align = 0;
@@ -91,7 +92,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         List<List<Point>> bgArea = new List<List<Point>>();
 
         // Variables para el Threshold
-        int threshold = 140;
+        int threshold = 128;
         bool autoThreshold = true;
 
         int nUnitsMm = 1;
@@ -226,7 +227,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         bool noCamera = false;
 
-
         public GigECameraDemoDlg()
         {
             m_AcqDevice = null;
@@ -235,7 +235,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             m_View = null;
 
             AcqConfigDlg acConfigDlg = new AcqConfigDlg(null, "", AcqConfigDlg.ServerCategory.ServerAcqDevice, true);
-            if (acConfigDlg.ShowDialog() == DialogResult.OK)
+            DialogResult result = acConfigDlg.ShowDialog();
+            if (result == DialogResult.OK)
             {
                 configPath = userDir + "\\STI-config\\";
                 csvPath = configPath + "\\STI-db.csv";
@@ -257,7 +258,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 if (!File.Exists(configPath + "STIconfig.ccf"))
                 {
-                    MessageBox.Show("Archivo de configuracion no encontrado, por favor genere uno y coloquelo en el direcotrio: " + configPath + " con el nombre: " + "STIconfig.ccf");
+                    MessageBox.Show("Config file not found, generate one and place it in: " + configPath + " with name: " + " STIconfig.ccf");
                     this.Close();
                 }
 
@@ -269,8 +270,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 if (units == "mm")
                 {
-                    initMaxDiameter = 93; //130mm
-                    initMinDiameter = 79; //110mm
+                    initMaxDiameter = 93.10; //130mm
+                    initMinDiameter = 78.80; //110mm
                 }
                 else
                 {
@@ -362,10 +363,38 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     processImageBtn.Enabled = false;
                     processImageBtn.Text = "PROCESSING";
                 }
+                else
+                {
+                    btnFreezeFrame.Enabled = false;
+
+                    changeTriggerMode("SOFTWARE");
+
+                    //triggerModeBtn.BackColor = DefaultBackColor;
+                    viewModeBtn.BackColor = Color.Silver;
+                    virtualTriggerBtn.BackColor = Color.Silver;
+                    processImageBtn.BackColor = Color.DarkGray;
+
+                    //txtSoftwareTrigger.Text = "PLC";
+                    txtPlcTrigger.BackColor = Color.Transparent;
+                    txtSoftwareTrigger.BackColor = Color.LightGreen;
+                    virtualTriggerBtn.Enabled = true;
+
+                    startStop();
+
+                    viewModeBtn.Enabled = true;
+                    processImageBtn.Enabled = false;
+                    processImageBtn.Text = "PROCESS FRAME";
+                }
+            }
+            else if(result == DialogResult.None)
+            {
+                MessageBox.Show("Bad serial number");
+                Environment.Exit(0);
+                this.Close();
             }
             else
             {
-                MessageBox.Show("No cameras found or selected");
+                MessageBox.Show("Camera not found");
                 Environment.Exit(0);
                 this.Close();
             }
@@ -484,7 +513,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 // Contenido de los registros
                 string[][] data = {
                     new string[] { "1","1", "Default", "130", "110", "12", "1", "mm"},
-                    };
+                };
 
                 // Escribir los datos en el archivo CSV
                 WriteCsvFile(csvPath, headers, data);
@@ -510,12 +539,16 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             modbusServer.Listen();
             Console.WriteLine("Modbus Server running...");
 
-            
+            for (int i = 0; i < 10; i++)
+            {
+                QueueFrame(0);
+            }
+
             // Aquí vamos a agregar todos los formatos
             // 3x3
             int[] quadrantsOfinterest = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
             gridTypes.Add(new GridType(1, (3, 3), quadrantsOfinterest));
-            // 5
+            // 2x1x2
             quadrantsOfinterest = new int[] { 1, 3, 5, 7, 9 };
             gridTypes.Add(new GridType(2, (3, 3), quadrantsOfinterest));
             // 4x4
@@ -544,12 +577,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             Txt_MaxCompacity.KeyPress += Txt_MaxCompacity_KeyPress;
 
-            // Crear un TabControl
-            TabControl tabControl1 = new TabControl();
-            tabControl1.Location = new Point(10, 10);
-            tabControl1.Size = new Size(680, 520);
-            this.Controls.Add(tabControl1);
-
             if (autoThreshold)
             {
                 btnAutoThreshold.BackColor = Color.LightGreen;
@@ -560,6 +587,16 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 btnAutoThreshold.BackColor = Color.Silver;
                 btnManualThreshold.BackColor = Color.LightGreen;
             }
+        }
+
+        private void QueueFrame(int v)
+        {
+            if (validFrames.Count >= 10)
+            {
+                validFrames.Dequeue();
+            }
+
+            validFrames.Enqueue(v);
         }
 
         private void SetTexts()
@@ -1112,11 +1149,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             CheckHoles(nHoles);
 
-            double cv = CalculateCV(diametersCV);
-            CheckCV(cv);
-
             // Calculamos el promedio de los diametros
-            if(MinD == 99999)
+            if (MinD == 99999)
             {
                 MinD = 0;
             }
@@ -1124,7 +1158,22 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             avgDIA /= n;
             avgD /= n;
 
-            ProcessControlDiameter(avgDIA);
+            double cv = CalculateCV(diametersCV);
+
+            int validObjects = Blobs.Count(Blob => Blob.Size != 6);
+
+            if (validObjects >= minBlobObjects)
+            {
+                QueueFrame(1);
+                ProcessControlDiameter(avgDIA);
+                CheckCV(cv);
+            }
+            else
+            {
+                QueueFrame(0);
+            }
+
+            CheckLastFrames();
 
             maxDiameterAvg = MaxD * euFactor;
             minDiameterAvg = MinD * euFactor;
@@ -1146,32 +1195,38 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void ProcessControlDiameter(double diam)
         {
-            int validObjects = Blobs.Count(Blob => Blob.Size != 6);
-            txtValidObjects.Text = validObjects.ToString();
-            if (validObjects >= minBlobObjects)
+            if (!double.IsNaN(diam))
             {
-                txtValidObjects.ForeColor = Color.Green;
-                if (!double.IsNaN(diam))
+                double validateControl = Filtro(diam);
+                if (validateControl > maxDiameter * 3)
                 {
-                    double validateControl = Filtro(diam);
-                    if (validateControl > maxDiameter * 3)
-                    {
-                        validateControl = maxDiameter * 3;
-                    }
-                    else if (validateControl < 0)
-                    {
-                        validateControl = 0;
-                    }
-                    controlDiameter = validateControl;
+                    validateControl = maxDiameter * 3;
                 }
-                else
+                else if (validateControl < 0)
                 {
-                    controlDiameter = Filtro(0);
+                    validateControl = 0;
                 }
+                controlDiameter = validateControl;
             }
             else
             {
-                txtValidObjects.ForeColor = Color.Red;
+                controlDiameter = Filtro(0);
+            }
+            
+        }
+
+        private void CheckLastFrames()
+        {
+            int a = validFrames.Count(e => e == 1);
+            flagValidFrames.Text = a.ToString();
+
+            if (a < 10)
+            {
+                flagValidFrames.BackColor = Color.Red;
+            }
+            else
+            {
+                flagValidFrames.BackColor = Color.LightGreen;
             }
         }
 
@@ -2137,7 +2192,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     grid = "3x3";
                     break;
                 case 2:
-                    grid = "5";
+                    grid = "2x1x5";
                     break;
                 case 3:
                     grid = "4x4";
@@ -3010,7 +3065,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             int n = 0;
             int nHoles = 0;
 
-            List<double> diametersDesv = new List<double>();
+            List<double> diametersCV = new List<double>();
 
             List<(int,bool)> drawFlags = new List<(int, bool)>();
 
@@ -3078,7 +3133,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                             {
                                 MinD = minDiameter;
                             }
-                            diametersDesv.Add(diametroIA);
+                            diametersCV.Add(diametroIA);
                             // Sumamos para promediar
                             avgDIA += (diametroIA);
                             avgD += (diameterTriangles * tempFactor);
@@ -3149,10 +3204,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             //Agujeros
             CheckHoles(nHoles);
 
-            // Coeficiente de variacion
-            double cv = CalculateCV(diametersDesv);
-            CheckCV(cv);
-            lblCV.Text = Math.Round(cv, 3).ToString();
 
             try
             {
@@ -3180,7 +3231,27 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             avgDIA /= n;
             avgD /= n;
 
-            ProcessControlDiameter(avgDIA);
+            double cv = CalculateCV(diametersCV);
+
+            int validObjects = Blobs.Count(Blob => Blob.Size != 6);
+            txtValidObjects.Text = validObjects.ToString();
+
+            if (validObjects >= minBlobObjects)
+            {
+                QueueFrame(1);
+                CheckCV(cv);
+                ProcessControlDiameter(avgDIA);
+
+                txtValidObjects.ForeColor = Color.Green;
+                lblCV.Text = Math.Round(cv, 3).ToString();
+            }
+            else
+            {
+                txtValidObjects.ForeColor = Color.Red;
+                QueueFrame(0);
+            }
+
+            CheckLastFrames();
 
             maxDiameterAvg = MaxD*euFactor;
             minDiameterAvg = MinD*euFactor;
@@ -3242,8 +3313,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 flagAlign.BackColor = Color.Silver;
             }
-            //Console.WriteLine(cv.ToString());
-            //Console.WriteLine(cvQueue.Sum());
         }
 
         private void QueueCV(double std)
@@ -4121,7 +4190,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void grid_5_Click(object sender, EventArgs e)
         {
-            updateGridType(2, "5");
+            updateGridType(2, "2x1x2");
         }
 
         private void grid_6_Click(object sender, EventArgs e)
@@ -4387,7 +4456,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                             case "3x3":
                                 grid = 1;
                                 break;
-                            case "5":
+                            case "2x1x5":
                                 grid = 2;
                                 break;
                             case "4x4":
@@ -4466,7 +4535,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 case "3x3":
                     grid = 1;
                     break;
-                case "5":
+                case "2x1x5":
                     grid = 2;
                     break;
                 case "4x4":
@@ -4476,8 +4545,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     grid = 4;
                     break;
             }
-
-            
 
             updateGridType(grid, CmbGrid.SelectedItem.ToString());
 
@@ -4578,7 +4645,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                             case "3x3":
                                 grid = 1;
                                 break;
-                            case "5":
+                            case "2x1x5":
                                 grid = 2;
                                 break;
                             case "4x4":
