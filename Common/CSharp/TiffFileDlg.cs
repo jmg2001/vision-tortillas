@@ -1,12 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
 using Microsoft.Win32;
-using DALSA.SaperaLT.SapClassBasic;
+using System;
+using System.Windows.Forms;
 
 namespace DALSA.SaperaLT.SapClassGui
 {
@@ -14,15 +8,15 @@ namespace DALSA.SaperaLT.SapClassGui
     {
         public TiffFileDlg(int compressionLevel, int compressionType)
         {
-            InitializeComponent(); 
+            InitializeComponent();
             // Read file name
             string keyPath = "Software\\Teledyne DALSA\\" + Application.ProductName + "\\SapFile";
             RegistryKey regkey = Registry.CurrentUser.OpenSubKey(keyPath);
             if (regkey != null)
             {
                 UpDown_compression_level.Value = Convert.ToDecimal(regkey.GetValue("Tiff Compression Level", compressionLevel));
-                comboBox_compression_type.SelectedIndex = Convert.ToInt32(regkey.GetValue("Tiff Compression Type", compressionType));          
-            }   
+                comboBox_compression_type.SelectedIndex = Convert.ToInt32(regkey.GetValue("Tiff Compression Type", compressionType));
+            }
         }
 
         private void button_OK_Click(object sender, EventArgs e)
@@ -37,13 +31,13 @@ namespace DALSA.SaperaLT.SapClassGui
         }
 
         public int CompressionLevel
-        { 
-            get {return m_Compression_Level;}   
+        {
+            get { return m_Compression_Level; }
         }
 
         public int CompressionType
         {
-            get {return m_Compression_Type;}
+            get { return m_Compression_Type; }
         }
 
     }

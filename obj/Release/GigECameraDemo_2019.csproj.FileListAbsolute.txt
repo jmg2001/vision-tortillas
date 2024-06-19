@@ -26,6 +26,8 @@ C:\Users\Jesús\Documents\vision-tortillas\bin\Release\DALSA.SaperaLT.SapClassBa
 C:\Users\Jesús\Documents\vision-tortillas\bin\Release\EasyModbus.dll
 C:\Users\Jesús\Documents\vision-tortillas\bin\Release\Emgu.CV.Bitmap.dll
 C:\Users\Jesús\Documents\vision-tortillas\bin\Release\Emgu.CV.Platform.NetStandard.dll
+C:\Users\Jesús\Documents\vision-tortillas\bin\Release\MetroFramework.dll
+C:\Users\Jesús\Documents\vision-tortillas\bin\Release\MetroFramework.Fonts.dll
 C:\Users\Jesús\Documents\vision-tortillas\bin\Release\Microsoft.Bcl.AsyncInterfaces.dll
 C:\Users\Jesús\Documents\vision-tortillas\bin\Release\Microsoft.Bcl.HashCode.dll
 C:\Users\Jesús\Documents\vision-tortillas\bin\Release\System.Buffers.dll
@@ -57,6 +59,7 @@ C:\Users\Jesús\Documents\vision-tortillas\obj\Release\DALSA.SaperaLT.Demos.NET.
 C:\Users\Jesús\Documents\vision-tortillas\obj\Release\DALSA.SaperaLT.SapClassGui.ImageBox.resources
 C:\Users\Jesús\Documents\vision-tortillas\obj\Release\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp.InputDlg2.resources
 C:\Users\Jesús\Documents\vision-tortillas\obj\Release\DALSA.SaperaLT.SapClassGui.JpegFileDlg.resources
+C:\Users\Jesús\Documents\vision-tortillas\obj\Release\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp.KeyBoard.resources
 C:\Users\Jesús\Documents\vision-tortillas\obj\Release\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp.LoginDlg.resources
 C:\Users\Jesús\Documents\vision-tortillas\obj\Release\DALSA.SaperaLT.SapClassGui.RawFileDlg.resources
 C:\Users\Jesús\Documents\vision-tortillas\obj\Release\DALSA.SaperaLT.SapClassGui.TiffFileDlg.resources

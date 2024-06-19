@@ -1,21 +1,11 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Windows.Forms;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Text;
-using Microsoft.Win32;
-
 using DALSA.SaperaLT.SapClassBasic;
+using System;
+using System.Windows.Forms;
 
 
 namespace DALSA.SaperaLT.SapClassGui
 {
-  
+
     public partial class BufferDlg : Form
     {
         public BufferDlg(SapBuffer buffer, SapDisplay display, bool Online)
@@ -46,7 +36,7 @@ namespace DALSA.SaperaLT.SapClassGui
 
             Initialize_Format_Combo();
             Initialize_Type_Flags();
-            EnableControls();  			
+            EnableControls();
         }
 
         // Initialize format combo
@@ -154,7 +144,7 @@ namespace DALSA.SaperaLT.SapClassGui
             if (m_format == formatInfo.Value) Index = 32;
 
             comboBox1_Format.SelectedIndex = Index;
-       
+
         }
 
         private void Initialize_Type_Flags()
@@ -172,12 +162,12 @@ namespace DALSA.SaperaLT.SapClassGui
             m_Count = int.Parse(textBox1_Count.Text);
             m_Width = int.Parse(textBox1_Width.Text);
             m_Height = int.Parse(textBox1_Height.Text);
-            m_pixelDepth = int.Parse(textBox1_PixelDepth.Text); 
+            m_pixelDepth = int.Parse(textBox1_PixelDepth.Text);
         }
 
         private void radioButton1_Contiguous_CheckedChanged(object sender, EventArgs e)
         {
-            if (radioButton1_Contiguous.Checked)	    
+            if (radioButton1_Contiguous.Checked)
                 m_type = SapBuffer.MemoryType.Contiguous;
         }
 
@@ -224,7 +214,7 @@ namespace DALSA.SaperaLT.SapClassGui
             textBox1_Width.Enabled = !m_isXfer;
             textBox1_Height.Enabled = !m_isXfer;
             comboBox1_Format.Enabled = !m_isXfer;
-       
+
             // Is pixel depth adjustable?
             if (SapManager.GetPixelDepthMin(m_format) != SapManager.GetPixelDepthMax(m_format))
             {
@@ -233,11 +223,11 @@ namespace DALSA.SaperaLT.SapClassGui
             }
             else
                 textBox1_PixelDepth.Enabled = false;
-        }    
+        }
 
         private void comboBox1_Format_SelectedIndexChanged(object sender, EventArgs e)
         {
-           // Update format 
+            // Update format 
             SapFormatInfo formatInfo = (SapFormatInfo)comboBox1_Format.SelectedItem;
             m_format = formatInfo.Value;
             EnableControls();

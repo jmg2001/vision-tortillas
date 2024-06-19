@@ -1,7 +1,6 @@
 using System;
-using System.Windows.Forms;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 
 
@@ -31,12 +30,10 @@ namespace DALSA.SaperaLT.SapClassGui
         wmSysCommand = 0x0112
     }
 
-    /// <summary>
-    /// A class that helps to manipulate the system menu
-    /// of a passed form.
-    ///
-    /// Written by Florian "nohero" Stinglmayr
-    /// </summary>
+    ///<summary>
+    ///A class that helps to manipulate the system menu of a passed form.
+    ///Written by Florian "nohero" Stinglmayr
+    ///</summary>
     public class SystemMenu
     {
         // I havn't found any other solution than using plain old

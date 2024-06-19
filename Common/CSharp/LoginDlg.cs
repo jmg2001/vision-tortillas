@@ -1,16 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-
-using System;
-using System.Security.Cryptography;
 
 namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp
 {
@@ -65,7 +55,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp
                 else
                 {
                     MessageBox.Show("Wrong Password");
-                    this .DialogResult = DialogResult.Cancel;
+                    this.DialogResult = DialogResult.Cancel;
                 }
             }
             else

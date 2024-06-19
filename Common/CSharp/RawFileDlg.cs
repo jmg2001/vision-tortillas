@@ -1,12 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
-using Microsoft.Win32;
 using DALSA.SaperaLT.SapClassBasic;
+using Microsoft.Win32;
+using System;
+using System.Windows.Forms;
 
 namespace DALSA.SaperaLT.SapClassGui
 {
@@ -22,13 +17,13 @@ namespace DALSA.SaperaLT.SapClassGui
             RegistryKey regkey = Registry.CurrentUser.OpenSubKey(keyPath);
             if (regkey != null)
             {
-               textBox_Width.Text = regkey.GetValue("Raw Width", width).ToString();
-               textBox_Height.Text = regkey.GetValue("Raw Height",height).ToString();
-               textBox_Offset.Text = regkey.GetValue("Raw Offset",offset).ToString();
-               m_Format = (SapFormat)Enum.Parse(typeof(SapFormat), regkey.GetValue("Raw Format", format).ToString(), true);
-           }
+                textBox_Width.Text = regkey.GetValue("Raw Width", width).ToString();
+                textBox_Height.Text = regkey.GetValue("Raw Height", height).ToString();
+                textBox_Offset.Text = regkey.GetValue("Raw Offset", offset).ToString();
+                m_Format = (SapFormat)Enum.Parse(typeof(SapFormat), regkey.GetValue("Raw Format", format).ToString(), true);
+            }
 
-            for (int i = 0; i < m_FormatInfo.Length ; i++)
+            for (int i = 0; i < m_FormatInfo.Length; i++)
             {
                 comboBox_RawFormat.Items.Add(m_FormatInfo[i].ToString());
                 if ((m_FormatInfo[i].Value == m_Format) || ((m_Format == 0) && (m_FormatInfo[i].Value == SapFormat.Mono8)))
@@ -50,9 +45,9 @@ namespace DALSA.SaperaLT.SapClassGui
             // Write compression type and level values
             string keyPath = "Software\\Teledyne DALSA\\" + Application.ProductName + "\\SapFile";
             RegistryKey regKey = Registry.CurrentUser.CreateSubKey(keyPath);
-            regKey.SetValue("Raw Width",m_Width);
-            regKey.SetValue("Raw Height",m_Height);
-            regKey.SetValue("Raw Offset",m_Offset);
+            regKey.SetValue("Raw Width", m_Width);
+            regKey.SetValue("Raw Height", m_Height);
+            regKey.SetValue("Raw Offset", m_Offset);
             regKey.SetValue("Raw Format", m_Format);
         }
 

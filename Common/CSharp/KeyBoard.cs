@@ -2,7 +2,6 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
-using System.Windows.Forms.DataVisualization.Charting;
 
 namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp
 {
@@ -14,13 +13,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp
         private bool password;
         private bool init = false;
 
-        public KeyBoard(TextBox targetTextBox, int type, bool password=false)
+        public KeyBoard(TextBox targetTextBox, int type, bool password = false)
         {
             this.targetTextBox = targetTextBox;
             this.type = type;
             this.password = password;
             InitializeKeyboard();
-            
+
         }
 
         private void InitializeKeyboard()
@@ -45,7 +44,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp
                     Padding = new Padding(10)
                 };
 
-                textBox = new TextBox {
+                textBox = new TextBox
+                {
                     Font = new Font("Microsoft Sans Serif", 18),
                     Width = 644,
                     Height = 50,
@@ -110,7 +110,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp
                 {
                 "1", "2", "3", "<---",
                 "4", "5", "6", "Enter",
-                "7", "8", "9", 
+                "7", "8", "9",
                 "0", ".", "","Clear"
                 };
 
@@ -180,7 +180,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp
                     tableLayoutPanel.Controls.Add(button);
                 }
             }
-            
+
             textBox.KeyPress += new KeyPressEventHandler(KeyPress_TextBox);
             Controls.Add(tableLayoutPanel);
             Text = "KEYBORAD";
@@ -203,7 +203,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp
         {
             if (sender is MetroFramework.Controls.MetroButton button)
             {
-                
+
                 var key = button.Text;
                 if (!init && key != "Enter")
                 {

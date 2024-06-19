@@ -1,42 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Windows.Forms;
-using Microsoft.Win32;
-
+﻿using CsvHelper;
+using DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp;
 using DALSA.SaperaLT.SapClassBasic;
 using DALSA.SaperaLT.SapClassGui;
-using System.Runtime.InteropServices;
+using EasyModbus;
+using Emgu.CV;
+using Emgu.CV.CvEnum;
+using Emgu.CV.Structure;
+using Emgu.CV.Util;
+using Microsoft.Win32;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Diagnostics;
+using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Data;
-
-using EasyModbus;
-using CsvHelper;
-
-using System.Threading.Tasks;
-
-using Emgu.CV.Structure;
-using Emgu.CV;
-using System.Diagnostics;
-using System.Globalization;
-
-using DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp;
-using Emgu.CV.CvEnum;
-using Emgu.CV.Util;
-
 using System.Runtime.ExceptionServices;
+using System.Runtime.InteropServices;
 using System.Security;
-
-using System.Configuration;
-using System.Runtime.CompilerServices;
-using DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Properties;
-using static System.Net.Mime.MediaTypeNames;
-using System.Security.Policy;
-using System.Windows.Forms.VisualStyles;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
-using MetroFramework.Forms;
-using System.ComponentModel.Composition;
 
 
 [StructLayout(LayoutKind.Sequential)]
@@ -52,6 +37,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 {
     public partial class GigECameraDemoDlg : Form
     {
+        int savedImagesCounter = 0;
+
         // Variables globales
         public RECT UserROI = new RECT();
         long[] Histogram = new long[256];
@@ -64,7 +51,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         bool modifyingProduct = false;
 
-        User currentUser = null; 
+        User currentUser = null;
 
         List<User> usersList = new List<User>();
 
@@ -129,7 +116,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         double minDiameter = 72;
         double maxCompactness = 20;
         double maxCompactnessHole = 20;
-        double maxOvality = 88/72;
+        double maxOvality = 88 / 72;
 
         // Resultados de los blobs, los que se colocan en el servidor Modbus
         double maxDiameterAvg = 0;
@@ -160,13 +147,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         List<string> sizes = new List<string>();
 
         // Imagen para cargar la imagen tomada por la camara
-        public Bitmap originalImage = new Bitmap(640,480);
+        public Bitmap originalImage = new Bitmap(640, 480);
         bool originalImageIsDisposed = true;
 
         bool roiImagesIsDisposed = false;
 
         // Directortio para guardar la imagenes para trabajar, es una carpeta tempoal
-        string imagesPath = Path.GetTempPath();
+        string imagesPath = "";
 
         // Crear una lista de blobs
         public List<Blob> Blobs = new List<Blob>();
@@ -185,14 +172,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         static object lockObject = new object();
 
-        Bitmap originalROIImage = new Bitmap(640,480);
+        Bitmap originalROIImage = new Bitmap(640, 480);
         Mat originalImageCV = new Mat();
 
         // Hasta aqui las creadas por mi
 
         // Crear una DataTable para almacenar la información
         DataTable dataTable = new DataTable();
-        
+
         int Max_Threshold = 255;
         int OffsetLeft = 0;
         int OffsetTop = 0;
@@ -234,7 +221,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             m_Xfer = null;
             m_View = null;
 
-            AcqConfigDlg acConfigDlg = new AcqConfigDlg(null, "", AcqConfigDlg.ServerCategory.ServerAcqDevice, true);
+            AcqConfigDlg acConfigDlg = new AcqConfigDlg(null, "", AcqConfigDlg.ServerCategory.ServerAcqDevice, false);
             DialogResult result = acConfigDlg.ShowDialog();
             if (result == DialogResult.OK)
             {
@@ -254,6 +241,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     // Si no existe, crearlo
                     Directory.CreateDirectory(imagesPath);
                     Console.WriteLine("Directorio creado: " + imagesPath);
+                }
+
+                if (!Directory.Exists(imagesPath + "\\frames\\"))
+                {
+                    // Si no existe, crearlo
+                    Directory.CreateDirectory(imagesPath + "\\frames\\");
+                    Console.WriteLine("Directorio creado: " + imagesPath + "\\frames\\");
                 }
 
                 if (!File.Exists(configPath + "STIconfig.ccf"))
@@ -282,10 +276,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 oldMaxDiameter = initMaxDiameter;
                 oldMinDiameter = initMinDiameter;
 
-                maxDiameter = initMaxDiameter; 
+                maxDiameter = initMaxDiameter;
                 minDiameter = initMinDiameter;
 
-                controlDiameterOld = (maxDiameter + minDiameter)/2;
+                controlDiameterOld = (maxDiameter + minDiameter) / 2;
                 controlDiameter = (maxDiameter + minDiameter) / 2;
 
                 updateLabels();
@@ -386,7 +380,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     processImageBtn.Text = "PROCESS FRAME";
                 }
             }
-            else if(result == DialogResult.None)
+            else if (result == DialogResult.None)
             {
                 MessageBox.Show("Bad serial number");
                 Environment.Exit(0);
@@ -673,9 +667,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void InitUsers()
         {
-            usersList.Add(new User("SIOS","2280",3));
-            usersList.Add(new User("SUP","12345",2));
-            usersList.Add(new User("MTTO","12345",1));
+            usersList.Add(new User("SIOS", "2280", 3));
+            usersList.Add(new User("SUP", "12345", 2));
+            usersList.Add(new User("MTTO", "12345", 1));
 
             btnLogoff.Enabled = false;
             btnLogoff.BackColor = Color.DarkGray;
@@ -708,14 +702,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 Console.WriteLine("Trigger " + modeStr);
             }
         }
-        
+
         public class User
         {
             public string Name { get; set; }
             public string Password { get; set; }
             public int Level { get; set; }
 
-            public User (string name, string password, int level)
+            public User(string name, string password, int level)
             {
                 Name = name;
                 Password = password;
@@ -734,7 +728,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             //public double MaxOvality { get; set; }
             public double MaxCompacity { get; set; }
             public int Grid { get; set; }
-            public string Units {  get; set; }
+            public string Units { get; set; }
 
         }
 
@@ -746,13 +740,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             public (int, int) Grid { get; set; }
             public int[] QuadrantsOfInterest { get; set; }
 
-            public GridType (int type, (int, int) grid, int[] quadrantsOfInterest)
+            public GridType(int type, (int, int) grid, int[] quadrantsOfInterest)
             {
                 Type = type;
                 Grid = grid;
                 QuadrantsOfInterest = quadrantsOfInterest;
             }
-            
+
         }
 
         public class Blob
@@ -815,7 +809,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 DiameterAvg = diameterAvg;
                 DiameterMax = diameterMax;
                 DiameterMin = diameterMin;
-                Ratio = diameterMax/diameterMin;
+                Ratio = diameterMax / diameterMin;
                 Compacity = compacity;
                 Blob = Blob;
             }
@@ -833,7 +827,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 GigeDlg.Invoke(new DisplayFrameAcquired(GigeDlg.ShowFrameNumber), argsNotify.EventCount, false);
 
-                GigeDlg.Invoke((MethodInvoker) async delegate
+                GigeDlg.Invoke((MethodInvoker)async delegate
                 {
                     // await mainProcess();
                     mainProcess();
@@ -902,7 +896,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         timeElapsed.Text = stopwatch.ElapsedMilliseconds.ToString() + " ms";
                         stopwatch.Restart();
                     }
-                    
+
                 }
             }
             catch (Exception ex)
@@ -921,7 +915,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 //flagFFH.BackColor = Color.Red;
                 flagFH.BackColor = Color.Red;
-            }else if (holesQueue.Sum() >= FH)
+            }
+            else if (holesQueue.Sum() >= FH)
             {
                 //flagFFH.BackColor = Color.Silver;
                 flagFH.BackColor = Color.Orange;
@@ -1016,7 +1011,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
             catch (Exception e)
             {
-                MessageBox.Show("Blob Error " + e.Message,"Error",MessageBoxButtons.OK,MessageBoxIcon.Error);
+                MessageBox.Show("Blob Error " + e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
             try
@@ -1039,8 +1034,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             Blobs.Clear();
             //Blobs = new List<Blob>();
 
-            minArea = (int)(((Math.Pow(minDiameter, 2) / 4) * Math.PI)*0.5);
-            maxArea = (int)(((Math.Pow(maxDiameter, 2) / 4) * Math.PI)*1.5);
+            minArea = (int)(((Math.Pow(minDiameter, 2) / 4) * Math.PI) * 0.5);
+            maxArea = (int)(((Math.Pow(maxDiameter, 2) / 4) * Math.PI) * 1.5);
 
             var (contours, centers, areas, perimeters, holePresent) = FindContoursWithEdgesAndCenters(image);
 
@@ -1190,7 +1185,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 dplControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsInch).ToString();
             }
 
-            GraphResults(MaxD,MinD,avgDIA);
+            GraphResults(MaxD, MinD, avgDIA);
         }
 
         private void ProcessControlDiameter(double diam)
@@ -1212,7 +1207,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 controlDiameter = Filtro(0);
             }
-            
+
         }
 
         private void CheckLastFrames()
@@ -1283,9 +1278,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 int startAddress = 250;
                 List<float> setPoints = new List<float>();
 
-                for ( int i = startAddress; i < (startAddress + (numData*2)); i+=2 )
+                for (int i = startAddress; i < (startAddress + (numData * 2)); i += 2)
                 {
-                    ushort[] registerValue = new ushort[] { (ushort)registers[i], (ushort)registers[i+1] };                                                                                                          // Combina los dos valores de 16 bits en un solo valor entero de 32 bits
+                    ushort[] registerValue = new ushort[] { (ushort)registers[i], (ushort)registers[i + 1] };                                                                                                          // Combina los dos valores de 16 bits en un solo valor entero de 32 bits
                     int intValue = (registerValue[0] << 16) | registerValue[1];
                     float floatValue = BitConverter.ToSingle(BitConverter.GetBytes(intValue), 0);
                     setPoints.Add(floatValue);
@@ -1310,7 +1305,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 {
                     lblPlcDataStatus.Text = "PLC Data NOK";
                 }
-               
+
             }
             catch
             {
@@ -1320,8 +1315,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void updateLabels()
         {
-            Txt_MaxDiameter.Text = (maxDiameter*euFactor).ToString();
-            Txt_MinDiameter.Text = (minDiameter*euFactor).ToString();
+            Txt_MaxDiameter.Text = (maxDiameter * euFactor).ToString();
+            Txt_MinDiameter.Text = (minDiameter * euFactor).ToString();
             Txt_MaxCompacity.Text = (maxCompactness).ToString();
             txtCompacityHoleLimit.Text = (maxCompactnessHole).ToString();
         }
@@ -1337,7 +1332,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             string path = saveImage();
 
-            using( Bitmap originalImage = new Bitmap(path))
+            using (Bitmap originalImage = new Bitmap(path))
             {
                 originalImageIsDisposed = false;
 
@@ -1346,10 +1341,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 ImageHistogram(originalImage);
 
                 originalImageIsDisposed = true;
-                
+
                 originalImageCV = imageCorrection(tempImage);
             }
-            
+
 
             originalImageCV.Save(imagesPath + "updatedROI.bmp");
 
@@ -1542,7 +1537,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 for (int xCorregido = 0; xCorregido < ancho; xCorregido++)
                 {
-                    
+
                     double xNormalizado = (xCorregido - cx);
                     double yNormalizado = (yCorregido - cy);
 
@@ -1633,11 +1628,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             double cx = 320;
             double cy = 240;
 
-            cameraMatrix[0,0] = fx;
-            cameraMatrix[0,2] = cx;
-            cameraMatrix[1,1] = fy;
-            cameraMatrix[1,2] = cy;
-            cameraMatrix[2,2] = 1;
+            cameraMatrix[0, 0] = fx;
+            cameraMatrix[0, 2] = cx;
+            cameraMatrix[1, 1] = fy;
+            cameraMatrix[1, 2] = cy;
+            cameraMatrix[2, 2] = 1;
 
             // Corregir la distorsión en la imagen
             Mat undistortedImage = new Mat();
@@ -1647,11 +1642,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return undistortedImage;
         }
 
-        private bool itsInCenter(Bitmap image,Point center, int margin)
+        private bool itsInCenter(Bitmap image, Point center, int margin)
         {
             // Obtener las coordenadas del centro de la imagen
-            int centroX = originalImage.Width/2;
-            int centroY = originalImage.Height/2;
+            int centroX = originalImage.Width / 2;
+            int centroY = originalImage.Height / 2;
 
             // Verificar si el punto está dentro del área central definida por el margen de error
             if (Math.Abs(center.X + UserROI.Left - centroX) <= margin && Math.Abs(center.Y + UserROI.Top - centroY) <= margin)
@@ -1681,7 +1676,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             Bitmap roiImage = binarizedImage.Clone(sectorRoi, binarizedImage.PixelFormat);
 
-            
+
             return roiImage;
         }
 
@@ -1738,7 +1733,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 // Procesamos el ROI
                 blobProces(roiImage);
                 updateView(processBuffer, processView, "final.bmp");
-                
+
             }
             catch (Exception e)
             {
@@ -1798,7 +1793,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             modbusServer.holdingRegisters[6] = (short)register2;
 
             // Max Diameter SP
-            floatValue = (float)(maxDiameter*euFactor);
+            floatValue = (float)(maxDiameter * euFactor);
             // Convertir el número flotante a bytes
             floatBytes = BitConverter.GetBytes(floatValue);
             // Escribir los bytes en dos registros de 16 bits (dos palabras)
@@ -1808,7 +1803,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             modbusServer.holdingRegisters[8] = (short)register2;
 
             // Min Diameter SP
-            floatValue = (float)(minDiameter*euFactor);
+            floatValue = (float)(minDiameter * euFactor);
             floatBytes = BitConverter.GetBytes(floatValue);
             // Escribir los bytes en dos registros de 16 bits (dos palabras)
             register1 = BitConverter.ToUInt16(floatBytes, 0);
@@ -2326,7 +2321,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 if (unitsNew == "inch")
                 {
                     double avgDiameter = 0;
-                    if (Double.TryParse(avg_diameter.Text, out avgDiameter));
+                    if (Double.TryParse(avg_diameter.Text, out avgDiameter)) ;
                     avgDiameter *= fact;
                     avg_diameter.Text = Math.Round(avgDiameter, nUnitsInch).ToString();
 
@@ -2557,7 +2552,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             m_Xfer.XferNotifyContext = this;
             StatusLabelInfo.Text = "Online... Waiting grabbed images";
 
-            
+
 
             if (!CreateObjects())
             {
@@ -2625,7 +2620,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 m_Buffers.Clear();
             }
             // Create view object
-            if (m_View != null && !m_View.Initialized) 
+            if (m_View != null && !m_View.Initialized)
             {
                 if (m_View.Create() == false)
                 {
@@ -2652,11 +2647,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     DestroyObjects();
                     return false;
                 }
-             }
+            }
 
 
 
-             return true;
+            return true;
 
 
         }
@@ -2700,11 +2695,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         }
 
         private void GigECameraDemoDlg_FormClosed(object sender, FormClosedEventArgs e)
-       {
-          DestroyObjects();
-          DisposeObjects();
-          modbusServer.StopListening();
-       }
+        {
+            DestroyObjects();
+            DisposeObjects();
+            modbusServer.StopListening();
+        }
 
         //*****************************************************************************************
         //
@@ -2715,7 +2710,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private void button_Snap_Click(object sender, EventArgs e)
         {
             AbortDlg abort = new AbortDlg(m_Xfer);
-            
+
             if (m_Xfer.Snap())
             {
                 if (abort.ShowDialog() != DialogResult.OK)
@@ -2726,18 +2721,18 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void button_Grab_Click(object sender, EventArgs e)
         {
-           this.StatusLabelInfo.Text = "";
-           this.StatusLabelInfoTrash.Text = "";
-           if (m_Xfer.Grab())
-           {
+            this.StatusLabelInfo.Text = "";
+            this.StatusLabelInfoTrash.Text = "";
+            if (m_Xfer.Grab())
+            {
                 UpdateControls();
-           }
+            }
         }
 
         private void button_Freeze_Click(object sender, EventArgs e)
         {
             AbortDlg abort = new AbortDlg(m_Xfer);
-            
+
             if (m_Xfer.Freeze())
             {
                 if (abort.ShowDialog() != DialogResult.OK)
@@ -2761,7 +2756,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 DestroyObjects();
                 DisposeObjects();
 
-                 //Update objects with new buffer
+                //Update objects with new buffer
                 if (!CreateNewObjects(dlg))
                 {
                     MessageBox.Show("New objects creation has failed. Restoring original object ");
@@ -2773,16 +2768,16 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     }
                 }
             }
-            m_ImageBox.Refresh(); 
+            m_ImageBox.Refresh();
         }
 
         private void button_View_Click(object sender, EventArgs e)
         {
-            ViewDlg viewDialog = new ViewDlg(m_View,m_ImageBox.ViewRectangle);
+            ViewDlg viewDialog = new ViewDlg(m_View, m_ImageBox.ViewRectangle);
 
             if (viewDialog.ShowDialog() == DialogResult.OK)
-               m_ImageBox.OnSize();
-            
+                m_ImageBox.OnSize();
+
             m_ImageBox.Refresh();
         }
 
@@ -2806,7 +2801,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 {
                     MessageBox.Show("New objects creation has failed. Restoring original object ");
                     // Recreate original objects
-                    if(!CreateNewObjects(null, true))
+                    if (!CreateNewObjects(null, true))
                     {
                         MessageBox.Show("Original object creation has failed. Closing application ");
                         System.Windows.Forms.Application.Exit();
@@ -2825,7 +2820,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         //					General Function
         //
         //*****************************************************************************************
-       
+
         // Updates the menu items enabling/disabling the proper items depending on the stateof the application
         void UpdateControls()
         {
@@ -2889,7 +2884,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             newDialogSave.Dispose();
             m_ImageBox.Refresh();
         }
-      
+
         //*****************************************************************************************
         //
         //					System menu
@@ -2928,7 +2923,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         public string saveImage()
         {
-            string imagePath = imagesPath + "imagenOrigen.bmp" ;
+            string imagePath = imagesPath + "imagenOrigen.bmp";
 
             // Aqui va a ir el trigger
             if (mode == 0) Console.WriteLine("Trigger.");
@@ -2936,9 +2931,20 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             try
             {
                 // Se guarda la imagen
-                if(!m_Buffers.Save(imagePath, "-format bmp", -1, 0))
+                if (!m_Buffers.Save(imagePath, "-format bmp", -1, 0))
                 {
                     Console.WriteLine("Saving Error");
+                }
+
+                if (!triggerPLC)
+                {
+                    // Se guarda la imagen
+                    if (!m_Buffers.Save(imagesPath + "\\frames\\" + savedImagesCounter.ToString() + ".bmp", "-format bmp", -1, 0))
+                    {
+                        Console.WriteLine("Saving Error");
+                    }
+                    savedImagesCounter++;
+                    if (savedImagesCounter > 100) savedImagesCounter = 0;
                 }
             }
             catch (SapLibraryException exception)
@@ -2946,8 +2952,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 Console.WriteLine(exception);
             }
 
-            //return imagePath;
-            return @"C:\Users\Jesús\Desktop\test.bmp";
+            return imagePath;
+            //return @"C:\Users\Jesús\Desktop\test.bmp";
         }
 
         private int CalculateOtsuThreshold()
@@ -3055,7 +3061,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             minArea = (int)(((Math.Pow(minDiameter, 2) / 4) * Math.PI) * 0.5);
             maxArea = (int)(((Math.Pow(maxDiameter, 2) / 4) * Math.PI) * 1.5);
 
-            var (contours ,centers, areas, perimeters, holePresent) = FindContoursWithEdgesAndCenters(image);
+            var (contours, centers, areas, perimeters, holePresent) = FindContoursWithEdgesAndCenters(image);
 
             // Inicializamos variables
             double MaxD = 0;
@@ -3067,7 +3073,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             List<double> diametersCV = new List<double>();
 
-            List<(int,bool)> drawFlags = new List<(int, bool)>();
+            List<(int, bool)> drawFlags = new List<(int, bool)>();
 
             foreach (int k in gridType.QuadrantsOfInterest)
             {
@@ -3253,18 +3259,18 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             CheckLastFrames();
 
-            maxDiameterAvg = MaxD*euFactor;
-            minDiameterAvg = MinD*euFactor;
+            maxDiameterAvg = MaxD * euFactor;
+            minDiameterAvg = MinD * euFactor;
             diameterControl = controlDiameter;
 
-            GraphResults(MaxD,MinD,avgDIA);
+            GraphResults(MaxD, MinD, avgDIA);
 
             if (units == "mm")
             {
                 // Asignamos el texto del promedio de los diametros
                 avg_diameter.Text = Math.Round(avgD, nUnitsMm).ToString();
-                txtAvgMaxD.Text = Math.Round(MaxD*euFactor, nUnitsMm).ToString();
-                txtAvgMinD.Text = Math.Round(MinD*euFactor, nUnitsMm).ToString();
+                txtAvgMaxD.Text = Math.Round(MaxD * euFactor, nUnitsMm).ToString();
+                txtAvgMinD.Text = Math.Round(MinD * euFactor, nUnitsMm).ToString();
                 txtEquivalentDiameter.Text = Math.Round(avgDIA * euFactor, nUnitsMm).ToString();
                 txtControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsMm).ToString();
                 dplControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsMm).ToString();
@@ -3304,7 +3310,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private void CheckCV(double cv)
         {
             QueueCV(cv);
-            flagAlign.Text = Math.Round(cvQueue.Sum(),2).ToString();
+            flagAlign.Text = Math.Round(cvQueue.Sum(), 2).ToString();
             if (cvQueue.Sum() >= align)
             {
                 flagAlign.BackColor = Color.Red;
@@ -3346,26 +3352,26 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return (std / mean) * 100;
         }
 
-        private void GraphResults(double MaxD,double MinD,double dIA)
+        private void GraphResults(double MaxD, double MinD, double dIA)
         {
             try
             {
                 var now = DateTime.Now;
                 trendChart.ChartAreas[0].AxisX.Minimum = now.AddHours(-1).ToOADate();
-                var now2 = now.ToOADate();                
+                var now2 = now.ToOADate();
 
-                trendChart.Series[0].Points.AddXY(now2, MaxD*euFactor);
-                trendChart.Series[1].Points.AddXY(now2, MinD*euFactor);
-                trendChart.Series[2].Points.AddXY(now2, diameterControl*euFactor);
-                trendChart.Series[3].Points.AddXY(now2, dIA*euFactor);
-                trendChart.Series[4].Points.AddXY(now2, maxDiameter*euFactor);
-                trendChart.Series[5].Points.AddXY(now2, minDiameter*euFactor);
+                trendChart.Series[0].Points.AddXY(now2, MaxD * euFactor);
+                trendChart.Series[1].Points.AddXY(now2, MinD * euFactor);
+                trendChart.Series[2].Points.AddXY(now2, diameterControl * euFactor);
+                trendChart.Series[3].Points.AddXY(now2, dIA * euFactor);
+                trendChart.Series[4].Points.AddXY(now2, maxDiameter * euFactor);
+                trendChart.Series[5].Points.AddXY(now2, minDiameter * euFactor);
 
                 trendChart.ChartAreas[0].AxisY.Title = "Diameter in " + units;
 
                 // Eliminar datos que exceden la hora
 
-                for (int i = 0; i < trendChart.Series.Count;  i++)
+                for (int i = 0; i < trendChart.Series.Count; i++)
                 {
                     while (trendChart.Series[i].Points.Count > 0 && trendChart.Series[i].Points[0].XValue < now.AddHours(-1).ToOADate())
                     {
@@ -3417,7 +3423,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         dataGridView1.Columns["Area (px)"].Visible = false;
                     }
                 }
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
@@ -3435,12 +3442,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             int textX = ((sector - 1) / gridType.Grid.Item2) * sectorWidth;
             int textY = ((gridType.Grid.Item2 - 1) - ((sector - 1) % gridType.Grid.Item2)) * sectorHeight;
 
-            MCvScalar brush = new MCvScalar(0,0,255);
+            MCvScalar brush = new MCvScalar(0, 0, 255);
 
             // Crear el texto a mostrar
             string texto = "Hole";
 
-            CvInvoke.PutText(image, texto, new Point(textX+2, textY + sectorHeight - 10), FontFace.HersheySimplex, 0.5, brush, 1);
+            CvInvoke.PutText(image, texto, new Point(textX + 2, textY + sectorHeight - 10), FontFace.HersheySimplex, 0.5, brush, 1);
         }
 
         private void drawSize(Mat image, int sector, ushort size)
@@ -3614,7 +3621,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
 
             }
-            
+
             // Aplicar umbralización (binarización)
             Mat imagenBinarizada = new Mat();
             CvInvoke.Threshold(image, imagenBinarizada, threshold, 255, ThresholdType.Binary);
@@ -3692,7 +3699,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private (double, double, double) calculateAndDrawDiameterTrianglesAlghoritm(Point center, Bitmap image, int sector, bool draw = true)
         {
-            
+
             double diameter, maxDiameter, minDiameter;
             List<Point> listXY = new List<Point>();
 
@@ -3756,7 +3763,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 listXY.Add(new Point(newX, newY));
 
-                radialLenght[i] = Math.Sqrt(Math.Pow((x - newX), 2) + Math.Pow((y - newY), 2)) - hipotenusa/2; //+ correction[i];
+                radialLenght[i] = Math.Sqrt(Math.Pow((x - newX), 2) + Math.Pow((y - newY), 2)) - hipotenusa / 2; //+ correction[i];
 
                 avg_diameter += radialLenght[i];
                 newX = x; newY = y;
@@ -3785,12 +3792,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 using (Graphics g = Graphics.FromImage(image))
                 {
-                    Pen pen1 = new Pen(Color.Green,2);
-                    Pen pen2 = new Pen(Color.Red,2);
+                    Pen pen1 = new Pen(Color.Green, 2);
+                    Pen pen2 = new Pen(Color.Red, 2);
 
                     // Dibujar diámetro máximo
                     g.DrawLine(pen1, new Point(center.X, center.Y), listXY[maxIndex]);
-                    g.DrawLine(pen1, new Point(center.X, center.Y), listXY[maxIndex+12]);
+                    g.DrawLine(pen1, new Point(center.X, center.Y), listXY[maxIndex + 12]);
 
                     // Dibujar diámetro minimo
                     g.DrawLine(pen2, new Point(center.X, center.Y), listXY[minIndex]);
@@ -3950,6 +3957,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             if (triggerPLC)
             {
+                
+
                 btnFreezeFrame.Enabled = true;
                 btnFreezeFrame.BackColor = Color.Silver;
                 txtPlcTrigger.BackColor = Color.LightGreen;
@@ -3970,6 +3979,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
             else
             {
+                if (freezeFrame)
+                {
+                    freezeFrame = false;
+                    btnFreezeFrame.BackColor = Color.Silver;
+                    btnFreezeFrame.Text = "FREEZE RESULTS";
+                }
+
                 btnFreezeFrame.Enabled = false;
                 btnFreezeFrame.BackColor = Color.DarkGray;
 
@@ -3996,7 +4012,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 processImageBtn.Enabled = false;
                 processImageBtn.BackColor = Color.DarkGray;
             }
-             
+
         }
 
         private void Cmd_Trigger_Click1(object sender, EventArgs e)
@@ -4200,7 +4216,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void grid_9_Click(object sender, EventArgs e)
         {
-            updateGridType(4,"2x2");
+            updateGridType(4, "2x2");
         }
 
         private void Cmd_Program_5_Click(object sender, EventArgs e)
@@ -4380,7 +4396,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 calibrating = false;
             }
 
-            
+
         }
 
         private void CmdUpdate_Click(object sender, EventArgs e)
@@ -4518,7 +4534,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 updateUnits("inch");
             }
 
-            
+
 
             Txt_MaxDiameter.Text = Txt_MaxD.Text;
             maxDiameter = double.Parse(Txt_MaxD.Text) / euFactor;
@@ -4771,7 +4787,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             GroupSelectGrid.Enabled = false;
             CmbProducts.SelectedIndex = 0;
             boxUnits.Enabled = false;
-            
+
         }
 
         private void Txt_MaxCompacity_TextChanged(object sender, EventArgs e)
@@ -5084,7 +5100,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             if (e.KeyChar == (char)Keys.Enter)
             {
                 float value;
-                if (float.TryParse(txtAlpha.Text, out value)){
+                if (float.TryParse(txtAlpha.Text, out value))
+                {
                     if (value >= 0 && value <= 1)
                     {
                         alpha = value;
@@ -5142,11 +5159,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     {
                         double height = inputForm.cameraHeight;
 
-                        double fov = 2 * Math.Atan(lenWidth/(2*lenF));
+                        double fov = 2 * Math.Atan(lenWidth / (2 * lenF));
 
-                        fov = 2 * Math.Tan(fov/2) * height;
+                        fov = 2 * Math.Tan(fov / 2) * height;
 
-                        euFactor = fov/640;
+                        euFactor = fov / 640;
                         settings.EUFactor = euFactor;
                         euFactorTxt.Text = Math.Round(euFactor, 3).ToString();
                         maxDiameter = double.Parse(Txt_MaxDiameter.Text) / euFactor;
@@ -5473,11 +5490,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 if (currentUser != null)
                 {
                     boxROI.Enabled = true;
-                    if(operationMode != 1) boxUnits.Enabled = true;
+                    if (operationMode != 1) boxUnits.Enabled = true;
                     GB_Threshold.Enabled = true;
                     gbShapeIndicator.Enabled = true;
                 }
-                
+
                 if (currentUser.Level >= 2)
                 {
                     advancedPage.Enabled = true;
@@ -5551,7 +5568,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void btnRestoreProduct_Click(object sender, EventArgs e)
         {
-            RestoreProduct(); 
+            RestoreProduct();
         }
 
         private void RestoreProduct()

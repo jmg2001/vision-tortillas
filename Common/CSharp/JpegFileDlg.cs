@@ -1,12 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
 using Microsoft.Win32;
-using DALSA.SaperaLT.SapClassBasic;
+using System;
+using System.Windows.Forms;
 
 namespace DALSA.SaperaLT.SapClassGui
 {
@@ -18,12 +12,12 @@ namespace DALSA.SaperaLT.SapClassGui
             string keyPath = "Software\\Teledyne DALSA\\" + Application.ProductName + "\\SapFile";
             RegistryKey regkey = Registry.CurrentUser.OpenSubKey(keyPath);
             if (regkey != null)
-                UpDown_compression_level.Value = Convert.ToDecimal(regkey.GetValue("Jpeg Quality",quality));
+                UpDown_compression_level.Value = Convert.ToDecimal(regkey.GetValue("Jpeg Quality", quality));
         }
 
         private void button_OK_Click(object sender, EventArgs e)
         {
-            m_Compression_Level = (int)UpDown_compression_level.Value;  
+            m_Compression_Level = (int)UpDown_compression_level.Value;
             // Write compression type and level values
             string keyPath = "Software\\Teledyne DALSA\\" + Application.ProductName + "\\SapFile";
             RegistryKey regKey = Registry.CurrentUser.CreateSubKey(keyPath);

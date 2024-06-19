@@ -1,11 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
 using DALSA.SaperaLT.SapClassBasic;
+using System;
+using System.Windows.Forms;
 
 
 namespace DALSA.SaperaLT.SapClassGui
@@ -31,14 +26,14 @@ namespace DALSA.SaperaLT.SapClassGui
             {
                 timer.Enabled = false;
                 this.DialogResult = DialogResult.OK;
-                this.Close();           
+                this.Close();
             }
             // Show window if time is out
-            else if (!m_bShow )
+            else if (!m_bShow)
             {
                 this.Opacity = 100;
                 m_bShow = true;
             }
-        }   
+        }
     }
 }

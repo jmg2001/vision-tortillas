@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
 
 namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
@@ -21,15 +20,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         public float maxOvality { get; set; }
         public float maxCompacity { get; set; }
         public float maxCompacityHole { get; set; }
-        public float targetCalibration {  get; set; }
-        public int productCode {  get; set; }
-        public long frames {  get; set; }
+        public float targetCalibration { get; set; }
+        public int productCode { get; set; }
+        public long frames { get; set; }
         public float alpha { get; set; }
         public int minBlobObjects { get; set; }
 
-        public int FH {  get; set; }
+        public int FH { get; set; }
         public int FFH { get; set; }
-        public float align {  get; set; }
+        public float align { get; set; }
 
 
         public Settings()

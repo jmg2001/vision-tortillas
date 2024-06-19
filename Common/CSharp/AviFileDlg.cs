@@ -1,12 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
 using Microsoft.Win32;
-using DALSA.SaperaLT.SapClassBasic;
+using System;
+using System.Windows.Forms;
 
 namespace DALSA.SaperaLT.SapClassGui
 {
@@ -28,7 +22,7 @@ namespace DALSA.SaperaLT.SapClassGui
 
             }
             UpdateControls();
-            
+
         }
 
         private void button_OK_Click(object sender, EventArgs e)
@@ -43,7 +37,7 @@ namespace DALSA.SaperaLT.SapClassGui
             regKeyAppRoot.SetValue("Avi First Frame", m_FirstFrame);
             regKeyAppRoot.SetValue("Avi Compression Level", m_CompressionLevel);
             regKeyAppRoot.SetValue("Avi Compression Type", m_CompressionType);
-        
+
         }
 
         private void UpdateControls()

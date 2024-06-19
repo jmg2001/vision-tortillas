@@ -1,17 +1,10 @@
+using DALSA.SaperaLT.SapClassBasic;
+using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
-using System.Collections;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Windows.Forms;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
-using Microsoft.Win32;
-
-using DALSA.SaperaLT.SapClassBasic;
-using DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Properties;
+using System.Windows.Forms;
 
 
 namespace DALSA.SaperaLT.SapClassGui
@@ -24,10 +17,10 @@ namespace DALSA.SaperaLT.SapClassGui
                  string key, string def, StringBuilder retVal,
             int size, string filePath);
 
-        static string ConfigKeyName     = "Camera Name";
-        static string CompanyKeyName    = "Company Name";
-        static string ModelKeyName      = "Model Name";
-        static string VicName           = "Vic Name";
+        static string ConfigKeyName = "Camera Name";
+        static string CompanyKeyName = "Company Name";
+        static string ModelKeyName = "Model Name";
+        static string VicName = "Vic Name";
         static string Acquisition_Default_folder = "\\CamFiles\\User";
         bool autoClick = false;
 
@@ -40,35 +33,35 @@ namespace DALSA.SaperaLT.SapClassGui
         {
             m_ServerCategory = serverCategory;
             // Load parameters from registry
-	        LoadSettings();
+            LoadSettings();
             InitializeComponent();
         }
 
 
         public AcqConfigDlg(SapLocation loc, string productDir, ServerCategory serverCategory, bool autoClick)
         {
-           m_ProductDir = productDir;
-           m_ServerCategory = serverCategory;
-           this.autoClick = autoClick;
+            m_ProductDir = productDir;
+            m_ServerCategory = serverCategory;
+            this.autoClick = autoClick;
 
-           if (loc != null)
-           {
-               m_ServerName = loc.ServerName;
-               m_ResourceIndex = loc.ServerIndex;
-           }
-           // Load parameters from registry
-           LoadSettings();
-           InitializeComponent();
-           
+            if (loc != null)
+            {
+                m_ServerName = loc.ServerName;
+                m_ResourceIndex = loc.ServerIndex;
+            }
+            // Load parameters from registry
+            LoadSettings();
+            InitializeComponent();
+
         }
 
         private void comboBox_Server_SelectedIndexChanged(object sender, EventArgs e)
         {
-	        if(m_init)
+            if (m_init)
             {
                 InitResourceCombo();
-	            UpdateNames();
-	            UpdateBoxAvailability();
+                UpdateNames();
+                UpdateBoxAvailability();
             }
         }
 
@@ -96,15 +89,15 @@ namespace DALSA.SaperaLT.SapClassGui
         {
             comboBox_Server.Items.Clear();
             for (int i = 0; i < SapManager.GetServerCount(); i++)
-	        {
-		        // Does this server support "Acq" (frame-grabber) or "AcqDevice" (camera)?
+            {
+                // Does this server support "Acq" (frame-grabber) or "AcqDevice" (camera)?
                 bool bAcq = (m_ServerCategory == ServerCategory.ServerAcq || m_ServerCategory == ServerCategory.ServerAll) &&
                            (SapManager.GetResourceCount(i, SapManager.ResourceType.Acq) > 0);
                 bool bAcqDevice = (m_ServerCategory == ServerCategory.ServerAcqDevice || m_ServerCategory == ServerCategory.ServerAll) &&
                             (SapManager.GetResourceCount(i, SapManager.ResourceType.AcqDevice) > 0);
 
                 if (bAcq)
-	            {
+                {
                     string serverName = SapManager.GetServerName(i);
                     comboBox_Server.Items.Add(new MyListBoxItem(serverName, true));
                 }
@@ -112,15 +105,15 @@ namespace DALSA.SaperaLT.SapClassGui
                 {
                     string serverName = SapManager.GetServerName(i);
                     if (serverName.Contains("CameraLink_") == false)
-                     comboBox_Server.Items.Add(new MyListBoxItem(serverName, false));
+                        comboBox_Server.Items.Add(new MyListBoxItem(serverName, false));
                 }
-	        }
-           if (comboBox_Server.Items.Count <= 0)
-           {
-              return false;
+            }
+            if (comboBox_Server.Items.Count <= 0)
+            {
+                return false;
             }
             else
-            {   
+            {
                 if (string.IsNullOrEmpty(m_ServerName) || comboBox_Server.FindString(m_ServerName, 0) == -1)
                 {
                     comboBox_Server.SelectedIndex = 0;
@@ -128,7 +121,7 @@ namespace DALSA.SaperaLT.SapClassGui
                 }
                 else
                     comboBox_Server.SelectedIndex = comboBox_Server.FindString(m_ServerName, 0);
-                
+
                 InitResourceCombo();
                 return true;
             }
@@ -137,13 +130,13 @@ namespace DALSA.SaperaLT.SapClassGui
         private void InitResourceCombo()
         {
             comboBox_Device.Items.Clear();
-	        int i=0;
+            int i = 0;
             bool valid = false;
             bool devicesFound = false;
             Object selectedItem = comboBox_Server.SelectedItem;
             // Add "Acq" resources (cameras) to combo
-	        for (i=0; i < SapManager.GetResourceCount(selectedItem.ToString(), SapManager.ResourceType.Acq); i++)
-	        {
+            for (i = 0; i < SapManager.GetResourceCount(selectedItem.ToString(), SapManager.ResourceType.Acq); i++)
+            {
                 string resourceName = SapManager.GetResourceName(selectedItem.ToString(), SapManager.ResourceType.Acq, i);
                 if (SapManager.IsResourceAvailable(selectedItem.ToString(), SapManager.ResourceType.Acq, i))
                 {
@@ -156,8 +149,8 @@ namespace DALSA.SaperaLT.SapClassGui
                     comboBox_Device.Items.Add("Not Available - Resource in Use");
                     comboBox_Device.SelectedIndex = 0;
                 }
-	        }
-	        // Add "AcqDevice" resources (cameras) to combo
+            }
+            // Add "AcqDevice" resources (cameras) to combo
             if (SapManager.GetResourceCount(selectedItem.ToString(), SapManager.ResourceType.Acq) == 0)
             {
                 devicesFound = true;
@@ -170,11 +163,11 @@ namespace DALSA.SaperaLT.SapClassGui
                         comboBox_Device.SelectedItem = resourceName;
                     if (resourceName == "M0001351")
                         valid = true;
-                    Console.WriteLine(resourceName);    
+                    Console.WriteLine(resourceName);
                 }
             }
             m_ResourceIndex = comboBox_Device.SelectedIndex;
-            
+
             if (valid)
             {
                 if (autoClick) button_ok.PerformClick();
@@ -213,11 +206,11 @@ namespace DALSA.SaperaLT.SapClassGui
         {
             String KeyPath = "Software\\Teledyne DALSA\\" + Application.ProductName + "\\SapAcquisition";
             RegistryKey RegKey = Registry.CurrentUser.OpenSubKey(KeyPath);
-            if(RegKey != null) 
+            if (RegKey != null)
             {
                 // Read location (server and resource) and file name
-                m_ServerName    = RegKey.GetValue("Server","").ToString();
-                m_ResourceIndex = (int)RegKey.GetValue("Resource",0);
+                m_ServerName = RegKey.GetValue("Server", "").ToString();
+                m_ResourceIndex = (int)RegKey.GetValue("Resource", 0);
                 if (File.Exists(RegKey.GetValue("ConfigFile", "").ToString()))
                     m_ConfigFile = RegKey.GetValue("ConfigFile", "").ToString();
             }
@@ -254,66 +247,66 @@ namespace DALSA.SaperaLT.SapClassGui
             DirectoryInfo dir = new DirectoryInfo(currentDir);
             if (dir.Exists)
             {
-               FileInfo[] ccffileInfo = dir.GetFiles("*.ccf");
-               comboBox_configfile.Items.Clear(); 
+                FileInfo[] ccffileInfo = dir.GetFiles("*.ccf");
+                comboBox_configfile.Items.Clear();
 
-               foreach (FileInfo f in ccffileInfo)
-               {
-                  string filePath = m_currentConfigDir + "\\" + f.Name;
-                  StringBuilder tempServerName = new StringBuilder(512);
-                  StringBuilder sbCameraName = new StringBuilder(512);
-                  StringBuilder sbCompanyName = new StringBuilder(512);
-                  StringBuilder sbModelName = new StringBuilder(512);
-                  StringBuilder sbVicName = new StringBuilder(512);
-                  string companyName = "";
-                  string modelName = "";
-                  string cameraDesc = "";
+                foreach (FileInfo f in ccffileInfo)
+                {
+                    string filePath = m_currentConfigDir + "\\" + f.Name;
+                    StringBuilder tempServerName = new StringBuilder(512);
+                    StringBuilder sbCameraName = new StringBuilder(512);
+                    StringBuilder sbCompanyName = new StringBuilder(512);
+                    StringBuilder sbModelName = new StringBuilder(512);
+                    StringBuilder sbVicName = new StringBuilder(512);
+                    string companyName = "";
+                    string modelName = "";
+                    string cameraDesc = "";
 
-                  GetPrivateProfileString("Board", "Server name", "Unknow", tempServerName, 512, filePath);
+                    GetPrivateProfileString("Board", "Server name", "Unknow", tempServerName, 512, filePath);
 
-                  // Check if the current configuration file has been created for the current server 
-                  if (string.Compare(curServerName, tempServerName.ToString(), StringComparison.OrdinalIgnoreCase) != 0)
-                     continue;
-                  // Add ccf File name
-                  ccffiles.Add(f.Name);
+                    // Check if the current configuration file has been created for the current server 
+                    if (string.Compare(curServerName, tempServerName.ToString(), StringComparison.OrdinalIgnoreCase) != 0)
+                        continue;
+                    // Add ccf File name
+                    ccffiles.Add(f.Name);
 
-                  GetPrivateProfileString("General", keyName, "Unknown", sbCameraName, 512, filePath);
-                  GetPrivateProfileString("General", CompanyKeyName, "", sbCompanyName, 512, filePath);
-                  GetPrivateProfileString("General", ModelKeyName, "", sbModelName, 512, filePath);
-                  GetPrivateProfileString("General", VicName, "", sbVicName, 512, filePath);
+                    GetPrivateProfileString("General", keyName, "Unknown", sbCameraName, 512, filePath);
+                    GetPrivateProfileString("General", CompanyKeyName, "", sbCompanyName, 512, filePath);
+                    GetPrivateProfileString("General", ModelKeyName, "", sbModelName, 512, filePath);
+                    GetPrivateProfileString("General", VicName, "", sbVicName, 512, filePath);
 
-                  if (sbCompanyName.ToString().Length != 0 && sbModelName.ToString().Length != 0)
-                     companyName = sbCompanyName.ToString() + ", ";
-                  if (sbModelName.ToString().Length != 0 && sbCameraName.ToString().Length != 0)
-                     modelName = sbModelName.ToString() + ", ";
+                    if (sbCompanyName.ToString().Length != 0 && sbModelName.ToString().Length != 0)
+                        companyName = sbCompanyName.ToString() + ", ";
+                    if (sbModelName.ToString().Length != 0 && sbCameraName.ToString().Length != 0)
+                        modelName = sbModelName.ToString() + ", ";
 
-                  cameraDesc = companyName + modelName + sbCameraName.ToString() + " - " + sbVicName.ToString();
+                    cameraDesc = companyName + modelName + sbCameraName.ToString() + " - " + sbVicName.ToString();
 
 
-                  MyListBoxItem item = new MyListBoxItem(cameraDesc, true);
-                  comboBox_configfile.Items.Add(item);
-               }
-           }
+                    MyListBoxItem item = new MyListBoxItem(cameraDesc, true);
+                    comboBox_configfile.Items.Add(item);
+                }
+            }
 
-	        if (comboBox_configfile.Items.Count != 0)
-	        {
+            if (comboBox_configfile.Items.Count != 0)
+            {
                 m_configFileAvailable = true;
                 int newFileIndex = 0;
-                
+
                 // Try to find the current camera file selected
-                for(int i =0; i<ccffiles.Count;i++)
+                for (int i = 0; i < ccffiles.Count; i++)
                 {
                     String currentccf = (String)ccffiles[i];
                     if (string.Compare(m_currentConfigFileName, currentccf, StringComparison.Ordinal) == 0)
                         newFileIndex = i;
                 }
                 comboBox_configfile.SelectedIndex = newFileIndex;
-                
-	        }
-	        else
-	        {
+
+            }
+            else
+            {
                 m_configFileAvailable = false;
-	        }
+            }
             UpdateBoxAvailability();
         }
 
@@ -336,16 +329,16 @@ namespace DALSA.SaperaLT.SapClassGui
             comboBox_configfile.Enabled = (m_ConfigFileEnable && m_configFileAvailable);
             textBox_configfile.Enabled = (m_ConfigFileEnable);
             button_browse.Enabled = (m_ConfigFileEnable);
-            button_ok.Enabled = !m_ConfigFileEnable || m_configFileAvailable;         
+            button_ok.Enabled = !m_ConfigFileEnable || m_configFileAvailable;
         }
 
         private void SetDirectories()
-        {            
+        {
             string productDirectory = "";
-            
+
             if (!string.IsNullOrEmpty(m_ProductDir))
                 productDirectory = Environment.GetEnvironmentVariable(m_ProductDir);
-        	
+
             string saperaDir = Environment.GetEnvironmentVariable("SAPERADIR");
 
             if (m_ConfigFile.Length != 0)
@@ -362,7 +355,7 @@ namespace DALSA.SaperaLT.SapClassGui
                 else if (saperaDir.Length != 0)
                     m_currentConfigDir = saperaDir + Acquisition_Default_folder;
                 textBox_configfile.Text = m_currentConfigDir;
-            } 
+            }
         }
 
         private void button_ok_Click(object sender, EventArgs e)
@@ -382,7 +375,7 @@ namespace DALSA.SaperaLT.SapClassGui
             SaveSettings();
         }
 
-      
+
         private void comboBox_configfile_SelectedIndexChanged(object sender, EventArgs e)
         {
             m_currentConfigFileIndex = comboBox_configfile.SelectedIndex;
@@ -391,16 +384,16 @@ namespace DALSA.SaperaLT.SapClassGui
 
         private void comboBox_Device_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if(m_init)
+            if (m_init)
                 UpdateNames();
         }
 
         /// <summary>
-        /// Property of the form 
+        /// Property of the form
         /// </summary>
         public string ConfigFile
         {
-            get 
+            get
             {
                 if (m_ConfigFileEnable)
                     return m_ConfigFile;
@@ -419,7 +412,7 @@ namespace DALSA.SaperaLT.SapClassGui
 
         public SapLocation ServerLocation
         {
-            get {return new SapLocation(m_ServerName, m_ResourceIndex);}
+            get { return new SapLocation(m_ServerName, m_ResourceIndex); }
         }
 
         /// <summary>
