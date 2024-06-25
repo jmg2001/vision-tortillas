@@ -5097,6 +5097,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
+        // Prueba Git
         private void btnManualThreshold_Click(object sender, EventArgs e)
         {
             btnManualThreshold.BackColor = Color.LightGreen;
