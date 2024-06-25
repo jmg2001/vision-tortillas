@@ -37,6 +37,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 {
     public partial class GigECameraDemoDlg : Form
     {
+        int validFramesLimit;
+
         int savedImagesCounter = 0;
 
         // Variables globales
@@ -213,6 +215,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         SapView processView;
 
         bool noCamera = false;
+        bool deviceLost = false;
 
         public GigECameraDemoDlg()
         {
@@ -632,6 +635,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // Compacity
             Txt_MaxCompacity.Text = maxCompactness.ToString();
             txtCompacityHoleLimit.Text = maxCompactnessHole.ToString();
+
+            // Valid Frames Limit
+            txtValidFramesLimit.Text = validFramesLimit.ToString();
         }
 
         private void LoadSettings()
@@ -663,6 +669,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             // Grid
             grid = settings.GridType;
+
+            //Valid Frames Limit
+            validFramesLimit = settings.validFramesLimit;
         }
 
         private void InitUsers()
@@ -1215,7 +1224,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             int a = validFrames.Count(e => e == 1);
             flagValidFrames.Text = a.ToString();
 
-            if (a < 10)
+            if (a < validFramesLimit)
             {
                 flagValidFrames.BackColor = Color.Red;
             }
@@ -1258,13 +1267,20 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void updateTemperatures()
         {
-            double deviceTemperature = 0;
-            bool succes = m_AcqDevice.SetFeatureValue("DeviceTemperatureSelector", 0);
-            if (succes) succes = m_AcqDevice.GetFeatureValue("DeviceTemperature", out deviceTemperature);
-            if (succes)
+            if (!deviceLost)
             {
-                deviceTemperature = Math.Round(deviceTemperature, 2);
-                deviceTemp.Text = deviceTemperature.ToString();
+                double deviceTemperature = 0;
+                bool succes = m_AcqDevice.SetFeatureValue("DeviceTemperatureSelector", 0);
+                if (!succes) deviceLost = true;
+                if (succes)
+                {
+                    succes = m_AcqDevice.GetFeatureValue("DeviceTemperature", out deviceTemperature);
+                }
+                if (succes)
+                {
+                    deviceTemperature = Math.Round(deviceTemperature, 2);
+                    deviceTemp.Text = deviceTemperature.ToString();
+                }
             }
         }
 
@@ -5206,6 +5222,22 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
 
             settings.Save();
+
+            if (deviceLost)
+            {
+                DeviceLost();
+            }
+        }
+
+        private void DeviceLost()
+        {
+            Invoke(
+                new Action(
+                    () => MessageBox.Show(this, $"Device Lost", Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Error)
+                )
+            );
+
+            
         }
 
         private void GetDataTxt()
@@ -5307,6 +5339,16 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Txt_Threshold.Text = threshold.ToString();
+            }
+
+            // Valid Frames Limir
+            if (int.TryParse(txtValidFramesLimit.Text, out validFramesLimit))
+            {
+            }
+            else
+            {
+                MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                txtValidFramesLimit.Text = validFramesLimit.ToString();
             }
             //// ROI Width
             //if()
@@ -5785,6 +5827,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         }
 
         private void txtAlign_Click(object sender, EventArgs e)
+        {
+            ShowInputKeyboard((TextBox)sender, 0);
+        }
+
+        private void txtValidFramesLimit_Click(object sender, EventArgs e)
         {
             ShowInputKeyboard((TextBox)sender, 0);
         }

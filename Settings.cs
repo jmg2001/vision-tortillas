@@ -25,6 +25,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         public long frames { get; set; }
         public float alpha { get; set; }
         public int minBlobObjects { get; set; }
+        public int validFramesLimit { get; set; }
 
         public int FH { get; set; }
         public int FFH { get; set; }
@@ -54,6 +55,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.FH = 5;
             this.FFH = 10;
             this.align = 20;
+            this.validFramesLimit = 7;
         }
 
         public static Settings Load()

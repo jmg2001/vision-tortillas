@@ -37,9 +37,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GigECameraDemoDlg));
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend3 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.StatusLabel = new System.Windows.Forms.ToolStripLabel();
             this.StatusLabelInfo = new System.Windows.Forms.ToolStripLabel();
@@ -220,6 +220,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Label27 = new System.Windows.Forms.Label();
             this.Label28 = new System.Windows.Forms.Label();
             this.tmrMB = new System.Windows.Forms.Timer(this.components);
+            this.label35 = new System.Windows.Forms.Label();
+            this.txtValidFramesLimit = new System.Windows.Forms.TextBox();
             this.toolStrip1.SuspendLayout();
             this.GroupBox1.SuspendLayout();
             this.groupBox15.SuspendLayout();
@@ -1650,6 +1652,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             // groupBox11
             // 
+            this.groupBox11.Controls.Add(this.label35);
+            this.groupBox11.Controls.Add(this.txtValidFramesLimit);
             this.groupBox11.Controls.Add(this.label30);
             this.groupBox11.Controls.Add(this.txtAlign);
             this.groupBox11.Controls.Add(this.label26);
@@ -1659,7 +1663,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.groupBox11.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.groupBox11.Location = new System.Drawing.Point(6, 357);
             this.groupBox11.Name = "groupBox11";
-            this.groupBox11.Size = new System.Drawing.Size(458, 192);
+            this.groupBox11.Size = new System.Drawing.Size(458, 248);
             this.groupBox11.TabIndex = 120;
             this.groupBox11.TabStop = false;
             this.groupBox11.Text = "Flags Parameters";
@@ -1679,7 +1683,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.txtAlign.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.txtAlign.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtAlign.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtAlign.Location = new System.Drawing.Point(251, 132);
+            this.txtAlign.Location = new System.Drawing.Point(251, 128);
             this.txtAlign.MaxLength = 5;
             this.txtAlign.Name = "txtAlign";
             this.txtAlign.Size = new System.Drawing.Size(100, 44);
@@ -1703,7 +1707,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.txtFFH.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.txtFFH.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtFFH.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtFFH.Location = new System.Drawing.Point(251, 82);
+            this.txtFFH.Location = new System.Drawing.Point(251, 78);
             this.txtFFH.MaxLength = 5;
             this.txtFFH.Name = "txtFFH";
             this.txtFFH.Size = new System.Drawing.Size(100, 44);
@@ -1727,7 +1731,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.txtFH.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.txtFH.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtFH.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtFH.Location = new System.Drawing.Point(251, 32);
+            this.txtFH.Location = new System.Drawing.Point(251, 28);
             this.txtFH.MaxLength = 5;
             this.txtFH.Name = "txtFH";
             this.txtFH.Size = new System.Drawing.Size(100, 44);
@@ -1740,7 +1744,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             this.groupBox7.Controls.Add(this.btnVideoSettings);
             this.groupBox7.Font = new System.Drawing.Font("Segoe UI", 10F);
-            this.groupBox7.Location = new System.Drawing.Point(7, 555);
+            this.groupBox7.Location = new System.Drawing.Point(7, 605);
             this.groupBox7.Name = "groupBox7";
             this.groupBox7.Size = new System.Drawing.Size(457, 88);
             this.groupBox7.TabIndex = 129;
@@ -1932,11 +1936,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             this.label19.AutoSize = true;
             this.label19.Font = new System.Drawing.Font("Segoe UI", 15F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label19.Location = new System.Drawing.Point(182, 110);
+            this.label19.Location = new System.Drawing.Point(208, 110);
             this.label19.Name = "label19";
-            this.label19.Size = new System.Drawing.Size(117, 28);
+            this.label19.Size = new System.Drawing.Size(72, 28);
             this.label19.TabIndex = 2;
-            this.label19.Text = "STI-PRE-1T";
+            this.label19.Text = "STI-TC";
             // 
             // pictureBox1
             // 
@@ -2037,25 +2041,25 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.trendChart.BorderlineColor = System.Drawing.Color.Black;
             this.trendChart.BorderlineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Solid;
             this.trendChart.BorderlineWidth = 2;
-            chartArea1.AxisX.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Seconds;
-            chartArea1.AxisX.LabelStyle.Format = "HH:mm:ss";
-            chartArea1.AxisX.LabelStyle.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Auto;
-            chartArea1.AxisX.ScrollBar.Enabled = false;
-            chartArea1.AxisY.Maximum = 300D;
-            chartArea1.Name = "ChartArea1";
-            this.trendChart.ChartAreas.Add(chartArea1);
-            legend1.Docking = System.Windows.Forms.DataVisualization.Charting.Docking.Top;
-            legend1.Name = "Legend1";
-            this.trendChart.Legends.Add(legend1);
+            chartArea3.AxisX.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Seconds;
+            chartArea3.AxisX.LabelStyle.Format = "HH:mm:ss";
+            chartArea3.AxisX.LabelStyle.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Auto;
+            chartArea3.AxisX.ScrollBar.Enabled = false;
+            chartArea3.AxisY.Maximum = 300D;
+            chartArea3.Name = "ChartArea1";
+            this.trendChart.ChartAreas.Add(chartArea3);
+            legend3.Docking = System.Windows.Forms.DataVisualization.Charting.Docking.Top;
+            legend3.Name = "Legend1";
+            this.trendChart.Legends.Add(legend3);
             this.trendChart.Location = new System.Drawing.Point(0, 0);
             this.trendChart.Name = "trendChart";
-            series1.ChartArea = "ChartArea1";
-            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series1.Legend = "Legend1";
-            series1.LegendText = "Max Diameter";
-            series1.Name = "MaxDiameterSerie";
-            series1.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
-            this.trendChart.Series.Add(series1);
+            series3.ChartArea = "ChartArea1";
+            series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series3.Legend = "Legend1";
+            series3.LegendText = "Max Diameter";
+            series3.Name = "MaxDiameterSerie";
+            series3.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
+            this.trendChart.Series.Add(series3);
             this.trendChart.Size = new System.Drawing.Size(806, 480);
             this.trendChart.TabIndex = 0;
             this.trendChart.Text = "chart1";
@@ -2413,6 +2417,30 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.tmrMB.Interval = 1000;
             this.tmrMB.Tick += new System.EventHandler(this.tmrMB_Tick);
             // 
+            // label35
+            // 
+            this.label35.AutoSize = true;
+            this.label35.Font = new System.Drawing.Font("Segoe UI", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label35.Location = new System.Drawing.Point(43, 190);
+            this.label35.Name = "label35";
+            this.label35.Size = new System.Drawing.Size(166, 25);
+            this.label35.TabIndex = 93;
+            this.label35.Text = "Val. Frames Limit:";
+            // 
+            // txtValidFramesLimit
+            // 
+            this.txtValidFramesLimit.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.txtValidFramesLimit.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtValidFramesLimit.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtValidFramesLimit.Location = new System.Drawing.Point(251, 178);
+            this.txtValidFramesLimit.MaxLength = 5;
+            this.txtValidFramesLimit.Name = "txtValidFramesLimit";
+            this.txtValidFramesLimit.Size = new System.Drawing.Size(100, 44);
+            this.txtValidFramesLimit.TabIndex = 92;
+            this.txtValidFramesLimit.Text = "0";
+            this.txtValidFramesLimit.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtValidFramesLimit.Click += new System.EventHandler(this.txtValidFramesLimit_Click);
+            // 
             // GigECameraDemoDlg
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -2424,7 +2452,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Controls.Add(this.label1);
             this.Controls.Add(this.mainTabs);
             this.Name = "GigECameraDemoDlg";
-            this.Text = "STI";
+            this.Text = "STI-TC";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.GigECameraDemoDlg_FormClosed);
             this.Load += new System.EventHandler(this.GigECameraDemoDlg_Load);
@@ -2685,6 +2713,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private Label label34;
         private Label label18;
         private Label label4;
+        private Label label35;
+        internal TextBox txtValidFramesLimit;
     }
 }
 
