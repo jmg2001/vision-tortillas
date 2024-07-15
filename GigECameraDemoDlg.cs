@@ -5298,7 +5298,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             if (double.TryParse(Txt_MinDiameter.Text, out minDiameter))
             {
                 minDiameter = minDiameter / euFactor;
-                settings.minDiameter = minDiameter / euFactor;
+                settings.minDiameter = minDiameter;
                 CheckChangeSetPointDiameters();
             }
             else
