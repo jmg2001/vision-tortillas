@@ -37,9 +37,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GigECameraDemoDlg));
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend3 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.StatusLabel = new System.Windows.Forms.ToolStripLabel();
             this.StatusLabelInfo = new System.Windows.Forms.ToolStripLabel();
@@ -68,10 +68,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.btnResetFrameCounter = new System.Windows.Forms.Button();
             this.txtSoftwareTrigger = new System.Windows.Forms.Label();
             this.txtFrameMode = new System.Windows.Forms.Label();
-            this.virtualTriggerBtn = new System.Windows.Forms.Button();
-            this.processImageBtn = new System.Windows.Forms.Button();
-            this.triggerModeBtn = new System.Windows.Forms.Button();
-            this.viewModeBtn = new System.Windows.Forms.Button();
+            this.btnVirtualTrigger = new System.Windows.Forms.Button();
+            this.btnProcessImage = new System.Windows.Forms.Button();
+            this.btnTriggerMode = new System.Windows.Forms.Button();
+            this.btnViewMode = new System.Windows.Forms.Button();
             this.GroupBox8 = new System.Windows.Forms.GroupBox();
             this.btnSetPointManual = new System.Windows.Forms.Button();
             this.btnSetPointLocal = new System.Windows.Forms.Button();
@@ -158,6 +158,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.btnChangeUnitsMm = new System.Windows.Forms.Button();
             this.advancedPage = new System.Windows.Forms.TabPage();
             this.groupBox11 = new System.Windows.Forms.GroupBox();
+            this.label35 = new System.Windows.Forms.Label();
+            this.txtValidFramesLimit = new System.Windows.Forms.TextBox();
             this.label30 = new System.Windows.Forms.Label();
             this.txtAlign = new System.Windows.Forms.TextBox();
             this.label26 = new System.Windows.Forms.Label();
@@ -198,17 +200,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Chk_Digital_Knife = new System.Windows.Forms.CheckBox();
             this.GroupBox10 = new System.Windows.Forms.GroupBox();
             this.CmbProducts = new System.Windows.Forms.ComboBox();
-            this.Cmd_Save = new System.Windows.Forms.Button();
+            this.btnSelectProduct = new System.Windows.Forms.Button();
             this.GroupBox9 = new System.Windows.Forms.GroupBox();
             this.btnModifyProduct = new System.Windows.Forms.Button();
             this.btnRestoreProduct = new System.Windows.Forms.Button();
             this.cmbProductUnits = new System.Windows.Forms.ComboBox();
-            this.CmdAdd = new System.Windows.Forms.Button();
+            this.btnAddProduct = new System.Windows.Forms.Button();
             this.label8 = new System.Windows.Forms.Label();
-            this.CmdUpdate = new System.Windows.Forms.Button();
+            this.btnSaveProduct = new System.Windows.Forms.Button();
             this.txtMinDProductUnits = new System.Windows.Forms.Label();
             this.txtMaxDProductUnits = new System.Windows.Forms.Label();
-            this.CmdDelete = new System.Windows.Forms.Button();
+            this.btnDeleteProduct = new System.Windows.Forms.Button();
             this.CmbGrid = new System.Windows.Forms.ComboBox();
             this.label9 = new System.Windows.Forms.Label();
             this.Txt_Description = new System.Windows.Forms.TextBox();
@@ -220,8 +222,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Label27 = new System.Windows.Forms.Label();
             this.Label28 = new System.Windows.Forms.Label();
             this.tmrMB = new System.Windows.Forms.Timer(this.components);
-            this.label35 = new System.Windows.Forms.Label();
-            this.txtValidFramesLimit = new System.Windows.Forms.TextBox();
+            this.btn90DegDiameters = new System.Windows.Forms.Button();
+            this.groupBox16 = new System.Windows.Forms.GroupBox();
             this.toolStrip1.SuspendLayout();
             this.GroupBox1.SuspendLayout();
             this.groupBox15.SuspendLayout();
@@ -258,6 +260,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.GroupBox13.SuspendLayout();
             this.GroupBox10.SuspendLayout();
             this.GroupBox9.SuspendLayout();
+            this.groupBox16.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStrip1
@@ -414,10 +417,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.GroupBox1.Controls.Add(this.groupBox15);
             this.GroupBox1.Controls.Add(this.txtSoftwareTrigger);
             this.GroupBox1.Controls.Add(this.txtFrameMode);
-            this.GroupBox1.Controls.Add(this.virtualTriggerBtn);
-            this.GroupBox1.Controls.Add(this.processImageBtn);
-            this.GroupBox1.Controls.Add(this.triggerModeBtn);
-            this.GroupBox1.Controls.Add(this.viewModeBtn);
+            this.GroupBox1.Controls.Add(this.btnVirtualTrigger);
+            this.GroupBox1.Controls.Add(this.btnProcessImage);
+            this.GroupBox1.Controls.Add(this.btnTriggerMode);
+            this.GroupBox1.Controls.Add(this.btnViewMode);
             this.GroupBox1.Font = new System.Drawing.Font("Segoe UI", 9.75F);
             this.GroupBox1.Location = new System.Drawing.Point(3, 4);
             this.GroupBox1.Name = "GroupBox1";
@@ -507,61 +510,61 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.txtFrameMode.TabIndex = 124;
             this.txtFrameMode.Text = "FRAME";
             // 
-            // virtualTriggerBtn
+            // btnVirtualTrigger
             // 
-            this.virtualTriggerBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.virtualTriggerBtn.BackColor = System.Drawing.Color.Silver;
-            this.virtualTriggerBtn.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.virtualTriggerBtn.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.virtualTriggerBtn.Location = new System.Drawing.Point(228, 81);
-            this.virtualTriggerBtn.Name = "virtualTriggerBtn";
-            this.virtualTriggerBtn.Size = new System.Drawing.Size(108, 55);
-            this.virtualTriggerBtn.TabIndex = 74;
-            this.virtualTriggerBtn.Text = "CAPTURE\r\nFRAME";
-            this.virtualTriggerBtn.UseVisualStyleBackColor = false;
-            this.virtualTriggerBtn.Click += new System.EventHandler(this.virtualTriggerBtn_Click);
+            this.btnVirtualTrigger.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnVirtualTrigger.BackColor = System.Drawing.Color.Silver;
+            this.btnVirtualTrigger.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnVirtualTrigger.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnVirtualTrigger.Location = new System.Drawing.Point(228, 81);
+            this.btnVirtualTrigger.Name = "btnVirtualTrigger";
+            this.btnVirtualTrigger.Size = new System.Drawing.Size(108, 55);
+            this.btnVirtualTrigger.TabIndex = 74;
+            this.btnVirtualTrigger.Text = "CAPTURE\r\nFRAME";
+            this.btnVirtualTrigger.UseVisualStyleBackColor = false;
+            this.btnVirtualTrigger.Click += new System.EventHandler(this.virtualTriggerBtn_Click);
             // 
-            // processImageBtn
+            // btnProcessImage
             // 
-            this.processImageBtn.BackColor = System.Drawing.Color.Silver;
-            this.processImageBtn.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.processImageBtn.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.processImageBtn.Location = new System.Drawing.Point(340, 81);
-            this.processImageBtn.Name = "processImageBtn";
-            this.processImageBtn.Size = new System.Drawing.Size(101, 55);
-            this.processImageBtn.TabIndex = 73;
-            this.processImageBtn.Text = "PROCESS FRAME";
-            this.processImageBtn.UseVisualStyleBackColor = false;
-            this.processImageBtn.Click += new System.EventHandler(this.processImageBtn_Click);
+            this.btnProcessImage.BackColor = System.Drawing.Color.Silver;
+            this.btnProcessImage.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnProcessImage.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnProcessImage.Location = new System.Drawing.Point(340, 81);
+            this.btnProcessImage.Name = "btnProcessImage";
+            this.btnProcessImage.Size = new System.Drawing.Size(101, 55);
+            this.btnProcessImage.TabIndex = 73;
+            this.btnProcessImage.Text = "PROCESS FRAME";
+            this.btnProcessImage.UseVisualStyleBackColor = false;
+            this.btnProcessImage.Click += new System.EventHandler(this.processImageBtn_Click);
             // 
-            // triggerModeBtn
+            // btnTriggerMode
             // 
-            this.triggerModeBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.triggerModeBtn.BackColor = System.Drawing.Color.Silver;
-            this.triggerModeBtn.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.triggerModeBtn.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.triggerModeBtn.Location = new System.Drawing.Point(7, 80);
-            this.triggerModeBtn.Name = "triggerModeBtn";
-            this.triggerModeBtn.Size = new System.Drawing.Size(103, 57);
-            this.triggerModeBtn.TabIndex = 72;
-            this.triggerModeBtn.Text = "TRIGGER SOURCE";
-            this.triggerModeBtn.UseVisualStyleBackColor = false;
-            this.triggerModeBtn.Click += new System.EventHandler(this.triggerModeBtn_Click);
+            this.btnTriggerMode.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnTriggerMode.BackColor = System.Drawing.Color.Silver;
+            this.btnTriggerMode.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnTriggerMode.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnTriggerMode.Location = new System.Drawing.Point(7, 80);
+            this.btnTriggerMode.Name = "btnTriggerMode";
+            this.btnTriggerMode.Size = new System.Drawing.Size(103, 57);
+            this.btnTriggerMode.TabIndex = 72;
+            this.btnTriggerMode.Text = "TRIGGER SOURCE";
+            this.btnTriggerMode.UseVisualStyleBackColor = false;
+            this.btnTriggerMode.Click += new System.EventHandler(this.triggerModeBtn_Click);
             // 
-            // viewModeBtn
+            // btnViewMode
             // 
-            this.viewModeBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.viewModeBtn.BackColor = System.Drawing.Color.Silver;
-            this.viewModeBtn.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.viewModeBtn.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.viewModeBtn.Location = new System.Drawing.Point(7, 19);
-            this.viewModeBtn.Name = "viewModeBtn";
-            this.viewModeBtn.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.viewModeBtn.Size = new System.Drawing.Size(103, 58);
-            this.viewModeBtn.TabIndex = 69;
-            this.viewModeBtn.Text = "VIEW MODE";
-            this.viewModeBtn.UseVisualStyleBackColor = false;
-            this.viewModeBtn.Click += new System.EventHandler(this.Cmd_Trigger_Click);
+            this.btnViewMode.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnViewMode.BackColor = System.Drawing.Color.Silver;
+            this.btnViewMode.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnViewMode.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnViewMode.Location = new System.Drawing.Point(7, 19);
+            this.btnViewMode.Name = "btnViewMode";
+            this.btnViewMode.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.btnViewMode.Size = new System.Drawing.Size(103, 58);
+            this.btnViewMode.TabIndex = 69;
+            this.btnViewMode.Text = "VIEW MODE";
+            this.btnViewMode.UseVisualStyleBackColor = false;
+            this.btnViewMode.Click += new System.EventHandler(this.Cmd_Trigger_Click);
             // 
             // GroupBox8
             // 
@@ -1248,6 +1251,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // configurationPage
             // 
             this.configurationPage.BackColor = System.Drawing.Color.LightSteelBlue;
+            this.configurationPage.Controls.Add(this.groupBox16);
             this.configurationPage.Controls.Add(this.gbShapeIndicator);
             this.configurationPage.Controls.Add(this.groupBox4);
             this.configurationPage.Controls.Add(this.GB_Threshold);
@@ -1668,6 +1672,30 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.groupBox11.TabStop = false;
             this.groupBox11.Text = "Flags Parameters";
             // 
+            // label35
+            // 
+            this.label35.AutoSize = true;
+            this.label35.Font = new System.Drawing.Font("Segoe UI", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label35.Location = new System.Drawing.Point(43, 190);
+            this.label35.Name = "label35";
+            this.label35.Size = new System.Drawing.Size(166, 25);
+            this.label35.TabIndex = 93;
+            this.label35.Text = "Val. Frames Limit:";
+            // 
+            // txtValidFramesLimit
+            // 
+            this.txtValidFramesLimit.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.txtValidFramesLimit.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtValidFramesLimit.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtValidFramesLimit.Location = new System.Drawing.Point(251, 178);
+            this.txtValidFramesLimit.MaxLength = 5;
+            this.txtValidFramesLimit.Name = "txtValidFramesLimit";
+            this.txtValidFramesLimit.Size = new System.Drawing.Size(100, 44);
+            this.txtValidFramesLimit.TabIndex = 92;
+            this.txtValidFramesLimit.Text = "0";
+            this.txtValidFramesLimit.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtValidFramesLimit.Click += new System.EventHandler(this.txtValidFramesLimit_Click);
+            // 
             // label30
             // 
             this.label30.AutoSize = true;
@@ -2041,25 +2069,25 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.trendChart.BorderlineColor = System.Drawing.Color.Black;
             this.trendChart.BorderlineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Solid;
             this.trendChart.BorderlineWidth = 2;
-            chartArea3.AxisX.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Seconds;
-            chartArea3.AxisX.LabelStyle.Format = "HH:mm:ss";
-            chartArea3.AxisX.LabelStyle.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Auto;
-            chartArea3.AxisX.ScrollBar.Enabled = false;
-            chartArea3.AxisY.Maximum = 300D;
-            chartArea3.Name = "ChartArea1";
-            this.trendChart.ChartAreas.Add(chartArea3);
-            legend3.Docking = System.Windows.Forms.DataVisualization.Charting.Docking.Top;
-            legend3.Name = "Legend1";
-            this.trendChart.Legends.Add(legend3);
+            chartArea2.AxisX.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Seconds;
+            chartArea2.AxisX.LabelStyle.Format = "HH:mm:ss";
+            chartArea2.AxisX.LabelStyle.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Auto;
+            chartArea2.AxisX.ScrollBar.Enabled = false;
+            chartArea2.AxisY.Maximum = 300D;
+            chartArea2.Name = "ChartArea1";
+            this.trendChart.ChartAreas.Add(chartArea2);
+            legend2.Docking = System.Windows.Forms.DataVisualization.Charting.Docking.Top;
+            legend2.Name = "Legend1";
+            this.trendChart.Legends.Add(legend2);
             this.trendChart.Location = new System.Drawing.Point(0, 0);
             this.trendChart.Name = "trendChart";
-            series3.ChartArea = "ChartArea1";
-            series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series3.Legend = "Legend1";
-            series3.LegendText = "Max Diameter";
-            series3.Name = "MaxDiameterSerie";
-            series3.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
-            this.trendChart.Series.Add(series3);
+            series2.ChartArea = "ChartArea1";
+            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series2.Legend = "Legend1";
+            series2.LegendText = "Max Diameter";
+            series2.Name = "MaxDiameterSerie";
+            series2.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
+            this.trendChart.Series.Add(series2);
             this.trendChart.Size = new System.Drawing.Size(806, 480);
             this.trendChart.TabIndex = 0;
             this.trendChart.Text = "chart1";
@@ -2138,7 +2166,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.GroupBox10.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.GroupBox10.Controls.Add(this.CmbProducts);
-            this.GroupBox10.Controls.Add(this.Cmd_Save);
+            this.GroupBox10.Controls.Add(this.btnSelectProduct);
             this.GroupBox10.Location = new System.Drawing.Point(2, 2);
             this.GroupBox10.Name = "GroupBox10";
             this.GroupBox10.Size = new System.Drawing.Size(781, 69);
@@ -2157,17 +2185,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.CmbProducts.Sorted = true;
             this.CmbProducts.TabIndex = 106;
             // 
-            // Cmd_Save
+            // btnSelectProduct
             // 
-            this.Cmd_Save.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.Cmd_Save.BackColor = System.Drawing.Color.Silver;
-            this.Cmd_Save.Location = new System.Drawing.Point(390, 21);
-            this.Cmd_Save.Name = "Cmd_Save";
-            this.Cmd_Save.Size = new System.Drawing.Size(208, 42);
-            this.Cmd_Save.TabIndex = 114;
-            this.Cmd_Save.Text = "SELECT";
-            this.Cmd_Save.UseVisualStyleBackColor = false;
-            this.Cmd_Save.Click += new System.EventHandler(this.Cmd_Save_Click);
+            this.btnSelectProduct.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnSelectProduct.BackColor = System.Drawing.Color.Silver;
+            this.btnSelectProduct.Location = new System.Drawing.Point(390, 21);
+            this.btnSelectProduct.Name = "btnSelectProduct";
+            this.btnSelectProduct.Size = new System.Drawing.Size(208, 42);
+            this.btnSelectProduct.TabIndex = 114;
+            this.btnSelectProduct.Text = "SELECT";
+            this.btnSelectProduct.UseVisualStyleBackColor = false;
+            this.btnSelectProduct.Click += new System.EventHandler(this.Cmd_Save_Click);
             // 
             // GroupBox9
             // 
@@ -2176,12 +2204,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.GroupBox9.Controls.Add(this.btnModifyProduct);
             this.GroupBox9.Controls.Add(this.btnRestoreProduct);
             this.GroupBox9.Controls.Add(this.cmbProductUnits);
-            this.GroupBox9.Controls.Add(this.CmdAdd);
+            this.GroupBox9.Controls.Add(this.btnAddProduct);
             this.GroupBox9.Controls.Add(this.label8);
-            this.GroupBox9.Controls.Add(this.CmdUpdate);
+            this.GroupBox9.Controls.Add(this.btnSaveProduct);
             this.GroupBox9.Controls.Add(this.txtMinDProductUnits);
             this.GroupBox9.Controls.Add(this.txtMaxDProductUnits);
-            this.GroupBox9.Controls.Add(this.CmdDelete);
+            this.GroupBox9.Controls.Add(this.btnDeleteProduct);
             this.GroupBox9.Controls.Add(this.CmbGrid);
             this.GroupBox9.Controls.Add(this.label9);
             this.GroupBox9.Controls.Add(this.Txt_Description);
@@ -2236,17 +2264,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.cmbProductUnits.TabIndex = 128;
             this.cmbProductUnits.SelectedIndexChanged += new System.EventHandler(this.cmbProductUnits_SelectedIndexChanged);
             // 
-            // CmdAdd
+            // btnAddProduct
             // 
-            this.CmdAdd.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.CmdAdd.BackColor = System.Drawing.Color.Silver;
-            this.CmdAdd.Location = new System.Drawing.Point(504, 46);
-            this.CmdAdd.Name = "CmdAdd";
-            this.CmdAdd.Size = new System.Drawing.Size(115, 55);
-            this.CmdAdd.TabIndex = 119;
-            this.CmdAdd.Text = "ADD";
-            this.CmdAdd.UseVisualStyleBackColor = false;
-            this.CmdAdd.Click += new System.EventHandler(this.CmdAdd_Click);
+            this.btnAddProduct.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnAddProduct.BackColor = System.Drawing.Color.Silver;
+            this.btnAddProduct.Location = new System.Drawing.Point(504, 46);
+            this.btnAddProduct.Name = "btnAddProduct";
+            this.btnAddProduct.Size = new System.Drawing.Size(115, 55);
+            this.btnAddProduct.TabIndex = 119;
+            this.btnAddProduct.Text = "ADD";
+            this.btnAddProduct.UseVisualStyleBackColor = false;
+            this.btnAddProduct.Click += new System.EventHandler(this.CmdAdd_Click);
             // 
             // label8
             // 
@@ -2258,18 +2286,18 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.label8.TabIndex = 127;
             this.label8.Text = "Units:";
             // 
-            // CmdUpdate
+            // btnSaveProduct
             // 
-            this.CmdUpdate.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.CmdUpdate.BackColor = System.Drawing.Color.Silver;
-            this.CmdUpdate.Enabled = false;
-            this.CmdUpdate.Location = new System.Drawing.Point(628, 104);
-            this.CmdUpdate.Name = "CmdUpdate";
-            this.CmdUpdate.Size = new System.Drawing.Size(115, 114);
-            this.CmdUpdate.TabIndex = 118;
-            this.CmdUpdate.Text = "SAVE";
-            this.CmdUpdate.UseVisualStyleBackColor = false;
-            this.CmdUpdate.Click += new System.EventHandler(this.CmdUpdate_Click);
+            this.btnSaveProduct.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnSaveProduct.BackColor = System.Drawing.Color.Silver;
+            this.btnSaveProduct.Enabled = false;
+            this.btnSaveProduct.Location = new System.Drawing.Point(628, 104);
+            this.btnSaveProduct.Name = "btnSaveProduct";
+            this.btnSaveProduct.Size = new System.Drawing.Size(115, 114);
+            this.btnSaveProduct.TabIndex = 118;
+            this.btnSaveProduct.Text = "SAVE";
+            this.btnSaveProduct.UseVisualStyleBackColor = false;
+            this.btnSaveProduct.Click += new System.EventHandler(this.CmdUpdate_Click);
             // 
             // txtMinDProductUnits
             // 
@@ -2291,17 +2319,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.txtMaxDProductUnits.TabIndex = 125;
             this.txtMaxDProductUnits.Text = "mm";
             // 
-            // CmdDelete
+            // btnDeleteProduct
             // 
-            this.CmdDelete.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.CmdDelete.BackColor = System.Drawing.Color.Silver;
-            this.CmdDelete.Location = new System.Drawing.Point(625, 45);
-            this.CmdDelete.Name = "CmdDelete";
-            this.CmdDelete.Size = new System.Drawing.Size(118, 54);
-            this.CmdDelete.TabIndex = 116;
-            this.CmdDelete.Text = "DELETE";
-            this.CmdDelete.UseVisualStyleBackColor = false;
-            this.CmdDelete.Click += new System.EventHandler(this.CmdDelete_Click);
+            this.btnDeleteProduct.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnDeleteProduct.BackColor = System.Drawing.Color.Silver;
+            this.btnDeleteProduct.Location = new System.Drawing.Point(625, 45);
+            this.btnDeleteProduct.Name = "btnDeleteProduct";
+            this.btnDeleteProduct.Size = new System.Drawing.Size(118, 54);
+            this.btnDeleteProduct.TabIndex = 116;
+            this.btnDeleteProduct.Text = "DELETE";
+            this.btnDeleteProduct.UseVisualStyleBackColor = false;
+            this.btnDeleteProduct.Click += new System.EventHandler(this.CmdDelete_Click);
             // 
             // CmbGrid
             // 
@@ -2417,29 +2445,30 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.tmrMB.Interval = 1000;
             this.tmrMB.Tick += new System.EventHandler(this.tmrMB_Tick);
             // 
-            // label35
+            // btn90DegDiameters
             // 
-            this.label35.AutoSize = true;
-            this.label35.Font = new System.Drawing.Font("Segoe UI", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label35.Location = new System.Drawing.Point(43, 190);
-            this.label35.Name = "label35";
-            this.label35.Size = new System.Drawing.Size(166, 25);
-            this.label35.TabIndex = 93;
-            this.label35.Text = "Val. Frames Limit:";
+            this.btn90DegDiameters.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btn90DegDiameters.AutoSize = true;
+            this.btn90DegDiameters.BackColor = System.Drawing.Color.Silver;
+            this.btn90DegDiameters.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btn90DegDiameters.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold);
+            this.btn90DegDiameters.Location = new System.Drawing.Point(50, 40);
+            this.btn90DegDiameters.Name = "btn90DegDiameters";
+            this.btn90DegDiameters.Size = new System.Drawing.Size(86, 42);
+            this.btn90DegDiameters.TabIndex = 125;
+            this.btn90DegDiameters.Text = "DIA. 90°";
+            this.btn90DegDiameters.UseVisualStyleBackColor = false;
+            this.btn90DegDiameters.Click += new System.EventHandler(this.btn90DegDiameters_Click);
             // 
-            // txtValidFramesLimit
+            // groupBox16
             // 
-            this.txtValidFramesLimit.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.txtValidFramesLimit.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtValidFramesLimit.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtValidFramesLimit.Location = new System.Drawing.Point(251, 178);
-            this.txtValidFramesLimit.MaxLength = 5;
-            this.txtValidFramesLimit.Name = "txtValidFramesLimit";
-            this.txtValidFramesLimit.Size = new System.Drawing.Size(100, 44);
-            this.txtValidFramesLimit.TabIndex = 92;
-            this.txtValidFramesLimit.Text = "0";
-            this.txtValidFramesLimit.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.txtValidFramesLimit.Click += new System.EventHandler(this.txtValidFramesLimit_Click);
+            this.groupBox16.Controls.Add(this.btn90DegDiameters);
+            this.groupBox16.Location = new System.Drawing.Point(6, 669);
+            this.groupBox16.Name = "groupBox16";
+            this.groupBox16.Size = new System.Drawing.Size(458, 100);
+            this.groupBox16.TabIndex = 131;
+            this.groupBox16.TabStop = false;
+            this.groupBox16.Text = "Parameters";
             // 
             // GigECameraDemoDlg
             // 
@@ -2513,6 +2542,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.GroupBox10.ResumeLayout(false);
             this.GroupBox9.ResumeLayout(false);
             this.GroupBox9.PerformLayout();
+            this.groupBox16.ResumeLayout(false);
+            this.groupBox16.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -2541,9 +2572,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         //index for "about this.." item im system menu
         private const int m_AboutID = 0x100;
         internal System.Windows.Forms.GroupBox GroupBox1;
-        internal System.Windows.Forms.Button triggerModeBtn;
-        internal System.Windows.Forms.Button viewModeBtn;
-        internal System.Windows.Forms.Button processImageBtn;
+        internal System.Windows.Forms.Button btnTriggerMode;
+        internal System.Windows.Forms.Button btnViewMode;
+        internal System.Windows.Forms.Button btnProcessImage;
         internal System.Windows.Forms.GroupBox GroupBox8;
         internal System.Windows.Forms.GroupBox GroupActualTargetSize;
         internal System.Windows.Forms.TextBox Txt_MinDiameter;
@@ -2571,11 +2602,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         internal CheckBox Chk_Right_Side;
         internal TextBox Txt_Tag;
         internal CheckBox Chk_Digital_Knife;
-        internal Button CmdAdd;
-        internal Button CmdUpdate;
+        internal Button btnAddProduct;
+        internal Button btnSaveProduct;
         internal GroupBox GroupBox10;
         internal ComboBox CmbProducts;
-        internal Button CmdDelete;
+        internal Button btnDeleteProduct;
         internal GroupBox GroupBox9;
         internal TextBox Txt_Description;
         internal TextBox Txt_Code;
@@ -2585,10 +2616,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         internal TextBox Txt_MaxD;
         internal Label Label27;
         internal Label Label28;
-        internal Button Cmd_Save;
+        internal Button btnSelectProduct;
         internal GroupBox groupBox2;
         private Label avg_diameter;
-        internal Button virtualTriggerBtn;
+        internal Button btnVirtualTrigger;
         private GroupBox boxUnits;
         private Button calibrateBtn;
         private Label minDiameterUnitsTxt;
@@ -2715,6 +2746,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private Label label4;
         private Label label35;
         internal TextBox txtValidFramesLimit;
+        private GroupBox groupBox16;
+        internal Button btn90DegDiameters;
     }
 }
 

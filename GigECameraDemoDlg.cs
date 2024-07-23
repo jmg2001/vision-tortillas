@@ -37,6 +37,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 {
     public partial class GigECameraDemoDlg : Form
     {
+        bool diameter90deg = true;
+
+        // LINQ
+        List<Product> Products = new List<Product>();
+
         int validFramesLimit;
 
         int savedImagesCounter = 0;
@@ -261,29 +266,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 InitializeComponent();
 
-                InitializeElements();
+                InitElements();
                 InitializeDataTable();
-                InitializeChart();
+                InitChart();
 
-                if (units == "mm")
-                {
-                    initMaxDiameter = 93.10; //130mm
-                    initMinDiameter = 78.80; //110mm
-                }
-                else
-                {
-                    initMaxDiameter = 100; //5inch
-                    initMinDiameter = 60; //3inch
-                }
-
-                oldMaxDiameter = initMaxDiameter;
-                oldMinDiameter = initMinDiameter;
-
-                maxDiameter = initMaxDiameter;
-                minDiameter = initMinDiameter;
-
-                controlDiameterOld = (maxDiameter + minDiameter) / 2;
-                controlDiameter = (maxDiameter + minDiameter) / 2;
+                InitControlDiameter();
 
                 updateLabels();
 
@@ -342,45 +329,45 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 {
                     btnFreezeFrame.Enabled = true;
 
-                    changeTriggerMode("PLC");
+                    ChangeTriggerMode("PLC");
 
                     //triggerModeBtn.BackColor = DefaultBackColor;
-                    viewModeBtn.BackColor = Color.DarkGray;
-                    virtualTriggerBtn.BackColor = Color.DarkGray;
-                    processImageBtn.BackColor = Color.DarkGray;
+                    btnViewMode.BackColor = Color.DarkGray;
+                    btnVirtualTrigger.BackColor = Color.DarkGray;
+                    btnProcessImage.BackColor = Color.DarkGray;
 
                     //txtSoftwareTrigger.Text = "PLC";
                     txtPlcTrigger.BackColor = Color.LightGreen;
                     txtSoftwareTrigger.BackColor = Color.Transparent;
-                    virtualTriggerBtn.Enabled = false;
+                    btnVirtualTrigger.Enabled = false;
 
-                    startStop();
+                    StartStop();
 
-                    viewModeBtn.Enabled = false;
-                    processImageBtn.Enabled = false;
-                    processImageBtn.Text = "PROCESSING";
+                    btnViewMode.Enabled = false;
+                    btnProcessImage.Enabled = false;
+                    btnProcessImage.Text = "PROCESSING";
                 }
                 else
                 {
                     btnFreezeFrame.Enabled = false;
 
-                    changeTriggerMode("SOFTWARE");
+                    ChangeTriggerMode("SOFTWARE");
 
                     //triggerModeBtn.BackColor = DefaultBackColor;
-                    viewModeBtn.BackColor = Color.Silver;
-                    virtualTriggerBtn.BackColor = Color.Silver;
-                    processImageBtn.BackColor = Color.DarkGray;
+                    btnViewMode.BackColor = Color.Silver;
+                    btnVirtualTrigger.BackColor = Color.Silver;
+                    btnProcessImage.BackColor = Color.DarkGray;
 
                     //txtSoftwareTrigger.Text = "PLC";
                     txtPlcTrigger.BackColor = Color.Transparent;
                     txtSoftwareTrigger.BackColor = Color.LightGreen;
-                    virtualTriggerBtn.Enabled = true;
+                    btnVirtualTrigger.Enabled = true;
 
-                    startStop();
+                    StartStop();
 
-                    viewModeBtn.Enabled = true;
-                    processImageBtn.Enabled = false;
-                    processImageBtn.Text = "PROCESS FRAME";
+                    btnViewMode.Enabled = true;
+                    btnProcessImage.Enabled = false;
+                    btnProcessImage.Text = "PROCESS FRAME";
                 }
             }
             else if (result == DialogResult.None)
@@ -397,7 +384,30 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
-        private void InitializeChart()
+        private void InitControlDiameter()
+        {
+            if (units == "mm")
+            {
+                initMaxDiameter = 165.1 / euFactor; //130mm
+                initMinDiameter = 139.7 / euFactor; //110mm
+            }
+            else
+            {
+                initMaxDiameter = 6.5 / euFactor; //5inch
+                initMinDiameter = 5.5 / euFactor; //3inch
+            }
+
+            oldMaxDiameter = initMaxDiameter;
+            oldMinDiameter = initMinDiameter;
+
+            maxDiameter = initMaxDiameter;
+            minDiameter = initMinDiameter;
+
+            controlDiameterOld = (maxDiameter + minDiameter) / 2;
+            controlDiameter = (maxDiameter + minDiameter) / 2;
+        }
+
+        private void InitChart()
         {
             trendChart.ChartAreas.Clear();
             trendChart.Series.Clear();
@@ -455,11 +465,20 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             trendChart.ChartAreas[0].AxisX.Minimum = DateTime.Now.AddHours(-1).ToOADate(); // Mostrar solo los datos de la última hora
         }
 
-        private void InitializeElements()
+        private void InitElements()
         {
             InitUsers();
             LoadSettings();
             SetTexts();
+
+            if (diameter90deg)
+            {
+                btn90DegDiameters.BackColor = Color.LightGreen;
+            }
+            else
+            {
+                btn90DegDiameters.BackColor = Color.Silver;
+            }
 
             btnSetPointPLC.BackColor = Color.LightGreen;
             operationMode = 2;
@@ -471,7 +490,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // Suscribir al evento SelectedIndexChanged del TabControl
             mainTabs.SelectedIndexChanged += TabControl2_SelectedIndexChanged;
 
-            processImageBtn.Enabled = false;
+            btnProcessImage.Enabled = false;
 
             txtPlcTrigger.BackColor = Color.LightGreen;
             txtSoftwareTrigger.BackColor = Color.Transparent;
@@ -498,7 +517,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     var records = csvReader.GetRecords<Product>();
                     foreach (var record in records)
                     {
-                        CmbProducts.Items.Add(record.Code);
+                        Products.Add(record);
+                        // CmbProducts.Items.Add(record.Code);
                     }
                 }
             }
@@ -523,16 +543,22 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     var records = csvReader.GetRecords<Product>();
                     foreach (var record in records)
                     {
-                        CmbProducts.Items.Add(record.Code);
-                        changeProduct(record);
+                        Products.Add(record);
+                        ChangeProduct(record);
                     }
                 }
+            }
+
+            // Init Cmb Products
+            foreach(var p in Products)
+            {
+                CmbProducts.Items.Add(p.Code);
             }
 
             // Suscribirse al evento SelectedIndexChanged del ComboBox
             CmbProducts.SelectedIndexChanged += CmbProducts_SelectedIndexChanged;
 
-            modbusServer.Port = 502;
+            modbusServer.Port = 503;
             modbusServer.Listen();
             Console.WriteLine("Modbus Server running...");
 
@@ -693,7 +719,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return newK;
         }
 
-        private void changeTriggerMode(string modeStr)
+        private void ChangeTriggerMode(string modeStr)
         {
             int param = -1;
             switch (modeStr)
@@ -732,13 +758,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             public int Id { get; set; }
             public int Code { get; set; }
             public string Name { get; set; }
-            public double MaxD { get; set; }
+            public double MaxD { get; set; }    
             public double MinD { get; set; }
-            //public double MaxOvality { get; set; }
             public double MaxCompacity { get; set; }
             public int Grid { get; set; }
             public string Units { get; set; }
-
         }
 
 
@@ -886,7 +910,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         }
                         else
                         {
-                            process();
+                            Process();
                         }
                     }
 
@@ -1011,7 +1035,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
 
             // Se extrae el ROI de la imagen binarizada
-            Mat roiImage = extractROI(binarizedImage);
+            Mat roiImage = ExtractROI(binarizedImage);
 
             try
             {
@@ -1025,7 +1049,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             try
             {
-                setModbusData();
+                SetModbusData();
             }
             catch (Exception e)
             {
@@ -1035,7 +1059,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             originalImage.Dispose();
             originalImageIsDisposed = true;
 
-            processImageBtn.Enabled = false;
+            btnProcessImage.Enabled = false;
         }
 
         private void blobProcessFreezed(Mat image)
@@ -1073,7 +1097,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     // Calcular el sector del contorno
                     int sector = CalculateSector(centro, image.Width, image.Height, gridType.Grid.Item1, gridType.Grid.Item2) + 1;
 
-                    double area = areas[i];
+                    int area = (int)areas[i];
                     double perimeter = perimeters[i];
 
                     // Calcular la compacidad
@@ -1095,7 +1119,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                         double ovalidad = calculateOvality(maxDiameter, minDiameter);
 
-                        ushort size = calculateSize(maxDiameter, minDiameter, compactness, ovalidad, hole);
+                        ushort size = CalculateSize(maxDiameter, minDiameter, compactness, ovalidad, hole, area);
 
                         if (size != 6) // Shape
                         {
@@ -1236,10 +1260,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void preProcessFreezed()
         {
-            processImageBtn.Enabled = true;
+            btnProcessImage.Enabled = true;
             originalImageCV = new Mat();
 
-            string path = saveImage();
+            string path = SaveImage();
             using (Bitmap originalImage = new Bitmap(path))
             {
                 originalImageIsDisposed = false;
@@ -1343,10 +1367,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             boxOriginal.BringToFront();
             boxProcess.Visible = false;
 
-            processImageBtn.Enabled = true;
+            btnProcessImage.Enabled = true;
             originalImageCV = new Mat();
 
-            string path = saveImage();
+            string path = SaveImage();
 
             using (Bitmap originalImage = new Bitmap(path))
             {
@@ -1367,17 +1391,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             if (!triggerPLC)
             {
 
-                Mat temp = drawROI(originalImageCV.Clone());
+                Mat temp = DrawROI(originalImageCV.Clone());
 
                 temp.Save(imagesPath + "roiDraw.bmp");
 
                 temp.Dispose();
 
-                updateView(originalBuffer, originalView, "roiDraw.bmp");
+                UpdateView(originalBuffer, originalView, "roiDraw.bmp");
             }
             else
             {
-                updateView(originalBuffer, originalView, "updatedROI.bmp");
+                UpdateView(originalBuffer, originalView, "updatedROI.bmp");
             }
 
 
@@ -1428,7 +1452,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
 
             //// Se extrae el ROI de la imagen binarizada
-            Mat roiImage = extractROI(binarizedImage);
+            Mat roiImage = ExtractROI(binarizedImage);
 
             int sectorSel = 5;
 
@@ -1516,7 +1540,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             originalImage.Dispose();
             originalImageIsDisposed = true;
 
-            processImageBtn.Enabled = false;
+            btnProcessImage.Enabled = false;
 
             calibrating = false;
         }
@@ -1708,7 +1732,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return numeroSectorCentral;
         }
 
-        private void process()
+        private void Process()
         {
             frameCounter++;
             if (frameCounter >= 1000000)
@@ -1739,7 +1763,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
 
             // Se extrae el ROI de la imagen binarizada
-            Mat roiImage = extractROI(binarizedImage);
+            Mat roiImage = ExtractROI(binarizedImage);
 
             // Colocamos el picturebox del ROI
             SetPictureBoxPositionAndSize(ref processBuffer, imagePage);
@@ -1747,8 +1771,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             try
             {
                 // Procesamos el ROI
-                blobProces(roiImage);
-                updateView(processBuffer, processView, "final.bmp");
+                BlobProcess(roiImage);
+                UpdateView(processBuffer, processView, "final.bmp");
 
             }
             catch (Exception e)
@@ -1758,24 +1782,26 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             try
             {
-                setModbusData();
+                SetModbusData();
             }
             catch (Exception e)
             {
                 MessageBox.Show(e.ToString());
             }
 
-            processImageBtn.Enabled = false;
-            processImageBtn.BackColor = Color.DarkGray;
+            btnProcessImage.Enabled = false;
+            btnProcessImage.BackColor = Color.DarkGray;
+            originalView.Show();
+            processView.Show();
         }
 
-        private void updateView(SapBuffer buffer, SapView view, string v)
+        private void UpdateView(SapBuffer buffer, SapView view, string v)
         {
             buffer.Load(imagesPath + v, -1, "-format bmp");
             view.Show();
         }
 
-        private void setModbusData()
+        private void SetModbusData()
         {
             // Frame Counter
             // Número flotante que deseas publicar
@@ -2126,7 +2152,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
-        private Mat extractROI(Mat image)
+        private Mat ExtractROI(Mat image)
         {
             // Extraer la región del ROI
             // Definir las coordenadas del ROI (rectángulo de interés)
@@ -2139,7 +2165,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return roiImage;
         }
 
-        private Mat drawROI(Mat image)
+        private Mat DrawROI(Mat image)
         {
             //Rectangle rect = new Rectangle(UserROI.Left, UserROI.Top, UserROI.Right - UserROI.Left, UserROI.Bottom - UserROI.Top);
             // Coordenadas y tamaño del rectángulo
@@ -2154,7 +2180,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // Grosor del borde del rectángulo
             int grosor = 2;
 
-            drawHelpLines(image, color, grosor, ancho, alto);
+            DrawHelpLines(image, color, grosor, ancho, alto);
 
             // Dibujar el rectángulo en la imagen
             CvInvoke.Rectangle(image, new Rectangle(x, y, ancho, alto), color, grosor);
@@ -2162,7 +2188,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return image;
         }
 
-        private void drawHelpLines(Mat image, MCvScalar color, int grosor, int ancho, int alto)
+        private void DrawHelpLines(Mat image, MCvScalar color, int grosor, int ancho, int alto)
         {
             CvInvoke.Line(image, new Point(UserROI.Left, UserROI.Top + ((int)(alto / 2))), new Point(UserROI.Right, UserROI.Top + ((int)(alto / 2))), color, grosor);
             CvInvoke.Line(image, new Point(UserROI.Left + ((int)(ancho / 2)), UserROI.Top), new Point(UserROI.Left + ((int)(ancho / 2)), UserROI.Bottom), color, grosor);
@@ -2185,7 +2211,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
-        private void changeProduct(Product record)
+        private void ChangeProduct(Product record)
         {
             settings.productCode = record.Code;
             CmbProducts.SelectedItem = record.Code;
@@ -2219,20 +2245,24 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             string selectedItem = CmbProducts.SelectedItem.ToString();
 
-            using (var reader = new StreamReader(new FileStream(csvPath, FileMode.Open), System.Text.Encoding.UTF8))
-            using (var csvReader = new CsvReader(reader, CultureInfo.CurrentCulture))
-            {
-                var records = csvReader.GetRecords<Product>();
-                //records.Add(new Product { Code = 1, MaxD = 130, MinD = 110, MaxOvality = 0.5, MaxCompacity = 12 });
-                //csvWriter.WriteRecords(records);
-                foreach (var record in records)
-                {
-                    if (record.Code == int.Parse(selectedItem))
-                    {
-                        changeProduct(record);
-                    }
-                }
-            }
+            //using (var reader = new StreamReader(new FileStream(csvPath, FileMode.Open), System.Text.Encoding.UTF8))
+            //using (var csvReader = new CsvReader(reader, CultureInfo.CurrentCulture))
+            //{
+            //    var records = csvReader.GetRecords<Product>();
+            //    //records.Add(new Product { Code = 1, MaxD = 130, MinD = 110, MaxOvality = 0.5, MaxCompacity = 12 });
+            //    //csvWriter.WriteRecords(records);
+            //    foreach (var record in records)
+            //    {
+            //        if (record.Code == int.Parse(selectedItem))
+            //        {
+            //            changeProduct(record);
+            //        }
+            //    }
+            //}
+
+            var product = Products.Select(p => p).
+                                   Where(p => p.Code == int.Parse(selectedItem)).ToList()[0];
+            ChangeProduct(product);
 
         }
 
@@ -2243,12 +2273,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             Mat originalROIImage = CvInvoke.Imread(imagesPath + "updatedROI.bmp");
 
-            drawROI(originalROIImage);
+            DrawROI(originalROIImage);
 
             originalROIImage.Save(imagesPath + "roiDraw.bmp");
 
             //originalBox.LoadAsync();
-            updateView(originalBuffer, originalView, "roiDraw.bmp");
+            UpdateView(originalBuffer, originalView, "roiDraw.bmp");
 
             originalROIImage.Dispose();
         }
@@ -2496,12 +2526,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 if (freezeFrame)
                 {
-
                     originalView.Show();
                     processView.Show();
-                    //updateImage(originalBox, new Bitmap(imagesPath + "roiDraw.jpg"));
-                    //updateImage(processROIBox, new Bitmap(imagesPath + "final.jpg"));
-
                 }
                 else
                 {
@@ -2920,6 +2946,20 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             SystemEvents.SessionEnded += new SessionEndedEventHandler(SystemEvents_SessionEnded);
         }
 
+        private void LoadProducts()
+        {
+            Products.Clear();
+            using (var reader = new StreamReader(new FileStream(csvPath, FileMode.Open), System.Text.Encoding.UTF8))
+            using (var csvReader = new CsvReader(reader, CultureInfo.CurrentCulture))
+            {
+                var records = csvReader.GetRecords<Product>();
+                foreach (var record in records)
+                {
+                    Products.Add(record);
+                }
+            }
+        }
+
         //Catch the WM_SYSCOMMAND message and process it.
         protected override void WndProc(ref Message msg)
         {
@@ -2937,7 +2977,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             base.WndProc(ref msg);
         }
 
-        public string saveImage()
+        public string SaveImage()
         {
             string imagePath = imagesPath + "imagenOrigen.bmp";
 
@@ -2969,7 +3009,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
 
             return imagePath;
-            //return @"C:\Users\Jesús\Desktop\test.bmp";
+            //return @"C:\Users\Jesús\Pictures\Pruebas STI\STI-images\Linea 2\frames - copia (2)\2.bmp";
         }
 
         private int CalculateOtsuThreshold()
@@ -3038,28 +3078,28 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             if (modeNew == 0)
             {
                 bool succes = m_AcqDevice.SetFeatureValue("TriggerMode", 1);
-                triggerModeBtn.Enabled = true;
-                triggerModeBtn.BackColor = Color.Silver;
+                btnTriggerMode.Enabled = true;
+                btnTriggerMode.BackColor = Color.Silver;
                 txtFrameMode.BackColor = Color.LightGreen;
                 txtLiveMode.BackColor = Color.Transparent;
                 mode = 0;
-                processImageBtn.Enabled = true;
-                processImageBtn.BackColor = Color.Silver;
-                virtualTriggerBtn.Enabled = true;
-                virtualTriggerBtn.BackColor = Color.Silver;
+                btnProcessImage.Enabled = true;
+                btnProcessImage.BackColor = Color.Silver;
+                btnVirtualTrigger.Enabled = true;
+                btnVirtualTrigger.BackColor = Color.Silver;
 
             }
             else
             {
                 bool succes = m_AcqDevice.SetFeatureValue("TriggerMode", 0);
-                triggerModeBtn.Enabled = false;
-                triggerModeBtn.BackColor = Color.DarkGray;
+                btnTriggerMode.Enabled = false;
+                btnTriggerMode.BackColor = Color.DarkGray;
                 txtFrameMode.BackColor = Color.Transparent;
                 txtLiveMode.BackColor = Color.LightGreen;
-                virtualTriggerBtn.Enabled = false;
-                virtualTriggerBtn.BackColor = Color.DarkGray;
-                processImageBtn.Enabled = false;
-                processImageBtn.BackColor = Color.DarkGray;
+                btnVirtualTrigger.Enabled = false;
+                btnVirtualTrigger.BackColor = Color.DarkGray;
+                btnProcessImage.Enabled = false;
+                btnProcessImage.BackColor = Color.DarkGray;
                 mode = 1;
             }
 
@@ -3070,7 +3110,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         }
 
 
-        private void blobProces(Mat image)
+        private void BlobProcess(Mat image)
         {
             Blobs.Clear();
 
@@ -3081,7 +3121,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             // Inicializamos variables
             double MaxD = 0;
-            double MinD = 99999;
+            double MinD = 0;
             double avgD = 0;
             double avgDIA = 0;
             int n = 0;
@@ -3138,30 +3178,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                         double ovalidad = calculateOvality(maxDiameter, minDiameter);
 
-                        ushort size = calculateSize(maxDiameter, minDiameter, compactness, ovalidad, hole);
-
-                        // Agregamos los datos a la tabla
-                        // dataTable.Rows.Add(sector, area, Math.Round(diametroIA * tempFactor, 3), Math.Round(diameterTriangles * tempFactor, 3), Math.Round(maxDiameter * tempFactor, 3), Math.Round(minDiameter * tempFactor, 3), Math.Round(compactness, 3), Math.Round(ovalidad, 3));
+                        ushort size = CalculateSize(maxDiameter, minDiameter, compactness, ovalidad, hole, area);
 
                         Blob blob = new Blob((double)area, perimeter, contours[i], diameterTriangles, diametroIA, centro, maxDiameter, minDiameter, sector, compactness, size, ovalidad, hole);
-
-                        if (size != 6) // Shape
-                        {
-                            if (maxDiameter > MaxD)
-                            {
-                                MaxD = maxDiameter;
-                            }
-                            if (minDiameter < MinD)
-                            {
-                                MinD = minDiameter;
-                            }
-                            diametersCV.Add(diametroIA);
-                            // Sumamos para promediar
-                            avgDIA += (diametroIA);
-                            avgD += (diameterTriangles * tempFactor);
-                            // Aumentamos el numero de elementos para promediar
-                            n++;
-                        }
 
                         // Agregamos el elemento a la lista
                         Blobs.Add(blob);
@@ -3226,7 +3245,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             //Agujeros
             CheckHoles(nHoles);
 
-
             try
             {
                 drawPerimeters(image, contours, 1);
@@ -3245,13 +3263,21 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 Console.WriteLine(e);
             }
 
-            // Calculamos el promedio de los diametros
-            if (MinD == 99999)
+            try
             {
-                MinD = 0;
+                var validBlobs = Blobs.Where(blob => blob.Size != 6 && blob.Size != 7).ToList();
+                diametersCV = validBlobs.Select(blob => blob.DiametroIA).ToList();
+                avgDIA = validBlobs.Select(blob => blob.DiametroIA).Average();
+                avgD = validBlobs.Select(blob => blob.Diametro).Average();
+                MaxD = validBlobs.Select(blob => blob.DMayor).Max();
+                MinD = validBlobs.Select(blob => blob.DMenor).Min();
             }
-            avgDIA /= n;
-            avgD /= n;
+            catch
+            {
+
+            }
+
+            GraphResults(MaxD, MinD, avgDIA);
 
             double cv = CalculateCV(diametersCV);
 
@@ -3279,43 +3305,35 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             minDiameterAvg = MinD * euFactor;
             diameterControl = controlDiameter;
 
-            GraphResults(MaxD, MinD, avgDIA);
 
             if (units == "mm")
             {
                 // Asignamos el texto del promedio de los diametros
-                avg_diameter.Text = Math.Round(avgD, nUnitsMm).ToString();
+                avg_diameter.Text = Math.Round(avgD * euFactor, nUnitsMm).ToString();
                 txtAvgMaxD.Text = Math.Round(MaxD * euFactor, nUnitsMm).ToString();
                 txtAvgMinD.Text = Math.Round(MinD * euFactor, nUnitsMm).ToString();
                 txtEquivalentDiameter.Text = Math.Round(avgDIA * euFactor, nUnitsMm).ToString();
                 txtControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsMm).ToString();
                 dplControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsMm).ToString();
-                if (controlDiameter > maxDiameter || controlDiameter < minDiameter)
-                {
-                    dplControlDiameter.BackColor = Color.Red;
-                }
-                else
-                {
-                    dplControlDiameter.BackColor = Color.LightGreen;
-                }
             }
             else
             {
                 // Asignamos el texto del promedio de los diametros
-                avg_diameter.Text = Math.Round(avgD, nUnitsInch).ToString();
-                txtAvgMaxD.Text = Math.Round(MaxD, nUnitsInch).ToString();
-                txtAvgMinD.Text = Math.Round(MinD, nUnitsInch).ToString();
+                avg_diameter.Text = Math.Round(avgD * euFactor, nUnitsInch).ToString();
+                txtAvgMaxD.Text = Math.Round(MaxD * euFactor, nUnitsInch).ToString();
+                txtAvgMinD.Text = Math.Round(MinD * euFactor, nUnitsInch).ToString();
                 txtEquivalentDiameter.Text = Math.Round(avgDIA * euFactor, nUnitsInch).ToString();
                 txtControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsInch).ToString();
                 dplControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsInch).ToString();
-                if (controlDiameter > maxDiameter || controlDiameter < minDiameter)
-                {
-                    dplControlDiameter.BackColor = Color.Red;
-                }
-                else
-                {
-                    dplControlDiameter.BackColor = Color.LightGreen;
-                }
+            }
+
+            if (controlDiameter > maxDiameter || controlDiameter < minDiameter)
+            {
+                dplControlDiameter.BackColor = Color.Red;
+            }
+            else
+            {
+                dplControlDiameter.BackColor = Color.LightGreen;
             }
 
             // Asignar la DataTable al DataGridView
@@ -3376,12 +3394,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 trendChart.ChartAreas[0].AxisX.Minimum = now.AddHours(-1).ToOADate();
                 var now2 = now.ToOADate();
 
-                trendChart.Series[0].Points.AddXY(now2, MaxD * euFactor);
-                trendChart.Series[1].Points.AddXY(now2, MinD * euFactor);
-                trendChart.Series[2].Points.AddXY(now2, diameterControl * euFactor);
-                trendChart.Series[3].Points.AddXY(now2, dIA * euFactor);
-                trendChart.Series[4].Points.AddXY(now2, maxDiameter * euFactor);
-                trendChart.Series[5].Points.AddXY(now2, minDiameter * euFactor);
+                trendChart.Series["MaxDiameterSerie"].Points.AddXY(now2, MaxD * euFactor);
+                trendChart.Series["MinDiameterSerie"].Points.AddXY(now2, MinD * euFactor);
+                trendChart.Series["ControlDiameterSerie"].Points.AddXY(now2, controlDiameter * euFactor);
+                trendChart.Series["SEQDiameterSerie"].Points.AddXY(now2, dIA * euFactor);
+                trendChart.Series["MaxDiameterSP"].Points.AddXY(now2, maxDiameter * euFactor);
+                trendChart.Series["MinDiameterSP"].Points.AddXY(now2, minDiameter * euFactor);
 
                 trendChart.ChartAreas[0].AxisY.Title = "Diameter in " + units;
 
@@ -3594,24 +3612,33 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return ovality;
         }
 
-        private ushort calculateSize(double dMayor, double dMenor, double compacidad, double ovalidad, bool hole)
+        private ushort CalculateSize(double dMayor, double dMenor, double compacidad, double ovalidad, bool hole, int area)
         {
             ushort size = 1; // Normal
-            maxOvality = maxDiameter / minDiameter;
+            double maxOvality = maxDiameter / minDiameter;
+            double avg = (dMayor + dMenor) / 2;
+            int normalArea = (int)((Math.PI * Math.Pow(((maxDiameter + minDiameter) / 2), 2)) / 4);
 
             if (hole && compacidad > maxCompactnessHole || (!hole && compacidad > maxCompactness))
             {
-                size = 6; // Shape
+                if (ovalidad > maxOvality && area > normalArea * 1.4)
+                {
+                    size = 7; // Double
+                }
+                else
+                {
+                    size = 6; // Shape
+                }
             }
             else if (ovalidad > maxOvality)
             {
                 size = 4; // Oval
             }
-            else if (dMayor > maxDiameter)
+            else if (avg > maxDiameter)
             {
                 size = 2; // Big
             }
-            else if (dMenor < minDiameter)
+            else if (avg < minDiameter)
             {
                 size = 3; // Small
             }
@@ -3738,7 +3765,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             for (int i = 0; i < 24; i++)
             {
-                iteration = 0;
+                int iteration = 0;
                 Color pixelColor = image.GetPixel(newX, newY);
 
                 while (pixelColor.GetBrightness() != 0)
@@ -3759,13 +3786,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     }
 
                     pixelColor = image.GetPixel(newX, newY);
-
-                    //if (pixelColor.GetBrightness() == 0)
-                    //{
-                    //    newX -= (int)(deltaX[i] / 2);
-                    //    newY -= (int)(deltaY[i] / 2);
-                    //    break;
-                    //}
 
                     if (iteration >= maxIteration)
                     {
@@ -3798,29 +3818,61 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             maxDiameter = diameters.Max();
             minDiameter = diameters.Min();
 
-
             if (draw)
             {
-                int maxIndex = diameters.IndexOf(maxDiameter);
-                int minIndex = diameters.IndexOf(minDiameter);
-
-                // CvInvoke.Line(image,new Point(center.X, center.Y), listXY[maxIndex],new MCvScalar(2552,255,0));
-
-                using (Graphics g = Graphics.FromImage(image))
+                if (diameter90deg)
                 {
-                    Pen pen1 = new Pen(Color.Green, 2);
-                    Pen pen2 = new Pen(Color.Red, 2);
+                    int maxIndex = diameters.IndexOf(maxDiameter);
+                    int minIndex;
+                    if (maxIndex >= 6)
+                    {
+                        minIndex = maxIndex - 6;
+                    }
+                    else
+                    {
+                        minIndex = maxIndex + 6;
+                    }
 
-                    // Dibujar diámetro máximo
-                    g.DrawLine(pen1, new Point(center.X, center.Y), listXY[maxIndex]);
-                    g.DrawLine(pen1, new Point(center.X, center.Y), listXY[maxIndex + 12]);
+                    using (Graphics g = Graphics.FromImage(image))
+                    {
+                        Pen pen1 = new Pen(Color.Green, 2);
+                        Pen pen2 = new Pen(Color.Red, 2);
 
-                    // Dibujar diámetro minimo
-                    g.DrawLine(pen2, new Point(center.X, center.Y), listXY[minIndex]);
-                    g.DrawLine(pen2, new Point(center.X, center.Y), listXY[minIndex + 12]);
+                        // Dibujar diámetro máximo
+                        g.DrawLine(pen1, new Point(center.X, center.Y), listXY[maxIndex]);
+                        g.DrawLine(pen1, new Point(center.X, center.Y), listXY[maxIndex + 12]);
+
+                        // Dibujar diámetro minimo
+                        g.DrawLine(pen2, new Point(center.X, center.Y), listXY[minIndex]);
+                        g.DrawLine(pen2, new Point(center.X, center.Y), listXY[minIndex + 12]);
+                    }
+
+                    minDiameter = diameters[minIndex];
+                }
+                else
+                {
+                    int maxIndex = diameters.IndexOf(maxDiameter);
+                    int minIndex = diameters.IndexOf(minDiameter);
+
+
+                    using (Graphics g = Graphics.FromImage(image))
+                    {
+                        Pen pen1 = new Pen(Color.Green, 2);
+                        Pen pen2 = new Pen(Color.Red, 2);
+
+                        // Dibujar diámetro máximo
+                        g.DrawLine(pen1, new Point(center.X, center.Y), listXY[maxIndex]);
+                        g.DrawLine(pen1, new Point(center.X, center.Y), listXY[maxIndex + 12]);
+
+                        // Dibujar diámetro minimo
+                        g.DrawLine(pen2, new Point(center.X, center.Y), listXY[minIndex]);
+                        g.DrawLine(pen2, new Point(center.X, center.Y), listXY[minIndex + 12]);
+                    }
                 }
 
             }
+
+            diameter = (maxDiameter + minDiameter) / 2;
             return (diameter, maxDiameter, minDiameter);
         }
 
@@ -3902,14 +3954,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             stopwatch.Start();
 
-            process();
+            Process();
 
             stopwatch.Stop();
             timeElapsed.Text = stopwatch.ElapsedMilliseconds.ToString() + " ms";
             stopwatch.Restart();
         }
 
-        public void startStop()
+        public void StartStop()
         {
             this.StatusLabelInfo.Text = "";
             this.StatusLabelInfoTrash.Text = "";
@@ -3923,10 +3975,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     //txtFrameMode.Text = "LIVE";
                     txtFrameMode.BackColor = Color.Transparent;
                     txtLiveMode.BackColor = Color.LightGreen;
-                    virtualTriggerBtn.Enabled = false;
-                    virtualTriggerBtn.BackColor = Color.DarkGray;
-                    processImageBtn.Enabled = false;
-                    processImageBtn.BackColor = Color.DarkGray;
+                    btnVirtualTrigger.Enabled = false;
+                    btnVirtualTrigger.BackColor = Color.DarkGray;
+                    btnProcessImage.Enabled = false;
+                    btnProcessImage.BackColor = Color.DarkGray;
                     mode = 1;
 
                     if (triggerPLC)
@@ -3952,10 +4004,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     txtFrameMode.Text = "FRAME"; // Cambiar el texto cuando está desactivado
                     txtFrameMode.BackColor = Color.Khaki;
                     mode = 0;
-                    processImageBtn.Enabled = true;
-                    processImageBtn.BackColor = Color.Silver;
-                    virtualTriggerBtn.Enabled = true;
-                    virtualTriggerBtn.BackColor = Color.Silver;
+                    btnProcessImage.Enabled = true;
+                    btnProcessImage.BackColor = Color.Silver;
+                    btnVirtualTrigger.Enabled = true;
+                    btnVirtualTrigger.BackColor = Color.Silver;
                 }
             }
         }
@@ -3967,8 +4019,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             if (m_Xfer.Grabbing)
             {
                 m_Xfer.Abort();
-                processImageBtn.Enabled = true;
-                processImageBtn.BackColor = Color.Silver;
+                btnProcessImage.Enabled = true;
+                btnProcessImage.BackColor = Color.Silver;
             }
 
             if (triggerPLC)
@@ -3979,18 +4031,18 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 btnFreezeFrame.BackColor = Color.Silver;
                 txtPlcTrigger.BackColor = Color.LightGreen;
                 txtSoftwareTrigger.BackColor = Color.Transparent;
-                virtualTriggerBtn.Enabled = false;
-                virtualTriggerBtn.BackColor = Color.DarkGray;
+                btnVirtualTrigger.Enabled = false;
+                btnVirtualTrigger.BackColor = Color.DarkGray;
 
-                changeTriggerMode("PLC");
+                ChangeTriggerMode("PLC");
 
-                startStop();
+                StartStop();
 
-                viewModeBtn.Enabled = false;
-                viewModeBtn.BackColor = Color.DarkGray;
-                processImageBtn.Enabled = false;
-                processImageBtn.BackColor = Color.DarkGray;
-                processImageBtn.Text = "PROCESSING";
+                btnViewMode.Enabled = false;
+                btnViewMode.BackColor = Color.DarkGray;
+                btnProcessImage.Enabled = false;
+                btnProcessImage.BackColor = Color.DarkGray;
+                btnProcessImage.Text = "PROCESSING";
 
             }
             else
@@ -4006,27 +4058,27 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 btnFreezeFrame.BackColor = Color.DarkGray;
 
 
-                changeTriggerMode("SOFTWARE");
+                ChangeTriggerMode("SOFTWARE");
 
                 if (m_Xfer.Grab())
                 {
                     UpdateControls();
                 }
 
-                virtualTriggerBtn.Enabled = true;
-                virtualTriggerBtn.BackColor = Color.Silver;
+                btnVirtualTrigger.Enabled = true;
+                btnVirtualTrigger.BackColor = Color.Silver;
 
-                viewModeBtn.Enabled = true;
-                viewModeBtn.BackColor = Color.Silver;
-                processImageBtn.Enabled = true;
-                processImageBtn.BackColor = Color.Silver;
+                btnViewMode.Enabled = true;
+                btnViewMode.BackColor = Color.Silver;
+                btnProcessImage.Enabled = true;
+                btnProcessImage.BackColor = Color.Silver;
 
 
                 txtPlcTrigger.BackColor = Color.Transparent;
                 txtSoftwareTrigger.BackColor = Color.LightGreen;
-                processImageBtn.Text = "PROCESS FRAME";
-                processImageBtn.Enabled = false;
-                processImageBtn.BackColor = Color.DarkGray;
+                btnProcessImage.Text = "PROCESS FRAME";
+                btnProcessImage.Enabled = false;
+                btnProcessImage.BackColor = Color.DarkGray;
             }
 
         }
@@ -4263,8 +4315,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             if (succes)
             {
                 Console.WriteLine("VirtualTrigger");
-                processImageBtn.Enabled = true;
-                processImageBtn.BackColor = Color.Silver;
+                btnProcessImage.Enabled = true;
+                btnProcessImage.BackColor = Color.Silver;
             }
 
         }
@@ -4294,18 +4346,20 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             // Coloreamos todos los pixeles de fondo
             Array array = jerarquia.GetData();
-            for (int i = 0; i < contours.Size; i++)
-            {
-                // Si el contorno tiene un contorno padre
-                int a = (int)array.GetValue(0, i, 3);
-                int area = (int)CvInvoke.ContourArea(contours[i]);
-                //MessageBox.Show(array.GetValue(0,i,3).ToString());
-                if (a != -1 && area > 0 && area < minArea)
-                {
-                    // Dibujar el contorno interno en verde
-                    CvInvoke.DrawContours(image, contours, i, new MCvScalar(255, 255, 0), -1);
-                }
-            }
+            //for (int i = 0; i < contours.Size; i++)
+            //{
+            //    // Si el contorno tiene un contorno padre
+            //    int a = (int)array.GetValue(0, i, 3);
+            //    int area = (int)CvInvoke.ContourArea(contours[i]);
+            //    //MessageBox.Show(array.GetValue(0,i,3).ToString());
+            //    if (a != -1 && area > 0 && area < minArea)
+            //    {
+            //        // Dibujar el contorno interno en verde
+            //        CvInvoke.DrawContours(image, contours, i, new MCvScalar(255, 255, 0), -1);
+            //    }
+            //}
+
+            bool hole = false;
 
             for (int i = 0; i < contours.Size; i++)
             {
@@ -4314,9 +4368,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 {
                     double perimeter = CvInvoke.ArcLength(contours[i], true);
                     int indicePrimerHijo = Convert.ToInt32(array.GetValue(0, i, 2));
+                    hole = false;
                     if (indicePrimerHijo != -1)
                     {
-                        holePresent.Add(true);
                         // El contorno tiene al menos un hijo
                         // Iterar sobre los hijos y hacer lo que necesites
                         int indiceHijoActual = indicePrimerHijo;
@@ -4324,14 +4378,23 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         {
                             // Acceder al contorno hijo en el vector de contornos
                             VectorOfPoint contornoHijo = contours[indiceHijoActual];
+                            if (CvInvoke.ContourArea(contornoHijo) > 10)
+                            {
+                                hole = true;
+                                CvInvoke.DrawContours(image, contours, indiceHijoActual, new MCvScalar(0, 255, 0), -1);
 
-                            area -= CvInvoke.ContourArea(contornoHijo);
-                            perimeter += CvInvoke.ArcLength(contornoHijo, true);
+                                area -= CvInvoke.ContourArea(contornoHijo);
+                                perimeter += CvInvoke.ArcLength(contornoHijo, true);
 
-                            // Obtener el índice del siguiente hijo del contorno padre actual
-                            indiceHijoActual = Convert.ToInt32(array.GetValue(0, indiceHijoActual, 0));
+                                // Obtener el índice del siguiente hijo del contorno padre actual
+                                indiceHijoActual = Convert.ToInt32(array.GetValue(0, indiceHijoActual, 0));
+                            }
+                            
 
-                        } while (indiceHijoActual != -1); // Continuar mientras haya más hijos
+                        }while (indiceHijoActual != -1); // Continuar mientras haya más hijos
+
+                        if (hole) holePresent.Add(true);
+                        else holePresent.Add(false);
                     }
                     else
                     {
@@ -4428,10 +4491,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
 
             btnRestoreProduct.Enabled = false;
-            CmdUpdate.Enabled = false;
-            CmdAdd.Enabled = true;
-            CmdDelete.Enabled = true;
+            btnSaveProduct.Enabled = false;
+            btnAddProduct.Enabled = true;
+            btnDeleteProduct.Enabled = true;
             btnModifyProduct.Enabled = true;
+            CmbProducts.Enabled = true;
+            btnSaveProduct.BackColor = Color.Silver;
 
             EnabledDisabledProductModification(false);
         }
@@ -4443,22 +4508,16 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 string selected = CmbProducts.SelectedItem.ToString();
                 int selectedItem = int.Parse(CmbProducts.SelectedItem.ToString());
 
-                updateProdut(selectedItem);
+                UpdateProcess(selectedItem);
 
-                using (var reader = new StreamReader(new FileStream(csvPath, FileMode.Open), System.Text.Encoding.UTF8))
-                using (var csvReader = new CsvReader(reader, CultureInfo.CurrentCulture))
+                CmbProducts.Items.Clear();
+
+                foreach (var p in Products)
                 {
-                    var records = csvReader.GetRecords<Product>();
-                    CmbProducts.Items.Clear();
-                    //records.Add(new Product { Code = 1, MaxD = 130, MinD = 110, MaxOvality = 0.5, MaxCompacity = 12 });
-                    //csvWriter.WriteRecords(records);
-                    foreach (var record in records)
-                    {
-                        CmbProducts.Items.Add(record.Code);
-                    }
+                    CmbProducts.Items.Add(p.Code);
                 }
 
-                CmbProducts.SelectedIndex = 0;
+                CmbProducts.SelectedItem = selectedItem;
             }
             else
             {
@@ -4467,62 +4526,52 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
-        private void updateProdut(int selectedItem)
+        private void UpdateProcess(int selectedItem)
         {
-            var records = new List<Product>();
-
-            using (var reader = new StreamReader(new FileStream(csvPath, FileMode.Open), System.Text.Encoding.UTF8))
-            using (var csvReader = new CsvReader(reader, CultureInfo.CurrentCulture))
+            for (int i = 0; i < Products.Count; i++)
             {
-                records = csvReader.GetRecords<Product>().ToList();
-                //records.Add(new Product { Code = 1, MaxD = 130, MinD = 110, MaxOvality = 0.5, MaxCompacity = 12 });
-                //csvWriter.WriteRecords(records);
-                for (int i = 0; i < records.Count(); i++)
+                if (Products[i].Code == selectedItem)
                 {
-                    if (records[i].Code == selectedItem)
+                    int grid = 0;
+
+                    switch (CmbGrid.SelectedItem.ToString())
                     {
-                        int grid = 0;
-
-                        switch (CmbGrid.SelectedItem.ToString())
-                        {
-                            case "3x3":
-                                grid = 1;
-                                break;
-                            case "2x1x5":
-                                grid = 2;
-                                break;
-                            case "4x4":
-                                grid = 3;
-                                break;
-                            case "2x2":
-                                grid = 4;
-                                break;
-                        }
-
-                        string units = cmbProductUnits.SelectedItem.ToString();
-
-                        records[i] = new Product
-                        {
-                            Id = i + 1,
-                            Code = int.Parse(Txt_Code.Text),
-                            Name = Txt_Description.Text,
-                            MaxD = double.Parse(Txt_MaxD.Text),
-                            MinD = double.Parse(Txt_MinD.Text),
-                            //MaxOvality = double.Parse(Txt_Ovality.Text),
-                            MaxCompacity = maxCompactness,
-                            Grid = grid,
-                            Units = units
-                        };
-
-                        break;
+                        case "3x3":
+                            grid = 1;
+                            break;
+                        case "2x1x5":
+                            grid = 2;
+                            break;
+                        case "4x4":
+                            grid = 3;
+                            break;
+                        case "2x2":
+                            grid = 4;
+                            break;
                     }
+
+                    string units = cmbProductUnits.SelectedItem.ToString();
+
+                    Products[i] = new Product
+                    {
+                        Id = i + 1,
+                        Code = int.Parse(Txt_Code.Text),
+                        Name = Txt_Description.Text,
+                        MaxD = double.Parse(Txt_MaxD.Text),
+                        MinD = double.Parse(Txt_MinD.Text),
+                        MaxCompacity = maxCompactness,
+                        Grid = grid,
+                        Units = units
+                    };
+
+                    break;
                 }
             }
 
             using (var writer = new StreamWriter(new FileStream(csvPath, FileMode.Open), System.Text.Encoding.UTF8))
             using (var csvWriter = new CsvWriter(writer, CultureInfo.CurrentCulture))
             {
-                csvWriter.WriteRecords(records);
+                csvWriter.WriteRecords(Products);
             }
 
             MessageBox.Show("Product suceesfully updated", "Updated", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -4586,53 +4635,51 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void CmdDelete_Click(object sender, EventArgs e)
         {
-            string selected = CmbProducts.SelectedItem.ToString();
-            int selectedItem = int.Parse(CmbProducts.SelectedItem.ToString());
-
-            var newRecords = new List<Product>();
-
-            using (var reader = new StreamReader(new FileStream(csvPath, FileMode.Open), System.Text.Encoding.UTF8))
-            using (var csvReader = new CsvReader(reader, CultureInfo.CurrentCulture))
+            if(Products.Count < 2)
             {
-                var records = csvReader.GetRecords<Product>();
-                foreach (var record in records)
+                MessageBox.Show("Can´t delete all products");
+            }
+            else
+            {
+                string selected = CmbProducts.SelectedItem.ToString();
+                int selectedItem = int.Parse(CmbProducts.SelectedItem.ToString());
+
+                var newRecords = new List<Product>();
+
+                Products = Products.Select(p => p).Where(p => p.Code != selectedItem).ToList();
+
+                using (var writer = new StreamWriter(new FileStream(csvPath, FileMode.Create), System.Text.Encoding.UTF8))
+                using (var csvWriter = new CsvWriter(writer, CultureInfo.CurrentCulture))
                 {
-                    if (record.Code != selectedItem)
-                    {
-                        newRecords.Add(record);
-                    }
+                    csvWriter.WriteRecords(Products);
                 }
+
+                CmbProducts.Items.Clear();
+                foreach (var p in Products)
+                {
+                    CmbProducts.Items.Add(p.Code);
+                }
+
+                MessageBox.Show("Product deleted succesfully", "Deleted", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                CmbProducts.SelectedIndex = 0;
             }
-
-            using (var writer = new StreamWriter(new FileStream(csvPath, FileMode.Create), System.Text.Encoding.UTF8))
-            using (var csvWriter = new CsvWriter(writer, CultureInfo.CurrentCulture))
-            {
-                csvWriter.WriteRecords(newRecords);
-            }
-
-            CmbProducts.Items.Clear();
-            foreach (var record in newRecords)
-            {
-                CmbProducts.Items.Add(record.Code);
-            }
-
-            MessageBox.Show("Product deleted succesfully", "Deleted", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-            CmbProducts.SelectedIndex = 0;
         }
 
         private void CmdAdd_Click(object sender, EventArgs e)
         {
             EnabledDisabledProductModification(true);
-            CmdDelete.Enabled = false;
+            btnDeleteProduct.Enabled = false;
             btnModifyProduct.Enabled = false;
-            CmdUpdate.Enabled = true;
+            btnSaveProduct.Enabled = true;
             btnRestoreProduct.Enabled = false;
 
             modifyingProduct = false;
+            CmbProducts.Enabled = false;
+            btnSaveProduct.BackColor = Color.LightYellow;
 
             ClearProductFields();
-            //AddProduct();
+            
         }
 
         private void ClearProductFields()
@@ -4647,18 +4694,18 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void AddProduct()
         {
-            var records = new List<Product>();
+            //var records = new List<Product>();
 
             bool added = false;
 
-            using (var reader = new StreamReader(new FileStream(csvPath, FileMode.Open), System.Text.Encoding.UTF8))
-            using (var csvReader = new CsvReader(reader, CultureInfo.CurrentCulture))
-            {
-                records = csvReader.GetRecords<Product>().ToList();
+            //using (var reader = new StreamReader(new FileStream(csvPath, FileMode.Open), System.Text.Encoding.UTF8))
+            //using (var csvReader = new CsvReader(reader, CultureInfo.CurrentCulture))
+            //{
+                //records = csvReader.GetRecords<Product>().ToList();
                 List<int> ids = new List<int>();
                 List<int> codes = new List<int>();
 
-                foreach (var record in records)
+                foreach (var record in Products)
                 {
                     ids.Add(record.Id);
                     codes.Add(record.Code);
@@ -4690,7 +4737,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                         string units = cmbProductUnits.SelectedItem.ToString();
 
-                        records.Add(new Product
+                        Products.Add(new Product
                         {
                             Id = ids.Count + 1,
                             Code = int.Parse(Txt_Code.Text),
@@ -4713,7 +4760,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 {
                     MessageBox.Show("Invalid Data");
                 }
-            }
+            //}
 
             if (!added)
             {
@@ -4724,17 +4771,26 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 using (var writer = new StreamWriter(new FileStream(csvPath, FileMode.Open), System.Text.Encoding.UTF8))
                 using (var csvWriter = new CsvWriter(writer, CultureInfo.CurrentCulture))
                 {
-                    csvWriter.WriteRecords(records);
+                    csvWriter.WriteRecords(Products);
                 }
-                using (var reader2 = new StreamReader(new FileStream(csvPath, FileMode.Open), System.Text.Encoding.UTF8))
-                using (var csvReader2 = new CsvReader(reader2, CultureInfo.CurrentCulture))
+
+                //LoadProducts();
+
+                //using (var reader2 = new StreamReader(new FileStream(csvPath, FileMode.Open), System.Text.Encoding.UTF8))
+                //using (var csvReader2 = new CsvReader(reader2, CultureInfo.CurrentCulture))
+                //{
+                //    CmbProducts.Items.Clear();
+                //    var records2 = csvReader2.GetRecords<Product>();
+                //    foreach (var record in records2)
+                //    {
+                //        CmbProducts.Items.Add(record.Code);
+                //    }
+                //}
+
+                CmbProducts.Items.Clear();
+                foreach (var p in Products)
                 {
-                    CmbProducts.Items.Clear();
-                    var records2 = csvReader2.GetRecords<Product>();
-                    foreach (var record in records2)
-                    {
-                        CmbProducts.Items.Add(record.Code);
-                    }
+                    CmbProducts.Items.Add(p.Code);
                 }
 
                 CmbProducts.SelectedItem = int.Parse(Txt_Code.Text);
@@ -5170,7 +5226,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             if (!triggerPLC && mode == 0)
             {
-                using (var inputForm = new InputDlg2(units))
+                if (units == "inch") euFactor *= 25.4;
+                using (var inputForm = new InputDlg2("mm"))
                 {
                     if (inputForm.ShowDialog() == DialogResult.OK)
                     {
@@ -5181,6 +5238,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         fov = 2 * Math.Tan(fov / 2) * height;
 
                         euFactor = fov / 640;
+                        if (units == "inch") euFactor *= 0.0393701;
                         settings.EUFactor = euFactor;
                         euFactorTxt.Text = Math.Round(euFactor, 3).ToString();
                         maxDiameter = double.Parse(Txt_MaxDiameter.Text) / euFactor;
@@ -5628,7 +5686,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 {
                     if (record.Code == int.Parse(selectedItem))
                     {
-                        changeProduct(record);
+                        ChangeProduct(record);
                     }
                 }
             }
@@ -5636,17 +5694,19 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void pictureBox1_Click(object sender, EventArgs e)
         {
-            Process.Start(new ProcessStartInfo("https://sios.sunderteck.com/") { UseShellExecute = true });
+            System.Diagnostics.Process.Start(new ProcessStartInfo("https://sios.sunderteck.com/") { UseShellExecute = true });
         }
 
         private void btnModifyProduct_Click(object sender, EventArgs e)
         {
             EnabledDisabledProductModification(true);
-            CmdDelete.Enabled = false;
-            CmdAdd.Enabled = false;
-            CmdUpdate.Enabled = true;
+            btnDeleteProduct.Enabled = false;
+            btnAddProduct.Enabled = false;
+            btnSaveProduct.Enabled = true;
             btnRestoreProduct.Enabled = true;
 
+            CmbProducts.Enabled = false;
+            btnSaveProduct.BackColor = Color.LightYellow;
             modifyingProduct = true;
         }
 
@@ -5835,6 +5895,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private void txtValidFramesLimit_Click(object sender, EventArgs e)
         {
             ShowInputKeyboard((TextBox)sender, 0);
+        }
+
+        private void btn90DegDiameters_Click(object sender, EventArgs e)
+        {
+            diameter90deg = !diameter90deg;
+            if (diameter90deg) btn90DegDiameters.BackColor = Color.LightGreen;
+            else btn90DegDiameters.BackColor = Color.Silver;
         }
     }
 }
