@@ -37,9 +37,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GigECameraDemoDlg));
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.StatusLabel = new System.Windows.Forms.ToolStripLabel();
             this.StatusLabelInfo = new System.Windows.Forms.ToolStripLabel();
@@ -128,6 +128,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.label15 = new System.Windows.Forms.Label();
             this.txtControlDiameterUnits = new System.Windows.Forms.Label();
             this.configurationPage = new System.Windows.Forms.TabPage();
+            this.groupBox16 = new System.Windows.Forms.GroupBox();
+            this.btn90DegDiameters = new System.Windows.Forms.Button();
             this.gbShapeIndicator = new System.Windows.Forms.GroupBox();
             this.label21 = new System.Windows.Forms.Label();
             this.txtCompacityHoleLimit = new System.Windows.Forms.TextBox();
@@ -143,7 +145,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.GB_Threshold = new System.Windows.Forms.GroupBox();
             this.btnAutoThreshold = new System.Windows.Forms.Button();
             this.btnManualThreshold = new System.Windows.Forms.Button();
-            this.Txt_Threshold = new System.Windows.Forms.TextBox();
+            this.txtThreshold = new System.Windows.Forms.TextBox();
             this.boxROI = new System.Windows.Forms.GroupBox();
             this.btnDecrementRoiHeight = new System.Windows.Forms.Button();
             this.btnIncrementRoiHeight = new System.Windows.Forms.Button();
@@ -222,8 +224,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.Label27 = new System.Windows.Forms.Label();
             this.Label28 = new System.Windows.Forms.Label();
             this.tmrMB = new System.Windows.Forms.Timer(this.components);
-            this.btn90DegDiameters = new System.Windows.Forms.Button();
-            this.groupBox16 = new System.Windows.Forms.GroupBox();
             this.toolStrip1.SuspendLayout();
             this.GroupBox1.SuspendLayout();
             this.groupBox15.SuspendLayout();
@@ -238,6 +238,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.groupBox2.SuspendLayout();
             this.groupBox12.SuspendLayout();
             this.configurationPage.SuspendLayout();
+            this.groupBox16.SuspendLayout();
             this.gbShapeIndicator.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.GB_Threshold.SuspendLayout();
@@ -260,7 +261,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.GroupBox13.SuspendLayout();
             this.GroupBox10.SuspendLayout();
             this.GroupBox9.SuspendLayout();
-            this.groupBox16.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStrip1
@@ -1265,6 +1265,31 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.configurationPage.TabIndex = 1;
             this.configurationPage.Text = "CONFIG";
             // 
+            // groupBox16
+            // 
+            this.groupBox16.Controls.Add(this.btn90DegDiameters);
+            this.groupBox16.Location = new System.Drawing.Point(6, 669);
+            this.groupBox16.Name = "groupBox16";
+            this.groupBox16.Size = new System.Drawing.Size(458, 100);
+            this.groupBox16.TabIndex = 131;
+            this.groupBox16.TabStop = false;
+            this.groupBox16.Text = "Parameters";
+            // 
+            // btn90DegDiameters
+            // 
+            this.btn90DegDiameters.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btn90DegDiameters.AutoSize = true;
+            this.btn90DegDiameters.BackColor = System.Drawing.Color.Silver;
+            this.btn90DegDiameters.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btn90DegDiameters.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold);
+            this.btn90DegDiameters.Location = new System.Drawing.Point(50, 40);
+            this.btn90DegDiameters.Name = "btn90DegDiameters";
+            this.btn90DegDiameters.Size = new System.Drawing.Size(86, 42);
+            this.btn90DegDiameters.TabIndex = 125;
+            this.btn90DegDiameters.Text = "DIA. 90°";
+            this.btn90DegDiameters.UseVisualStyleBackColor = false;
+            this.btn90DegDiameters.Click += new System.EventHandler(this.btn90DegDiameters_Click);
+            // 
             // gbShapeIndicator
             // 
             this.gbShapeIndicator.Controls.Add(this.label21);
@@ -1426,7 +1451,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             this.GB_Threshold.Controls.Add(this.btnAutoThreshold);
             this.GB_Threshold.Controls.Add(this.btnManualThreshold);
-            this.GB_Threshold.Controls.Add(this.Txt_Threshold);
+            this.GB_Threshold.Controls.Add(this.txtThreshold);
             this.GB_Threshold.Font = new System.Drawing.Font("Alef", 10F);
             this.GB_Threshold.Location = new System.Drawing.Point(6, 272);
             this.GB_Threshold.Name = "GB_Threshold";
@@ -1465,21 +1490,21 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.btnManualThreshold.UseVisualStyleBackColor = false;
             this.btnManualThreshold.Click += new System.EventHandler(this.btnManualThreshold_Click);
             // 
-            // Txt_Threshold
+            // txtThreshold
             // 
-            this.Txt_Threshold.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.Txt_Threshold.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.Txt_Threshold.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.Txt_Threshold.Font = new System.Drawing.Font("Microsoft Sans Serif", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Txt_Threshold.Location = new System.Drawing.Point(121, 83);
-            this.Txt_Threshold.MaxLength = 3;
-            this.Txt_Threshold.Name = "Txt_Threshold";
-            this.Txt_Threshold.Size = new System.Drawing.Size(88, 40);
-            this.Txt_Threshold.TabIndex = 12;
-            this.Txt_Threshold.Text = "0";
-            this.Txt_Threshold.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.Txt_Threshold.Click += new System.EventHandler(this.Txt_Threshold_Click);
-            this.Txt_Threshold.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Txt_Threshold_KeyPress);
+            this.txtThreshold.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.txtThreshold.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtThreshold.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.txtThreshold.Font = new System.Drawing.Font("Microsoft Sans Serif", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtThreshold.Location = new System.Drawing.Point(121, 83);
+            this.txtThreshold.MaxLength = 3;
+            this.txtThreshold.Name = "txtThreshold";
+            this.txtThreshold.Size = new System.Drawing.Size(88, 40);
+            this.txtThreshold.TabIndex = 12;
+            this.txtThreshold.Text = "0";
+            this.txtThreshold.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtThreshold.Click += new System.EventHandler(this.Txt_Threshold_Click);
+            this.txtThreshold.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Txt_Threshold_KeyPress);
             // 
             // boxROI
             // 
@@ -2069,25 +2094,25 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.trendChart.BorderlineColor = System.Drawing.Color.Black;
             this.trendChart.BorderlineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Solid;
             this.trendChart.BorderlineWidth = 2;
-            chartArea2.AxisX.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Seconds;
-            chartArea2.AxisX.LabelStyle.Format = "HH:mm:ss";
-            chartArea2.AxisX.LabelStyle.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Auto;
-            chartArea2.AxisX.ScrollBar.Enabled = false;
-            chartArea2.AxisY.Maximum = 300D;
-            chartArea2.Name = "ChartArea1";
-            this.trendChart.ChartAreas.Add(chartArea2);
-            legend2.Docking = System.Windows.Forms.DataVisualization.Charting.Docking.Top;
-            legend2.Name = "Legend1";
-            this.trendChart.Legends.Add(legend2);
+            chartArea1.AxisX.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Seconds;
+            chartArea1.AxisX.LabelStyle.Format = "HH:mm:ss";
+            chartArea1.AxisX.LabelStyle.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Auto;
+            chartArea1.AxisX.ScrollBar.Enabled = false;
+            chartArea1.AxisY.Maximum = 300D;
+            chartArea1.Name = "ChartArea1";
+            this.trendChart.ChartAreas.Add(chartArea1);
+            legend1.Docking = System.Windows.Forms.DataVisualization.Charting.Docking.Top;
+            legend1.Name = "Legend1";
+            this.trendChart.Legends.Add(legend1);
             this.trendChart.Location = new System.Drawing.Point(0, 0);
             this.trendChart.Name = "trendChart";
-            series2.ChartArea = "ChartArea1";
-            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series2.Legend = "Legend1";
-            series2.LegendText = "Max Diameter";
-            series2.Name = "MaxDiameterSerie";
-            series2.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
-            this.trendChart.Series.Add(series2);
+            series1.ChartArea = "ChartArea1";
+            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series1.Legend = "Legend1";
+            series1.LegendText = "Max Diameter";
+            series1.Name = "MaxDiameterSerie";
+            series1.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
+            this.trendChart.Series.Add(series1);
             this.trendChart.Size = new System.Drawing.Size(806, 480);
             this.trendChart.TabIndex = 0;
             this.trendChart.Text = "chart1";
@@ -2445,31 +2470,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.tmrMB.Interval = 1000;
             this.tmrMB.Tick += new System.EventHandler(this.tmrMB_Tick);
             // 
-            // btn90DegDiameters
-            // 
-            this.btn90DegDiameters.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btn90DegDiameters.AutoSize = true;
-            this.btn90DegDiameters.BackColor = System.Drawing.Color.Silver;
-            this.btn90DegDiameters.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btn90DegDiameters.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold);
-            this.btn90DegDiameters.Location = new System.Drawing.Point(50, 40);
-            this.btn90DegDiameters.Name = "btn90DegDiameters";
-            this.btn90DegDiameters.Size = new System.Drawing.Size(86, 42);
-            this.btn90DegDiameters.TabIndex = 125;
-            this.btn90DegDiameters.Text = "DIA. 90°";
-            this.btn90DegDiameters.UseVisualStyleBackColor = false;
-            this.btn90DegDiameters.Click += new System.EventHandler(this.btn90DegDiameters_Click);
-            // 
-            // groupBox16
-            // 
-            this.groupBox16.Controls.Add(this.btn90DegDiameters);
-            this.groupBox16.Location = new System.Drawing.Point(6, 669);
-            this.groupBox16.Name = "groupBox16";
-            this.groupBox16.Size = new System.Drawing.Size(458, 100);
-            this.groupBox16.TabIndex = 131;
-            this.groupBox16.TabStop = false;
-            this.groupBox16.Text = "Parameters";
-            // 
             // GigECameraDemoDlg
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -2507,6 +2507,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.groupBox12.ResumeLayout(false);
             this.groupBox12.PerformLayout();
             this.configurationPage.ResumeLayout(false);
+            this.groupBox16.ResumeLayout(false);
+            this.groupBox16.PerformLayout();
             this.gbShapeIndicator.ResumeLayout(false);
             this.gbShapeIndicator.PerformLayout();
             this.groupBox4.ResumeLayout(false);
@@ -2542,8 +2544,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.GroupBox10.ResumeLayout(false);
             this.GroupBox9.ResumeLayout(false);
             this.GroupBox9.PerformLayout();
-            this.groupBox16.ResumeLayout(false);
-            this.groupBox16.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -2630,7 +2630,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         internal Label label9;
         private ComboBox CmbGrid;
         internal GroupBox GB_Threshold;
-        internal TextBox Txt_Threshold;
+        internal TextBox txtThreshold;
         private Label txtAvgMinD;
         private Label txtAvgMaxD;
         private Label txtControlDiameter;

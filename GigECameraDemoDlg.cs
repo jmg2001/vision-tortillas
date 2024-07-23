@@ -37,6 +37,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 {
     public partial class GigECameraDemoDlg : Form
     {
+        bool linesFilter = true;
         bool diameter90deg = true;
 
         // LINQ
@@ -1741,29 +1742,85 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
             txtFramesCount.Text = frameCounter.ToString();
 
-            //----------------Only for Debug, delete on production-----------------
-            settings.frames++;
-            //----------------Only for Debug, delete on production-----------------
+            ////----------------Only for Debug, delete on production-----------------
+            //settings.frames++;
+            ////----------------Only for Debug, delete on production-----------------
 
             //originalBox.Visible = true;
             //processROIBox.Visible = true; // Mostrar el PictureBox ROI
             Mat binarizedImage = new Mat();
+            Mat grayImage = new Mat();
 
             // Se binariza la imagen
             try
             {
+                CvInvoke.CvtColor(originalImageCV, grayImage, ColorConversion.Bgra2Gray);
                 //binarizedImage = binarizeImage(originalImage, 0);
-                binarizedImage = binarizeImage(originalImageCV, 0);
+                //binarizedImage = binarizeImage(originalImageCV, 0);
+                if (autoThreshold)
+                {
+                    threshold = (int)CvInvoke.Threshold(grayImage, binarizedImage, 0, 255, ThresholdType.Otsu);
+                    txtThreshold.Text = threshold.ToString();
+                }
+                else
+                {
+                    threshold = int.Parse(txtThreshold.Text);
+                    CvInvoke.Threshold(grayImage, binarizedImage, threshold, 255, ThresholdType.Binary);
+                }
+
+                CvInvoke.CvtColor(binarizedImage, binarizedImage, ColorConversion.Gray2Bgra);
+
                 originalImageCV.Dispose();
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 Console.WriteLine("Binarization problem");
                 return;
             }
 
+            Mat roiImage = new Mat();
+
+            if (linesFilter)
+            {
+                int div = 64;
+
+                Mat hori = binarizedImage.Clone();
+
+                // Especificar tamaño en el eje horizontal
+                int cols = hori.Cols;
+                int horizontalSize = cols / div;
+
+                // Crear elemento estructural para extraer líneas horizontales a través de operaciones morfológicas
+                Mat horizontalStructure = CvInvoke.GetStructuringElement(ElementShape.Rectangle, new Size(horizontalSize, 1), new Point(-1, -1));
+
+                // Aplicar operaciones morfológicas
+                CvInvoke.Erode(hori, hori, horizontalStructure, new Point(-1, -1), 1, BorderType.Default, new MCvScalar());
+                CvInvoke.Dilate(hori, hori, horizontalStructure, new Point(-1, -1), 1, BorderType.Default, new MCvScalar());
+
+                // Especificar tamaño en el eje horizontal
+                int rows = hori.Rows;
+                int verticalSize = rows / div;
+
+                // Crear elemento estructural para extraer líneas horizontales a través de operaciones morfológicas
+                Mat verticalStructure = CvInvoke.GetStructuringElement(ElementShape.Rectangle, new Size(1, verticalSize), new Point(-1, -1));
+
+                // Aplicar operaciones morfológicas
+                CvInvoke.Erode(hori, hori, verticalStructure, new Point(-1, -1), 1, BorderType.Default, new MCvScalar());
+                CvInvoke.Dilate(hori, hori, verticalStructure, new Point(-1, -1), 1, BorderType.Default, new MCvScalar());
+
+                // Se extrae el ROI de la imagen binarizada
+                roiImage = ExtractROI(hori);
+            }
+            else
+            {
+
+                // Se extrae el ROI de la imagen binarizada
+                roiImage = ExtractROI(binarizedImage);
+            }
+
             // Se extrae el ROI de la imagen binarizada
-            Mat roiImage = ExtractROI(binarizedImage);
+            //Mat roiImage = ExtractROI(binarizedImage);
 
             // Colocamos el picturebox del ROI
             SetPictureBoxPositionAndSize(ref processBuffer, imagePage);
@@ -3008,8 +3065,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 Console.WriteLine(exception);
             }
 
-            return imagePath;
-            //return @"C:\Users\Jesús\Pictures\Pruebas STI\STI-images\Linea 2\frames - copia (2)\2.bmp";
+            //return imagePath;
+            return @"C:\Users\Jesús\Pictures\Pruebas STI\STI-images\Linea 2\frames - copia (4)\16.bmp";
         }
 
         private int CalculateOtsuThreshold()
@@ -3118,6 +3175,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             maxArea = (int)(((Math.Pow(maxDiameter, 2) / 4) * Math.PI) * 1.5);
 
             var (contours, centers, areas, perimeters, holePresent) = FindContoursWithEdgesAndCenters(image);
+
+            //CvInvoke.CvtColor(image, image, ColorConversion.Bgr2Gray);
 
             // Inicializamos variables
             double MaxD = 0;
@@ -3253,6 +3312,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 MessageBox.Show(ex.Message);
             }
+
+            //CvInvoke.CvtColor(image, image, ColorConversion.Gray2Bgr);
 
             try
             {
@@ -3653,11 +3714,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 if (autoThreshold)
                 {
                     threshold = CalculateOtsuThreshold();
-                    Txt_Threshold.Text = threshold.ToString();
+                    txtThreshold.Text = threshold.ToString();
                 }
                 else
                 {
-                    threshold = int.Parse(Txt_Threshold.Text);
+                    threshold = int.Parse(txtThreshold.Text);
                 }
             }
             catch (FormatException)
@@ -4133,7 +4194,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             if (e.KeyChar == (char)Keys.Enter)
             {
                 // Intentar convertir el texto del TextBox a un número entero
-                if (int.TryParse(Txt_Threshold.Text, out threshold))
+                if (int.TryParse(txtThreshold.Text, out threshold))
                 {
                     // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
                     //MessageBox.Show("Data saved: " + threshold, "Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -5391,13 +5452,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             // Threshold
-            if (int.TryParse(Txt_Threshold.Text, out threshold))
+            if (int.TryParse(txtThreshold.Text, out threshold))
             {
             }
             else
             {
                 MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Txt_Threshold.Text = threshold.ToString();
+                txtThreshold.Text = threshold.ToString();
             }
 
             // Valid Frames Limir

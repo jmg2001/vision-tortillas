@@ -150,14 +150,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="STI.exe" size="290816">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="STI.exe" size="291328">
       <assemblyIdentity name="STI" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>VrNOtCWXgT5FiXtWvQ7fmydfUEANoQXmSB1SdTqkTyI=</dsig:DigestValue>
+        <dsig:DigestValue>EvOWYw9PpTeTvnXlfPeD1uDwPhLQNmOrdXV+YsO1dzM=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
