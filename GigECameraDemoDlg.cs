@@ -325,7 +325,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 processView.AutoEmpty = true;
                 //----------------Only for Debug, delete on production-----------------
 
-
                 // Cargamos la configuracion por default
                 m_AcqDevice.LoadFeatures(configPath + "STIconfig.ccf");
 
@@ -891,7 +890,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                             PreProcess();
                             break;
                         case 1:
-                            m_ImageBox.BringToFront();
+                            boxOriginal.Visible = false;
+                            boxProcess.Visible = false;
+                            //m_ImageBox.BringToFront();
                             m_View.Show();
                             break;
                     }
@@ -1202,12 +1203,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             if (units == "mm")
             {
-                txtControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsMm).ToString();
+                
                 dplControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsMm).ToString();
             }
             else
             {
-                txtControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsInch).ToString();
+
                 dplControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsInch).ToString();
             }
 
@@ -1674,22 +1675,19 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
             txtFramesCount.Text = frameCounter.ToString();
 
-            ////----------------Only for Debug, delete on production-----------------
-            //settings.frames++;
-            ////----------------Only for Debug, delete on production-----------------
-            ///
             Mat roiImage = new Mat();
             roiImage = ExtractROI(originalImageCV);
 
             Mat binarizedImage = new Mat();
+            
 
             // Se binariza la imagen
             try
             {
                 if (autoThreshold)
                 {
-                    Mat grayImage = new Mat();
 
+                    Mat grayImage = new Mat();
                     CvInvoke.CvtColor(roiImage, grayImage, ColorConversion.Bgr2Gray);
                     threshold = (int)CvInvoke.Threshold(grayImage, binarizedImage, 0, 255, ThresholdType.Otsu);
                     txtThreshold.Text = threshold.ToString();
@@ -2374,7 +2372,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     double controlDiameter = 0;
                     if (Double.TryParse(dplControlDiameter.Text, out controlDiameter)) ;
                     controlDiameter *= fact;
-                    txtControlDiameter.Text = Math.Round(controlDiameter, nUnitsInch).ToString();
                     dplControlDiameter.Text = Math.Round(controlDiameter, nUnitsInch).ToString();
 
                     double avgMinDiameter = 0;
@@ -2415,7 +2412,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     double controlDiameter = 0;
                     if (Double.TryParse(dplControlDiameter.Text, out controlDiameter)) ;
                     controlDiameter *= fact;
-                    txtControlDiameter.Text = Math.Round(controlDiameter, nUnitsMm).ToString();
+
                     dplControlDiameter.Text = Math.Round(controlDiameter, nUnitsMm).ToString();
 
                     double avgMinDiameter = 0;
@@ -2597,33 +2594,33 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
 
         // Create new objects with acquisition information
-        public bool CreateNewObjects(BufferDlg dlg)
-        {
-            m_AcqDevice = new SapAcqDevice(m_ServerLocation, m_ConfigFileName);
-            if (dlg.Count > 1)
-                m_Buffers = new SapBufferWithTrash(dlg.Count, m_AcqDevice, dlg.Type);
-            else
-                m_Buffers = new SapBuffer(1, m_AcqDevice, dlg.Type);
-            m_Xfer = new SapAcqDeviceToBuf(m_AcqDevice, m_Buffers);
-            m_View = new SapView(m_Buffers);
-            m_ImageBox.View = m_View;
+        //public bool CreateNewObjects(BufferDlg dlg, bool r)
+        //{
+        //    m_AcqDevice = new SapAcqDevice(m_ServerLocation, m_ConfigFileName);
+        //    if (dlg.Count > 1)
+        //        m_Buffers = new SapBufferWithTrash(dlg.Count, m_AcqDevice, dlg.Type);
+        //    else
+        //        m_Buffers = new SapBuffer(1, m_AcqDevice, dlg.Type);
+        //    m_Xfer = new SapAcqDeviceToBuf(m_AcqDevice, m_Buffers);
+        //    m_View = new SapView(m_Buffers);
+        //    m_ImageBox.View = m_View;
 
-            m_Xfer.Pairs[0].EventType = SapXferPair.XferEventType.EndOfFrame;
-            m_Xfer.XferNotify += new SapXferNotifyHandler(xfer_XferNotify);
-            m_Xfer.XferNotifyContext = this;
-            StatusLabelInfo.Text = "Online... Waiting grabbed images";
+        //    m_Xfer.Pairs[0].EventType = SapXferPair.XferEventType.EndOfFrame;
+        //    m_Xfer.XferNotify += new SapXferNotifyHandler(xfer_XferNotify);
+        //    m_Xfer.XferNotifyContext = this;
+        //    StatusLabelInfo.Text = "Online... Waiting grabbed images";
 
-            if (!CreateObjects())
-            {
-                DisposeObjects();
-                return false;
-            }
+        //    if (!CreateObjects())
+        //    {
+        //        DisposeObjects();
+        //        return false;
+        //    }
 
-            // Resize ImagBox to take into account the size of created sapview
-            m_ImageBox.OnSize();
-            UpdateControls();
-            return true;
-        }
+        //    // Resize ImagBox to take into account the size of created sapview
+        //    m_ImageBox.OnSize();
+        //    UpdateControls();
+        //    return true;
+        //}
 
 
         // Call Create Object 
@@ -2776,29 +2773,29 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         //
         //*****************************************************************************************
 
-        private void button_Buffer_Click(object sender, EventArgs e)
-        {
-            // Set new buffer parameters
-            BufferDlg dlg = new BufferDlg(m_Buffers, m_View.Display, true);
-            if (dlg.ShowDialog() == DialogResult.OK)
-            {
-                DestroyObjects();
-                DisposeObjects();
+        //private void button_Buffer_Click(object sender, EventArgs e)
+        //{
+        //    // Set new buffer parameters
+        //    BufferDlg dlg = new BufferDlg(m_Buffers, m_View.Display, true);
+        //    if (dlg.ShowDialog() == DialogResult.OK)
+        //    {
+        //        DestroyObjects();
+        //        DisposeObjects();
 
-                //Update objects with new buffer
-                if (!CreateNewObjects(dlg))
-                {
-                    MessageBox.Show("New objects creation has failed. Restoring original object ");
-                    // Recreate original objects
-                    if (!CreateNewObjects(null, true))
-                    {
-                        MessageBox.Show("Original object creation has failed. Closing application ");
-                        System.Windows.Forms.Application.Exit();
-                    }
-                }
-            }
-            m_ImageBox.Refresh();
-        }
+        //        //Update objects with new buffer
+        //        if (!CreateNewObjects(dlg))
+        //        {
+        //            MessageBox.Show("New objects creation has failed. Restoring original object ");
+        //            // Recreate original objects
+        //            if (!CreateNewObjects(null, true))
+        //            {
+        //                MessageBox.Show("Original object creation has failed. Closing application ");
+        //                System.Windows.Forms.Application.Exit();
+        //            }
+        //        }
+        //    }
+        //    m_ImageBox.Refresh();
+        //}
 
         private void button_View_Click(object sender, EventArgs e)
         {
@@ -3328,12 +3325,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             
             if (units == "mm")
             {
-                txtControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsMm).ToString();
+
                 dplControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsMm).ToString();
             }
             else
             {
-                txtControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsInch).ToString();
+
                 dplControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsInch).ToString();
             }
 
