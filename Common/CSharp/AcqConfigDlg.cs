@@ -161,7 +161,7 @@ namespace DALSA.SaperaLT.SapClassGui
                     comboBox_Device.Items.Add(resourceName);
                     if (i == m_ResourceIndex)
                         comboBox_Device.SelectedItem = resourceName;
-                    if (resourceName == "M0002101")
+                    if (resourceName == "M0001351")
                         valid = true;
                     Console.WriteLine(resourceName);
                 }

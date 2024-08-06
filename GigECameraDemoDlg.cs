@@ -76,15 +76,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         float align = 0;
 
         // Datos de la lente
-        double lenF = 8.52;
-        double lenWidth = 10.88;
-        double lenHeight = 8.16;
+        double lenF = 8.52; // mm
+        double lenWidth = 10.88; // mm
+        double lenHeight = 8.16; // mm
 
         // Color de la tortilla en la imagen binarizada
         int tortillaColor = 1; // 1 - Blanco, 0 - Negro
         int backgroundColor = 0;
-
-        List<List<Point>> bgArea = new List<List<Point>>();
 
         // Variables para el Threshold
         int threshold = 128;
@@ -208,6 +206,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         double targetCalibrationSize = 0;
 
+        int imageWidth = 640;
+        int imageHeight = 480;
+
         // Delegate to display number of frame acquired 
         // Delegate is needed because .NEt framework does not support  cross thread control modification
         private delegate void DisplayFrameAcquired(int number, bool trash);
@@ -268,7 +269,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 InitializeComponent();
 
                 InitElements();
+
                 InitializeDataTable();
+
                 InitChart();
 
                 InitControlDiameter();
@@ -472,14 +475,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             LoadSettings();
             SetTexts();
 
-            if (diameter90deg)
-            {
-                btn90DegDiameters.BackColor = Color.LightGreen;
-            }
-            else
-            {
-                btn90DegDiameters.BackColor = Color.Silver;
-            }
+            if (diameter90deg) btn90DegDiameters.BackColor = Color.LightGreen;
+            else btn90DegDiameters.BackColor = Color.Silver;
+
+            if (linesFilter) btnLinesFilter.BackColor = Color.LightGreen;
+            else btnLinesFilter.BackColor = Color.Silver;
 
             btnSetPointPLC.BackColor = Color.LightGreen;
             operationMode = 2;
@@ -591,15 +591,16 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 }
             }
 
-            sizes.Add("Size");
+            sizes.Add("SIZE");
             sizes.Add("OK");
             sizes.Add("BIG");
             sizes.Add("SMALL");
             sizes.Add("OVAL");
-            sizes.Add("Oversize");
+            sizes.Add("OVERSIZE");
             sizes.Add("SHAPE");
+            sizes.Add("DOUBLE");
 
-            Txt_MaxCompacity.KeyPress += Txt_MaxCompacity_KeyPress;
+            txtMaxCompacity.KeyPress += Txt_MaxCompacity_KeyPress;
 
             if (autoThreshold)
             {
@@ -639,7 +640,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             txtMinDProductUnits.Text = units;
 
             // Parameters and Factor
-            euFactorTxt.Text = Math.Round(euFactor, 3).ToString();
+            lblEuFactor.Text = Math.Round(euFactor, 3).ToString();
             txtMinBlobObjects.Text = minBlobObjects.ToString();
             txtAlpha.Text = alpha.ToString();
 
@@ -656,11 +657,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             txtAlign.Text = align.ToString();
 
             // Diameters
-            Txt_MaxDiameter.Text = Math.Round(maxDiameter * euFactor, 3).ToString();
-            Txt_MinDiameter.Text = Math.Round(minDiameter * euFactor, 3).ToString();
+            txtMaxDiameter.Text = Math.Round(maxDiameter * euFactor, 3).ToString();
+            txtMinDiameter.Text = Math.Round(minDiameter * euFactor, 3).ToString();
 
             // Compacity
-            Txt_MaxCompacity.Text = maxCompactness.ToString();
+            txtMaxCompacity.Text = maxCompactness.ToString();
             txtCompacityHoleLimit.Text = maxCompactnessHole.ToString();
 
             // Valid Frames Limit
@@ -887,14 +888,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     switch (mode)
                     {
                         case 0:
-                            if (freeze)
-                            {
-                                preProcessFreezed();
-                            }
-                            else
-                            {
-                                preProcess();
-                            }
+                            PreProcess();
                             break;
                         case 1:
                             m_ImageBox.BringToFront();
@@ -905,19 +899,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                     if (triggerPLC && !calibrating)
                     {
-                        if (freeze)
-                        {
-                            processFreezed();
-                        }
-                        else
-                        {
-                            Process();
-                        }
+                        Process();
                     }
 
                     if (calibrating)
                     {
-                        calibrate();
+                        var result = MessageBox.Show("Continue?","Is object in center?",MessageBoxButtons.OKCancel);
+                        if (result == DialogResult.OK)
+                        {
+                            Calibrate();
+                        }
+                        calibrating = false;
                     }
                     processing = false;
 
@@ -1096,7 +1088,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     Point centro = centers[i];
 
                     // Calcular el sector del contorno
-                    int sector = CalculateSector(centro, image.Width, image.Height, gridType.Grid.Item1, gridType.Grid.Item2) + 1;
+                    int sector = CalculateSector(centro) + 1;
 
                     int area = (int)areas[i];
                     double perimeter = perimeters[i];
@@ -1272,7 +1264,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 Image<Bgr, byte> tempImage = originalImage.ToImage<Bgr, byte>();
                 ImageHistogram(originalImage);
                 originalImageIsDisposed = true;
-                originalImageCV = imageCorrection(tempImage);
+                originalImageCV = ImageCorrection(tempImage);
 
             }
 
@@ -1290,7 +1282,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
-        private void updateTemperatures()
+        private void UpdateTemperatures()
         {
             if (!deviceLost)
             {
@@ -1356,17 +1348,20 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void updateLabels()
         {
-            Txt_MaxDiameter.Text = (maxDiameter * euFactor).ToString();
-            Txt_MinDiameter.Text = (minDiameter * euFactor).ToString();
-            Txt_MaxCompacity.Text = (maxCompactness).ToString();
+            txtMaxDiameter.Text = (maxDiameter * euFactor).ToString();
+            txtMinDiameter.Text = (minDiameter * euFactor).ToString();
+            txtMaxCompacity.Text = (maxCompactness).ToString();
             txtCompacityHoleLimit.Text = (maxCompactnessHole).ToString();
         }
 
-        private void preProcess()
+        private void PreProcess()
         {
-            boxOriginal.Visible = true;
-            boxOriginal.BringToFront();
-            boxProcess.Visible = false;
+            if (!freezeFrame)
+            {
+                boxOriginal.Visible = true;
+                boxOriginal.BringToFront();
+                boxProcess.Visible = false;
+            }
 
             btnProcessImage.Enabled = true;
             originalImageCV = new Mat();
@@ -1379,32 +1374,33 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 // Convertir el objeto Bitmap a una matriz de Emgu CV (Image<Bgr, byte>)
                 Image<Bgr, byte> tempImage = originalImage.ToImage<Bgr, byte>();
-                ImageHistogram(originalImage);
+                //ImageHistogram(originalImage);
 
                 originalImageIsDisposed = true;
 
-                originalImageCV = imageCorrection(tempImage);
+                originalImageCV = ImageCorrection(tempImage);
             }
 
-
-            originalImageCV.Save(imagesPath + "updatedROI.bmp");
-
-            if (!triggerPLC)
+            if (!freezeFrame)
             {
+                originalImageCV.Save(imagesPath + "updatedROI.bmp");
 
-                Mat temp = DrawROI(originalImageCV.Clone());
+                if (!triggerPLC)
+                {
 
-                temp.Save(imagesPath + "roiDraw.bmp");
+                    Mat temp = DrawROI(originalImageCV.Clone());
 
-                temp.Dispose();
+                    temp.Save(imagesPath + "roiDraw.bmp");
 
-                UpdateView(originalBuffer, originalView, "roiDraw.bmp");
+                    temp.Dispose();
+
+                    UpdateView(originalBuffer, originalView, "roiDraw.bmp");
+                }
+                else
+                {
+                    UpdateView(originalBuffer, originalView, "updatedROI.bmp");
+                }
             }
-            else
-            {
-                UpdateView(originalBuffer, originalView, "updatedROI.bmp");
-            }
-
 
             Quadrants = new List<Quadrant>();
 
@@ -1433,7 +1429,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             pictureBox.Invalidate();
         }
 
-        private void calibrate()
+        private void Calibrate()
         {
             // Cambiamos al modo de grid 3x3 para calibrar con la del centro
             updateGridType(1);
@@ -1443,11 +1439,27 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // Se binariza la imagen
             try
             {
-                //binarizedImage = binarizeImage(originalImage, 0);
-                binarizedImage = binarizeImage(originalImageCV, 0);
+                if (autoThreshold)
+                {
+                    Mat grayImage = new Mat();
+
+                    CvInvoke.CvtColor(originalImageCV, grayImage, ColorConversion.Bgr2Gray);
+                    threshold = (int)CvInvoke.Threshold(grayImage, binarizedImage, 0, 255, ThresholdType.Otsu);
+                    txtThreshold.Text = threshold.ToString();
+                    CvInvoke.Threshold(originalImageCV, binarizedImage, threshold, 255, ThresholdType.Binary);
+
+                }
+                else
+                {
+                    threshold = int.Parse(txtThreshold.Text);
+                    CvInvoke.Threshold(originalImageCV, binarizedImage, threshold, 255, ThresholdType.Binary);
+                }
+
+                originalImageCV.Dispose();
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 Console.WriteLine("Binarization problem");
                 return;
             }
@@ -1466,37 +1478,48 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             //double minD = 0;
             bool calibrationValidate = false;
 
-            //centralSector.Save(imagesPath + "centralSector.bmp");
+            minArea = (int)(((Math.Pow(minDiameter, 2) / 4) * Math.PI) * 0.5);
+            maxArea = (int)(((Math.Pow(maxDiameter, 2) / 4) * Math.PI) * 1.5);
 
             var (contours, centers, areas, perimeters, holePresent) = FindContoursWithEdgesAndCenters(roiImage);
 
+            // Obtener las coordenadas del centro de la imagen
+            int centroX = imageWidth / 2;
+            int centroY = imageHeight / 2;
+
             Point centro = new Point();
+            Point minError = new Point(777,777);
+            double error = 99999;
 
             for (int i = 0; i < areas.Count; i++)
             {
                 int area = (int)areas[i];
-                int perimeter = (int)perimeters[i];
                 centro = centers[i];
 
-                int sector = CalculateSector(centro, roiImage.Width, roiImage.Height, 3, 3) + 1;
+                int sector = CalculateSector(centro) + 1;
 
                 if (sector == sectorSel)
                 {
-                    if (itsInCenter(centralSector, centro, 10))
+                    if (ItsInCenter(centralSector, centro, 10))
                     {
                         diametroIA = (float)CalculateDiameterFromArea(area);
-
-                        // (diameter, maxD, minD) = calculateAndDrawDiameterTrianglesAlghoritm(centro, roiImage, sector, false);
 
                         calibrationValidate = true;
                         break;
                     }
+                    else
+                    {
+                        double hip = Math.Sqrt((Math.Pow((centro.X-centroX),2)+Math.Pow((centro.Y-centroY),2)));
+                        if (hip < error)
+                        {
+                            minError = centro;
+                            error = hip;
+                        }
+                    }
                 }
             }
 
-            // Obtener las coordenadas del centro de la imagen
-            int centroX = originalImage.Width / 2;
-            int centroY = originalImage.Height / 2;
+            
 
             if (calibrationValidate)
             {
@@ -1511,9 +1534,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     // Agrega aquí el código que deseas ejecutar después de que el usuario confirme
                     euFactor = tempFactor;
                     settings.EUFactor = euFactor;
-                    euFactorTxt.Text = Math.Round(euFactor, 3).ToString();
-                    maxDiameter = double.Parse(Txt_MaxDiameter.Text) / euFactor;
-                    minDiameter = double.Parse(Txt_MinDiameter.Text) / euFactor;
+                    lblEuFactor.Text = Math.Round(euFactor, 3).ToString();
+                    maxDiameter = double.Parse(txtMaxDiameter.Text) / euFactor;
+                    minDiameter = double.Parse(txtMinDiameter.Text) / euFactor;
                     settings.maxDiameter = maxDiameter;
                     settings.minDiameter = minDiameter;
 
@@ -1527,8 +1550,16 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
             else
             {
-                Console.WriteLine(centro.X + " " + centro.Y);
-                MessageBox.Show("Place the calibration target in the middle. Error = X:" + (centro.X + UserROI.Left - centroX) + ", Y:" + (centroY - (centro.Y + UserROI.Top)));
+                if (minError.X != 777)
+                {
+                    Console.WriteLine(centro.X + " " + centro.Y);
+                    MessageBox.Show("Place the calibration target in the middle. Min Object Error = X:" + (minError.X + UserROI.Left - centroX) + ", Y:" + (centroY - (minError.Y + UserROI.Top)));
+                }
+                else
+                {
+                    MessageBox.Show("No objects found");
+                }
+                
             }
 
             updateGridType(grid);
@@ -1543,108 +1574,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             btnProcessImage.Enabled = false;
 
-            calibrating = false;
         }
 
-        public Bitmap undistortImage(Bitmap imagen)
-        {
-            // Bitmap imagen = new Bitmap(originalImage);
-
-            // Dimensiones de la imagen
-            int alto = imagen.Height;
-            int ancho = imagen.Width;
-
-            double k1 = -1.158e-6;//-1.6105e-6;//-1.158e-6;// -24.4641724;
-            double k2 = 1.56e-12;//1.28317e-11;//1.56e-12;//-108.33681;
-
-            double cx = 319;
-            double cy = 239;
-
-            // Crear una imagen corregida vacía
-            Bitmap imagenCorregida = new Bitmap(ancho, alto);
-
-            // Obtener todos los píxeles de la imagen original de una vez
-            Color[,] pixels = new Color[ancho, alto];
-            for (int x = 0; x < ancho; x++)
-            {
-                for (int y = 0; y < alto; y++)
-                {
-                    pixels[x, y] = imagen.GetPixel(x, y);
-                }
-            }
-
-            // Procesar cada sección de la imagen en paralelo
-            Parallel.For(0, alto, yCorregido =>
-            {
-                for (int xCorregido = 0; xCorregido < ancho; xCorregido++)
-                {
-
-                    double xNormalizado = (xCorregido - cx);
-                    double yNormalizado = (yCorregido - cy);
-
-                    double radio = Math.Sqrt(xNormalizado * xNormalizado + yNormalizado * yNormalizado);
-
-                    double factorCorreccionRadial = 1 + k1 * Math.Pow(radio, 2) + k2 * Math.Pow(radio, 4);
-
-                    double xNormalizadoCorregido = xNormalizado * factorCorreccionRadial;
-                    double yNormalizadoCorregido = yNormalizado * factorCorreccionRadial;
-
-                    var xCorregidoFinal = (xNormalizadoCorregido + cx);
-                    var yCorregidoFinal = (yNormalizadoCorregido + cy);
-
-                    // Procesar cada píxel de la sección dentro de un bloqueo
-                    lock (lockObject)
-                    {
-
-                        if (0 <= xCorregidoFinal && xCorregidoFinal < ancho - 1 && 0 <= yCorregidoFinal && yCorregidoFinal < alto - 1)
-                        {
-                            int x0 = (int)xCorregidoFinal;
-                            int y0 = (int)yCorregidoFinal;
-                            int x1 = x0 + 1;
-                            int y1 = y0 + 1;
-
-                            double dx = xCorregidoFinal - x0;
-                            double dy = yCorregidoFinal - y0;
-
-                            Color c00 = pixels[x0, y0];
-                            Color c10 = pixels[x1, y0];
-                            Color c01 = pixels[x0, y1];
-                            Color c11 = pixels[x1, y1];
-
-                            double dr = (1 - dx) * (1 - dy) * c00.R + dx * (1 - dy) * c10.R + (1 - dx) * dy * c01.R + dx * dy * c11.R;
-                            double dg = (1 - dx) * (1 - dy) * c00.G + dx * (1 - dy) * c10.G + (1 - dx) * dy * c01.G + dx * dy * c11.G;
-                            double db = (1 - dx) * (1 - dy) * c00.B + dx * (1 - dy) * c10.B + (1 - dx) * dy * c01.B + dx * dy * c11.B;
-
-                            Color valorPixel = Color.FromArgb((int)dr, (int)dg, (int)db);
-                            imagenCorregida.SetPixel(xCorregido, yCorregido, valorPixel);
-                        }
-                        else
-                        {
-                            // Si las coordenadas están fuera de la imagen, simplemente copiar el valor del píxel original
-                            imagenCorregida.SetPixel(xCorregido, yCorregido, Color.Black);//pixels[(int)xCorregido, (int)yCorregido]);//pixels[(int)xNormalizadoCorregido, (int)yNormalizadoCorregido]);
-                        }
-                    }
-                }
-            });
-
-            imagen.Dispose();
-
-            imagenCorregida.Save(imagesPath + "imagenCorregida.bmp");
-
-            return imagenCorregida;
-        }
-
-
-        // Interpolación bilineal entre cuatro píxeles
-        static Color InterpolarBilineal(Color c00, Color c10, Color c01, Color c11, double dx, double dy)
-        {
-            double dr = (1 - dx) * (1 - dy) * c00.R + dx * (1 - dy) * c10.R + (1 - dx) * dy * c01.R + dx * dy * c11.R;
-            double dg = (1 - dx) * (1 - dy) * c00.G + dx * (1 - dy) * c10.G + (1 - dx) * dy * c01.G + dx * dy * c11.G;
-            double db = (1 - dx) * (1 - dy) * c00.B + dx * (1 - dy) * c10.B + (1 - dx) * dy * c01.B + dx * dy * c11.B;
-            return Color.FromArgb((int)dr, (int)dg, (int)db);
-        }
-
-        public Mat imageCorrection(Image<Bgr, byte> image)
+        public Mat ImageCorrection(Image<Bgr, byte> image)
         {
             // Declarar el vector de coeficientes de distorsión manualmente
             Matrix<double> distCoeffs = new Matrix<double>(1, 5); // 5 coeficientes de distorsión
@@ -1683,11 +1615,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return undistortedImage;
         }
 
-        private bool itsInCenter(Bitmap image, Point center, int margin)
+        private bool ItsInCenter(Bitmap image, Point center, int margin)
         {
             // Obtener las coordenadas del centro de la imagen
-            int centroX = originalImage.Width / 2;
-            int centroY = originalImage.Height / 2;
+            int centroX = imageWidth / 2;
+            int centroY = imageHeight / 2;
 
             // Verificar si el punto está dentro del área central definida por el margen de error
             if (Math.Abs(center.X + UserROI.Left - centroX) <= margin && Math.Abs(center.Y + UserROI.Top - centroY) <= margin)
@@ -1745,30 +1677,30 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             ////----------------Only for Debug, delete on production-----------------
             //settings.frames++;
             ////----------------Only for Debug, delete on production-----------------
+            ///
+            Mat roiImage = new Mat();
+            roiImage = ExtractROI(originalImageCV);
 
-            //originalBox.Visible = true;
-            //processROIBox.Visible = true; // Mostrar el PictureBox ROI
             Mat binarizedImage = new Mat();
-            Mat grayImage = new Mat();
 
             // Se binariza la imagen
             try
             {
-                CvInvoke.CvtColor(originalImageCV, grayImage, ColorConversion.Bgra2Gray);
-                //binarizedImage = binarizeImage(originalImage, 0);
-                //binarizedImage = binarizeImage(originalImageCV, 0);
                 if (autoThreshold)
                 {
+                    Mat grayImage = new Mat();
+
+                    CvInvoke.CvtColor(roiImage, grayImage, ColorConversion.Bgr2Gray);
                     threshold = (int)CvInvoke.Threshold(grayImage, binarizedImage, 0, 255, ThresholdType.Otsu);
                     txtThreshold.Text = threshold.ToString();
+                    CvInvoke.Threshold(roiImage, binarizedImage, threshold, 255, ThresholdType.Binary);
+
                 }
                 else
                 {
                     threshold = int.Parse(txtThreshold.Text);
-                    CvInvoke.Threshold(grayImage, binarizedImage, threshold, 255, ThresholdType.Binary);
+                    CvInvoke.Threshold(roiImage, binarizedImage, threshold, 255, ThresholdType.Binary);
                 }
-
-                CvInvoke.CvtColor(binarizedImage, binarizedImage, ColorConversion.Gray2Bgra);
 
                 originalImageCV.Dispose();
             }
@@ -1778,8 +1710,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 Console.WriteLine("Binarization problem");
                 return;
             }
-
-            Mat roiImage = new Mat();
 
             if (linesFilter)
             {
@@ -1810,26 +1740,23 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 CvInvoke.Dilate(hori, hori, verticalStructure, new Point(-1, -1), 1, BorderType.Default, new MCvScalar());
 
                 // Se extrae el ROI de la imagen binarizada
-                roiImage = ExtractROI(hori);
+                roiImage = hori;
             }
             else
             {
 
                 // Se extrae el ROI de la imagen binarizada
-                roiImage = ExtractROI(binarizedImage);
+                roiImage = binarizedImage;
             }
 
-            // Se extrae el ROI de la imagen binarizada
-            //Mat roiImage = ExtractROI(binarizedImage);
-
             // Colocamos el picturebox del ROI
-            SetPictureBoxPositionAndSize(ref processBuffer, imagePage);
+            if (!freezeFrame) SetPictureBoxPositionAndSize(ref processBuffer, imagePage);
 
             try
             {
                 // Procesamos el ROI
                 BlobProcess(roiImage);
-                UpdateView(processBuffer, processView, "final.bmp");
+                if (!freezeFrame) UpdateView(processBuffer, processView, "final.bmp");
 
             }
             catch (Exception e)
@@ -1848,8 +1775,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             btnProcessImage.Enabled = false;
             btnProcessImage.BackColor = Color.DarkGray;
-            originalView.Show();
-            processView.Show();
+            if (!freezeFrame)
+            {
+                originalView.Show();
+                processView.Show();
+            }
         }
 
         private void UpdateView(SapBuffer buffer, SapView view, string v)
@@ -2411,34 +2341,34 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 }
 
                 settings.Units = units;
-                euFactorTxt.Text = Math.Round(euFactor, 3).ToString();
+                lblEuFactor.Text = Math.Round(euFactor, 3).ToString();
                 settings.EUFactor = euFactor;
 
                 // Actualizamos los datos de la tabla
                 if (dataTable.Rows.Count > 0)
                 {
                     dataTable.Clear();
-                    setDataTable();
+                    SetDataTable();
                 }
 
                 if (unitsNew == "inch")
                 {
                     double avgDiameter = 0;
-                    if (Double.TryParse(avg_diameter.Text, out avgDiameter)) ;
+                    if (Double.TryParse(lblAvgDiameter.Text, out avgDiameter)) ;
                     avgDiameter *= fact;
-                    avg_diameter.Text = Math.Round(avgDiameter, nUnitsInch).ToString();
+                    lblAvgDiameter.Text = Math.Round(avgDiameter, nUnitsInch).ToString();
 
                     if (operationMode != 1)
                     {
                         double mxDiameter = 0;
-                        if (Double.TryParse(Txt_MaxDiameter.Text, out mxDiameter)) ;
+                        if (Double.TryParse(txtMaxDiameter.Text, out mxDiameter)) ;
                         mxDiameter *= fact;
-                        Txt_MaxDiameter.Text = Math.Round(mxDiameter, nUnitsInch).ToString();
+                        txtMaxDiameter.Text = Math.Round(mxDiameter, nUnitsInch).ToString();
 
                         double mnDiameter = 0;
-                        if (Double.TryParse(Txt_MinDiameter.Text, out mnDiameter)) ;
+                        if (Double.TryParse(txtMinDiameter.Text, out mnDiameter)) ;
                         mnDiameter *= fact;
-                        Txt_MinDiameter.Text = Math.Round(mnDiameter, nUnitsInch).ToString();
+                        txtMinDiameter.Text = Math.Round(mnDiameter, nUnitsInch).ToString();
                     }
 
                     double controlDiameter = 0;
@@ -2448,38 +2378,38 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     dplControlDiameter.Text = Math.Round(controlDiameter, nUnitsInch).ToString();
 
                     double avgMinDiameter = 0;
-                    if (Double.TryParse(txtAvgMinD.Text, out avgMinDiameter)) ;
+                    if (Double.TryParse(lblMinDiameter.Text, out avgMinDiameter)) ;
                     avgMinDiameter *= fact;
-                    txtAvgMinD.Text = Math.Round(avgMinDiameter, nUnitsInch).ToString();
+                    lblMinDiameter.Text = Math.Round(avgMinDiameter, nUnitsInch).ToString();
 
                     double avgMaxDiameter = 0;
-                    if (Double.TryParse(txtAvgMaxD.Text, out avgMaxDiameter)) ;
+                    if (Double.TryParse(lblMaxDiameter.Text, out avgMaxDiameter)) ;
                     avgMaxDiameter *= fact;
-                    txtAvgMaxD.Text = Math.Round(avgMaxDiameter, nUnitsInch).ToString();
+                    lblMaxDiameter.Text = Math.Round(avgMaxDiameter, nUnitsInch).ToString();
 
                     double equivalentDiameter = 0;
-                    if (Double.TryParse(txtEquivalentDiameter.Text, out equivalentDiameter)) ;
+                    if (Double.TryParse(lblSEQDiameter.Text, out equivalentDiameter)) ;
                     equivalentDiameter *= fact;
-                    txtEquivalentDiameter.Text = Math.Round(equivalentDiameter, nUnitsInch).ToString();
+                    lblSEQDiameter.Text = Math.Round(equivalentDiameter, nUnitsInch).ToString();
                 }
                 else
                 {
                     double avgDiameter = 0;
-                    if (Double.TryParse(avg_diameter.Text, out avgDiameter)) ;
+                    if (Double.TryParse(lblAvgDiameter.Text, out avgDiameter)) ;
                     avgDiameter *= fact;
-                    avg_diameter.Text = Math.Round(avgDiameter, nUnitsMm).ToString();
+                    lblAvgDiameter.Text = Math.Round(avgDiameter, nUnitsMm).ToString();
 
                     if (operationMode != 1)
                     {
                         double mxDiameter = 0;
-                        if (Double.TryParse(Txt_MaxDiameter.Text, out mxDiameter)) ;
+                        if (Double.TryParse(txtMaxDiameter.Text, out mxDiameter)) ;
                         mxDiameter *= fact;
-                        Txt_MaxDiameter.Text = Math.Round(mxDiameter, nUnitsMm).ToString();
+                        txtMaxDiameter.Text = Math.Round(mxDiameter, nUnitsMm).ToString();
 
                         double mnDiameter = 0;
-                        if (Double.TryParse(Txt_MinDiameter.Text, out mnDiameter)) ;
+                        if (Double.TryParse(txtMinDiameter.Text, out mnDiameter)) ;
                         mnDiameter *= fact;
-                        Txt_MinDiameter.Text = Math.Round(mnDiameter, nUnitsMm).ToString();
+                        txtMinDiameter.Text = Math.Round(mnDiameter, nUnitsMm).ToString();
                     }
 
                     double controlDiameter = 0;
@@ -2489,19 +2419,19 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     dplControlDiameter.Text = Math.Round(controlDiameter, nUnitsMm).ToString();
 
                     double avgMinDiameter = 0;
-                    if (Double.TryParse(txtAvgMinD.Text, out avgMinDiameter)) ;
+                    if (Double.TryParse(lblMinDiameter.Text, out avgMinDiameter)) ;
                     avgMinDiameter *= fact;
-                    txtAvgMinD.Text = Math.Round(avgMinDiameter, nUnitsMm).ToString();
+                    lblMinDiameter.Text = Math.Round(avgMinDiameter, nUnitsMm).ToString();
 
                     double avgMaxDiameter = 0;
-                    if (Double.TryParse(txtAvgMaxD.Text, out avgMaxDiameter)) ;
+                    if (Double.TryParse(lblMaxDiameter.Text, out avgMaxDiameter)) ;
                     avgMaxDiameter *= fact;
-                    txtAvgMaxD.Text = Math.Round(avgMaxDiameter, nUnitsMm).ToString();
+                    lblMaxDiameter.Text = Math.Round(avgMaxDiameter, nUnitsMm).ToString();
 
                     double equivalentDiameter = 0;
-                    if (Double.TryParse(txtEquivalentDiameter.Text, out equivalentDiameter)) ;
+                    if (Double.TryParse(lblSEQDiameter.Text, out equivalentDiameter)) ;
                     equivalentDiameter *= fact;
-                    txtEquivalentDiameter.Text = Math.Round(equivalentDiameter, nUnitsMm).ToString();
+                    lblSEQDiameter.Text = Math.Round(equivalentDiameter, nUnitsMm).ToString();
                 }
             }
         }
@@ -2512,7 +2442,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             if (e.KeyChar == (char)Keys.Enter)
             {
                 // Intentar convertir el texto del TextBox a un número entero
-                if (double.TryParse(Txt_MaxCompacity.Text, out maxCompactness))
+                if (double.TryParse(txtMaxCompacity.Text, out maxCompactness))
                 {
                     // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
                     // MessageBox.Show("Data saved: " + maxCompactness, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -2532,7 +2462,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             if (e.KeyChar == (char)Keys.Enter)
             {
                 // Intentar convertir el texto del TextBox a un número entero
-                if (double.TryParse(Txt_MinDiameter.Text, out minDiameter))
+                if (double.TryParse(txtMinDiameter.Text, out minDiameter))
                 {
                     // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
                     //MessageBox.Show("Data saved: " + minDiameter, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -2554,7 +2484,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             if (e.KeyChar == (char)Keys.Enter)
             {
                 // Intentar convertir el texto del TextBox a un número entero
-                if (double.TryParse(Txt_MaxDiameter.Text, out maxDiameter))
+                if (double.TryParse(txtMaxDiameter.Text, out maxDiameter))
                 {
                     // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
                     //MessageBox.Show("Data saved: " + maxDiameter, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -3176,8 +3106,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             var (contours, centers, areas, perimeters, holePresent) = FindContoursWithEdgesAndCenters(image);
 
-            //CvInvoke.CvtColor(image, image, ColorConversion.Bgr2Gray);
-
             // Inicializamos variables
             double MaxD = 0;
             double MinD = 0;
@@ -3202,7 +3130,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     Point centro = centers[i];
 
                     // Calcular el sector del contorno
-                    int sector = CalculateSector(centro, image.Width, image.Height, gridType.Grid.Item1, gridType.Grid.Item2) + 1;
+                    int sector = CalculateSector(centro) + 1;
 
                     int area = (int)areas[i];
                     double perimeter = perimeters[i];
@@ -3271,20 +3199,20 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                             try
                             {
                                 // Dibujamos el centro
-                                drawCenter(centro, 2, image);
+                                DrawCenter(centro, 2, image);
 
                                 // Dibujamos el sector
-                                drawSector(image, sector);
+                                DrawSector(image, sector);
 
                                 // Dibujamos el numero del sector
-                                drawSectorNumber(image, centro, sector - 1);
+                                DrawSectorNumber(image, centro, sector - 1);
 
-                                drawSize(image, sector, size);
+                                DrawSize(image, sector, size);
 
                                 if (hole && size != 6)
                                 {
                                     nHoles++;
-                                    drawHole(image, sector);
+                                    DrawHole(image, sector);
                                 }
                             }
                             catch (Exception ex)
@@ -3296,28 +3224,33 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 }
             }
 
-            // Limpiamos la tabla
-            dataTable.Clear();
-            // Agregamos los datos a la tabla
-            setDataTable();
+            if (!freezeFrame)
+            {
+                // Limpiamos la tabla
+                dataTable.Clear();
+
+                // Agregamos los datos a la tabla
+                SetDataTable();
+            }
 
             //Agujeros
             CheckHoles(nHoles);
 
             try
             {
-                drawPerimeters(image, contours, 1);
+                if (!freezeFrame)
+                {
+                    DrawPerimeters(image, contours, 1);
+                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
 
-            //CvInvoke.CvtColor(image, image, ColorConversion.Gray2Bgr);
-
             try
             {
-                image.Save(imagesPath + "final.bmp");
+                if (!freezeFrame) image.Save(imagesPath + "final.bmp");
             }
             catch (Exception e)
             {
@@ -3343,7 +3276,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             double cv = CalculateCV(diametersCV);
 
             int validObjects = Blobs.Count(Blob => Blob.Size != 6);
-            txtValidObjects.Text = validObjects.ToString();
+            if (!freezeFrame) txtValidObjects.Text = validObjects.ToString();
 
             if (validObjects >= minBlobObjects)
             {
@@ -3351,8 +3284,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 CheckCV(cv);
                 ProcessControlDiameter(avgDIA);
 
-                txtValidObjects.ForeColor = Color.Green;
-                lblCV.Text = Math.Round(cv, 3).ToString();
+                if (!freezeFrame) txtValidObjects.ForeColor = Color.Green;
             }
             else
             {
@@ -3362,31 +3294,49 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             CheckLastFrames();
 
+            if (!freezeFrame) lblCV.Text = Math.Round(cv, 3).ToString();
+
+
             maxDiameterAvg = MaxD * euFactor;
             minDiameterAvg = MinD * euFactor;
             diameterControl = controlDiameter;
 
+            if (!freezeFrame)
+            {
+                if (units == "mm")
+                {
+                    // Asignamos el texto del promedio de los diametros
+                    lblAvgDiameter.Text = Math.Round(avgD * euFactor, nUnitsMm).ToString();
+                    lblMaxDiameter.Text = Math.Round(MaxD * euFactor, nUnitsMm).ToString();
+                    lblMinDiameter.Text = Math.Round(MinD * euFactor, nUnitsMm).ToString();
+                    lblSEQDiameter.Text = Math.Round(avgDIA * euFactor, nUnitsMm).ToString();
+                    
+                }
+                else
+                {
+                    // Asignamos el texto del promedio de los diametros
+                    lblAvgDiameter.Text = Math.Round(avgD * euFactor, nUnitsInch).ToString();
+                    lblMaxDiameter.Text = Math.Round(MaxD * euFactor, nUnitsInch).ToString();
+                    lblMinDiameter.Text = Math.Round(MinD * euFactor, nUnitsInch).ToString();
+                    lblSEQDiameter.Text = Math.Round(avgDIA * euFactor, nUnitsInch).ToString();
+                    
+                }
 
+                // Asignar la DataTable al DataGridView
+                dataGridView1.DataSource = dataTable;
+            }
+            
             if (units == "mm")
             {
-                // Asignamos el texto del promedio de los diametros
-                avg_diameter.Text = Math.Round(avgD * euFactor, nUnitsMm).ToString();
-                txtAvgMaxD.Text = Math.Round(MaxD * euFactor, nUnitsMm).ToString();
-                txtAvgMinD.Text = Math.Round(MinD * euFactor, nUnitsMm).ToString();
-                txtEquivalentDiameter.Text = Math.Round(avgDIA * euFactor, nUnitsMm).ToString();
                 txtControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsMm).ToString();
                 dplControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsMm).ToString();
             }
             else
             {
-                // Asignamos el texto del promedio de los diametros
-                avg_diameter.Text = Math.Round(avgD * euFactor, nUnitsInch).ToString();
-                txtAvgMaxD.Text = Math.Round(MaxD * euFactor, nUnitsInch).ToString();
-                txtAvgMinD.Text = Math.Round(MinD * euFactor, nUnitsInch).ToString();
-                txtEquivalentDiameter.Text = Math.Round(avgDIA * euFactor, nUnitsInch).ToString();
                 txtControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsInch).ToString();
                 dplControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsInch).ToString();
             }
+
 
             if (controlDiameter > maxDiameter || controlDiameter < minDiameter)
             {
@@ -3397,8 +3347,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 dplControlDiameter.BackColor = Color.LightGreen;
             }
 
-            // Asignar la DataTable al DataGridView
-            dataGridView1.DataSource = dataTable;
+            
 
         }
 
@@ -3480,7 +3429,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
-        private void setDataTable()
+        private void SetDataTable()
         {
             IEnumerable<Blob> blobs = Blobs.OrderBy(Blob => Blob.Sector);
 
@@ -3526,7 +3475,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         }
 
-        private void drawHole(Mat image, int sector)
+        private void DrawHole(Mat image, int sector)
         {
             int sectorWidth = image.Width / gridType.Grid.Item2;
             int sectorHeight = image.Height / gridType.Grid.Item1;
@@ -3545,7 +3494,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             CvInvoke.PutText(image, texto, new Point(textX + 2, textY + sectorHeight - 10), FontFace.HersheySimplex, 0.5, brush, 1);
         }
 
-        private void drawSize(Mat image, int sector, ushort size)
+        private void DrawSize(Mat image, int sector, ushort size)
         {
             int sectorWidth = image.Width / gridType.Grid.Item2;
             int sectorHeight = image.Height / gridType.Grid.Item1;
@@ -3655,13 +3604,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return (contours);
         }
 
-        private void drawCenter(Point centro, int thickness, Mat image)
+        private void DrawCenter(Point centro, int thickness, Mat image)
         {
             CvInvoke.Circle(image, centro, thickness, new MCvScalar(255, 255, 0));
         }
 
         // Función para dibujar un punto con un grosor dado
-        void drawPerimeters(Mat image, VectorOfVectorOfPoint perimeter, int thickness)
+        void DrawPerimeters(Mat image, VectorOfVectorOfPoint perimeter, int thickness)
         {
             CvInvoke.DrawContours(image, perimeter, -1, new MCvScalar(255, 255, 0), thickness);
         }
@@ -3752,7 +3701,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         }
 
-        private void drawSectorNumber(Mat image, Point center, int sector)
+        private void DrawSectorNumber(Mat image, Point center, int sector)
         {
             // Seleccionar la esquina donde se mostrará el número del sector (puedes ajustar según tus necesidades)
             int xOffset = 5;
@@ -3762,21 +3711,22 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         }
 
-        private int CalculateSector(Point objectCenter, int imageWidth, int imageHeight, int gridRows, int gridCols)
+        private int CalculateSector(Point objectCenter)
         {
-
+            int imageWidth = UserROI.Right - UserROI.Left;
+            int imageHeight = UserROI.Bottom - UserROI.Top;
             // Calcular el ancho y alto de cada sector
-            int sectorWidth = imageWidth / gridCols;
-            int sectorHeight = imageHeight / gridRows;
+            int sectorWidth = imageWidth / gridType.Grid.Item1;
+            int sectorHeight = imageHeight / gridType.Grid.Item2;
 
             // Calcular el sector en el que se encuentra el centro del objeto
             int sectorX = objectCenter.X / sectorWidth;
 
             // Calcular sectorY de abajo hacia arriba
-            int sectorY = gridRows - 1 - (objectCenter.Y / sectorHeight);
+            int sectorY = gridType.Grid.Item1 - 1 - (objectCenter.Y / sectorHeight);
 
             // Calcular el índice del sector en función del número de columnas
-            int sectorIndex = sectorX * gridCols + sectorY;
+            int sectorIndex = sectorX * gridType.Grid.Item2 + sectorY;
 
             return sectorIndex;
         }
@@ -3992,7 +3942,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return compactness;
         }
 
-        private void drawSector(Mat image, int sector)
+        private void DrawSector(Mat image, int sector)
         {
             // Calcular el ancho y alto de cada sector
             int sectorWidth = image.Width / gridType.Grid.Item2;
@@ -4389,7 +4339,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private (VectorOfVectorOfPoint, List<Point>, List<double>, List<double>, List<bool>) FindContoursWithEdgesAndCenters(Mat image)
         {
-            Mat grayImage = new Mat();
+            Mat grayImage = image.Clone();
             CvInvoke.CvtColor(image, grayImage, ColorConversion.Bgr2Gray);
 
             // Encontrar contornos
@@ -4404,21 +4354,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             CvInvoke.FindContours(grayImage, contours, jerarquia, RetrType.Tree, ChainApproxMethod.ChainApproxSimple);
 
-
             // Coloreamos todos los pixeles de fondo
             Array array = jerarquia.GetData();
-            //for (int i = 0; i < contours.Size; i++)
-            //{
-            //    // Si el contorno tiene un contorno padre
-            //    int a = (int)array.GetValue(0, i, 3);
-            //    int area = (int)CvInvoke.ContourArea(contours[i]);
-            //    //MessageBox.Show(array.GetValue(0,i,3).ToString());
-            //    if (a != -1 && area > 0 && area < minArea)
-            //    {
-            //        // Dibujar el contorno interno en verde
-            //        CvInvoke.DrawContours(image, contours, i, new MCvScalar(255, 255, 0), -1);
-            //    }
-            //}
 
             bool hole = false;
 
@@ -4449,6 +4386,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                                 // Obtener el índice del siguiente hijo del contorno padre actual
                                 indiceHijoActual = Convert.ToInt32(array.GetValue(0, indiceHijoActual, 0));
+                            }
+                            else
+                            {
+                                break;
                             }
                             
 
@@ -4662,10 +4603,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
 
 
-            Txt_MaxDiameter.Text = Txt_MaxD.Text;
+            txtMaxDiameter.Text = Txt_MaxD.Text;
             maxDiameter = double.Parse(Txt_MaxD.Text) / euFactor;
 
-            Txt_MinDiameter.Text = Txt_MinD.Text;
+            txtMinDiameter.Text = Txt_MinD.Text;
             minDiameter = double.Parse(Txt_MinD.Text) / euFactor;
 
             CheckChangeSetPointDiameters();
@@ -5287,23 +5228,31 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             if (!triggerPLC && mode == 0)
             {
-                if (units == "inch") euFactor *= 25.4;
-                using (var inputForm = new InputDlg2("mm"))
+                using (var inputForm = new InputDlg2(units))
                 {
                     if (inputForm.ShowDialog() == DialogResult.OK)
                     {
+                        
                         double height = inputForm.cameraHeight;
 
-                        double fov = 2 * Math.Atan(lenWidth / (2 * lenF));
+                        double fov;
+
+                        if (units == "mm")
+                        {
+                            fov = 2 * Math.Atan(lenWidth / (2 * lenF));
+                        }
+                        else
+                        {
+                            fov = 2 * Math.Atan((lenWidth/25.4) / (2 * (lenF/25.4)));
+                        }
 
                         fov = 2 * Math.Tan(fov / 2) * height;
 
                         euFactor = fov / 640;
-                        if (units == "inch") euFactor *= 0.0393701;
                         settings.EUFactor = euFactor;
-                        euFactorTxt.Text = Math.Round(euFactor, 3).ToString();
-                        maxDiameter = double.Parse(Txt_MaxDiameter.Text) / euFactor;
-                        minDiameter = double.Parse(Txt_MinDiameter.Text) / euFactor;
+                        lblEuFactor.Text = Math.Round(euFactor, 3).ToString();
+                        maxDiameter = double.Parse(txtMaxDiameter.Text) / euFactor;
+                        minDiameter = double.Parse(txtMinDiameter.Text) / euFactor;
                         settings.maxDiameter = maxDiameter;
                         settings.minDiameter = minDiameter;
 
@@ -5325,7 +5274,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 requestModbusData();
             }
 
-            updateTemperatures();
+            UpdateTemperatures();
 
             if (authenticated)
             {
@@ -5363,10 +5312,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private void GetDataTxt()
         {
             // Round Compacity
-            if (!double.TryParse(Txt_MaxCompacity.Text, out maxCompactness))
+            if (!double.TryParse(txtMaxCompacity.Text, out maxCompactness))
             {
                 Console.WriteLine("Shape Round Limit Invalid");
-                Txt_MaxCompacity.Text = maxCompactness.ToString();
+                txtMaxCompacity.Text = maxCompactness.ToString();
             }
             else
             {
@@ -5403,7 +5352,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 settings.alpha = alpha;
             }
             // Max diameter
-            if (double.TryParse(Txt_MaxDiameter.Text, out maxDiameter))
+            if (double.TryParse(txtMaxDiameter.Text, out maxDiameter))
             {
                 maxDiameter = maxDiameter / euFactor;
                 settings.maxDiameter = maxDiameter;
@@ -5414,7 +5363,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             // Min Diameter
-            if (double.TryParse(Txt_MinDiameter.Text, out minDiameter))
+            if (double.TryParse(txtMinDiameter.Text, out minDiameter))
             {
                 minDiameter = minDiameter / euFactor;
                 settings.minDiameter = minDiameter;
@@ -5963,6 +5912,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             diameter90deg = !diameter90deg;
             if (diameter90deg) btn90DegDiameters.BackColor = Color.LightGreen;
             else btn90DegDiameters.BackColor = Color.Silver;
+        }
+
+        private void btnLinesFilter_Click(object sender, EventArgs e)
+        {
+            linesFilter = !linesFilter;
+            if (linesFilter) btnLinesFilter.BackColor = Color.LightGreen;
+            else btnLinesFilter.BackColor = Color.Silver;
         }
     }
 }
