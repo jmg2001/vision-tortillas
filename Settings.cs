@@ -13,6 +13,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         public int ROI_Right { get; set; }
         public string Units { get; set; }
         public double EUFactor { get; set; }
+        public double CorrectionFactor { get; set; }
+        public double LastCalibrationHeight { get; set; }
+        public string LastCalibrationUnits { get; set; }
         public int GridType { get; set; }
         public string Format { get; set; }
         public double maxDiameter { get; set; }
@@ -40,6 +43,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.ROI_Bottom = 440;
             this.Units = "mm";
             this.EUFactor = 1.0;
+            this.CorrectionFactor = 1.0;
+            this.LastCalibrationHeight = 0;
+            this.LastCalibrationUnits = "mm";
             this.GridType = 1;
             this.Format = "3x3";
             this.maxDiameter = 100;

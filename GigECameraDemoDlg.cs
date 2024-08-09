@@ -19,7 +19,6 @@ using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Security;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 
@@ -37,6 +36,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 {
     public partial class GigECameraDemoDlg : Form
     {
+        List<string> camera1Series = new List<string>();
+
+        double lastCalibrationHeight;
+        string lastCalibrationUnits;
+        double correctionFactor;
+
         bool linesFilter = true;
         bool diameter90deg = true;
 
@@ -151,6 +156,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         // Lista para los strings de los tamaños de la tortilla
         List<string> sizes = new List<string>();
+        List<MCvScalar> brushes = new List<MCvScalar>();
 
         // Imagen para cargar la imagen tomada por la camara
         public Bitmap originalImage = new Bitmap(640, 480);
@@ -268,15 +274,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 InitializeComponent();
 
+                LoadSettings();
+
+                InitControlDiameter();
+
                 InitElements();
 
                 InitializeDataTable();
 
                 InitChart();
 
-                InitControlDiameter();
-
-                updateLabels();
+                //updateLabels();
 
                 originalBuffer = new SapBuffer(1, 640, 480, SapFormat.RGBP8, SapBuffer.MemoryType.ScatterGather);
                 originalView = new SapView(originalBuffer, boxOriginal);
@@ -391,13 +399,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             if (units == "mm")
             {
-                initMaxDiameter = 165.1 / euFactor; //130mm
-                initMinDiameter = 139.7 / euFactor; //110mm
+                initMaxDiameter = 150; //130mm
+                initMinDiameter = 110; //110mm
             }
             else
             {
-                initMaxDiameter = 6.5 / euFactor; //5inch
-                initMinDiameter = 5.5 / euFactor; //3inch
+                initMaxDiameter = 6.5; //5inch
+                initMinDiameter = 5.5; //3inch
             }
 
             oldMaxDiameter = initMaxDiameter;
@@ -412,53 +420,60 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void InitChart()
         {
+            camera1Series.Add("MaxDiameterSerie");
+            camera1Series.Add("MinDiameterSerie");
+            camera1Series.Add("ControlDiameterSerie");
+            camera1Series.Add("SEQDiameterSerie");
+            camera1Series.Add("MaxDiameterSP");
+            camera1Series.Add("MinDiameterSP");
+
             trendChart.ChartAreas.Clear();
             trendChart.Series.Clear();
             trendChart.ChartAreas.Add("Area");
 
             int lineWidth = 3;
 
-            trendChart.Series.Add("MaxDiameterSerie");
-            trendChart.Series["MaxDiameterSerie"].ChartType = SeriesChartType.Line;
-            trendChart.Series["MaxDiameterSerie"].Color = Color.Red;
-            trendChart.Series["MaxDiameterSerie"].BorderWidth = lineWidth;
-            trendChart.Series["MaxDiameterSerie"].LegendText = "Maximum Diameter";
-            trendChart.Series["MaxDiameterSerie"].XValueType = ChartValueType.Time;
+            trendChart.Series.Add(camera1Series[0]);
+            trendChart.Series[camera1Series[0]].ChartType = SeriesChartType.Line;
+            trendChart.Series[camera1Series[0]].Color = Color.Red;
+            trendChart.Series[camera1Series[0]].BorderWidth = lineWidth;
+            trendChart.Series[camera1Series[0]].LegendText = "Maximum Diameter";
+            trendChart.Series[camera1Series[0]].XValueType = ChartValueType.Time;
 
-            trendChart.Series.Add("MinDiameterSerie");
-            trendChart.Series["MinDiameterSerie"].ChartType = SeriesChartType.Line;
-            trendChart.Series["MinDiameterSerie"].Color = Color.Orange;
-            trendChart.Series["MinDiameterSerie"].BorderWidth = lineWidth;
-            trendChart.Series["MinDiameterSerie"].LegendText = "Minimum Diameter";
-            trendChart.Series["MinDiameterSerie"].XValueType = ChartValueType.Time;
+            trendChart.Series.Add(camera1Series[1]);
+            trendChart.Series[camera1Series[1]].ChartType = SeriesChartType.Line;
+            trendChart.Series[camera1Series[1]].Color = Color.Orange;
+            trendChart.Series[camera1Series[1]].BorderWidth = lineWidth;
+            trendChart.Series[camera1Series[1]].LegendText = "Minimum Diameter";
+            trendChart.Series[camera1Series[1]].XValueType = ChartValueType.Time;
 
-            trendChart.Series.Add("ControlDiameterSerie");
-            trendChart.Series["ControlDiameterSerie"].ChartType = SeriesChartType.Line;
-            trendChart.Series["ControlDiameterSerie"].Color = Color.Green;
-            trendChart.Series["ControlDiameterSerie"].BorderWidth = lineWidth;
-            trendChart.Series["ControlDiameterSerie"].LegendText = "Control Diameter";
-            trendChart.Series["ControlDiameterSerie"].XValueType = ChartValueType.Time;
+            trendChart.Series.Add(camera1Series[2]);
+            trendChart.Series[camera1Series[2]].ChartType = SeriesChartType.Line;
+            trendChart.Series[camera1Series[2]].Color = Color.Green;
+            trendChart.Series[camera1Series[2]].BorderWidth = lineWidth;
+            trendChart.Series[camera1Series[2]].LegendText = "Control Diameter";
+            trendChart.Series[camera1Series[2]].XValueType = ChartValueType.Time;
 
-            trendChart.Series.Add("SEQDiameterSerie");
-            trendChart.Series["SEQDiameterSerie"].ChartType = SeriesChartType.Line;
-            trendChart.Series["SEQDiameterSerie"].Color = Color.Blue;
-            trendChart.Series["SEQDiameterSerie"].BorderWidth = lineWidth;
-            trendChart.Series["SEQDiameterSerie"].LegendText = "SEQ Diameter";
-            trendChart.Series["SEQDiameterSerie"].XValueType = ChartValueType.Time;
+            trendChart.Series.Add(camera1Series[3]);
+            trendChart.Series[camera1Series[3]].ChartType = SeriesChartType.Line;
+            trendChart.Series[camera1Series[3]].Color = Color.Blue;
+            trendChart.Series[camera1Series[3]].BorderWidth = lineWidth;
+            trendChart.Series[camera1Series[3]].LegendText = "SEQ Diameter";
+            trendChart.Series[camera1Series[3]].XValueType = ChartValueType.Time;
 
-            trendChart.Series.Add("MaxDiameterSP");
-            trendChart.Series["MaxDiameterSP"].ChartType = SeriesChartType.Line;
-            trendChart.Series["MaxDiameterSP"].Color = Color.Gray;
-            trendChart.Series["MaxDiameterSP"].BorderWidth = lineWidth;
-            trendChart.Series["MaxDiameterSP"].LegendText = "SP Max";
-            trendChart.Series["MaxDiameterSP"].XValueType = ChartValueType.Time;
+            trendChart.Series.Add(camera1Series[4]);
+            trendChart.Series[camera1Series[4]].ChartType = SeriesChartType.Line;
+            trendChart.Series[camera1Series[4]].Color = Color.Gray;
+            trendChart.Series[camera1Series[4]].BorderWidth = lineWidth;
+            trendChart.Series[camera1Series[4]].LegendText = "SP Max";
+            trendChart.Series[camera1Series[4]].XValueType = ChartValueType.Time;
 
-            trendChart.Series.Add("MinDiameterSP");
-            trendChart.Series["MinDiameterSP"].ChartType = SeriesChartType.Line;
-            trendChart.Series["MinDiameterSP"].Color = Color.Gray;
-            trendChart.Series["MinDiameterSP"].BorderWidth = lineWidth;
-            trendChart.Series["MinDiameterSP"].LegendText = "SP Min";
-            trendChart.Series["MinDiameterSP"].XValueType = ChartValueType.Time;
+            trendChart.Series.Add(camera1Series[5]);
+            trendChart.Series[camera1Series[5]].ChartType = SeriesChartType.Line;
+            trendChart.Series[camera1Series[5]].Color = Color.Gray;
+            trendChart.Series[camera1Series[5]].BorderWidth = lineWidth;
+            trendChart.Series[camera1Series[5]].LegendText = "SP Min";
+            trendChart.Series[camera1Series[5]].XValueType = ChartValueType.Time;
 
             trendChart.ChartAreas[0].AxisY.Title = "Diameter in " + units;
             trendChart.ChartAreas[0].AxisX.LabelStyle.Format = "HH:mm";
@@ -466,12 +481,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             trendChart.ChartAreas[0].AxisX.IntervalType = DateTimeIntervalType.Minutes;
             trendChart.ChartAreas[0].AxisX.IntervalOffset = 0; // Iniciar desde el minuto 1
             trendChart.ChartAreas[0].AxisX.Minimum = DateTime.Now.AddHours(-1).ToOADate(); // Mostrar solo los datos de la última hora
+
+            CreateCheckbox();
         }
 
         private void InitElements()
         {
             InitUsers();
-            LoadSettings();
             SetTexts();
 
             if (diameter90deg) btn90DegDiameters.BackColor = Color.LightGreen;
@@ -599,6 +615,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             sizes.Add("SHAPE");
             sizes.Add("DOUBLE");
 
+            brushes.Add(new MCvScalar(0, 0, 255));
+            brushes.Add(new MCvScalar(18, 193, 18));
+            brushes.Add(new MCvScalar(0, 0, 255));
+            brushes.Add(new MCvScalar(0, 169, 255));
+            brushes.Add(new MCvScalar(0, 255, 255));
+            brushes.Add(new MCvScalar(0, 0, 255));
+            brushes.Add(new MCvScalar(0, 0, 255));
+            brushes.Add(new MCvScalar(255, 0, 0));
+
+
+
             txtMaxCompacity.KeyPress += Txt_MaxCompacity_KeyPress;
 
             if (autoThreshold)
@@ -639,7 +666,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             txtMinDProductUnits.Text = units;
 
             // Parameters and Factor
-            lblEuFactor.Text = Math.Round(euFactor, 3).ToString();
             txtMinBlobObjects.Text = minBlobObjects.ToString();
             txtAlpha.Text = alpha.ToString();
 
@@ -656,8 +682,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             txtAlign.Text = align.ToString();
 
             // Diameters
-            txtMaxDiameter.Text = Math.Round(maxDiameter * euFactor, 3).ToString();
-            txtMinDiameter.Text = Math.Round(minDiameter * euFactor, 3).ToString();
+            txtMaxDiameter.Text = Math.Round(maxDiameter, 3).ToString();
+            txtMinDiameter.Text = Math.Round(minDiameter, 3).ToString();
 
             // Compacity
             txtMaxCompacity.Text = maxCompactness.ToString();
@@ -674,6 +700,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             // Factor
             euFactor = settings.EUFactor;
+            lastCalibrationHeight = settings.LastCalibrationHeight;
+            lastCalibrationUnits = settings.LastCalibrationUnits;
+            correctionFactor = settings.CorrectionFactor;
 
             // Objeto ROI
             UserROI.Top = settings.ROI_Top;
@@ -704,13 +733,16 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private void InitUsers()
         {
             usersList.Add(new User("SIOS", "2280", 3));
-            usersList.Add(new User("SUP", "12345", 2));
-            usersList.Add(new User("MTTO", "12345", 1));
+            usersList.Add(new User("SUP", "12345", 1));
+            usersList.Add(new User("ADMIN", "12345", 2));
 
             btnLogoff.Enabled = false;
             btnLogoff.BackColor = Color.DarkGray;
 
-            checkAuthentication();
+            currentUser = usersList[0];
+            Login();
+
+            CheckAuthentication();
         }
 
         public double Filtro(double k)
@@ -1000,225 +1032,281 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             //}
         }
 
-        private void processFreezed()
+        //private void processFreezed()
+        //{
+        //    frameCounter++;
+        //    if (frameCounter >= 1000000)
+        //    {
+        //        frameCounter = 0;
+        //    }
+        //    txtFramesCount.Text = frameCounter.ToString();
+
+        //    //----------------Only for Debug, delete on production-----------------
+        //    settings.frames++;
+        //    //----------------Only for Debug, delete on production-----------------
+
+        //    Mat binarizedImage = new Mat();
+
+        //    // Se binariza la imagen
+        //    try
+        //    {
+        //        //binarizedImage = binarizeImage(originalImage, 0);
+        //        binarizedImage = binarizeImage(originalImageCV, 0);
+        //        originalImageCV.Dispose();
+        //    }
+        //    catch
+        //    {
+        //        Console.WriteLine("Binarization problem");
+        //        return;
+        //    }
+
+        //    // Se extrae el ROI de la imagen binarizada
+        //    Mat roiImage = ExtractROI(binarizedImage);
+
+        //    try
+        //    {
+        //        // Procesamos el ROI
+        //        blobProcessFreezed(roiImage);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        MessageBox.Show("Blob Error " + e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //    }
+
+        //    try
+        //    {
+        //        SetModbusData();
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        MessageBox.Show(e.ToString());
+        //    }
+
+        //    originalImage.Dispose();
+        //    originalImageIsDisposed = true;
+
+        //    btnProcessImage.Enabled = false;
+        //}
+
+        //private void blobProcessFreezed(Mat image)
+        //{
+        //    Blobs.Clear();
+        //    //Blobs = new List<Blob>();
+
+        //    minArea = (int)(((Math.Pow(minDiameter, 2) / 4) * Math.PI) * 0.5);
+        //    maxArea = (int)(((Math.Pow(maxDiameter, 2) / 4) * Math.PI) * 1.5);
+
+        //    var (contours, centers, areas, perimeters, holePresent) = FindContoursWithEdgesAndCenters(image);
+
+        //    // Inicializamos variables
+        //    double avgDIA = 0;
+        //    double MaxD = 0;
+        //    double MinD = 99999;
+        //    double avgD = 0;
+        //    int n = 0;
+        //    int nHoles = 0;
+        //    List<double> diametersCV = new List<double>();
+
+        //    List<(int, bool)> drawFlags = new List<(int, bool)>();
+
+        //    foreach (int k in gridType.QuadrantsOfInterest)
+        //    {
+        //        drawFlags.Add((k, true));
+        //    }
+
+        //    for (int i = 0; i < areas.Count; i++)
+        //    {
+        //        if (!IsTouchingEdges(contours[i]))
+        //        {
+        //            Point centro = centers[i];
+
+        //            // Calcular el sector del contorno
+        //            int sector = CalculateSector(centro) + 1;
+
+        //            int area = (int)areas[i];
+        //            double perimeter = perimeters[i];
+
+        //            // Calcular la compacidad
+        //            double compactness = CalculateCompactness((int)area, perimeter);
+
+        //            // Verificamos si el sector es uno de los que nos interesa
+        //            if (Array.IndexOf(gridType.QuadrantsOfInterest, sector) != -1)
+        //            {
+
+        //                bool hole = holePresent[i];
+
+        //                double tempFactor = euFactor;
+
+        //                // Este diametro lo vamos a dejar para despues
+        //                double diametroIA = CalculateDiameterFromArea((int)area);
+
+        //                // Calculamos el diametro
+        //                (double diameterTriangles, double maxDiameter, double minDiameter) = calculateAndDrawDiameterTrianglesAlghoritm(centro, image.ToBitmap(), sector, true);
+
+        //                double ovalidad = calculateOvality(maxDiameter, minDiameter);
+
+        //                ushort size = CalculateSize(maxDiameter, minDiameter, compactness, ovalidad, hole, area);
+
+        //                if (size != 6) // Shape
+        //                {
+        //                    if (maxDiameter > MaxD)
+        //                    {
+        //                        MaxD = maxDiameter;
+        //                    }
+        //                    if (minDiameter < MinD)
+        //                    {
+        //                        MinD = minDiameter;
+        //                    }
+
+        //                    diametersCV.Add(diametroIA);
+        //                    // Sumamos para promediar
+        //                    avgDIA += (diametroIA);
+        //                    avgD += (diameterTriangles * tempFactor);
+        //                    // Aumentamos el numero de elementos para promediar
+        //                    n++;
+        //                }
+
+        //                Blob blob = new Blob(area, perimeter, contours[i], diameterTriangles, diametroIA, centro, maxDiameter, minDiameter, sector, compactness, size, ovalidad, hole);
+
+        //                // Agregamos el elemento a la lista
+        //                Blobs.Add(blob);
+
+        //                if (hole)
+        //                {
+        //                    nHoles++;
+        //                }
+
+        //                foreach (Quadrant quadrant in Quadrants)
+        //                {
+        //                    if (quadrant.Number == sector)
+        //                    {
+        //                        quadrant.DiameterMax = maxDiameter;
+        //                        quadrant.DiameterMin = minDiameter;
+        //                        quadrant.Compacity = compactness;
+        //                        quadrant.Found = true;
+        //                        quadrant.Blob = blob;
+
+        //                        for (int l = 0; l < drawFlags.Count; l++)
+        //                        {
+        //                            if (drawFlags[l].Item1 == sector)
+        //                            {
+        //                                drawFlags[l] = (sector, false);
+        //                            }
+        //                        }
+
+        //                        break;
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
+
+        //    CheckHoles(nHoles);
+
+        //    // Calculamos el promedio de los diametros
+        //    if (MinD == 99999)
+        //    {
+        //        MinD = 0;
+        //    }
+
+        //    avgDIA /= n;
+        //    avgD /= n;
+
+        //    double cv = CalculateCV(diametersCV);
+
+        //    int validObjects = Blobs.Count(Blob => Blob.Size != 6);
+
+        //    if (validObjects >= minBlobObjects)
+        //    {
+        //        QueueFrame(1);
+        //        ProcessControlDiameter(avgDIA);
+        //        CheckCV(cv);
+        //    }
+        //    else
+        //    {
+        //        QueueFrame(0);
+        //    }
+
+        //    CheckLastFrames();
+
+        //    maxDiameterAvg = MaxD * euFactor;
+        //    minDiameterAvg = MinD * euFactor;
+        //    diameterControl = controlDiameter;
+
+        //    if (units == "mm")
+        //    {
+
+        //        dplControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsMm).ToString();
+        //    }
+        //    else
+        //    {
+
+        //        dplControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsInch).ToString();
+        //    }
+
+        //    GraphResults(MaxD, MinD, avgDIA);
+        //}
+
+        private void CreateCheckbox(int camera = 1)
         {
-            frameCounter++;
-            if (frameCounter >= 1000000)
+            gbSeries.Controls.Clear();
+
+            int yPos = 40; // Posición vertical inicial para los CheckBox
+            Font checkBoxFont = new Font("Segoe UI", 12);
+            List<string> listNames = new List<string>();
+
+            if (camera == 1) listNames = camera1Series;
+            else listNames = camera1Series;
+
+            var activeSeries = trendChart.Series.Where(series => series.Enabled).Select(series => series);
+
+            foreach (var series in activeSeries)
             {
-                frameCounter = 0;
-            }
-            txtFramesCount.Text = frameCounter.ToString();
-
-            //----------------Only for Debug, delete on production-----------------
-            settings.frames++;
-            //----------------Only for Debug, delete on production-----------------
-
-            Mat binarizedImage = new Mat();
-
-            // Se binariza la imagen
-            try
-            {
-                //binarizedImage = binarizeImage(originalImage, 0);
-                binarizedImage = binarizeImage(originalImageCV, 0);
-                originalImageCV.Dispose();
-            }
-            catch
-            {
-                Console.WriteLine("Binarization problem");
-                return;
-            }
-
-            // Se extrae el ROI de la imagen binarizada
-            Mat roiImage = ExtractROI(binarizedImage);
-
-            try
-            {
-                // Procesamos el ROI
-                blobProcessFreezed(roiImage);
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show("Blob Error " + e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-
-            try
-            {
-                SetModbusData();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-            }
-
-            originalImage.Dispose();
-            originalImageIsDisposed = true;
-
-            btnProcessImage.Enabled = false;
-        }
-
-        private void blobProcessFreezed(Mat image)
-        {
-            Blobs.Clear();
-            //Blobs = new List<Blob>();
-
-            minArea = (int)(((Math.Pow(minDiameter, 2) / 4) * Math.PI) * 0.5);
-            maxArea = (int)(((Math.Pow(maxDiameter, 2) / 4) * Math.PI) * 1.5);
-
-            var (contours, centers, areas, perimeters, holePresent) = FindContoursWithEdgesAndCenters(image);
-
-            // Inicializamos variables
-            double avgDIA = 0;
-            double MaxD = 0;
-            double MinD = 99999;
-            double avgD = 0;
-            int n = 0;
-            int nHoles = 0;
-            List<double> diametersCV = new List<double>();
-
-            List<(int, bool)> drawFlags = new List<(int, bool)>();
-
-            foreach (int k in gridType.QuadrantsOfInterest)
-            {
-                drawFlags.Add((k, true));
-            }
-
-            for (int i = 0; i < areas.Count; i++)
-            {
-                if (!IsTouchingEdges(contours[i]))
+                if (listNames.Contains(series.Name))
                 {
-                    Point centro = centers[i];
-
-                    // Calcular el sector del contorno
-                    int sector = CalculateSector(centro) + 1;
-
-                    int area = (int)areas[i];
-                    double perimeter = perimeters[i];
-
-                    // Calcular la compacidad
-                    double compactness = CalculateCompactness((int)area, perimeter);
-
-                    // Verificamos si el sector es uno de los que nos interesa
-                    if (Array.IndexOf(gridType.QuadrantsOfInterest, sector) != -1)
+                    CheckBox checkBox = new CheckBox();
+                    checkBox.Font = checkBoxFont;
+                    checkBox.Text = series.LegendText;
+                    checkBox.Checked = series.Enabled;
+                    checkBox.Top = yPos;
+                    checkBox.Left = 10;
+                    checkBox.Width = gbSeries.Width - 20;
+                    checkBox.CheckedChanged += (sender, e) =>
                     {
-
-                        bool hole = holePresent[i];
-
-                        double tempFactor = euFactor;
-
-                        // Este diametro lo vamos a dejar para despues
-                        double diametroIA = CalculateDiameterFromArea((int)area);
-
-                        // Calculamos el diametro
-                        (double diameterTriangles, double maxDiameter, double minDiameter) = calculateAndDrawDiameterTrianglesAlghoritm(centro, image.ToBitmap(), sector, false);
-
-                        double ovalidad = calculateOvality(maxDiameter, minDiameter);
-
-                        ushort size = CalculateSize(maxDiameter, minDiameter, compactness, ovalidad, hole, area);
-
-                        if (size != 6) // Shape
+                        if (!checkBox.Checked && AllCheckBoxesUnchecked(gbSeries))
                         {
-                            if (maxDiameter > MaxD)
-                            {
-                                MaxD = maxDiameter;
-                            }
-                            if (minDiameter < MinD)
-                            {
-                                MinD = minDiameter;
-                            }
-
-                            diametersCV.Add(diametroIA);
-                            // Sumamos para promediar
-                            avgDIA += (diametroIA);
-                            avgD += (diameterTriangles * tempFactor);
-                            // Aumentamos el numero de elementos para promediar
-                            n++;
+                            // Evitar que todos los CheckBox se desmarquen
+                            checkBox.Checked = true;
                         }
-
-                        Blob blob = new Blob(area, perimeter, contours[i], diameterTriangles, diametroIA, centro, maxDiameter, minDiameter, sector, compactness, size, ovalidad, hole);
-
-                        // Agregamos el elemento a la lista
-                        Blobs.Add(blob);
-
-                        if (hole)
+                        else
                         {
-                            nHoles++;
+                            series.Enabled = checkBox.Checked;
                         }
+                    };
 
-                        foreach (Quadrant quadrant in Quadrants)
-                        {
-                            if (quadrant.Number == sector)
-                            {
-                                quadrant.DiameterMax = maxDiameter;
-                                quadrant.DiameterMin = minDiameter;
-                                quadrant.Compacity = compactness;
-                                quadrant.Found = true;
-                                quadrant.Blob = blob;
-
-                                for (int l = 0; l < drawFlags.Count; l++)
-                                {
-                                    if (drawFlags[l].Item1 == sector)
-                                    {
-                                        drawFlags[l] = (sector, false);
-                                    }
-                                }
-
-                                break;
-                            }
-                        }
-                    }
+                    gbSeries.Controls.Add(checkBox);
+                    yPos += checkBox.Height + 10; // Incrementar la posición vertical para el próximo CheckBox
                 }
             }
+        }
 
-            CheckHoles(nHoles);
-
-            // Calculamos el promedio de los diametros
-            if (MinD == 99999)
+        private bool AllCheckBoxesUnchecked(GroupBox groupBox)
+        {
+            foreach (var control in groupBox.Controls)
             {
-                MinD = 0;
+                if (control is CheckBox checkBox && checkBox.Checked)
+                {
+                    return false;
+                }
             }
-
-            avgDIA /= n;
-            avgD /= n;
-
-            double cv = CalculateCV(diametersCV);
-
-            int validObjects = Blobs.Count(Blob => Blob.Size != 6);
-
-            if (validObjects >= minBlobObjects)
-            {
-                QueueFrame(1);
-                ProcessControlDiameter(avgDIA);
-                CheckCV(cv);
-            }
-            else
-            {
-                QueueFrame(0);
-            }
-
-            CheckLastFrames();
-
-            maxDiameterAvg = MaxD * euFactor;
-            minDiameterAvg = MinD * euFactor;
-            diameterControl = controlDiameter;
-
-            if (units == "mm")
-            {
-                
-                dplControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsMm).ToString();
-            }
-            else
-            {
-
-                dplControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsInch).ToString();
-            }
-
-            GraphResults(MaxD, MinD, avgDIA);
+            return true;
         }
 
         private void ProcessControlDiameter(double diam)
         {
             if (!double.IsNaN(diam))
             {
+                diam = diam * euFactor;
                 double validateControl = Filtro(diam);
                 if (validateControl > maxDiameter * 3)
                 {
@@ -1323,10 +1411,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 if (setPoints[0] < 300 && setPoints[1] > 2)
                 {
-                    maxDiameter = setPoints[0] / euFactor;
+                    maxDiameter = setPoints[0];
                     settings.maxDiameter = maxDiameter;
 
-                    minDiameter = setPoints[1] / euFactor;
+                    minDiameter = setPoints[1];
                     settings.minDiameter = minDiameter;
 
                     CheckChangeSetPointDiameters();
@@ -1349,8 +1437,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void updateLabels()
         {
-            txtMaxDiameter.Text = (maxDiameter * euFactor).ToString();
-            txtMinDiameter.Text = (minDiameter * euFactor).ToString();
+            txtMaxDiameter.Text = (maxDiameter).ToString();
+            txtMinDiameter.Text = (minDiameter).ToString();
             txtMaxCompacity.Text = (maxCompactness).ToString();
             txtCompacityHoleLimit.Text = (maxCompactnessHole).ToString();
         }
@@ -1479,8 +1567,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             //double minD = 0;
             bool calibrationValidate = false;
 
-            minArea = (int)(((Math.Pow(minDiameter, 2) / 4) * Math.PI) * 0.5);
-            maxArea = (int)(((Math.Pow(maxDiameter, 2) / 4) * Math.PI) * 1.5);
+            minArea = (int)(((Math.Pow(minDiameter/euFactor, 2) / 4) * Math.PI) * 0.5);
+            maxArea = (int)(((Math.Pow(maxDiameter/euFactor, 2) / 4) * Math.PI) * 1.5);
 
             var (contours, centers, areas, perimeters, holePresent) = FindContoursWithEdgesAndCenters(roiImage);
 
@@ -1535,9 +1623,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     // Agrega aquí el código que deseas ejecutar después de que el usuario confirme
                     euFactor = tempFactor;
                     settings.EUFactor = euFactor;
-                    lblEuFactor.Text = Math.Round(euFactor, 3).ToString();
-                    maxDiameter = double.Parse(txtMaxDiameter.Text) / euFactor;
-                    minDiameter = double.Parse(txtMinDiameter.Text) / euFactor;
+                    maxDiameter = double.Parse(txtMaxDiameter.Text);
+                    minDiameter = double.Parse(txtMinDiameter.Text);
                     settings.maxDiameter = maxDiameter;
                     settings.minDiameter = minDiameter;
 
@@ -1679,7 +1766,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             roiImage = ExtractROI(originalImageCV);
 
             Mat binarizedImage = new Mat();
-            
+
+            Mat grayImage = new Mat();
+
+            CvInvoke.CvtColor(roiImage, grayImage, ColorConversion.Bgr2Gray);
+
 
             // Se binariza la imagen
             try
@@ -1687,8 +1778,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 if (autoThreshold)
                 {
 
-                    Mat grayImage = new Mat();
-                    CvInvoke.CvtColor(roiImage, grayImage, ColorConversion.Bgr2Gray);
+                    
+                    
                     threshold = (int)CvInvoke.Threshold(grayImage, binarizedImage, 0, 255, ThresholdType.Otsu);
                     txtThreshold.Text = threshold.ToString();
                     CvInvoke.Threshold(roiImage, binarizedImage, threshold, 255, ThresholdType.Binary);
@@ -1697,10 +1788,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 else
                 {
                     threshold = int.Parse(txtThreshold.Text);
-                    CvInvoke.Threshold(roiImage, binarizedImage, threshold, 255, ThresholdType.Binary);
+                    CvInvoke.Threshold(grayImage, binarizedImage, threshold, 255, ThresholdType.Binary);
                 }
 
                 originalImageCV.Dispose();
+
+                
             }
             catch (Exception ex)
             {
@@ -2339,7 +2432,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 }
 
                 settings.Units = units;
-                lblEuFactor.Text = Math.Round(euFactor, 3).ToString();
                 settings.EUFactor = euFactor;
 
                 // Actualizamos los datos de la tabla
@@ -2356,7 +2448,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     avgDiameter *= fact;
                     lblAvgDiameter.Text = Math.Round(avgDiameter, nUnitsInch).ToString();
 
-                    if (operationMode != 1)
+                    if (operationMode != 2)
                     {
                         double mxDiameter = 0;
                         if (Double.TryParse(txtMaxDiameter.Text, out mxDiameter)) ;
@@ -2396,7 +2488,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     avgDiameter *= fact;
                     lblAvgDiameter.Text = Math.Round(avgDiameter, nUnitsMm).ToString();
 
-                    if (operationMode != 1)
+                    if (operationMode != 2)
                     {
                         double mxDiameter = 0;
                         if (Double.TryParse(txtMaxDiameter.Text, out mxDiameter)) ;
@@ -3098,8 +3190,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             Blobs.Clear();
 
-            minArea = (int)(((Math.Pow(minDiameter, 2) / 4) * Math.PI) * 0.5);
-            maxArea = (int)(((Math.Pow(maxDiameter, 2) / 4) * Math.PI) * 1.5);
+            minArea = (int)(((Math.Pow(minDiameter / euFactor, 2) / 4) * Math.PI) * 0.5);
+            maxArea = (int)(((Math.Pow(maxDiameter / euFactor, 2) / 4) * Math.PI) * 1.5);
 
             var (contours, centers, areas, perimeters, holePresent) = FindContoursWithEdgesAndCenters(image);
 
@@ -3118,6 +3210,18 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             foreach (int k in gridType.QuadrantsOfInterest)
             {
                 drawFlags.Add((k, true));
+            }
+
+            try
+            {
+                if (!freezeFrame)
+                {
+                    DrawPerimeters(image, contours, 1);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
             }
 
             for (int i = 0; i < areas.Count; i++)
@@ -3158,9 +3262,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         double diametroIA = CalculateDiameterFromArea((int)area);
 
                         // Calculamos el diametro
-                        (double diameterTriangles, double maxDiameter, double minDiameter) = calculateAndDrawDiameterTrianglesAlghoritm(centro, image.ToBitmap(), sector, drawFlag);
+                        (double diameterTriangles, double maxDiameter, double minDiameter) = CalculateAndDrawDiameterTrianglesAlghoritm(centro, image, sector, drawFlag);
 
-                        double ovalidad = calculateOvality(maxDiameter, minDiameter);
+                        double ovalidad = CalculateOvality(maxDiameter, minDiameter);
 
                         ushort size = CalculateSize(maxDiameter, minDiameter, compactness, ovalidad, hole, area);
 
@@ -3202,7 +3306,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                                 DrawSector(image, sector);
 
                                 // Dibujamos el numero del sector
-                                DrawSectorNumber(image, centro, sector - 1);
+                                DrawSectorNumber(image, centro, sector - 1, size);
 
                                 DrawSize(image, sector, size);
 
@@ -3233,17 +3337,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             //Agujeros
             CheckHoles(nHoles);
 
-            try
-            {
-                if (!freezeFrame)
-                {
-                    DrawPerimeters(image, contours, 1);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
+            
 
             try
             {
@@ -3293,7 +3387,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             if (!freezeFrame) lblCV.Text = Math.Round(cv, 3).ToString();
 
-
             maxDiameterAvg = MaxD * euFactor;
             minDiameterAvg = MinD * euFactor;
             diameterControl = controlDiameter;
@@ -3326,12 +3419,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             if (units == "mm")
             {
 
-                dplControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsMm).ToString();
+                dplControlDiameter.Text = Math.Round(controlDiameter, nUnitsMm).ToString();
             }
             else
             {
 
-                dplControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsInch).ToString();
+                dplControlDiameter.Text = Math.Round(controlDiameter, nUnitsInch).ToString();
             }
 
 
@@ -3403,10 +3496,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 trendChart.Series["MaxDiameterSerie"].Points.AddXY(now2, MaxD * euFactor);
                 trendChart.Series["MinDiameterSerie"].Points.AddXY(now2, MinD * euFactor);
-                trendChart.Series["ControlDiameterSerie"].Points.AddXY(now2, controlDiameter * euFactor);
+                trendChart.Series["ControlDiameterSerie"].Points.AddXY(now2, controlDiameter);
                 trendChart.Series["SEQDiameterSerie"].Points.AddXY(now2, dIA * euFactor);
-                trendChart.Series["MaxDiameterSP"].Points.AddXY(now2, maxDiameter * euFactor);
-                trendChart.Series["MinDiameterSP"].Points.AddXY(now2, minDiameter * euFactor);
+                trendChart.Series["MaxDiameterSP"].Points.AddXY(now2, maxDiameter);
+                trendChart.Series["MinDiameterSP"].Points.AddXY(now2, minDiameter);
 
                 trendChart.ChartAreas[0].AxisY.Title = "Diameter in " + units;
 
@@ -3497,41 +3590,28 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             int sectorHeight = image.Height / gridType.Grid.Item1;
 
             // Console.WriteLine(sectorWidth);
+            MCvScalar rectColor = new MCvScalar(0, 0, 0); // Negro
 
             // Calcular las coordenadas del sector en el orden deseado
             int textX = ((sector - 1) / gridType.Grid.Item2) * sectorWidth;
             int textY = ((gridType.Grid.Item2 - 1) - ((sector - 1) % gridType.Grid.Item2)) * sectorHeight;
 
-            MCvScalar brush = new MCvScalar();
-
-            switch (size)
-            {
-                // Normal
-                case 1:
-                    brush = new MCvScalar(0, 255, 0);
-                    break;
-                // Big
-                case 2:
-                    brush = new MCvScalar(0, 165, 255);
-                    break;
-                // Small
-                case 3:
-                    brush = new MCvScalar(0, 255, 255);
-                    break;
-                // Oval
-                case 4:
-                    brush = new MCvScalar(255, 255, 0);
-                    break;
-                // Shape
-                case 6:
-                    brush = new MCvScalar(0, 0, 255);
-                    break;
-            }
-
             // Crear el texto a mostrar
             string texto = sizes[size];
+            int baseline = 0;
+            // Tamaño del texto
+            Size textSize = CvInvoke.GetTextSize(texto, FontFace.HersheySimplex, 0.5, 1, ref baseline);
 
-            CvInvoke.PutText(image, texto, new Point(textX, textY + 15), FontFace.HersheySimplex, 0.5, brush, 1);
+            // Posición del rectángulo basado en la posición del texto
+            Rectangle rect = new Rectangle(new Point(textX+2, textY+4), textSize);
+
+            // Ajuste del rectángulo para que cubra el texto con un pequeño margen
+            //rect.Inflate(5, 5);
+
+            // Dibujar el rectángulo negro
+            CvInvoke.Rectangle(image, rect, rectColor, -1);
+
+            CvInvoke.PutText(image, texto, new Point(textX+2, textY + 15), FontFace.HersheySimplex, 0.5, brushes[size], 1);
         }
 
         public static List<List<Point>> FindBackground(Bitmap binaryImage, int color, int minArea, int maxArea)
@@ -3607,12 +3687,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         }
 
         // Función para dibujar un punto con un grosor dado
-        void DrawPerimeters(Mat image, VectorOfVectorOfPoint perimeter, int thickness)
+        void DrawPerimeters(Mat image, VectorOfVectorOfPoint perimeters, int thickness)
         {
-            CvInvoke.DrawContours(image, perimeter, -1, new MCvScalar(255, 255, 0), thickness);
+            CvInvoke.DrawContours(image, perimeters, -1, new MCvScalar(255, 255, 0), thickness);
         }
 
-        private double calculateOvality(double maxDiameter, double minDiameter)
+        private double CalculateOvality(double maxDiameter, double minDiameter)
         {
             //double ovality = Math.Sqrt((1 - (Math.Pow(minDiameter, 2) / Math.Pow(maxDiameter, 2))));
             double ovality = maxDiameter / minDiameter;
@@ -3621,16 +3701,18 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private ushort CalculateSize(double dMayor, double dMenor, double compacidad, double ovalidad, bool hole, int area)
         {
+            dMayor = dMayor * euFactor;
+            dMenor = dMenor * euFactor;
             ushort size = 1; // Normal
             double maxOvality = maxDiameter / minDiameter;
             double avg = (dMayor + dMenor) / 2;
-            int normalArea = (int)((Math.PI * Math.Pow(((maxDiameter + minDiameter) / 2), 2)) / 4);
+            int normalArea = (int)((Math.PI * Math.Pow(((maxDiameter/euFactor + minDiameter/euFactor) / 2), 2)) / 4);
 
             if (hole && compacidad > maxCompactnessHole || (!hole && compacidad > maxCompactness))
             {
                 if (ovalidad > maxOvality && area > normalArea * 1.4)
                 {
-                    size = 7; // Double
+                    size = 5; // Double
                 }
                 else
                 {
@@ -3639,7 +3721,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
             else if (ovalidad > maxOvality)
             {
-                size = 4; // Oval
+                size = 5; // Oval
             }
             else if (avg > maxDiameter)
             {
@@ -3698,13 +3780,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         }
 
-        private void DrawSectorNumber(Mat image, Point center, int sector)
+        private void DrawSectorNumber(Mat image, Point center, int sector, int size)
         {
             // Seleccionar la esquina donde se mostrará el número del sector (puedes ajustar según tus necesidades)
             int xOffset = 5;
             int yOffset = 5;
 
-            CvInvoke.PutText(image, (sector + 1).ToString(), new Point(center.X + xOffset, center.Y + yOffset), FontFace.HersheySimplex, 0.7, new MCvScalar(0, 0, 255), 2);
+            CvInvoke.PutText(image, (sector + 1).ToString(), new Point(center.X + xOffset, center.Y + yOffset), FontFace.HersheySimplex, 0.7, brushes[size], 2);
 
         }
 
@@ -3748,7 +3830,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
-        private (double, double, double) calculateAndDrawDiameterTrianglesAlghoritm(Point center, Bitmap image, int sector, bool draw = true)
+        private (double, double, double) CalculateAndDrawDiameterTrianglesAlghoritm(Point center, Mat imageCV, int sector, bool draw = true)
         {
 
             double diameter, maxDiameter, minDiameter;
@@ -3771,49 +3853,52 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             double[] radialLenght = new double[24];
 
-            for (int i = 0; i < 24; i++)
+            using (Bitmap image = imageCV.ToBitmap())
             {
-                int iteration = 0;
-                Color pixelColor = image.GetPixel(newX, newY);
-
-                while (pixelColor.GetBrightness() != 0)
+                for (int i = 0; i < 24; i++)
                 {
-                    iteration++;
+                    int iteration = 0;
+                    Color pixelColor = image.GetPixel(newX, newY);
 
-                    newX += deltaX[i];
-                    newY += deltaY[i];
-
-                    if (newX >= image.Width || newX < 0)
+                    while (pixelColor.GetBrightness() != 0)
                     {
-                        newX -= deltaX[i];
+                        iteration++;
+
+                        newX += deltaX[i];
+                        newY += deltaY[i];
+
+                        if (newX >= image.Width || newX < 0)
+                        {
+                            newX -= deltaX[i];
+                        }
+
+                        if (newY >= image.Height || newY < 0)
+                        {
+                            newY -= deltaY[i];
+                        }
+
+                        pixelColor = image.GetPixel(newX, newY);
+
+                        if (iteration >= maxIteration)
+                        {
+                            iteration = 0;
+                            break;
+                        }
+
                     }
 
-                    if (newY >= image.Height || newY < 0)
-                    {
-                        newY -= deltaY[i];
-                    }
+                    double hipotenusa = Math.Sqrt(Math.Pow(deltaX[i], 2) + Math.Pow(deltaY[i], 2));
 
-                    pixelColor = image.GetPixel(newX, newY);
+                    listXY.Add(new Point(newX, newY));
 
-                    if (iteration >= maxIteration)
-                    {
-                        iteration = 0;
-                        break;
-                    }
+                    radialLenght[i] = Math.Sqrt(Math.Pow((x - newX), 2) + Math.Pow((y - newY), 2)) - hipotenusa / 2; //+ correction[i];
 
+                    avg_diameter += radialLenght[i];
+                    newX = x; newY = y;
                 }
-
-                double hipotenusa = Math.Sqrt(Math.Pow(deltaX[i], 2) + Math.Pow(deltaY[i], 2));
-
-                listXY.Add(new Point(newX, newY));
-
-                radialLenght[i] = Math.Sqrt(Math.Pow((x - newX), 2) + Math.Pow((y - newY), 2)) - hipotenusa / 2; //+ correction[i];
-
-                avg_diameter += radialLenght[i];
-                newX = x; newY = y;
             }
 
-            diameter = avg_diameter / 12;
+            //diameter = avg_diameter / 12;
 
             List<double> diameters = new List<double>();
 
@@ -3828,6 +3913,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             if (draw)
             {
+                MCvScalar pen1 = new MCvScalar(0, 255, 0);
+                MCvScalar pen2 = new MCvScalar(0, 0, 255);
+
                 if (diameter90deg)
                 {
                     int maxIndex = diameters.IndexOf(maxDiameter);
@@ -3841,19 +3929,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         minIndex = maxIndex + 6;
                     }
 
-                    using (Graphics g = Graphics.FromImage(image))
-                    {
-                        Pen pen1 = new Pen(Color.Green, 2);
-                        Pen pen2 = new Pen(Color.Red, 2);
+                    CvInvoke.Line(imageCV, new Point(center.X, center.Y), listXY[maxIndex], pen1);
+                    CvInvoke.Line(imageCV, new Point(center.X, center.Y), listXY[maxIndex + 12], pen1);
 
-                        // Dibujar diámetro máximo
-                        g.DrawLine(pen1, new Point(center.X, center.Y), listXY[maxIndex]);
-                        g.DrawLine(pen1, new Point(center.X, center.Y), listXY[maxIndex + 12]);
+                    CvInvoke.Line(imageCV, new Point(center.X, center.Y), listXY[minIndex], pen2);
+                    CvInvoke.Line(imageCV, new Point(center.X, center.Y), listXY[minIndex + 12], pen2);
 
-                        // Dibujar diámetro minimo
-                        g.DrawLine(pen2, new Point(center.X, center.Y), listXY[minIndex]);
-                        g.DrawLine(pen2, new Point(center.X, center.Y), listXY[minIndex + 12]);
-                    }
 
                     minDiameter = diameters[minIndex];
                 }
@@ -3862,20 +3943,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     int maxIndex = diameters.IndexOf(maxDiameter);
                     int minIndex = diameters.IndexOf(minDiameter);
 
+                    CvInvoke.Line(imageCV, new Point(center.X, center.Y), listXY[maxIndex], pen1);
+                    CvInvoke.Line(imageCV, new Point(center.X, center.Y), listXY[maxIndex + 12], pen1);
 
-                    using (Graphics g = Graphics.FromImage(image))
-                    {
-                        Pen pen1 = new Pen(Color.Green, 2);
-                        Pen pen2 = new Pen(Color.Red, 2);
-
-                        // Dibujar diámetro máximo
-                        g.DrawLine(pen1, new Point(center.X, center.Y), listXY[maxIndex]);
-                        g.DrawLine(pen1, new Point(center.X, center.Y), listXY[maxIndex + 12]);
-
-                        // Dibujar diámetro minimo
-                        g.DrawLine(pen2, new Point(center.X, center.Y), listXY[minIndex]);
-                        g.DrawLine(pen2, new Point(center.X, center.Y), listXY[minIndex + 12]);
-                    }
+                    CvInvoke.Line(imageCV, new Point(center.X, center.Y), listXY[minIndex], pen2);
+                    CvInvoke.Line(imageCV, new Point(center.X, center.Y), listXY[minIndex + 12], pen2);
                 }
 
             }
@@ -4601,10 +4673,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
 
             txtMaxDiameter.Text = Txt_MaxD.Text;
-            maxDiameter = double.Parse(Txt_MaxD.Text) / euFactor;
+            maxDiameter = double.Parse(Txt_MaxD.Text);
 
             txtMinDiameter.Text = Txt_MinD.Text;
-            minDiameter = double.Parse(Txt_MinD.Text) / euFactor;
+            minDiameter = double.Parse(Txt_MinD.Text);
 
             CheckChangeSetPointDiameters();
 
@@ -4857,7 +4929,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             GroupActualTargetSize.Enabled = false;
             GroupSelectGrid.Enabled = false;
             CmbProducts.SelectedIndex = 0;
-            boxUnits.Enabled = false;
+            gbUnits.Enabled = false;
 
         }
 
@@ -5225,35 +5297,57 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             if (!triggerPLC && mode == 0)
             {
-                using (var inputForm = new InputDlg2(units))
+                using (var chooseCamera = new ChooseCameraDlg())
                 {
-                    if (inputForm.ShowDialog() == DialogResult.OK)
+                    if (chooseCamera.ShowDialog() == DialogResult.OK)
                     {
-                        
-                        double height = inputForm.cameraHeight;
-
-                        double fov;
-
-                        if (units == "mm")
+                        using (var inputForm = new InputDlg2(units,euFactor,lastCalibrationHeight,correctionFactor,lastCalibrationUnits,chooseCamera.camera))
                         {
-                            fov = 2 * Math.Atan(lenWidth / (2 * lenF));
+                            var result = inputForm.ShowDialog();
+                            if (result == DialogResult.OK)
+                            {
+                                double height, fov;
+
+                                height = inputForm.cameraHeight;
+
+                                if (units == "mm")
+                                {
+                                    fov = 2 * Math.Atan(lenWidth / (2 * lenF));
+                                }
+                                else
+                                {
+                                    fov = 2 * Math.Atan((lenWidth / 25.4) / (2 * (lenF / 25.4)));
+                                }
+
+                                lastCalibrationHeight = height;
+                                lastCalibrationUnits = units;
+
+                                fov = 2 * Math.Tan(fov / 2) * height;
+
+                                euFactor = (fov / 640) * correctionFactor;
+                                settings.EUFactor = euFactor / correctionFactor;
+                                settings.LastCalibrationHeight = lastCalibrationHeight;
+                                settings.LastCalibrationUnits = lastCalibrationUnits;
+
+                                MessageBox.Show("Calibration Succesfull, Factor: " + euFactor / correctionFactor, "Operation Succesfull", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                settings.Save();
+                            }
+                            else if (result == DialogResult.Yes)
+                            {
+                                euFactor /= correctionFactor;
+                                correctionFactor = inputForm.correctionFactor;
+                                euFactor *= correctionFactor;
+                                settings.CorrectionFactor = correctionFactor;
+                                settings.EUFactor = euFactor;
+
+                                MessageBox.Show("Correction Succesfull, Factor: " + correctionFactor, "Operation Succesfull", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                settings.Save();
+                            }
+                            else
+                            {
+                                MessageBox.Show("Operation Cancelled", "Cancel", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            }
                         }
-                        else
-                        {
-                            fov = 2 * Math.Atan((lenWidth/25.4) / (2 * (lenF/25.4)));
-                        }
-
-                        fov = 2 * Math.Tan(fov / 2) * height;
-
-                        euFactor = fov / 640;
-                        settings.EUFactor = euFactor;
-                        lblEuFactor.Text = Math.Round(euFactor, 3).ToString();
-                        maxDiameter = double.Parse(txtMaxDiameter.Text) / euFactor;
-                        minDiameter = double.Parse(txtMinDiameter.Text) / euFactor;
-                        settings.maxDiameter = maxDiameter;
-                        settings.minDiameter = minDiameter;
-
-                        MessageBox.Show("Calibration Succesful, Factor: " + euFactor);
                     }
                 }
             }
@@ -5351,7 +5445,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // Max diameter
             if (double.TryParse(txtMaxDiameter.Text, out maxDiameter))
             {
-                maxDiameter = maxDiameter / euFactor;
+                maxDiameter = maxDiameter;
                 settings.maxDiameter = maxDiameter;
                 CheckChangeSetPointDiameters();
             }
@@ -5362,7 +5456,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // Min Diameter
             if (double.TryParse(txtMinDiameter.Text, out minDiameter))
             {
-                minDiameter = minDiameter / euFactor;
+                minDiameter = minDiameter;
                 settings.minDiameter = minDiameter;
                 CheckChangeSetPointDiameters();
             }
@@ -5546,15 +5640,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void btnLogin_Click(object sender, EventArgs e)
         {
-            List<string> users = new List<string>();
-            foreach (User us in usersList)
-            {
-                users.Add(us.Name);
-            }
+            //List<string> users = new List<string>();
+            //foreach (User us in usersList);
+            //{
+            //    users.Add(us.Name);
+            //}
+
+            var users = usersList.Select(u => u.Name).ToList();
 
             if (users.Contains(txtUser.Text))
             {
-                int i = users.IndexOf(txtUser.Text);
+                var i = users.IndexOf(txtUser.Text);
 
                 if (txtPassword.Text == usersList[i].Password)
                 {
@@ -5575,46 +5671,92 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void Login()
         {
+            txtUser.Text = currentUser.Name;
             authenticated = true;
             btnLogin.BackColor = Color.DarkGray;
             btnLogoff.Enabled = true;
             btnLogoff.BackColor = Color.Silver;
             btnLogin.Enabled = false;
 
-            userLogged = txtUser.Text;
+            userLogged = currentUser.Name;
             lblUserLogged.Text = userLogged;
 
             txtUser.Enabled = false;
             txtPassword.Enabled = false;
             txtPassword.Clear();
 
-            checkAuthentication();
+            CheckAuthentication();
         }
 
-        private void checkAuthentication()
+        private void CheckAuthentication()
         {
             if (authenticated)
             {
                 if (currentUser != null)
                 {
-                    boxROI.Enabled = true;
-                    if (operationMode != 1) boxUnits.Enabled = true;
-                    GB_Threshold.Enabled = true;
-                    gbShapeIndicator.Enabled = true;
-                }
+                    if (currentUser.Level == 1)
+                    {
+                        advancedPage.Enabled = true;
+                        UnabledGB(advancedPage);
+                        gbShapeIndicator.Enabled = true;
+                        gbFlagParameters.Enabled = true;
 
-                if (currentUser.Level >= 2)
-                {
-                    advancedPage.Enabled = true;
+                        gbOperationControls.Enabled = true;
+                    }
+                    else if (currentUser.Level == 2)
+                    {
+                        gbOperationControls.Enabled = true;
+                        configurationPage.Enabled = true;
+                        EnabledGB(configurationPage);
+
+                        advancedPage.Enabled = true;
+                        UnabledGB(advancedPage);
+                        gbCalibration.Enabled = true;
+                        gbProcessControlDiamater.Enabled = true;
+                        gbParameters.Enabled = true;
+                    }
+                    else if (currentUser.Level == 3)
+                    {
+                        gbOperationControls.Enabled = true;
+                        advancedPage.Enabled = true;
+                        EnabledGB(advancedPage);
+                        configurationPage.Enabled = true;
+                        EnabledGB(configurationPage);
+                    }
                 }
             }
             else
             {
-                boxROI.Enabled = false;
-                boxUnits.Enabled = false;
-                GB_Threshold.Enabled = false;
+                //boxROI.Enabled = false;
+                //boxUnits.Enabled = false;
+                //GB_Threshold.Enabled = false;
+                //advancedPage.Enabled = false;
+                //gbShapeIndicator.Enabled = false;
+                gbOperationControls.Enabled = false;
+                configurationPage.Enabled = false;
                 advancedPage.Enabled = false;
-                gbShapeIndicator.Enabled = false;
+            }
+        }
+
+        private void EnabledGB(TabPage tabPage)
+        {
+            foreach (Control control in tabPage.Controls)
+            {
+                if (control is GroupBox)
+                {
+                    control.Enabled = true;
+                }
+            }
+        }
+
+        private void UnabledGB(TabPage tabPage)
+        {
+            foreach(Control control in tabPage.Controls)
+            {
+                if (control is GroupBox)
+                {
+                    control.Enabled = false;
+                }
             }
         }
 
@@ -5643,7 +5785,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             userLogged = "No logged";
             lblUserLogged.Text = userLogged;
 
-            checkAuthentication();
+            CheckAuthentication();
         }
 
         private void btnVideoSettings_Click(object sender, EventArgs e)
@@ -5753,9 +5895,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void btnClearChart_Click(object sender, EventArgs e)
         {
-            trendChart.Series["MaxDiameterSerie"].Points.Clear();
-            trendChart.Series["MinDiameterSerie"].Points.Clear();
-            trendChart.Series["ControlDiameterSerie"].Points.Clear();
+            foreach (var serie in trendChart.Series)
+            {
+                serie.Points.Clear();
+            }
         }
 
         private void txtUser_Click(object sender, EventArgs e)
@@ -5916,6 +6059,65 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             linesFilter = !linesFilter;
             if (linesFilter) btnLinesFilter.BackColor = Color.LightGreen;
             else btnLinesFilter.BackColor = Color.Silver;
+        }
+
+        private void btnExportData_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (true) ExportData(1);
+                else ExportData(2);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Export Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void ExportData(int camera)
+        {
+            // Seleccionar la serie activa (habilitada)
+            var activeSeries = trendChart.Series.Where(series => series.Enabled).Select(series => series).ToList();
+            if (activeSeries != null)
+            {
+                SaveFileDialog saveFileDialog = new SaveFileDialog();
+                saveFileDialog.Filter = "CSV files (*.csv)|*.csv";
+                saveFileDialog.Title = "Save series data to CSV";
+                saveFileDialog.FileName = $"Camera{camera}Data.csv";
+
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    using (StreamWriter writer = new StreamWriter(saveFileDialog.FileName))
+                    {
+                        string head = "Timestamp,";
+                        foreach (var serie in activeSeries)
+                        {
+                            head += serie.LegendText.ToString() + ",";
+                        }
+                        writer.WriteLine(head);
+
+                        for (int i = 0; i < activeSeries[0].Points.Count; i++)
+                        {
+                            string line = "";
+                            string time = DateTime.FromOADate(activeSeries[0].Points[i].XValue).ToString("HH:mm:ss:fff");
+
+                            line += time + ",";
+
+                            foreach (var serie in activeSeries)
+                            {
+                                line += serie.Points[i].YValues[0].ToString() + ",";
+                            }
+
+                            writer.WriteLine(line);
+                        }
+                    }
+                    MessageBox.Show("Data exported successfully.", "Export Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            else
+            {
+                MessageBox.Show("No active series to export.", "Export Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }

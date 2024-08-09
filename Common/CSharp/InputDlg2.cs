@@ -1,22 +1,40 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.Windows.Forms;
 
-namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp
+namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 {
     public partial class InputDlg2 : Form
     {
         public string units { get; set; }
         public double cameraHeight { get; set; }
+        public double correctionFactor { get; set; }
 
-        public InputDlg2(string unit)
+        double originalSize;
+        double desiredSize;
+
+        public InputDlg2(string unit, double euFactor, double lastCalibrationHeight, double correctionFactor, string lastCalibrationHeightUnits, int camera = 1)
         {
             units = unit;
+            string title = "";
+            if (camera == 1) title = "LEFT";
+            else title = "RIGHT";
+            this.Text = $"Calibration Menu {title}";
             InitializeComponent();
+
+            txtUnits.Text = units;
+            lblDesiredSizeUnits.Text = units;
+            lblOriginalSizeUnits.Text = units;
+
+            lblEUFactorCal.Text = euFactor.ToString();
+            lblLastCalibrationHeight.Text = lastCalibrationHeight.ToString();
+            lblCorrectionFactor.Text = correctionFactor.ToString();
+            lblLastCalibrationHeightUnits.Text = lastCalibrationHeightUnits;
         }
 
         public void InputDlg2_Load(object sender, EventArgs e)
         {
-            txtUnits.Text = units;
+            
         }
 
         private void btnContinue_Click(object sender, EventArgs e)
@@ -62,6 +80,41 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp
             {
                 return height;
             }
+        }
+
+        private void btnCorrect_Click(object sender, EventArgs e)
+        {
+            if (!double.TryParse(txtOriginalSize.Text, out originalSize))
+            {
+                MessageBox.Show("Use a valid number");
+                return;
+            }
+
+            if (!double.TryParse(txtDesiredSize.Text, out desiredSize))
+            {
+                MessageBox.Show("Use a valid number");
+                return;
+            }
+
+            double correction = desiredSize / originalSize;
+
+            if (Math.Abs(correction-1) > 0.1)
+            {
+                MessageBox.Show("Invalid correction, must be <= 10 %");
+                return;
+            }
+
+            this.DialogResult = DialogResult.Yes;
+            this.correctionFactor = correction;
+            this.Close();
+
+        }
+
+        private void btnResetFactor_Click(object sender, EventArgs e)
+        {
+            this.DialogResult = DialogResult.Yes;
+            this.correctionFactor = 1;
+            this.Close();
         }
     }
 }

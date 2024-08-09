@@ -22,7 +22,6 @@ C:\Users\Jesús\Documents\vision-tortillas\bin\Debug\STI.application
 C:\Users\Jesús\Documents\vision-tortillas\bin\Debug\STI.exe
 C:\Users\Jesús\Documents\vision-tortillas\bin\Debug\STI.pdb
 C:\Users\Jesús\Documents\vision-tortillas\bin\Debug\CsvHelper.dll
-C:\Users\Jesús\Documents\vision-tortillas\bin\Debug\DALSA.SaperaLT.SapClassBasic.dll
 C:\Users\Jesús\Documents\vision-tortillas\bin\Debug\EasyModbus.dll
 C:\Users\Jesús\Documents\vision-tortillas\bin\Debug\Emgu.CV.Bitmap.dll
 C:\Users\Jesús\Documents\vision-tortillas\bin\Debug\Emgu.CV.Platform.NetStandard.dll
@@ -69,7 +68,9 @@ C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\STI.exe
 C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\STI.pdb
 C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp.InputDlg.resources
 C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Properties.Resources.resources
-C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp.InputDlg2.resources
 C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp.KeyBoard.resources
 C:\Users\Jesús\Documents\vision-tortillas\bin\Debug\MetroFramework.dll
 C:\Users\Jesús\Documents\vision-tortillas\bin\Debug\MetroFramework.Fonts.dll
+C:\Users\Jesús\Documents\vision-tortillas\bin\Debug\DALSA.SaperaLT.SapClassBasic.dll
+C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.ChooseCameraDlg.resources
+C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.InputDlg2.resources

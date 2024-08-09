@@ -219,6 +219,12 @@
     <Compile Include="Common\CSharp\BufDlg.Designer.cs">
       <DependentUpon>BufDlg.cs</DependentUpon>
     </Compile>
+    <Compile Include="Common\CSharp\ChooseCameraDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Common\CSharp\ChooseCameraDlg.designer.cs">
+      <DependentUpon>ChooseCameraDlg.cs</DependentUpon>
+    </Compile>
     <Compile Include="Common\CSharp\InputDlg.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -234,7 +240,7 @@
     <Compile Include="Common\CSharp\InputDlg2.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Common\CSharp\InputDlg2.Designer.cs">
+    <Compile Include="Common\CSharp\InputDlg2.designer.cs">
       <DependentUpon>InputDlg2.cs</DependentUpon>
     </Compile>
     <Compile Include="Common\CSharp\JpegFileDlg.cs">
@@ -312,6 +318,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Common\CSharp\BufDlg.resx">
       <DependentUpon>BufDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Common\CSharp\ChooseCameraDlg.resx">
+      <DependentUpon>ChooseCameraDlg.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Common\CSharp\InputDlg.resx">
       <DependentUpon>InputDlg.cs</DependentUpon>
