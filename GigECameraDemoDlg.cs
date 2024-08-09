@@ -101,7 +101,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         // Varibles para identificar si el trigger viene del PLC o del Software
         bool triggerPLC = true;
+        bool triggerPLC2 = true;
         int mode = 1; // 1 - Live, 0 - Frame
+        int mode2 = 1; // 1 - Live, 0 - Frame
         int frameCounter = 0;
 
         // Variable para actualizar las imagenes si estamos el la imagesTab
@@ -226,6 +228,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         SapView originalView;
         SapBuffer processBuffer;
         SapView processView;
+        
+        SapBuffer originalBuffer2;
+        SapView originalView2;
+        SapBuffer processBuffer2;
+        SapView processView2;
 
         bool noCamera = false;
         bool deviceLost = false;
@@ -236,55 +243,59 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             m_Buffers = null;
             m_Xfer = null;
             m_View = null;
+            
+            m_AcqDevice2 = null;
+            m_Buffers2 = null;
+            m_Xfer2 = null;
+            m_View2 = null;
 
-            AcqConfigDlg acConfigDlg = new AcqConfigDlg(null, "", AcqConfigDlg.ServerCategory.ServerAcqDevice, false);
+            configPath = userDir + "\\STI-config\\";
+            csvPath = configPath + "\\STI-db.csv";
+            imagesPath = userDir + "\\STI-images\\";
+
+            if (!Directory.Exists(configPath))
+            {
+                // Si no existe, crearlo
+                Directory.CreateDirectory(configPath);
+                Console.WriteLine("Directorio creado: " + configPath);
+            }
+
+            if (!Directory.Exists(imagesPath))
+            {
+                // Si no existe, crearlo
+                Directory.CreateDirectory(imagesPath);
+                Console.WriteLine("Directorio creado: " + imagesPath);
+            }
+
+            if (!Directory.Exists(imagesPath + "\\frames\\"))
+            {
+                // Si no existe, crearlo
+                Directory.CreateDirectory(imagesPath + "\\frames\\");
+                Console.WriteLine("Directorio creado: " + imagesPath + "\\frames\\");
+            }
+
+            if (!File.Exists(configPath + "STIconfig.ccf"))
+            {
+                MessageBox.Show("Config file not found, generate one and place it in: " + configPath + " with name: " + " STIconfig.ccf");
+                this.Close();
+            }
+
+            InitializeComponent();
+
+            LoadSettings();
+
+            InitControlDiameter();
+
+            InitElements();
+
+            InitializeDataTable();
+
+            InitChart();
+
+            AcqConfigDlg acConfigDlg = new AcqConfigDlg(null, "", AcqConfigDlg.ServerCategory.ServerAcqDevice, false, "M0001351");
             DialogResult result = acConfigDlg.ShowDialog();
             if (result == DialogResult.OK)
             {
-                configPath = userDir + "\\STI-config\\";
-                csvPath = configPath + "\\STI-db.csv";
-                imagesPath = userDir + "\\STI-images\\";
-
-                if (!Directory.Exists(configPath))
-                {
-                    // Si no existe, crearlo
-                    Directory.CreateDirectory(configPath);
-                    Console.WriteLine("Directorio creado: " + configPath);
-                }
-
-                if (!Directory.Exists(imagesPath))
-                {
-                    // Si no existe, crearlo
-                    Directory.CreateDirectory(imagesPath);
-                    Console.WriteLine("Directorio creado: " + imagesPath);
-                }
-
-                if (!Directory.Exists(imagesPath + "\\frames\\"))
-                {
-                    // Si no existe, crearlo
-                    Directory.CreateDirectory(imagesPath + "\\frames\\");
-                    Console.WriteLine("Directorio creado: " + imagesPath + "\\frames\\");
-                }
-
-                if (!File.Exists(configPath + "STIconfig.ccf"))
-                {
-                    MessageBox.Show("Config file not found, generate one and place it in: " + configPath + " with name: " + " STIconfig.ccf");
-                    this.Close();
-                }
-
-                InitializeComponent();
-
-                LoadSettings();
-
-                InitControlDiameter();
-
-                InitElements();
-
-                InitializeDataTable();
-
-                InitChart();
-
-                //updateLabels();
 
                 originalBuffer = new SapBuffer(1, 640, 480, SapFormat.RGBP8, SapBuffer.MemoryType.ScatterGather);
                 originalView = new SapView(originalBuffer, boxOriginal);
@@ -389,10 +400,126 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
             else
             {
-                MessageBox.Show("Camera not found");
+                //MessageBox.Show("Camera not found");
                 Environment.Exit(0);
                 this.Close();
             }
+
+            AcqConfigDlg acConfigDlg2 = new AcqConfigDlg(null, "", AcqConfigDlg.ServerCategory.ServerAcqDevice, false, "M0002101");
+            DialogResult result2 = acConfigDlg2.ShowDialog();
+            if (result2 == DialogResult.OK)
+            {
+
+                originalBuffer2 = new SapBuffer(1, 640, 480, SapFormat.RGBP8, SapBuffer.MemoryType.ScatterGather);
+                originalView2 = new SapView(originalBuffer2, boxOriginal2);
+
+                bool succes = originalBuffer2.Create();
+                succes = originalView2.Create();
+
+                processBuffer2 = new SapBuffer(1, 357, 357, SapFormat.RGBP8, SapBuffer.MemoryType.ScatterGather);
+                processView2 = new SapView(processBuffer2, boxProcess2);
+
+                succes = processBuffer2.Create();
+                succes = processView2.Create();
+
+                if (succes)
+                {
+                    Console.WriteLine("Bufffers and Views Created");
+                }
+
+                //----------------Only for Debug, delete on production-----------------
+                //settings.frames = 0;
+                //----------------Only for Debug, delete on production-----------------
+
+                // Agregar m_ImageBox al TabPage
+                this.m_ImageBox2 = new DALSA.SaperaLT.SapClassGui.ImageBox();
+                this.m_ImageBox2.Location = new Point(OffsetLeft, OffsetTop);
+                this.m_ImageBox2.Name = "m_ImageBox";
+                this.m_ImageBox2.PixelValueDisplay = this.PixelDataValue;
+                this.m_ImageBox2.Size = new Size(640, 480);
+                this.m_ImageBox2.SliderEnable = true;
+                this.m_ImageBox2.SliderMaximum = 10;
+                this.m_ImageBox2.SliderMinimum = 0;
+                this.m_ImageBox2.SliderValue = 0;
+                this.m_ImageBox2.SliderVisible = false;
+                this.m_ImageBox2.TabIndex = 12;
+                this.m_ImageBox2.TrackerEnable = false;
+                this.m_ImageBox2.View = null;
+                imagePage2.Controls.Add(this.m_ImageBox2);
+
+
+                if (!CreateNewObjects(acConfigDlg, false, 2))
+                    this.Close();
+
+                //----------------Only for Debug, delete on production-----------------
+                m_View2.AutoEmpty = true;
+                originalView2.AutoEmpty = true;
+                processView2.AutoEmpty = true;
+                //----------------Only for Debug, delete on production-----------------
+
+                // Cargamos la configuracion por default
+                m_AcqDevice2.LoadFeatures(configPath + "STIconfig.ccf");
+
+                if (triggerPLC2)
+                {
+                    btnFreezeFrame2.Enabled = true;
+
+                    ChangeTriggerMode("PLC",2);
+
+                    //triggerModeBtn.BackColor = DefaultBackColor;
+                    btnViewMode2.BackColor = Color.DarkGray;
+                    btnVirtualTrigger2.BackColor = Color.DarkGray;
+                    btnProcessImage2.BackColor = Color.DarkGray;
+
+                    //txtSoftwareTrigger.Text = "PLC";
+                    txtPlcTrigger2.BackColor = Color.LightGreen;
+                    txtSoftwareTrigger2.BackColor = Color.Transparent;
+                    btnVirtualTrigger2.Enabled = false;
+
+                    StartStop(2);
+
+                    btnViewMode2.Enabled = false;
+                    btnProcessImage2.Enabled = false;
+                    btnProcessImage2.Text = "PROCESSING";
+                }
+                else
+                {
+                    btnFreezeFrame2.Enabled = false;
+
+                    ChangeTriggerMode("SOFTWARE",2);
+
+                    //triggerModeBtn.BackColor = DefaultBackColor;
+                    btnViewMode2.BackColor = Color.Silver;
+                    btnVirtualTrigger2.BackColor = Color.Silver;
+                    btnProcessImage2.BackColor = Color.DarkGray;
+
+                    //txtSoftwareTrigger.Text = "PLC";
+                    txtPlcTrigger2.BackColor = Color.Transparent;
+                    txtSoftwareTrigger2.BackColor = Color.LightGreen;
+                    btnVirtualTrigger2.Enabled = true;
+
+                    StartStop(2);
+
+                    btnViewMode2.Enabled = true;
+                    btnProcessImage2.Enabled = false;
+                    btnProcessImage2.Text = "PROCESS FRAME";
+                }
+            }
+            else if (result2 == DialogResult.None)
+            {
+                MessageBox.Show("Bad serial number");
+                Environment.Exit(0);
+                this.Close();
+            }
+            else
+            {
+                //MessageBox.Show("Camera not found");
+                Environment.Exit(0);
+                this.Close();
+            }
+
+
+            tmrMB.Enabled = true;
         }
 
         private void InitControlDiameter()
@@ -752,7 +879,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return newK;
         }
 
-        private void ChangeTriggerMode(string modeStr)
+        private void ChangeTriggerMode(string modeStr, int camera = 1)
         {
             int param = -1;
             switch (modeStr)
@@ -2650,38 +2777,70 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         // Create new objects with acquisition information
         [Obsolete]
-        public bool CreateNewObjects(AcqConfigDlg acConfigDlg, bool Restore)
+        public bool CreateNewObjects(AcqConfigDlg acConfigDlg, bool Restore, int camera = 1)
         {
-            if (!Restore)
+            if (camera == 1)
             {
-                m_ServerLocation = acConfigDlg.ServerLocation;
-                m_ConfigFileName = acConfigDlg.ConfigFile;
+                if (!Restore)
+                {
+                    m_ServerLocation = acConfigDlg.ServerLocation;
+                    m_ConfigFileName = acConfigDlg.ConfigFile;
+                }
+                m_AcqDevice = new SapAcqDevice(m_ServerLocation, m_ConfigFileName);
+                if (SapBuffer.IsBufferTypeSupported(m_ServerLocation, SapBuffer.MemoryType.ScatterGather))
+                    m_Buffers = new SapBufferWithTrash(2, m_AcqDevice, SapBuffer.MemoryType.ScatterGather);
+                else
+                    m_Buffers = new SapBufferWithTrash(2, m_AcqDevice, SapBuffer.MemoryType.ScatterGatherPhysical);
+                m_Xfer = new SapAcqDeviceToBuf(m_AcqDevice, m_Buffers);
+                m_View = new SapView(m_Buffers);
+                m_ImageBox.View = m_View;
+                m_Xfer.Pairs[0].EventType = SapXferPair.XferEventType.EndOfFrame;
+                m_Xfer.XferNotify += new SapXferNotifyHandler(xfer_XferNotify);
+                m_Xfer.XferNotifyContext = this;
+                StatusLabelInfo.Text = "Online... Waiting grabbed images";
+
+                if (!CreateObjects())
+                {
+                    DisposeObjects();
+                    return false;
+                }
+
+                // Resize ImagBox to take into account the size of created sapview
+                m_ImageBox.OnSize();
+                UpdateControls();
+                return true;
             }
-            m_AcqDevice = new SapAcqDevice(m_ServerLocation, m_ConfigFileName);
-            if (SapBuffer.IsBufferTypeSupported(m_ServerLocation, SapBuffer.MemoryType.ScatterGather))
-                m_Buffers = new SapBufferWithTrash(2, m_AcqDevice, SapBuffer.MemoryType.ScatterGather);
             else
-                m_Buffers = new SapBufferWithTrash(2, m_AcqDevice, SapBuffer.MemoryType.ScatterGatherPhysical);
-            m_Xfer = new SapAcqDeviceToBuf(m_AcqDevice, m_Buffers);
-            m_View = new SapView(m_Buffers);
-            m_ImageBox.View = m_View;
-            m_Xfer.Pairs[0].EventType = SapXferPair.XferEventType.EndOfFrame;
-            m_Xfer.XferNotify += new SapXferNotifyHandler(xfer_XferNotify);
-            m_Xfer.XferNotifyContext = this;
-            StatusLabelInfo.Text = "Online... Waiting grabbed images";
-
-
-
-            if (!CreateObjects())
             {
-                DisposeObjects();
-                return false;
-            }
+                if (!Restore)
+                {
+                    m_ServerLocation2 = acConfigDlg.ServerLocation;
+                    m_ConfigFileName2 = acConfigDlg.ConfigFile;
+                }
+                m_AcqDevice2 = new SapAcqDevice(m_ServerLocation2, m_ConfigFileName2);
+                if (SapBuffer.IsBufferTypeSupported(m_ServerLocation2, SapBuffer.MemoryType.ScatterGather))
+                    m_Buffers2 = new SapBufferWithTrash(2, m_AcqDevice2, SapBuffer.MemoryType.ScatterGather);
+                else
+                    m_Buffers2 = new SapBufferWithTrash(2, m_AcqDevice2, SapBuffer.MemoryType.ScatterGatherPhysical);
+                m_Xfer2 = new SapAcqDeviceToBuf(m_AcqDevice2, m_Buffers2);
+                m_View2 = new SapView(m_Buffers2);
+                m_ImageBox2.View = m_View2;
+                m_Xfer2.Pairs[0].EventType = SapXferPair.XferEventType.EndOfFrame;
+                m_Xfer2.XferNotify += new SapXferNotifyHandler(xfer_XferNotify);
+                m_Xfer2.XferNotifyContext = this;
+                StatusLabelInfo.Text = "Online... Waiting grabbed images";
 
-            // Resize ImagBox to take into account the size of created sapview
-            m_ImageBox.OnSize();
-            UpdateControls();
-            return true;
+                if (!CreateObjects(2))
+                {
+                    DisposeObjects(2);
+                    return false;
+                }
+
+                // Resize ImagBox to take into account the size of created sapview
+                m_ImageBox2.OnSize();
+                UpdateControls();
+                return true;
+            }
         }
 
 
@@ -2716,54 +2875,108 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
 
         // Call Create Object 
-        private bool CreateObjects()
+        private bool CreateObjects(int camera = 1)
         {
-            // Create acquisition object
-            if (m_AcqDevice != null && !m_AcqDevice.Initialized)
+            if (camera == 1)
             {
-                if (m_AcqDevice.Create() == false)
+                // Create acquisition object
+                if (m_AcqDevice != null && !m_AcqDevice.Initialized)
                 {
-                    DestroyObjects();
-                    return false;
+                    if (m_AcqDevice.Create() == false)
+                    {
+                        DestroyObjects();
+                        return false;
+                    }
                 }
-            }
-            // Create buffer object
-            if (m_Buffers != null && !m_Buffers.Initialized)
-            {
-                if (m_Buffers.Create() == false)
+                // Create buffer object
+                if (m_Buffers != null && !m_Buffers.Initialized)
                 {
-                    DestroyObjects();
-                    return false;
+                    if (m_Buffers.Create() == false)
+                    {
+                        DestroyObjects();
+                        return false;
+                    }
+                    m_Buffers.Clear();
                 }
-                m_Buffers.Clear();
-            }
-            // Create view object
-            if (m_View != null && !m_View.Initialized)
-            {
-                if (m_View.Create() == false)
+                // Create view object
+                if (m_View != null && !m_View.Initialized)
                 {
-                    DestroyObjects();
-                    return false;
+                    if (m_View.Create() == false)
+                    {
+                        DestroyObjects();
+                        return false;
+                    }
                 }
-            }
 
-            if (m_Xfer != null && m_Xfer.Pairs[0] != null)
-            {
-                m_Xfer.Pairs[0].Cycle = SapXferPair.CycleMode.NextWithTrash;
-                if (m_Xfer.Pairs[0].Cycle != SapXferPair.CycleMode.NextWithTrash)
+                if (m_Xfer != null && m_Xfer.Pairs[0] != null)
                 {
-                    DestroyObjects();
-                    return false;
+                    m_Xfer.Pairs[0].Cycle = SapXferPair.CycleMode.NextWithTrash;
+                    if (m_Xfer.Pairs[0].Cycle != SapXferPair.CycleMode.NextWithTrash)
+                    {
+                        DestroyObjects();
+                        return false;
+                    }
+                }
+
+                // Create Xfer object
+                if (m_Xfer != null && !m_Xfer.Initialized)
+                {
+                    if (m_Xfer.Create() == false)
+                    {
+                        DestroyObjects();
+                        return false;
+                    }
                 }
             }
-
-            // Create Xfer object
-            if (m_Xfer != null && !m_Xfer.Initialized)
+            else
             {
-                if (m_Xfer.Create() == false)
+                // Create acquisition object
+                if (m_AcqDevice2 != null && !m_AcqDevice2.Initialized)
                 {
-                    DestroyObjects();
-                    return false;
+                    if (m_AcqDevice2.Create() == false)
+                    {
+                        DestroyObjects(2);
+                        return false;
+                    }
+                }
+                // Create buffer object
+                if (m_Buffers2 != null && !m_Buffers2.Initialized)
+                {
+                    if (m_Buffers2.Create() == false)
+                    {
+                        DestroyObjects(2);
+                        return false;
+                    }
+                    m_Buffers2.Clear();
+                }
+                // Create view object
+                if (m_View2 != null && !m_View2.Initialized)
+                {
+                    if (m_View2.Create() == false)
+                    {
+                        DestroyObjects(2);
+                        return false;
+                    }
+                }
+
+                if (m_Xfer2 != null && m_Xfer2.Pairs[0] != null)
+                {
+                    m_Xfer2.Pairs[0].Cycle = SapXferPair.CycleMode.NextWithTrash;
+                    if (m_Xfer2.Pairs[0].Cycle != SapXferPair.CycleMode.NextWithTrash)
+                    {
+                        DestroyObjects(2);
+                        return false;
+                    }
+                }
+
+                // Create Xfer object
+                if (m_Xfer2 != null && !m_Xfer2.Initialized)
+                {
+                    if (m_Xfer2.Create() == false)
+                    {
+                        DestroyObjects(2);
+                        return false;
+                    }
                 }
             }
 
@@ -2774,29 +2987,58 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         }
 
-        private void DestroyObjects()
+        private void DestroyObjects(int camera = 1)
         {
-            if (m_Xfer != null && m_Xfer.Initialized)
-                m_Xfer.Destroy();
-            if (m_View != null && m_View.Initialized)
-                m_View.Destroy();
-            if (m_Buffers != null && m_Buffers.Initialized)
-                m_Buffers.Destroy();
-            if (m_AcqDevice != null && m_AcqDevice.Initialized)
-                m_AcqDevice.Destroy();
+            if (camera == 1)
+            {
+                if (m_Xfer != null && m_Xfer.Initialized)
+                    m_Xfer.Destroy();
+                if (m_View != null && m_View.Initialized)
+                    m_View.Destroy();
+                if (m_Buffers != null && m_Buffers.Initialized)
+                    m_Buffers.Destroy();
+                if (m_AcqDevice != null && m_AcqDevice.Initialized)
+                    m_AcqDevice.Destroy();
+            }
+            else
+            {
+                if (m_Xfer2 != null && m_Xfer2.Initialized)
+                    m_Xfer2.Destroy();
+                if (m_View2 != null && m_View2.Initialized)
+                    m_View2.Destroy();
+                if (m_Buffers2 != null && m_Buffers2.Initialized)
+                    m_Buffers2.Destroy();
+                if (m_AcqDevice2 != null && m_AcqDevice2.Initialized)
+                    m_AcqDevice2.Destroy();
+            }
+            
 
         }
 
-        private void DisposeObjects()
+        private void DisposeObjects(int camera = 1)
         {
-            if (m_Xfer != null)
-            { m_Xfer.Dispose(); m_Xfer = null; }
-            if (m_View != null)
-            { m_View.Dispose(); m_View = null; m_ImageBox.View = null; }
-            if (m_Buffers != null)
-            { m_Buffers.Dispose(); m_Buffers = null; }
-            if (m_AcqDevice != null)
-            { m_AcqDevice.Dispose(); m_AcqDevice = null; }
+            if (camera == 1)
+            {
+                if (m_Xfer != null)
+                { m_Xfer.Dispose(); m_Xfer = null; }
+                if (m_View != null)
+                { m_View.Dispose(); m_View = null; m_ImageBox.View = null; }
+                if (m_Buffers != null)
+                { m_Buffers.Dispose(); m_Buffers = null; }
+                if (m_AcqDevice != null)
+                { m_AcqDevice.Dispose(); m_AcqDevice = null; }
+            }
+            else
+            {
+                if (m_Xfer2 != null)
+                { m_Xfer2.Dispose(); m_Xfer2 = null; }
+                if (m_View2 != null)
+                { m_View2.Dispose(); m_View2 = null; m_ImageBox2.View = null; }
+                if (m_Buffers != null)
+                { m_Buffers2.Dispose(); m_Buffers2 = null; }
+                if (m_AcqDevice2 != null)
+                { m_AcqDevice2.Dispose(); m_AcqDevice2 = null; }
+            }
         }
 
         //**********************************************************************************
@@ -2905,33 +3147,33 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         //
         //*****************************************************************************************
 
-        private void button_Load_Config_Click(object sender, EventArgs e)
-        {
-            // Set new acquisition parameters
-            AcqConfigDlg acConfigDlg = new AcqConfigDlg(null, "", AcqConfigDlg.ServerCategory.ServerAcqDevice, false);
-            if (acConfigDlg.ShowDialog() == DialogResult.OK)
-            {
-                DestroyObjects();
-                DisposeObjects();
+        //private void button_Load_Config_Click(object sender, EventArgs e)
+        //{
+        //    // Set new acquisition parameters
+        //    AcqConfigDlg acConfigDlg = new AcqConfigDlg(null, "", AcqConfigDlg.ServerCategory.ServerAcqDevice, false);
+        //    if (acConfigDlg.ShowDialog() == DialogResult.OK)
+        //    {
+        //        DestroyObjects();
+        //        DisposeObjects();
 
-                // Update objects with new acquisition
-                if (!CreateNewObjects(acConfigDlg, false))
-                {
-                    MessageBox.Show("New objects creation has failed. Restoring original object ");
-                    // Recreate original objects
-                    if (!CreateNewObjects(null, true))
-                    {
-                        MessageBox.Show("Original object creation has failed. Closing application ");
-                        System.Windows.Forms.Application.Exit();
-                    }
-                }
-            }
-            else
-            {
-                MessageBox.Show("No Modification in Acquisition");
-            }
-            m_ImageBox.Refresh();
-        }
+        //        // Update objects with new acquisition
+        //        if (!CreateNewObjects(acConfigDlg, false))
+        //        {
+        //            MessageBox.Show("New objects creation has failed. Restoring original object ");
+        //            // Recreate original objects
+        //            if (!CreateNewObjects(null, true))
+        //            {
+        //                MessageBox.Show("Original object creation has failed. Closing application ");
+        //                System.Windows.Forms.Application.Exit();
+        //            }
+        //        }
+        //    }
+        //    else
+        //    {
+        //        MessageBox.Show("No Modification in Acquisition");
+        //    }
+        //    m_ImageBox.Refresh();
+        //}
 
         //*****************************************************************************************
         //
@@ -2942,9 +3184,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         // Updates the menu items enabling/disabling the proper items depending on the stateof the application
         void UpdateControls()
         {
-            bool bAcqNoGrab = (m_Xfer != null) && (m_Xfer.Grabbing == false);
-            bool bAcqGrab = (m_Xfer != null) && (m_Xfer.Grabbing == true);
-            bool bNoGrab = (m_Xfer == null) || (m_Xfer.Grabbing == false);
+            //bool bAcqNoGrab = (m_Xfer != null) && (m_Xfer.Grabbing == false);
+            //bool bAcqGrab = (m_Xfer != null) && (m_Xfer.Grabbing == true);
+            //bool bNoGrab = (m_Xfer == null) || (m_Xfer.Grabbing == false);
 
             //// Acquisition Control
             //button_Grab.Enabled = bAcqNoGrab;
@@ -4041,55 +4283,63 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             stopwatch.Restart();
         }
 
-        public void StartStop()
+        public void StartStop(int camera = 1)
         {
-            this.StatusLabelInfo.Text = "";
-            this.StatusLabelInfoTrash.Text = "";
-            if (!m_Xfer.Grabbing)
+            if (camera == 1)
             {
-                if (m_Xfer.Grab())
+                this.StatusLabelInfo.Text = "";
+                this.StatusLabelInfoTrash.Text = "";
+                if (!m_Xfer.Grabbing)
                 {
-                    UpdateControls();
-
-                    // viewModeBtn.BackColor = DefaultBackColor; // Restaurar el color de fondo predeterminado
-                    //txtFrameMode.Text = "LIVE";
-                    txtFrameMode.BackColor = Color.Transparent;
-                    txtLiveMode.BackColor = Color.LightGreen;
-                    btnVirtualTrigger.Enabled = false;
-                    btnVirtualTrigger.BackColor = Color.DarkGray;
-                    btnProcessImage.Enabled = false;
-                    btnProcessImage.BackColor = Color.DarkGray;
-                    mode = 1;
-
-                    if (triggerPLC)
+                    if (m_Xfer.Grab())
                     {
-                        txtLiveMode.BackColor = Color.Transparent;
-                        //txtFrameMode.Text = "FRAME";
-                        txtFrameMode.BackColor = Color.LightGreen;
+                        UpdateControls();
+
+                        // viewModeBtn.BackColor = DefaultBackColor; // Restaurar el color de fondo predeterminado
+                        //txtFrameMode.Text = "LIVE";
+                        txtFrameMode.BackColor = Color.Transparent;
+                        txtLiveMode.BackColor = Color.LightGreen;
+                        btnVirtualTrigger.Enabled = false;
+                        btnVirtualTrigger.BackColor = Color.DarkGray;
+                        btnProcessImage.Enabled = false;
+                        btnProcessImage.BackColor = Color.DarkGray;
+                        mode = 1;
+
+                        if (triggerPLC)
+                        {
+                            txtLiveMode.BackColor = Color.Transparent;
+                            //txtFrameMode.Text = "FRAME";
+                            txtFrameMode.BackColor = Color.LightGreen;
+                            mode = 0;
+                        }
+                    }
+                }
+
+                else
+                {
+                    AbortDlg abort = new AbortDlg(m_Xfer);
+
+                    if (m_Xfer.Freeze())
+                    {
+                        if (abort.ShowDialog() != DialogResult.OK)
+                            m_Xfer.Abort();
+                        UpdateControls();
+
+                        txtFrameMode.Text = "FRAME"; // Cambiar el texto cuando está desactivado
+                        txtFrameMode.BackColor = Color.Khaki;
                         mode = 0;
+                        btnProcessImage.Enabled = true;
+                        btnProcessImage.BackColor = Color.Silver;
+                        btnVirtualTrigger.Enabled = true;
+                        btnVirtualTrigger.BackColor = Color.Silver;
                     }
                 }
             }
-
             else
             {
-                AbortDlg abort = new AbortDlg(m_Xfer);
 
-                if (m_Xfer.Freeze())
-                {
-                    if (abort.ShowDialog() != DialogResult.OK)
-                        m_Xfer.Abort();
-                    UpdateControls();
-
-                    txtFrameMode.Text = "FRAME"; // Cambiar el texto cuando está desactivado
-                    txtFrameMode.BackColor = Color.Khaki;
-                    mode = 0;
-                    btnProcessImage.Enabled = true;
-                    btnProcessImage.BackColor = Color.Silver;
-                    btnVirtualTrigger.Enabled = true;
-                    btnVirtualTrigger.BackColor = Color.Silver;
-                }
             }
+            
         }
 
         private async void triggerModeBtn_Click(object sender, EventArgs e)
@@ -4254,33 +4504,33 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         //}
 
 
-        private void videoSettingsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            // Set new acquisition parameters
-            AcqConfigDlg acConfigDlg = new AcqConfigDlg(null, "", AcqConfigDlg.ServerCategory.ServerAcqDevice, false);
-            if (acConfigDlg.ShowDialog() == DialogResult.OK)
-            {
-                DestroyObjects();
-                DisposeObjects();
+        //private void videoSettingsToolStripMenuItem_Click(object sender, EventArgs e)
+        //{
+        //    // Set new acquisition parameters
+        //    AcqConfigDlg acConfigDlg = new AcqConfigDlg(null, "", AcqConfigDlg.ServerCategory.ServerAcqDevice, false);
+        //    if (acConfigDlg.ShowDialog() == DialogResult.OK)
+        //    {
+        //        DestroyObjects();
+        //        DisposeObjects();
 
-                // Update objects with new acquisition
-                if (!CreateNewObjects(acConfigDlg, false))
-                {
-                    MessageBox.Show("New objects creation has failed. Restoring original object ");
-                    // Recreate original objects
-                    if (!CreateNewObjects(null, true))
-                    {
-                        MessageBox.Show("Original object creation has failed. Closing application ");
-                        System.Windows.Forms.Application.Exit();
-                    }
-                }
-            }
-            else
-            {
-                MessageBox.Show("No Modification in Acquisition");
-            }
-            //m_ImageBox.Refresh();
-        }
+        //        // Update objects with new acquisition
+        //        if (!CreateNewObjects(acConfigDlg, false))
+        //        {
+        //            MessageBox.Show("New objects creation has failed. Restoring original object ");
+        //            // Recreate original objects
+        //            if (!CreateNewObjects(null, true))
+        //            {
+        //                MessageBox.Show("Original object creation has failed. Closing application ");
+        //                System.Windows.Forms.Application.Exit();
+        //            }
+        //        }
+        //    }
+        //    else
+        //    {
+        //        MessageBox.Show("No Modification in Acquisition");
+        //    }
+        //    //m_ImageBox.Refresh();
+        //}
 
         private void SetPictureBoxPositionAndSize(ref SapBuffer buffer, TabPage tabPage)
         {
@@ -5788,33 +6038,33 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             CheckAuthentication();
         }
 
-        private void btnVideoSettings_Click(object sender, EventArgs e)
-        {
-            // Set new acquisition parameters
-            AcqConfigDlg acConfigDlg = new AcqConfigDlg(null, "", AcqConfigDlg.ServerCategory.ServerAcqDevice, false);
-            if (acConfigDlg.ShowDialog() == DialogResult.OK)
-            {
-                DestroyObjects();
-                DisposeObjects();
+        //private void btnVideoSettings_Click(object sender, EventArgs e)
+        //{
+        //    // Set new acquisition parameters
+        //    AcqConfigDlg acConfigDlg = new AcqConfigDlg(null, "", AcqConfigDlg.ServerCategory.ServerAcqDevice, false);
+        //    if (acConfigDlg.ShowDialog() == DialogResult.OK)
+        //    {
+        //        DestroyObjects();
+        //        DisposeObjects();
 
-                // Update objects with new acquisition
-                if (!CreateNewObjects(acConfigDlg, false))
-                {
-                    MessageBox.Show("New objects creation has failed. Restoring original object ");
-                    // Recreate original objects
-                    if (!CreateNewObjects(null, true))
-                    {
-                        MessageBox.Show("Original object creation has failed. Closing application ");
-                        System.Windows.Forms.Application.Exit();
-                    }
-                }
-            }
-            else
-            {
-                MessageBox.Show("No Modification in Acquisition");
-            }
-            m_ImageBox.Refresh();
-        }
+        //        // Update objects with new acquisition
+        //        if (!CreateNewObjects(acConfigDlg, false))
+        //        {
+        //            MessageBox.Show("New objects creation has failed. Restoring original object ");
+        //            // Recreate original objects
+        //            if (!CreateNewObjects(null, true))
+        //            {
+        //                MessageBox.Show("Original object creation has failed. Closing application ");
+        //                System.Windows.Forms.Application.Exit();
+        //            }
+        //        }
+        //    }
+        //    else
+        //    {
+        //        MessageBox.Show("No Modification in Acquisition");
+        //    }
+        //    m_ImageBox.Refresh();
+        //}
 
         private void btnRestoreProduct_Click(object sender, EventArgs e)
         {

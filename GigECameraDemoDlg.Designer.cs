@@ -37,9 +37,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GigECameraDemoDlg));
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea6 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend6 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series6 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.StatusLabel = new System.Windows.Forms.ToolStripLabel();
             this.StatusLabelInfo = new System.Windows.Forms.ToolStripLabel();
@@ -186,6 +186,52 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.boxOriginal = new System.Windows.Forms.GroupBox();
             this.boxProcess = new System.Windows.Forms.GroupBox();
+            this.imagePage2 = new System.Windows.Forms.TabPage();
+            this.boxOriginal2 = new System.Windows.Forms.GroupBox();
+            this.boxProcess2 = new System.Windows.Forms.GroupBox();
+            this.dataGridView2 = new System.Windows.Forms.DataGridView();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.label36 = new System.Windows.Forms.Label();
+            this.label37 = new System.Windows.Forms.Label();
+            this.label38 = new System.Windows.Forms.Label();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.label39 = new System.Windows.Forms.Label();
+            this.label40 = new System.Windows.Forms.Label();
+            this.label41 = new System.Windows.Forms.Label();
+            this.label42 = new System.Windows.Forms.Label();
+            this.btnFreezeFrame2 = new System.Windows.Forms.Button();
+            this.label43 = new System.Windows.Forms.Label();
+            this.label44 = new System.Windows.Forms.Label();
+            this.label45 = new System.Windows.Forms.Label();
+            this.label46 = new System.Windows.Forms.Label();
+            this.label48 = new System.Windows.Forms.Label();
+            this.label49 = new System.Windows.Forms.Label();
+            this.label50 = new System.Windows.Forms.Label();
+            this.label51 = new System.Windows.Forms.Label();
+            this.label52 = new System.Windows.Forms.Label();
+            this.groupBox6 = new System.Windows.Forms.GroupBox();
+            this.button2 = new System.Windows.Forms.Button();
+            this.groupBox7 = new System.Windows.Forms.GroupBox();
+            this.label53 = new System.Windows.Forms.Label();
+            this.button3 = new System.Windows.Forms.Button();
+            this.label56 = new System.Windows.Forms.Label();
+            this.button4 = new System.Windows.Forms.Button();
+            this.label57 = new System.Windows.Forms.Label();
+            this.button5 = new System.Windows.Forms.Button();
+            this.label58 = new System.Windows.Forms.Label();
+            this.label59 = new System.Windows.Forms.Label();
+            this.groupBox11 = new System.Windows.Forms.GroupBox();
+            this.txtPlcTrigger2 = new System.Windows.Forms.Label();
+            this.label61 = new System.Windows.Forms.Label();
+            this.groupBox16 = new System.Windows.Forms.GroupBox();
+            this.label62 = new System.Windows.Forms.Label();
+            this.button6 = new System.Windows.Forms.Button();
+            this.txtSoftwareTrigger2 = new System.Windows.Forms.Label();
+            this.label64 = new System.Windows.Forms.Label();
+            this.btnVirtualTrigger2 = new System.Windows.Forms.Button();
+            this.btnProcessImage2 = new System.Windows.Forms.Button();
+            this.btnTriggerMode2 = new System.Windows.Forms.Button();
+            this.btnViewMode2 = new System.Windows.Forms.Button();
             this.trendPage = new System.Windows.Forms.TabPage();
             this.btnExportData = new System.Windows.Forms.Button();
             this.gbSeries = new System.Windows.Forms.GroupBox();
@@ -250,6 +296,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.imagePage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.boxOriginal.SuspendLayout();
+            this.imagePage2.SuspendLayout();
+            this.boxOriginal2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).BeginInit();
+            this.groupBox1.SuspendLayout();
+            this.groupBox3.SuspendLayout();
+            this.groupBox6.SuspendLayout();
+            this.groupBox7.SuspendLayout();
+            this.groupBox11.SuspendLayout();
+            this.groupBox16.SuspendLayout();
             this.trendPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trendChart)).BeginInit();
             this.productsPage.SuspendLayout();
@@ -1943,6 +1998,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             this.mainTabs.Appearance = System.Windows.Forms.TabAppearance.FlatButtons;
             this.mainTabs.Controls.Add(this.imagePage);
+            this.mainTabs.Controls.Add(this.imagePage2);
             this.mainTabs.Controls.Add(this.trendPage);
             this.mainTabs.Controls.Add(this.productsPage);
             this.mainTabs.Controls.Add(this.aboutPage);
@@ -1970,7 +2026,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.imagePage.Name = "imagePage";
             this.imagePage.Size = new System.Drawing.Size(1169, 828);
             this.imagePage.TabIndex = 0;
-            this.imagePage.Text = "CAMERA VIEW";
+            this.imagePage.Text = "LEFT";
             // 
             // dataGridView1
             // 
@@ -2003,6 +2059,554 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.boxProcess.Size = new System.Drawing.Size(332, 228);
             this.boxProcess.TabIndex = 0;
             this.boxProcess.TabStop = false;
+            // 
+            // imagePage2
+            // 
+            this.imagePage2.Controls.Add(this.boxOriginal2);
+            this.imagePage2.Controls.Add(this.dataGridView2);
+            this.imagePage2.Controls.Add(this.groupBox1);
+            this.imagePage2.Controls.Add(this.groupBox6);
+            this.imagePage2.Controls.Add(this.groupBox11);
+            this.imagePage2.Location = new System.Drawing.Point(4, 44);
+            this.imagePage2.Name = "imagePage2";
+            this.imagePage2.Size = new System.Drawing.Size(1169, 828);
+            this.imagePage2.TabIndex = 5;
+            this.imagePage2.Text = "RIGHT";
+            this.imagePage2.UseVisualStyleBackColor = true;
+            // 
+            // boxOriginal2
+            // 
+            this.boxOriginal2.AutoSize = true;
+            this.boxOriginal2.Controls.Add(this.boxProcess2);
+            this.boxOriginal2.Location = new System.Drawing.Point(0, 0);
+            this.boxOriginal2.Name = "boxOriginal2";
+            this.boxOriginal2.Size = new System.Drawing.Size(640, 480);
+            this.boxOriginal2.TabIndex = 125;
+            this.boxOriginal2.TabStop = false;
+            // 
+            // boxProcess2
+            // 
+            this.boxProcess2.Location = new System.Drawing.Point(166, 120);
+            this.boxProcess2.Name = "boxProcess2";
+            this.boxProcess2.Size = new System.Drawing.Size(332, 228);
+            this.boxProcess2.TabIndex = 0;
+            this.boxProcess2.TabStop = false;
+            // 
+            // dataGridView2
+            // 
+            this.dataGridView2.AllowUserToOrderColumns = true;
+            this.dataGridView2.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.dataGridView2.BackgroundColor = System.Drawing.SystemColors.ControlDark;
+            this.dataGridView2.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
+            this.dataGridView2.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridView2.Location = new System.Drawing.Point(-10, 510);
+            this.dataGridView2.Margin = new System.Windows.Forms.Padding(0);
+            this.dataGridView2.Name = "dataGridView2";
+            this.dataGridView2.ReadOnly = true;
+            this.dataGridView2.Size = new System.Drawing.Size(1173, 284);
+            this.dataGridView2.TabIndex = 124;
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.groupBox1.Controls.Add(this.label36);
+            this.groupBox1.Controls.Add(this.label37);
+            this.groupBox1.Controls.Add(this.label38);
+            this.groupBox1.Controls.Add(this.groupBox3);
+            this.groupBox1.Controls.Add(this.label40);
+            this.groupBox1.Controls.Add(this.label41);
+            this.groupBox1.Controls.Add(this.label42);
+            this.groupBox1.Controls.Add(this.btnFreezeFrame2);
+            this.groupBox1.Controls.Add(this.label43);
+            this.groupBox1.Controls.Add(this.label44);
+            this.groupBox1.Controls.Add(this.label45);
+            this.groupBox1.Controls.Add(this.label46);
+            this.groupBox1.Controls.Add(this.label48);
+            this.groupBox1.Controls.Add(this.label49);
+            this.groupBox1.Controls.Add(this.label50);
+            this.groupBox1.Controls.Add(this.label51);
+            this.groupBox1.Controls.Add(this.label52);
+            this.groupBox1.Font = new System.Drawing.Font("Segoe UI", 10F);
+            this.groupBox1.Location = new System.Drawing.Point(645, 165);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(520, 161);
+            this.groupBox1.TabIndex = 123;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Frame Results";
+            // 
+            // label36
+            // 
+            this.label36.AutoSize = true;
+            this.label36.Font = new System.Drawing.Font("Segoe UI", 12F);
+            this.label36.Location = new System.Drawing.Point(457, 99);
+            this.label36.Name = "label36";
+            this.label36.Size = new System.Drawing.Size(23, 21);
+            this.label36.TabIndex = 135;
+            this.label36.Text = "%";
+            // 
+            // label37
+            // 
+            this.label37.AutoSize = true;
+            this.label37.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label37.Location = new System.Drawing.Point(396, 97);
+            this.label37.Name = "label37";
+            this.label37.Size = new System.Drawing.Size(18, 20);
+            this.label37.TabIndex = 134;
+            this.label37.Text = "0";
+            // 
+            // label38
+            // 
+            this.label38.AutoSize = true;
+            this.label38.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label38.Location = new System.Drawing.Point(286, 97);
+            this.label38.Name = "label38";
+            this.label38.Size = new System.Drawing.Size(82, 20);
+            this.label38.TabIndex = 133;
+            this.label38.Text = "Var. Coeff:";
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.BackColor = System.Drawing.Color.Transparent;
+            this.groupBox3.Controls.Add(this.label39);
+            this.groupBox3.Location = new System.Drawing.Point(50, 24);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(143, 57);
+            this.groupBox3.TabIndex = 132;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Valid Objects";
+            // 
+            // label39
+            // 
+            this.label39.AutoSize = true;
+            this.label39.BackColor = System.Drawing.Color.Transparent;
+            this.label39.Font = new System.Drawing.Font("Segoe UI", 15.75F, System.Drawing.FontStyle.Bold);
+            this.label39.Location = new System.Drawing.Point(59, 19);
+            this.label39.Name = "label39";
+            this.label39.Size = new System.Drawing.Size(25, 30);
+            this.label39.TabIndex = 127;
+            this.label39.Text = "0";
+            // 
+            // label40
+            // 
+            this.label40.AutoSize = true;
+            this.label40.Font = new System.Drawing.Font("Segoe UI", 12F);
+            this.label40.Location = new System.Drawing.Point(451, 120);
+            this.label40.Name = "label40";
+            this.label40.Size = new System.Drawing.Size(38, 21);
+            this.label40.TabIndex = 126;
+            this.label40.Text = "mm";
+            // 
+            // label41
+            // 
+            this.label41.AutoSize = true;
+            this.label41.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
+            this.label41.Location = new System.Drawing.Point(396, 121);
+            this.label41.Name = "label41";
+            this.label41.Size = new System.Drawing.Size(18, 20);
+            this.label41.TabIndex = 0;
+            this.label41.Text = "0";
+            // 
+            // label42
+            // 
+            this.label42.AutoSize = true;
+            this.label42.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label42.Location = new System.Drawing.Point(259, 119);
+            this.label42.Name = "label42";
+            this.label42.Size = new System.Drawing.Size(110, 20);
+            this.label42.TabIndex = 131;
+            this.label42.Text = "SEQ Diameter:";
+            // 
+            // btnFreezeFrame2
+            // 
+            this.btnFreezeFrame2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnFreezeFrame2.BackColor = System.Drawing.Color.Silver;
+            this.btnFreezeFrame2.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnFreezeFrame2.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnFreezeFrame2.Location = new System.Drawing.Point(48, 87);
+            this.btnFreezeFrame2.Name = "btnFreezeFrame2";
+            this.btnFreezeFrame2.Size = new System.Drawing.Size(145, 59);
+            this.btnFreezeFrame2.TabIndex = 129;
+            this.btnFreezeFrame2.Text = "FREEZE RESULTS";
+            this.btnFreezeFrame2.UseVisualStyleBackColor = false;
+            // 
+            // label43
+            // 
+            this.label43.AutoSize = true;
+            this.label43.Font = new System.Drawing.Font("Segoe UI", 12F);
+            this.label43.Location = new System.Drawing.Point(451, 71);
+            this.label43.Name = "label43";
+            this.label43.Size = new System.Drawing.Size(38, 21);
+            this.label43.TabIndex = 125;
+            this.label43.Text = "mm";
+            // 
+            // label44
+            // 
+            this.label44.AutoSize = true;
+            this.label44.Font = new System.Drawing.Font("Segoe UI", 12F);
+            this.label44.Location = new System.Drawing.Point(451, 42);
+            this.label44.Name = "label44";
+            this.label44.Size = new System.Drawing.Size(38, 21);
+            this.label44.TabIndex = 124;
+            this.label44.Text = "mm";
+            // 
+            // label45
+            // 
+            this.label45.AutoSize = true;
+            this.label45.Font = new System.Drawing.Font("Segoe UI", 12F);
+            this.label45.Location = new System.Drawing.Point(451, 16);
+            this.label45.Name = "label45";
+            this.label45.Size = new System.Drawing.Size(38, 21);
+            this.label45.TabIndex = 123;
+            this.label45.Text = "mm";
+            // 
+            // label46
+            // 
+            this.label46.AutoSize = true;
+            this.label46.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label46.Location = new System.Drawing.Point(396, 17);
+            this.label46.Name = "label46";
+            this.label46.Size = new System.Drawing.Size(18, 20);
+            this.label46.TabIndex = 0;
+            this.label46.Text = "0";
+            // 
+            // label48
+            // 
+            this.label48.AutoSize = true;
+            this.label48.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label48.Location = new System.Drawing.Point(259, 17);
+            this.label48.Name = "label48";
+            this.label48.Size = new System.Drawing.Size(111, 20);
+            this.label48.TabIndex = 122;
+            this.label48.Text = "Avg Diameter:";
+            // 
+            // label49
+            // 
+            this.label49.AutoSize = true;
+            this.label49.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label49.Location = new System.Drawing.Point(396, 71);
+            this.label49.Name = "label49";
+            this.label49.Size = new System.Drawing.Size(18, 20);
+            this.label49.TabIndex = 0;
+            this.label49.Text = "0";
+            // 
+            // label50
+            // 
+            this.label50.AutoSize = true;
+            this.label50.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label50.Location = new System.Drawing.Point(259, 45);
+            this.label50.Name = "label50";
+            this.label50.Size = new System.Drawing.Size(113, 20);
+            this.label50.TabIndex = 120;
+            this.label50.Text = "Max Diameter:";
+            // 
+            // label51
+            // 
+            this.label51.AutoSize = true;
+            this.label51.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label51.Location = new System.Drawing.Point(396, 43);
+            this.label51.Name = "label51";
+            this.label51.Size = new System.Drawing.Size(18, 20);
+            this.label51.TabIndex = 0;
+            this.label51.Text = "0";
+            // 
+            // label52
+            // 
+            this.label52.AutoSize = true;
+            this.label52.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label52.Location = new System.Drawing.Point(259, 73);
+            this.label52.Name = "label52";
+            this.label52.Size = new System.Drawing.Size(110, 20);
+            this.label52.TabIndex = 121;
+            this.label52.Text = "Min Diameter:";
+            // 
+            // groupBox6
+            // 
+            this.groupBox6.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.groupBox6.Controls.Add(this.button2);
+            this.groupBox6.Controls.Add(this.groupBox7);
+            this.groupBox6.Controls.Add(this.label58);
+            this.groupBox6.Controls.Add(this.label59);
+            this.groupBox6.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.groupBox6.Location = new System.Drawing.Point(645, 332);
+            this.groupBox6.Name = "groupBox6";
+            this.groupBox6.Size = new System.Drawing.Size(520, 144);
+            this.groupBox6.TabIndex = 122;
+            this.groupBox6.TabStop = false;
+            this.groupBox6.Text = "System Results";
+            // 
+            // button2
+            // 
+            this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.button2.BackColor = System.Drawing.Color.Silver;
+            this.button2.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.button2.Enabled = false;
+            this.button2.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold);
+            this.button2.Location = new System.Drawing.Point(10, 76);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(106, 44);
+            this.button2.TabIndex = 136;
+            this.button2.Text = "0";
+            this.button2.UseVisualStyleBackColor = false;
+            // 
+            // groupBox7
+            // 
+            this.groupBox7.Controls.Add(this.label53);
+            this.groupBox7.Controls.Add(this.button3);
+            this.groupBox7.Controls.Add(this.label56);
+            this.groupBox7.Controls.Add(this.button4);
+            this.groupBox7.Controls.Add(this.label57);
+            this.groupBox7.Controls.Add(this.button5);
+            this.groupBox7.Font = new System.Drawing.Font("Segoe UI", 10F);
+            this.groupBox7.Location = new System.Drawing.Point(229, 11);
+            this.groupBox7.Name = "groupBox7";
+            this.groupBox7.Size = new System.Drawing.Size(282, 120);
+            this.groupBox7.TabIndex = 136;
+            this.groupBox7.TabStop = false;
+            this.groupBox7.Text = "Last 10 Frames";
+            // 
+            // label53
+            // 
+            this.label53.AutoSize = true;
+            this.label53.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label53.Location = new System.Drawing.Point(19, 84);
+            this.label53.Name = "label53";
+            this.label53.Size = new System.Drawing.Size(98, 20);
+            this.label53.TabIndex = 136;
+            this.label53.Text = "Valid Frames";
+            // 
+            // button3
+            // 
+            this.button3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.button3.BackColor = System.Drawing.Color.Silver;
+            this.button3.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.button3.Enabled = false;
+            this.button3.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button3.Location = new System.Drawing.Point(194, 81);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(76, 26);
+            this.button3.TabIndex = 136;
+            this.button3.Text = "0";
+            this.button3.UseVisualStyleBackColor = false;
+            // 
+            // label56
+            // 
+            this.label56.AutoSize = true;
+            this.label56.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label56.Location = new System.Drawing.Point(19, 51);
+            this.label56.Name = "label56";
+            this.label56.Size = new System.Drawing.Size(141, 20);
+            this.label56.TabIndex = 135;
+            this.label56.Text = "Diameter Variation";
+            // 
+            // button4
+            // 
+            this.button4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.button4.BackColor = System.Drawing.Color.Silver;
+            this.button4.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.button4.Enabled = false;
+            this.button4.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button4.Location = new System.Drawing.Point(194, 49);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(76, 26);
+            this.button4.TabIndex = 131;
+            this.button4.Text = "0";
+            this.button4.UseVisualStyleBackColor = false;
+            // 
+            // label57
+            // 
+            this.label57.AutoSize = true;
+            this.label57.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label57.Location = new System.Drawing.Point(19, 22);
+            this.label57.Name = "label57";
+            this.label57.Size = new System.Drawing.Size(105, 20);
+            this.label57.TabIndex = 134;
+            this.label57.Text = "Holes Present";
+            // 
+            // button5
+            // 
+            this.button5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.button5.BackColor = System.Drawing.Color.Silver;
+            this.button5.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.button5.Enabled = false;
+            this.button5.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button5.Location = new System.Drawing.Point(194, 21);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(76, 24);
+            this.button5.TabIndex = 129;
+            this.button5.Text = "0";
+            this.button5.UseVisualStyleBackColor = false;
+            // 
+            // label58
+            // 
+            this.label58.AutoSize = true;
+            this.label58.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
+            this.label58.Location = new System.Drawing.Point(6, 29);
+            this.label58.Name = "label58";
+            this.label58.Size = new System.Drawing.Size(132, 42);
+            this.label58.TabIndex = 132;
+            this.label58.Text = "Process Control \r\nDiameter:";
+            // 
+            // label59
+            // 
+            this.label59.AutoSize = true;
+            this.label59.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F);
+            this.label59.Location = new System.Drawing.Point(139, 96);
+            this.label59.Name = "label59";
+            this.label59.Size = new System.Drawing.Size(42, 24);
+            this.label59.TabIndex = 126;
+            this.label59.Text = "mm";
+            // 
+            // groupBox11
+            // 
+            this.groupBox11.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.groupBox11.Controls.Add(this.txtPlcTrigger2);
+            this.groupBox11.Controls.Add(this.label61);
+            this.groupBox11.Controls.Add(this.groupBox16);
+            this.groupBox11.Controls.Add(this.txtSoftwareTrigger2);
+            this.groupBox11.Controls.Add(this.label64);
+            this.groupBox11.Controls.Add(this.btnVirtualTrigger2);
+            this.groupBox11.Controls.Add(this.btnProcessImage2);
+            this.groupBox11.Controls.Add(this.btnTriggerMode2);
+            this.groupBox11.Controls.Add(this.btnViewMode2);
+            this.groupBox11.Font = new System.Drawing.Font("Segoe UI", 9.75F);
+            this.groupBox11.Location = new System.Drawing.Point(645, 7);
+            this.groupBox11.Name = "groupBox11";
+            this.groupBox11.Size = new System.Drawing.Size(520, 148);
+            this.groupBox11.TabIndex = 121;
+            this.groupBox11.TabStop = false;
+            this.groupBox11.Text = "Operation Controls";
+            // 
+            // txtPlcTrigger2
+            // 
+            this.txtPlcTrigger2.AutoSize = true;
+            this.txtPlcTrigger2.BackColor = System.Drawing.Color.Transparent;
+            this.txtPlcTrigger2.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.txtPlcTrigger2.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtPlcTrigger2.Location = new System.Drawing.Point(116, 85);
+            this.txtPlcTrigger2.Name = "txtPlcTrigger2";
+            this.txtPlcTrigger2.Size = new System.Drawing.Size(40, 23);
+            this.txtPlcTrigger2.TabIndex = 133;
+            this.txtPlcTrigger2.Text = "PLC";
+            // 
+            // label61
+            // 
+            this.label61.AutoSize = true;
+            this.label61.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.label61.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label61.Location = new System.Drawing.Point(116, 21);
+            this.label61.Name = "label61";
+            this.label61.Size = new System.Drawing.Size(45, 23);
+            this.label61.TabIndex = 132;
+            this.label61.Text = "LIVE";
+            // 
+            // groupBox16
+            // 
+            this.groupBox16.Controls.Add(this.label62);
+            this.groupBox16.Controls.Add(this.button6);
+            this.groupBox16.Location = new System.Drawing.Point(231, 14);
+            this.groupBox16.Name = "groupBox16";
+            this.groupBox16.Size = new System.Drawing.Size(283, 67);
+            this.groupBox16.TabIndex = 131;
+            this.groupBox16.TabStop = false;
+            this.groupBox16.Text = "Frames Count";
+            // 
+            // label62
+            // 
+            this.label62.AutoSize = true;
+            this.label62.BackColor = System.Drawing.Color.Transparent;
+            this.label62.Font = new System.Drawing.Font("Segoe UI", 11F);
+            this.label62.Location = new System.Drawing.Point(53, 28);
+            this.label62.Name = "label62";
+            this.label62.Size = new System.Drawing.Size(17, 20);
+            this.label62.TabIndex = 131;
+            this.label62.Text = "0";
+            // 
+            // button6
+            // 
+            this.button6.BackColor = System.Drawing.Color.Silver;
+            this.button6.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.button6.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button6.Location = new System.Drawing.Point(141, 24);
+            this.button6.Name = "button6";
+            this.button6.Size = new System.Drawing.Size(103, 36);
+            this.button6.TabIndex = 134;
+            this.button6.Text = "RESET";
+            this.button6.UseVisualStyleBackColor = false;
+            // 
+            // txtSoftwareTrigger2
+            // 
+            this.txtSoftwareTrigger2.AutoSize = true;
+            this.txtSoftwareTrigger2.BackColor = System.Drawing.Color.Transparent;
+            this.txtSoftwareTrigger2.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.txtSoftwareTrigger2.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtSoftwareTrigger2.Location = new System.Drawing.Point(115, 114);
+            this.txtSoftwareTrigger2.Name = "txtSoftwareTrigger2";
+            this.txtSoftwareTrigger2.Size = new System.Drawing.Size(95, 23);
+            this.txtSoftwareTrigger2.TabIndex = 125;
+            this.txtSoftwareTrigger2.Text = "SOFTWARE";
+            // 
+            // label64
+            // 
+            this.label64.AutoSize = true;
+            this.label64.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.label64.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label64.Location = new System.Drawing.Point(116, 54);
+            this.label64.Name = "label64";
+            this.label64.Size = new System.Drawing.Size(65, 23);
+            this.label64.TabIndex = 124;
+            this.label64.Text = "FRAME";
+            // 
+            // btnVirtualTrigger2
+            // 
+            this.btnVirtualTrigger2.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnVirtualTrigger2.BackColor = System.Drawing.Color.Silver;
+            this.btnVirtualTrigger2.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnVirtualTrigger2.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnVirtualTrigger2.Location = new System.Drawing.Point(232, 87);
+            this.btnVirtualTrigger2.Name = "btnVirtualTrigger2";
+            this.btnVirtualTrigger2.Size = new System.Drawing.Size(127, 55);
+            this.btnVirtualTrigger2.TabIndex = 74;
+            this.btnVirtualTrigger2.Text = "CAPTURE\r\nFRAME";
+            this.btnVirtualTrigger2.UseVisualStyleBackColor = false;
+            // 
+            // btnProcessImage2
+            // 
+            this.btnProcessImage2.BackColor = System.Drawing.Color.Silver;
+            this.btnProcessImage2.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnProcessImage2.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnProcessImage2.Location = new System.Drawing.Point(365, 87);
+            this.btnProcessImage2.Name = "btnProcessImage2";
+            this.btnProcessImage2.Size = new System.Drawing.Size(146, 55);
+            this.btnProcessImage2.TabIndex = 73;
+            this.btnProcessImage2.Text = "PROCESS FRAME";
+            this.btnProcessImage2.UseVisualStyleBackColor = false;
+            // 
+            // btnTriggerMode2
+            // 
+            this.btnTriggerMode2.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnTriggerMode2.BackColor = System.Drawing.Color.Silver;
+            this.btnTriggerMode2.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnTriggerMode2.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnTriggerMode2.Location = new System.Drawing.Point(7, 80);
+            this.btnTriggerMode2.Name = "btnTriggerMode2";
+            this.btnTriggerMode2.Size = new System.Drawing.Size(103, 57);
+            this.btnTriggerMode2.TabIndex = 72;
+            this.btnTriggerMode2.Text = "TRIGGER SOURCE";
+            this.btnTriggerMode2.UseVisualStyleBackColor = false;
+            // 
+            // btnViewMode2
+            // 
+            this.btnViewMode2.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnViewMode2.BackColor = System.Drawing.Color.Silver;
+            this.btnViewMode2.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnViewMode2.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnViewMode2.Location = new System.Drawing.Point(7, 19);
+            this.btnViewMode2.Name = "btnViewMode2";
+            this.btnViewMode2.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.btnViewMode2.Size = new System.Drawing.Size(103, 58);
+            this.btnViewMode2.TabIndex = 69;
+            this.btnViewMode2.Text = "VIEW MODE";
+            this.btnViewMode2.UseVisualStyleBackColor = false;
             // 
             // trendPage
             // 
@@ -2053,25 +2657,25 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.trendChart.BorderlineColor = System.Drawing.Color.Black;
             this.trendChart.BorderlineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Solid;
             this.trendChart.BorderlineWidth = 2;
-            chartArea6.AxisX.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Seconds;
-            chartArea6.AxisX.LabelStyle.Format = "HH:mm:ss";
-            chartArea6.AxisX.LabelStyle.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Auto;
-            chartArea6.AxisX.ScrollBar.Enabled = false;
-            chartArea6.AxisY.Maximum = 300D;
-            chartArea6.Name = "ChartArea1";
-            this.trendChart.ChartAreas.Add(chartArea6);
-            legend6.Docking = System.Windows.Forms.DataVisualization.Charting.Docking.Top;
-            legend6.Name = "Legend1";
-            this.trendChart.Legends.Add(legend6);
+            chartArea2.AxisX.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Seconds;
+            chartArea2.AxisX.LabelStyle.Format = "HH:mm:ss";
+            chartArea2.AxisX.LabelStyle.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Auto;
+            chartArea2.AxisX.ScrollBar.Enabled = false;
+            chartArea2.AxisY.Maximum = 300D;
+            chartArea2.Name = "ChartArea1";
+            this.trendChart.ChartAreas.Add(chartArea2);
+            legend2.Docking = System.Windows.Forms.DataVisualization.Charting.Docking.Top;
+            legend2.Name = "Legend1";
+            this.trendChart.Legends.Add(legend2);
             this.trendChart.Location = new System.Drawing.Point(8, 0);
             this.trendChart.Name = "trendChart";
-            series6.ChartArea = "ChartArea1";
-            series6.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series6.Legend = "Legend1";
-            series6.LegendText = "Max Diameter";
-            series6.Name = "MaxDiameterSerie";
-            series6.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
-            this.trendChart.Series.Add(series6);
+            series2.ChartArea = "ChartArea1";
+            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series2.Legend = "Legend1";
+            series2.LegendText = "Max Diameter";
+            series2.Name = "MaxDiameterSerie";
+            series2.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
+            this.trendChart.Series.Add(series2);
             this.trendChart.Size = new System.Drawing.Size(806, 480);
             this.trendChart.TabIndex = 0;
             this.trendChart.Text = "chart1";
@@ -2439,7 +3043,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             // tmrMB
             // 
-            this.tmrMB.Enabled = true;
             this.tmrMB.Interval = 1000;
             this.tmrMB.Tick += new System.EventHandler(this.tmrMB_Tick);
             // 
@@ -2503,6 +3106,22 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.imagePage.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.boxOriginal.ResumeLayout(false);
+            this.imagePage2.ResumeLayout(false);
+            this.imagePage2.PerformLayout();
+            this.boxOriginal2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).EndInit();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
+            this.groupBox6.ResumeLayout(false);
+            this.groupBox6.PerformLayout();
+            this.groupBox7.ResumeLayout(false);
+            this.groupBox7.PerformLayout();
+            this.groupBox11.ResumeLayout(false);
+            this.groupBox11.PerformLayout();
+            this.groupBox16.ResumeLayout(false);
+            this.groupBox16.PerformLayout();
             this.trendPage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.trendChart)).EndInit();
             this.productsPage.ResumeLayout(false);
@@ -2527,6 +3146,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private System.Windows.Forms.ToolStripLabel PixelDataValue;
         private System.Windows.Forms.ToolStripLabel StatusLabelInfoTrash;
         private ImageBox m_ImageBox;
+        private ImageBox m_ImageBox2;
 
         private SapAcqDevice m_AcqDevice;
         private SapBuffer m_Buffers;
@@ -2535,6 +3155,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private SapView m_View;
         private SapLocation m_ServerLocation;
         private string m_ConfigFileName;
+        
+        private SapAcqDevice m_AcqDevice2;
+        private SapBuffer m_Buffers2;
+        private SapGraphic m_Graphic2;
+        private SapAcqDeviceToBuf m_Xfer2;
+        private SapView m_View2;
+        private SapLocation m_ServerLocation2;
+        private string m_ConfigFileName2;
 
         //System menu
         private SystemMenu m_SystemMenu;
@@ -2715,6 +3343,52 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private GroupBox gbSeries;
         private Button btnExportData;
         internal Label label7;
+        private TabPage imagePage2;
+        private GroupBox boxOriginal2;
+        private GroupBox boxProcess2;
+        private DataGridView dataGridView2;
+        internal GroupBox groupBox1;
+        private Label label36;
+        private Label label37;
+        internal Label label38;
+        private GroupBox groupBox3;
+        private Label label39;
+        private Label label40;
+        private Label label41;
+        internal Label label42;
+        internal Button btnFreezeFrame2;
+        private Label label43;
+        private Label label44;
+        private Label label45;
+        private Label label46;
+        internal Label label48;
+        private Label label49;
+        internal Label label50;
+        private Label label51;
+        internal Label label52;
+        internal GroupBox groupBox6;
+        internal Button button2;
+        private GroupBox groupBox7;
+        internal Label label53;
+        internal Button button3;
+        internal Label label56;
+        internal Button button4;
+        internal Label label57;
+        internal Button button5;
+        internal Label label58;
+        private Label label59;
+        internal GroupBox groupBox11;
+        internal Label txtPlcTrigger2;
+        internal Label label61;
+        private GroupBox groupBox16;
+        private Label label62;
+        internal Button button6;
+        internal Label txtSoftwareTrigger2;
+        internal Label label64;
+        internal Button btnVirtualTrigger2;
+        internal Button btnProcessImage2;
+        internal Button btnTriggerMode2;
+        internal Button btnViewMode2;
     }
 }
 

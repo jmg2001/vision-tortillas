@@ -23,6 +23,7 @@ namespace DALSA.SaperaLT.SapClassGui
         static string VicName = "Vic Name";
         static string Acquisition_Default_folder = "\\CamFiles\\User";
         bool autoClick = false;
+        string camera;
 
         public AcqConfigDlg()
         {
@@ -38,21 +39,22 @@ namespace DALSA.SaperaLT.SapClassGui
         }
 
 
-        public AcqConfigDlg(SapLocation loc, string productDir, ServerCategory serverCategory, bool autoClick)
+        public AcqConfigDlg(SapLocation loc, string productDir, ServerCategory serverCategory, bool autoClick, string camera)
         {
             m_ProductDir = productDir;
             m_ServerCategory = serverCategory;
             this.autoClick = autoClick;
+            this.camera = camera;
 
             if (loc != null)
             {
                 m_ServerName = loc.ServerName;
                 m_ResourceIndex = loc.ServerIndex;
             }
+
             // Load parameters from registry
             LoadSettings();
             InitializeComponent();
-
         }
 
         private void comboBox_Server_SelectedIndexChanged(object sender, EventArgs e)
@@ -161,22 +163,52 @@ namespace DALSA.SaperaLT.SapClassGui
                     comboBox_Device.Items.Add(resourceName);
                     if (i == m_ResourceIndex)
                         comboBox_Device.SelectedItem = resourceName;
-                    if (resourceName == "M0001351")
-                        valid = true;
-                    Console.WriteLine(resourceName);
+                    
                 }
             }
-            m_ResourceIndex = comboBox_Device.SelectedIndex;
 
-            if (valid)
-            {
-                if (autoClick) button_ok.PerformClick();
-            }
-            else
-            {
-                this.DialogResult = DialogResult.None;
-                this.Close();
-            }
+            //valid = true;
+
+            //if (camera == "M0001351")
+            //{
+            //    foreach( var str in comboBox_Device.Items)
+            //    {
+            //        Console.WriteLine(str);
+            //    }
+            //    if (!comboBox_Device.Items.Contains("M0001351"))
+            //    {
+            //        MessageBox.Show("Camera M0001351 not found");
+            //        this.DialogResult = DialogResult.None;
+            //        this.Close();
+            //        valid = false;
+            //    }
+
+            //    m_ResourceIndex = comboBox_Device.Items.IndexOf("M0001351");//comboBox_Device.SelectedIndex;
+            //    comboBox_Device.SelectedItem = "M0001351";
+            //}
+            //else
+            //{
+            //    if (!comboBox_Device.Items.Contains("M0002101"))
+            //    {
+            //        MessageBox.Show("Camera M0002101 not found");
+            //        this.DialogResult = DialogResult.None;
+            //        this.Close();
+            //        valid = false;
+            //    }
+            //    m_ResourceIndex = comboBox_Device.Items.IndexOf("M0002101");//comboBox_Device.SelectedIndex;
+            //    comboBox_Device.SelectedItem = "M0002101";
+            //}
+
+
+            //if (valid)
+            //{
+            //    if (autoClick) button_ok.PerformClick();
+            //}
+            //else
+            //{
+            //    this.DialogResult = DialogResult.None;
+            //    this.Close();
+            //}
         }
 
         private void button_browse_Click(object sender, EventArgs e)
