@@ -9,7 +9,7 @@
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo</RootNamespace>
-    <AssemblyName>STI</AssemblyName>
+    <AssemblyName>STI-RIGHT</AssemblyName>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
@@ -261,6 +261,12 @@
     </Compile>
     <Compile Include="Common\CSharp\LoginDlg.designer.cs">
       <DependentUpon>LoginDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Common\CSharp\MenuParameters.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Common\CSharp\MenuParameters.Designer.cs">
+      <DependentUpon>MenuParameters.cs</DependentUpon>
     </Compile>
     <Compile Include="Common\CSharp\RawFileDlg.cs">
       <SubType>Form</SubType>

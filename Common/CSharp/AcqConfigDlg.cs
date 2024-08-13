@@ -23,6 +23,7 @@ namespace DALSA.SaperaLT.SapClassGui
         static string VicName = "Vic Name";
         static string Acquisition_Default_folder = "\\CamFiles\\User";
         bool autoClick = false;
+        string serial;
 
         public AcqConfigDlg()
         {
@@ -38,11 +39,12 @@ namespace DALSA.SaperaLT.SapClassGui
         }
 
 
-        public AcqConfigDlg(SapLocation loc, string productDir, ServerCategory serverCategory, bool autoClick)
+        public AcqConfigDlg(SapLocation loc, string productDir, ServerCategory serverCategory, bool autoClick, string serial)
         {
             m_ProductDir = productDir;
             m_ServerCategory = serverCategory;
             this.autoClick = autoClick;
+            this.serial = serial;
 
             if (loc != null)
             {
@@ -82,7 +84,31 @@ namespace DALSA.SaperaLT.SapClassGui
                 // Scan all files in the current directory and fill the list box
                 UpdateNames();
             }
+
             m_init = true;
+
+            foreach (var server in comboBox_Server.Items)
+            {
+                Console.WriteLine(server.ToString());
+                for (int i = 0; i < SapManager.GetResourceCount(server.ToString(), SapManager.ResourceType.AcqDevice); i++)
+                {
+                    string resourceName;
+                    resourceName = SapManager.GetResourceName(server.ToString(), SapManager.ResourceType.AcqDevice, i);
+                    if (resourceName == serial)
+                    {
+                        comboBox_Server.SelectedIndex = comboBox_Server.FindString(server.ToString(),0);
+                        break;
+                    }
+                }
+            }
+
+            foreach (var device in comboBox_Device.Items)
+            {
+                if (device.ToString() == serial)
+                {
+                    comboBox_Device.SelectedIndex = comboBox_Device.FindString(device.ToString(),0);
+                }
+            }
         }
 
         private bool InitServerCombo()
@@ -130,6 +156,7 @@ namespace DALSA.SaperaLT.SapClassGui
         private void InitResourceCombo()
         {
             comboBox_Device.Items.Clear();
+
             int i = 0;
             bool valid = false;
             bool devicesFound = false;
@@ -161,12 +188,13 @@ namespace DALSA.SaperaLT.SapClassGui
                     comboBox_Device.Items.Add(resourceName);
                     if (i == m_ResourceIndex)
                         comboBox_Device.SelectedItem = resourceName;
-                    if (resourceName == "M0001351")
-                        valid = true;
-                    Console.WriteLine(resourceName);
                 }
             }
             m_ResourceIndex = comboBox_Device.SelectedIndex;
+
+            
+
+            valid = true;
 
             if (valid)
             {
@@ -238,6 +266,7 @@ namespace DALSA.SaperaLT.SapClassGui
             ccffiles.Clear();
 
             string currentDir = m_currentConfigDir;
+            //string currentDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\STI-config\\" ;
             string keyName = ConfigKeyName;
             string curServerName = comboBox_Server.SelectedItem.ToString();
             m_ResourceIndex = comboBox_Device.SelectedIndex;

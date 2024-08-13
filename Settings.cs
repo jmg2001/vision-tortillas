@@ -6,7 +6,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 {
     public class Settings
     {
-        string path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\STI-config\\STI-config.xml";
+        string path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\STI-config\\STI-config-RIGHT.xml";
         public int ROI_Top { get; set; }
         public int ROI_Bottom { get; set; }
         public int ROI_Left { get; set; }
