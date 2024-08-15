@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <asmv1:assembly xsi:schemaLocation="urn:schemas-microsoft-com:asm.v1 assembly.adaptive.xsd" manifestVersion="1.0" xmlns:asmv1="urn:schemas-microsoft-com:asm.v1" xmlns="urn:schemas-microsoft-com:asm.v2" xmlns:asmv2="urn:schemas-microsoft-com:asm.v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:co.v1="urn:schemas-microsoft-com:clickonce.v1" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3" xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" xmlns:co.v2="urn:schemas-microsoft-com:clickonce.v2">
-  <asmv1:assemblyIdentity name="STI-LEFT.exe" version="1.0.0.47" publicKeyToken="0000000000000000" language="neutral" processorArchitecture="msil" type="win32" />
+  <asmv1:assemblyIdentity name="STI-RIGHT.exe" version="1.0.0.47" publicKeyToken="0000000000000000" language="neutral" processorArchitecture="msil" type="win32" />
   <application />
   <entryPoint>
-    <assemblyIdentity name="STI-LEFT" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
-    <commandLine file="STI-LEFT.exe" parameters="" />
+    <assemblyIdentity name="STI-RIGHT" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
+    <commandLine file="STI-RIGHT.exe" parameters="" />
   </entryPoint>
   <trustInfo>
     <security>
@@ -150,14 +150,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="STI-LEFT.exe" size="299008">
-      <assemblyIdentity name="STI-LEFT" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="STI-RIGHT.exe" size="306176">
+      <assemblyIdentity name="STI-RIGHT" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>2cbmXhAWCD9Wl28WYcrSTYO9LeWoBL67rerrR+gM1PY=</dsig:DigestValue>
+        <dsig:DigestValue>cptHwEneZi6V6WG4rA7blV8qdM9+xSRvmN2CZMlpliQ=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -251,7 +251,7 @@
       <dsig:DigestValue>+yV6adEVlpUIOiH/IdsfqaixKo0MB7DiB/hBOyI4wKw=</dsig:DigestValue>
     </hash>
   </file>
-  <file name="STI-LEFT.exe.config" size="4285">
+  <file name="STI-RIGHT.exe.config" size="4285">
     <hash>
       <dsig:Transforms>
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />

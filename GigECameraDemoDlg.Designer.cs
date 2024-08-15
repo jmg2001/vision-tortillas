@@ -37,9 +37,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GigECameraDemoDlg));
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend3 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.StatusLabel = new System.Windows.Forms.ToolStripLabel();
             this.StatusLabelInfo = new System.Windows.Forms.ToolStripLabel();
@@ -1298,6 +1298,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.txtCompacityHoleLimit.Size = new System.Drawing.Size(98, 40);
             this.txtCompacityHoleLimit.TabIndex = 136;
             this.txtCompacityHoleLimit.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtCompacityHoleLimit.Click += new System.EventHandler(this.txtCompacityHoleLimit_Click);
             // 
             // label20
             // 
@@ -1320,6 +1321,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.txtMaxCompacity.Size = new System.Drawing.Size(98, 40);
             this.txtMaxCompacity.TabIndex = 129;
             this.txtMaxCompacity.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtMaxCompacity.Click += new System.EventHandler(this.txtMaxCompacity_Click);
             // 
             // gbFlagParameters
             // 
@@ -2053,25 +2055,25 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.trendChart.BorderlineColor = System.Drawing.Color.Black;
             this.trendChart.BorderlineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Solid;
             this.trendChart.BorderlineWidth = 2;
-            chartArea2.AxisX.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Seconds;
-            chartArea2.AxisX.LabelStyle.Format = "HH:mm:ss";
-            chartArea2.AxisX.LabelStyle.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Auto;
-            chartArea2.AxisX.ScrollBar.Enabled = false;
-            chartArea2.AxisY.Maximum = 300D;
-            chartArea2.Name = "ChartArea1";
-            this.trendChart.ChartAreas.Add(chartArea2);
-            legend2.Docking = System.Windows.Forms.DataVisualization.Charting.Docking.Top;
-            legend2.Name = "Legend1";
-            this.trendChart.Legends.Add(legend2);
+            chartArea3.AxisX.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Seconds;
+            chartArea3.AxisX.LabelStyle.Format = "HH:mm:ss";
+            chartArea3.AxisX.LabelStyle.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Auto;
+            chartArea3.AxisX.ScrollBar.Enabled = false;
+            chartArea3.AxisY.Maximum = 300D;
+            chartArea3.Name = "ChartArea1";
+            this.trendChart.ChartAreas.Add(chartArea3);
+            legend3.Docking = System.Windows.Forms.DataVisualization.Charting.Docking.Top;
+            legend3.Name = "Legend1";
+            this.trendChart.Legends.Add(legend3);
             this.trendChart.Location = new System.Drawing.Point(8, 0);
             this.trendChart.Name = "trendChart";
-            series2.ChartArea = "ChartArea1";
-            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series2.Legend = "Legend1";
-            series2.LegendText = "Max Diameter";
-            series2.Name = "MaxDiameterSerie";
-            series2.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
-            this.trendChart.Series.Add(series2);
+            series3.ChartArea = "ChartArea1";
+            series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series3.Legend = "Legend1";
+            series3.LegendText = "Max Diameter";
+            series3.Name = "MaxDiameterSerie";
+            series3.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
+            this.trendChart.Series.Add(series3);
             this.trendChart.Size = new System.Drawing.Size(806, 480);
             this.trendChart.TabIndex = 0;
             this.trendChart.Text = "chart1";

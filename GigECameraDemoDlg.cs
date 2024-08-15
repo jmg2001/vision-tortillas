@@ -9,7 +9,6 @@ using Emgu.CV.Structure;
 using Emgu.CV.Util;
 using Microsoft.Win32;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
@@ -74,7 +73,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         bool freezeFrame = false;
 
         //Properties.Settings settings = new Properties.Settings();
-        Settings settings = Settings.Load();
+        Settings settings;
 
         Queue<int> holesQueue = new Queue<int>();
         Queue<double> cvQueue = new Queue<double>();
@@ -236,6 +235,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         bool deviceLost = false;
 
         string CAMERA_SERIAL = "M0002101";
+        string CAMERA_SIDE = "RIGHT";
 
         public GigECameraDemoDlg()
         {
@@ -248,9 +248,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             DialogResult result = acConfigDlg.ShowDialog();
             if (result == DialogResult.OK)
             {
-                configPath = userDir + "\\STI-config\\";
-                csvPath = configPath + "\\STI-db.csv";
-                imagesPath = userDir + "\\STI-images-RIGHT\\";
+                configPath = userDir + $"\\STI-config-{CAMERA_SIDE}\\";
+                csvPath = configPath + $"\\STI-db-{CAMERA_SIDE}.csv";
+                imagesPath = userDir + $"\\STI-images-{CAMERA_SIDE}\\";
 
                 if (!Directory.Exists(configPath))
                 {
@@ -276,8 +276,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 if (!File.Exists(configPath + "STIconfig.ccf"))
                 {
                     MessageBox.Show("Config file not found, generate one and place it in: " + configPath + " with name: " + " STIconfig.ccf");
+                    Environment.Exit(0);
                     this.Close();
                 }
+
+                
 
                 InitializeComponent();
 
@@ -290,6 +293,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 InitializeDataTable();
 
                 InitChart();
+
+                this.Text = $"STI-{CAMERA_SIDE}";
 
                 //updateLabels();
 
@@ -762,6 +767,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void LoadSettings()
         {
+            settings = Settings.Load(CAMERA_SIDE);
+
             // Units
             units = settings.Units;
 
@@ -1379,7 +1386,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 {
                     validateControl = maxDiameter * 3;
                 }
-                else if (validateControl < 0)z
+                else if (validateControl < 0)
                 {
                     validateControl = 0;
                 }
@@ -1588,7 +1595,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private void Calibrate()
         {
             // Cambiamos al modo de grid 3x3 para calibrar con la del centro
-            updateGridType(1);
+            UpdateGridType(1);
 
             Mat binarizedImage = new Mat();
 
@@ -1717,7 +1724,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 
             }
 
-            updateGridType(grid);
+            UpdateGridType(grid);
 
             // Liberamos las imagenes
             binarizedImage.Dispose();
@@ -2762,7 +2769,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             //bitmap.Dispose();
         }
 
-        private void updateUnits(string unitsNew)
+        private void UpdateUnits(string unitsNew)
         {
             float fact = 0;
             if (units != unitsNew)
@@ -2886,6 +2893,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     lblSEQDiameter.Text = Math.Round(equivalentDiameter, nUnitsMm).ToString();
                 }
             }
+
+            GetDataTxt();
         }
 
         private void Txt_MaxCompacity_KeyPress(object sender, KeyPressEventArgs e)
@@ -3717,10 +3726,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 Console.WriteLine(e);
             }
-
+            var validBlobs = Blobs.Where(blob => blob.Size != 6 && blob.Size != 7).ToList();
             try
             {
-                var validBlobs = Blobs.Where(blob => blob.Size != 6 && blob.Size != 7).ToList();
+                //var validBlobs = Blobs.Where(blob => blob.Size != 6 && blob.Size != 7).ToList();
                 diametersCV = validBlobs.Select(blob => blob.DiametroIA).ToList();
                 avgDIA = validBlobs.Select(blob => blob.DiametroIA).Average();
                 avgD = validBlobs.Select(blob => blob.Diametro).Average();
@@ -3736,7 +3745,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             double cv = CalculateCV(diametersCV);
 
-            int validObjects = Blobs.Count(Blob => Blob.Size != 6);
+            int validObjects = validBlobs.Count();
             if (!freezeFrame) txtValidObjects.Text = validObjects.ToString();
 
             if (validObjects >= minBlobObjects)
@@ -4082,7 +4091,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 if (ovalidad > maxOvality && area > normalArea * 1.4)
                 {
-                    size = 5; // Double
+                    size = 7; // Double
                 }
                 else
                 {
@@ -4091,7 +4100,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
             else if (ovalidad > maxOvality)
             {
-                size = 5; // Oval
+                size = 4; // Oval
             }
             else if (avg > maxDiameter)
             {
@@ -4101,6 +4110,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 size = 3; // Small
             }
+
 
             return size;
         }
@@ -4678,7 +4688,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             // SaveResultsToTxt(dataTable);
             // Para guardar la configuración
-            settings.Save();
+            settings.Save(CAMERA_SIDE);
             MessageBox.Show("Configuration Saved", "Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
@@ -4699,10 +4709,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void grid_4_Click(object sender, EventArgs e)
         {
-            updateGridType(1, "3x3");
+            UpdateGridType(1, "3x3");
         }
 
-        private void updateGridType(int v, string type = "")
+        private void UpdateGridType(int v, string type = "")
         {
             foreach (GridType gridT in gridTypes)
             {
@@ -4724,17 +4734,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void grid_5_Click(object sender, EventArgs e)
         {
-            updateGridType(2, "2x1x2");
+            UpdateGridType(2, "2x1x2");
         }
 
         private void grid_6_Click(object sender, EventArgs e)
         {
-            updateGridType(3, "4x4");
+            UpdateGridType(3, "4x4");
         }
 
         private void grid_9_Click(object sender, EventArgs e)
         {
-            updateGridType(4, "2x2");
+            UpdateGridType(4, "2x2");
         }
 
         private void Cmd_Program_5_Click(object sender, EventArgs e)
@@ -5020,34 +5030,32 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void Cmd_Save_Click(object sender, EventArgs e)
         {
-            changeProductSetPoint();
+            ChangeProductSetPoint();
         }
 
-        private void changeProductSetPoint()
+        private void ChangeProductSetPoint()
         {
             txtProductSetted.Text = Txt_Code.Text;
+            txtMaxDiameter.Text = Txt_MaxD.Text;
+            txtMinDiameter.Text = Txt_MinD.Text;
 
-            if (cmbProductUnits.SelectedItem == "mm")
+            if (cmbProductUnits.SelectedItem.ToString() == "mm")
             {
                 btnChangeUnitsMm.BackColor = Color.LightGreen;
                 btnChangeUnitsInch.BackColor = Color.Silver;
-                updateUnits("mm");
+                UpdateUnits("mm");
             }
             else
             {
                 btnChangeUnitsMm.BackColor = Color.Silver;
                 btnChangeUnitsInch.BackColor = Color.LightGreen;
-                updateUnits("inch");
+                UpdateUnits("inch");
             }
-
-
-
-            txtMaxDiameter.Text = Txt_MaxD.Text;
+            
             maxDiameter = double.Parse(Txt_MaxD.Text);
-
-            txtMinDiameter.Text = Txt_MinD.Text;
             minDiameter = double.Parse(Txt_MinD.Text);
 
+            //GetDataTxt();
             CheckChangeSetPointDiameters();
 
             int grid = 0;
@@ -5068,7 +5076,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     break;
             }
 
-            updateGridType(grid, CmbGrid.SelectedItem.ToString());
+            UpdateGridType(grid, CmbGrid.SelectedItem.ToString());
 
             MessageBox.Show("Set Point Changed Succesfuly");
 
@@ -5312,14 +5320,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             btnChangeUnitsMm.BackColor = Color.LightGreen;
             btnChangeUnitsInch.BackColor = Color.Silver;
-            updateUnits("mm");
+            UpdateUnits("mm");
         }
 
         private void btnChangeUnitsInch_Click(object sender, EventArgs e)
         {
             btnChangeUnitsMm.BackColor = Color.Silver;
             btnChangeUnitsInch.BackColor = Color.LightGreen;
-            updateUnits("inch");
+            UpdateUnits("inch");
         }
 
         private void btnIncrementRoiWidth_Click(object sender, EventArgs e)
@@ -5701,7 +5709,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     settings.LastCalibrationUnits = lastCalibrationUnits;
 
                     MessageBox.Show("Calibration Succesfull, Factor: " + euFactor / correctionFactor, "Operation Succesfull", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    settings.Save();
+                    settings.Save(CAMERA_SIDE);
                 }
                 else if (result == DialogResult.Yes)
                 {
@@ -5712,7 +5720,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     settings.EUFactor = euFactor;
 
                     MessageBox.Show("Correction Succesfull, Factor: " + correctionFactor, "Operation Succesfull", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    settings.Save();
+                    settings.Save(CAMERA_SIDE);
                 }
                 else
                 {
@@ -5752,7 +5760,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 }
             }
 
-            settings.Save();
+            settings.Save(CAMERA_SIDE);
 
             if (deviceLost)
             {
@@ -6215,7 +6223,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void pictureBox1_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start(new ProcessStartInfo("https://sios.sunderteck.com/") { UseShellExecute = true });
+            //System.Diagnostics.Process.Start(new ProcessStartInfo("https://sios.sunderteck.com/") { UseShellExecute = true });
+            //MenuParameters menuParameters = new MenuParameters(usersList);
+            //var result = menuParameters.ShowDialog();
+
+            //if (result == DialogResult.OK)
+            //{
+
+            //}
         }
 
         private void btnModifyProduct_Click(object sender, EventArgs e)
@@ -6262,6 +6277,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 oldMinDiameter = minDiameter;
             }
 
+            dplControlDiameter.Text = controlDiameter.ToString();
+
             return true;
         }
 
@@ -6284,11 +6301,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         }
 
         private void Txt_Threshold_Click(object sender, EventArgs e)
-        {
-            ShowInputKeyboard((TextBox)sender, 0);
-        }
-
-        private void Txt_MaxCompacity_Click(object sender, EventArgs e)
         {
             ShowInputKeyboard((TextBox)sender, 0);
         }
@@ -6490,6 +6502,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 MessageBox.Show("No active series to export.", "Export Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void txtMaxCompacity_Click(object sender, EventArgs e)
+        {
+            ShowInputKeyboard((TextBox)sender, 0);
         }
     }
 }

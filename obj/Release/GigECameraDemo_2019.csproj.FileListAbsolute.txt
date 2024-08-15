@@ -65,6 +65,9 @@ C:\Users\Jesús\Documents\vision-tortillas\obj\Release\DALSA.SaperaLT.Demos.NET.
 C:\Users\Jesús\Documents\vision-tortillas\obj\Release\GigECameraDemo_2019.csproj.GenerateResource.cache
 C:\Users\Jesús\Documents\vision-tortillas\obj\Release\GigECameraDemo_2019.csproj.CoreCompileInputs.cache
 C:\Users\Jesús\Documents\vision-tortillas\obj\Release\GigECameraDemo_2019.csproj.CopyComplete
+C:\Users\Jesús\Documents\vision-tortillas\obj\Release\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp.MenuParameters.resources
+C:\Users\Jesús\Documents\vision-tortillas\obj\Release\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp.InputName.resources
+C:\Users\Jesús\Documents\vision-tortillas\obj\Release\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp.MessageBox2.resources
 C:\Users\Jesús\Documents\vision-tortillas\bin\Release\STI-RIGHT.exe.config
 C:\Users\Jesús\Documents\vision-tortillas\bin\Release\STI-RIGHT.exe.manifest
 C:\Users\Jesús\Documents\vision-tortillas\bin\Release\STI-RIGHT.application

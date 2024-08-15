@@ -243,6 +243,12 @@
     <Compile Include="Common\CSharp\InputDlg2.designer.cs">
       <DependentUpon>InputDlg2.cs</DependentUpon>
     </Compile>
+    <Compile Include="Common\CSharp\InputName.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Common\CSharp\InputName.Designer.cs">
+      <DependentUpon>InputName.cs</DependentUpon>
+    </Compile>
     <Compile Include="Common\CSharp\JpegFileDlg.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -267,6 +273,10 @@
     </Compile>
     <Compile Include="Common\CSharp\MenuParameters.Designer.cs">
       <DependentUpon>MenuParameters.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Common\CSharp\MessageDlg.cs" />
+    <Compile Include="Common\CSharp\MessageDlg.Designer.cs">
+      <DependentUpon>MessageDlg.cs</DependentUpon>
     </Compile>
     <Compile Include="Common\CSharp\RawFileDlg.cs">
       <SubType>Form</SubType>
@@ -337,6 +347,9 @@
     <EmbeddedResource Include="Common\CSharp\InputDlg2.resx">
       <DependentUpon>InputDlg2.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Common\CSharp\InputName.resx">
+      <DependentUpon>InputName.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Common\CSharp\JpegFileDlg.resx">
       <DependentUpon>JpegFileDlg.cs</DependentUpon>
     </EmbeddedResource>
@@ -345,6 +358,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Common\CSharp\LoginDlg.resx">
       <DependentUpon>LoginDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Common\CSharp\MenuParameters.resx">
+      <DependentUpon>MenuParameters.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Common\CSharp\MessageDlg.resx">
+      <DependentUpon>MessageDlg.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Common\CSharp\RawFileDlg.resx">
       <DependentUpon>RawFileDlg.cs</DependentUpon>

@@ -567,6 +567,11 @@ namespace DALSA.SaperaLT.SapClassGui
             set { Slider.Enabled = value; }
         }
 
+        private void picBox_Click(object sender, EventArgs e)
+        {
+
+        }
+
         public int SliderMinimum
         {
             get { return Slider.Minimum; }

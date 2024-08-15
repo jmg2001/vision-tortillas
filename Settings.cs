@@ -6,7 +6,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 {
     public class Settings
     {
-        string path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\STI-config\\STI-config-RIGHT.xml";
+        //string path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\STI-config\\STI-config-RIGHT.xml";
         public int ROI_Top { get; set; }
         public int ROI_Bottom { get; set; }
         public int ROI_Left { get; set; }
@@ -33,6 +33,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         public int FH { get; set; }
         public int FFH { get; set; }
         public float align { get; set; }
+
+        public string side { get; set; }
 
 
         public Settings()
@@ -64,9 +66,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.validFramesLimit = 7;
         }
 
-        public static Settings Load()
+        public static Settings Load(string side)
         {
-            string path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\STI-config\\STI-config.xml";
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + $"\\STI-config\\STI-config-{side}.xml";
             if (File.Exists(path))
             {
                 using (var stream = new FileStream(path, FileMode.Open))
@@ -82,8 +84,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
-        public void Save()
+        public void Save(string side)
         {
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + $"\\STI-config\\STI-config-{side}.xml";
             using (var stream = new FileStream(path, FileMode.Create))
             {
                 var serializer = new XmlSerializer(typeof(Settings));
