@@ -9,7 +9,7 @@
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo</RootNamespace>
-    <AssemblyName>STI-RIGHT</AssemblyName>
+    <AssemblyName>STI-LEFT</AssemblyName>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>

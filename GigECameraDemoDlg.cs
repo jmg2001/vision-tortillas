@@ -235,7 +235,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         bool deviceLost = false;
 
         string CAMERA_SERIAL = "M0002101";
-        string CAMERA_SIDE = "RIGHT";
+        string CAMERA_SIDE = "LEFT";
 
         public GigECameraDemoDlg()
         {
@@ -347,6 +347,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 // Cargamos la configuracion por default
                 m_AcqDevice.LoadFeatures(configPath + "STIconfig.ccf");
+
+                m_AcqDevice.SetFeatureValue("DeviceTemperatureSelector", 0);
 
                 if (triggerPLC)
                 {
@@ -680,35 +682,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void InitModbus()
         {
-            int port = 503;
-            string ip = "127.0.0.1";
+            int port = 504;
+            //string ip = "127.0.0.1";
             modbusServer.Port = port;
 
+            // Intentar iniciar el servidor Modbus
+            modbusServer.Listen();
+            Console.WriteLine("Servidor Modbus iniciado en el puerto " + port);
 
-            if (!IsPortOccupied(port))
-            {
-                // Intentar iniciar el servidor Modbus
-                modbusServer.Listen();
-                Console.WriteLine("Servidor Modbus iniciado en el puerto " + port);
-            }
-            else
-            {
-                // Si el puerto ya está en uso, actuar como cliente
-                Console.WriteLine("Puerto " + port + " ocupado, conectando como cliente...");
-
-                modbusClient = new ModbusClient(ip, port);
-
-                try
-                {
-                    modbusClient.Connect();
-                    Console.WriteLine("Conectado al servidor Modbus en " + ip + ":" + port);
-                    modbusServerFlag = false;
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("No se pudo conectar al servidor Modbus: " + e.Message);
-                }
-            }
         }
 
 
@@ -967,15 +948,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 GigeDlg.Invoke(new DisplayFrameAcquired(GigeDlg.ShowFrameNumber), argsNotify.EventCount, false);
 
-                GigeDlg.Invoke((MethodInvoker)async delegate
+                GigeDlg.Invoke((MethodInvoker) async delegate
                 {
                     // await mainProcess();
-                    mainProcess();
+                    MainProcess();
                 });
             }
         }
 
-        private void mainProcess()
+        private void MainProcess()
         {
             try
             {
@@ -1070,256 +1051,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             holesQueue.Enqueue(holes);
         }
 
-        //public static void Form_Paint(Object sender, PaintEventArgs args)
-        //{
-        //    // Find the SapView object corresponding to the form for this event
-        //    Form form = sender as Form;
-        //    SapView view = SapView.FindView(form);
-        //    view.OnPaint();
-        //}
-        //public static void Form_Resize(Object sender, EventArgs args)
-        //{
-        //    // Find the SapView object corresponding to the form for this event
-        //    Form form = sender as Form;
-        //    SapView view = SapView.FindView(form);
-        //    view.OnSize();
-        //}
-        //public static void Form_Move(Object sender, EventArgs args)
-        //{
-        //    // Find the SapView object corresponding to the form for this event
-        //    Form form = sender as Form;
-        //    SapView view = SapView.FindView(form);
-        //    view.OnMove();
-        //}
-
-        private void disposeImages()
-        {
-            //if (processROIBox.Image != null)
-            //{
-            //    processROIBox.Image.Dispose();
-            //    processROIBox.Image = null;
-            //}
-            //if (originalBox.Image != null)
-            //{
-            //    originalBox.Image.Dispose();
-            //    originalBox.Image = null;
-            //}
-        }
-
-        //private void processFreezed()
-        //{
-        //    frameCounter++;
-        //    if (frameCounter >= 1000000)
-        //    {
-        //        frameCounter = 0;
-        //    }
-        //    txtFramesCount.Text = frameCounter.ToString();
-
-        //    //----------------Only for Debug, delete on production-----------------
-        //    settings.frames++;
-        //    //----------------Only for Debug, delete on production-----------------
-
-        //    Mat binarizedImage = new Mat();
-
-        //    // Se binariza la imagen
-        //    try
-        //    {
-        //        //binarizedImage = binarizeImage(originalImage, 0);
-        //        binarizedImage = binarizeImage(originalImageCV, 0);
-        //        originalImageCV.Dispose();
-        //    }
-        //    catch
-        //    {
-        //        Console.WriteLine("Binarization problem");
-        //        return;
-        //    }
-
-        //    // Se extrae el ROI de la imagen binarizada
-        //    Mat roiImage = ExtractROI(binarizedImage);
-
-        //    try
-        //    {
-        //        // Procesamos el ROI
-        //        blobProcessFreezed(roiImage);
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        MessageBox.Show("Blob Error " + e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //    }
-
-        //    try
-        //    {
-        //        SetModbusData();
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        MessageBox.Show(e.ToString());
-        //    }
-
-        //    originalImage.Dispose();
-        //    originalImageIsDisposed = true;
-
-        //    btnProcessImage.Enabled = false;
-        //}
-
-        //private void blobProcessFreezed(Mat image)
-        //{
-        //    Blobs.Clear();
-        //    //Blobs = new List<Blob>();
-
-        //    minArea = (int)(((Math.Pow(minDiameter, 2) / 4) * Math.PI) * 0.5);
-        //    maxArea = (int)(((Math.Pow(maxDiameter, 2) / 4) * Math.PI) * 1.5);
-
-        //    var (contours, centers, areas, perimeters, holePresent) = FindContoursWithEdgesAndCenters(image);
-
-        //    // Inicializamos variables
-        //    double avgDIA = 0;
-        //    double MaxD = 0;
-        //    double MinD = 99999;
-        //    double avgD = 0;
-        //    int n = 0;
-        //    int nHoles = 0;
-        //    List<double> diametersCV = new List<double>();
-
-        //    List<(int, bool)> drawFlags = new List<(int, bool)>();
-
-        //    foreach (int k in gridType.QuadrantsOfInterest)
-        //    {
-        //        drawFlags.Add((k, true));
-        //    }
-
-        //    for (int i = 0; i < areas.Count; i++)
-        //    {
-        //        if (!IsTouchingEdges(contours[i]))
-        //        {
-        //            Point centro = centers[i];
-
-        //            // Calcular el sector del contorno
-        //            int sector = CalculateSector(centro) + 1;
-
-        //            int area = (int)areas[i];
-        //            double perimeter = perimeters[i];
-
-        //            // Calcular la compacidad
-        //            double compactness = CalculateCompactness((int)area, perimeter);
-
-        //            // Verificamos si el sector es uno de los que nos interesa
-        //            if (Array.IndexOf(gridType.QuadrantsOfInterest, sector) != -1)
-        //            {
-
-        //                bool hole = holePresent[i];
-
-        //                double tempFactor = euFactor;
-
-        //                // Este diametro lo vamos a dejar para despues
-        //                double diametroIA = CalculateDiameterFromArea((int)area);
-
-        //                // Calculamos el diametro
-        //                (double diameterTriangles, double maxDiameter, double minDiameter) = calculateAndDrawDiameterTrianglesAlghoritm(centro, image.ToBitmap(), sector, true);
-
-        //                double ovalidad = calculateOvality(maxDiameter, minDiameter);
-
-        //                ushort size = CalculateSize(maxDiameter, minDiameter, compactness, ovalidad, hole, area);
-
-        //                if (size != 6) // Shape
-        //                {
-        //                    if (maxDiameter > MaxD)
-        //                    {
-        //                        MaxD = maxDiameter;
-        //                    }
-        //                    if (minDiameter < MinD)
-        //                    {
-        //                        MinD = minDiameter;
-        //                    }
-
-        //                    diametersCV.Add(diametroIA);
-        //                    // Sumamos para promediar
-        //                    avgDIA += (diametroIA);
-        //                    avgD += (diameterTriangles * tempFactor);
-        //                    // Aumentamos el numero de elementos para promediar
-        //                    n++;
-        //                }
-
-        //                Blob blob = new Blob(area, perimeter, contours[i], diameterTriangles, diametroIA, centro, maxDiameter, minDiameter, sector, compactness, size, ovalidad, hole);
-
-        //                // Agregamos el elemento a la lista
-        //                Blobs.Add(blob);
-
-        //                if (hole)
-        //                {
-        //                    nHoles++;
-        //                }
-
-        //                foreach (Quadrant quadrant in Quadrants)
-        //                {
-        //                    if (quadrant.Number == sector)
-        //                    {
-        //                        quadrant.DiameterMax = maxDiameter;
-        //                        quadrant.DiameterMin = minDiameter;
-        //                        quadrant.Compacity = compactness;
-        //                        quadrant.Found = true;
-        //                        quadrant.Blob = blob;
-
-        //                        for (int l = 0; l < drawFlags.Count; l++)
-        //                        {
-        //                            if (drawFlags[l].Item1 == sector)
-        //                            {
-        //                                drawFlags[l] = (sector, false);
-        //                            }
-        //                        }
-
-        //                        break;
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    }
-
-        //    CheckHoles(nHoles);
-
-        //    // Calculamos el promedio de los diametros
-        //    if (MinD == 99999)
-        //    {
-        //        MinD = 0;
-        //    }
-
-        //    avgDIA /= n;
-        //    avgD /= n;
-
-        //    double cv = CalculateCV(diametersCV);
-
-        //    int validObjects = Blobs.Count(Blob => Blob.Size != 6);
-
-        //    if (validObjects >= minBlobObjects)
-        //    {
-        //        QueueFrame(1);
-        //        ProcessControlDiameter(avgDIA);
-        //        CheckCV(cv);
-        //    }
-        //    else
-        //    {
-        //        QueueFrame(0);
-        //    }
-
-        //    CheckLastFrames();
-
-        //    maxDiameterAvg = MaxD * euFactor;
-        //    minDiameterAvg = MinD * euFactor;
-        //    diameterControl = controlDiameter;
-
-        //    if (units == "mm")
-        //    {
-
-        //        dplControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsMm).ToString();
-        //    }
-        //    else
-        //    {
-
-        //        dplControlDiameter.Text = Math.Round(controlDiameter * euFactor, nUnitsInch).ToString();
-        //    }
-
-        //    GraphResults(MaxD, MinD, avgDIA);
-        //}
 
         private void CreateCheckbox(int camera = 1)
         {
@@ -1414,52 +1145,72 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
-        private void preProcessFreezed()
-        {
-            btnProcessImage.Enabled = true;
-            originalImageCV = new Mat();
+        //private void preProcessFreezed()
+        //{
+        //    btnProcessImage.Enabled = true;
+        //    originalImageCV = new Mat();
 
-            string path = SaveImage();
-            using (Bitmap originalImage = new Bitmap(path))
-            {
-                originalImageIsDisposed = false;
+        //    string path = SaveImage();
+        //    using (Bitmap originalImage = new Bitmap(path))
+        //    {
+        //        originalImageIsDisposed = false;
 
-                Image<Bgr, byte> tempImage = originalImage.ToImage<Bgr, byte>();
-                ImageHistogram(originalImage);
-                originalImageIsDisposed = true;
-                originalImageCV = ImageCorrection(tempImage);
+        //        Image<Bgr, byte> tempImage = originalImage.ToImage<Bgr, byte>();
+        //        ImageHistogram(originalImage);
+        //        originalImageIsDisposed = true;
+        //        originalImageCV = ImageCorrection(tempImage);
 
-            }
+        //    }
 
-            originalImageCV.Save(imagesPath + "updatedROI.bmp");
+        //    originalImageCV.Save(imagesPath + "updatedROI.bmp");
 
-            Quadrants = new List<Quadrant>();
+        //    Quadrants = new List<Quadrant>();
 
-            for (int i = 1; i < 17; i++)
-            {
-                VectorOfPoint points = new VectorOfPoint();
-                Point centro = new Point();
-                Blob blb = new Blob(0, 0, points, 0, 0, centro, 0, 0, 0, 0, 0, 0, false);
-                Quadrant qua = new Quadrant(i, "", false, 0, 0, 0, 0, blb);
-                Quadrants.Add(qua);
-            }
-        }
+        //    for (int i = 1; i < 17; i++)
+        //    {
+        //        VectorOfPoint points = new VectorOfPoint();
+        //        Point centro = new Point();
+        //        Blob blb = new Blob(0, 0, points, 0, 0, centro, 0, 0, 0, 0, 0, 0, false);
+        //        Quadrant qua = new Quadrant(i, "", false, 0, 0, 0, 0, blb);
+        //        Quadrants.Add(qua);
+        //    }
+        //}
 
         private void UpdateTemperatures()
         {
-            if (!deviceLost)
+            if (m_Xfer.Connected)
             {
                 double deviceTemperature = 0;
-                bool succes = m_AcqDevice.SetFeatureValue("DeviceTemperatureSelector", 0);
-                if (!succes) deviceLost = true;
-                if (succes)
+
+                //bool succes = m_AcqDevice.SetFeatureValue("DeviceTemperatureSelector", 0);
+                //if (!succes)
+                //{
+                //    deviceLost = true;
+                //    Console.WriteLine("CATCH");
+                //    tmrMB.Enabled = false;
+                //    return;
+                //}
+                bool succes = false;
+                try
                 {
                     succes = m_AcqDevice.GetFeatureValue("DeviceTemperature", out deviceTemperature);
+
+                }
+                catch
+                {
+                    Console.WriteLine("Error");
                 }
                 if (succes)
                 {
                     deviceTemperature = Math.Round(deviceTemperature, 2);
                     deviceTemp.Text = deviceTemperature.ToString();
+                }
+                else
+                {
+                    deviceLost = true;
+                    Console.WriteLine("CATCH");
+                    tmrMB.Enabled = false;
+                    return;
                 }
             }
         }
@@ -1852,17 +1603,18 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 if (autoThreshold)
                 {
 
-                    
-                    
                     threshold = (int)CvInvoke.Threshold(grayImage, binarizedImage, 0, 255, ThresholdType.Otsu);
+
                     txtThreshold.Text = threshold.ToString();
                     CvInvoke.Threshold(roiImage, binarizedImage, threshold, 255, ThresholdType.Binary);
+
 
                 }
                 else
                 {
                     threshold = int.Parse(txtThreshold.Text);
-                    CvInvoke.Threshold(grayImage, binarizedImage, threshold, 255, ThresholdType.Binary);
+                    CvInvoke.Threshold(roiImage, binarizedImage, threshold, 255, ThresholdType.Binary);
+        
                 }
 
                 originalImageCV.Dispose();
@@ -1955,14 +1707,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void SetModbusData()
         {
-            if (modbusServerFlag)
-            {
-                SetDataModbusAsServer();
-            }
-            else
-            {
-                SetDataModbusAsClient();
-            }
+            SetDataModbusAsServer();
         }
 
         private void SetDataModbusAsClient()
@@ -2536,6 +2281,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             foreach (Quadrant q in Quadrants)
             {
                 firtsRegister = offset * q.Number + 11;
+
                 if (gridType.QuadrantsOfInterest.Contains(q.Number))
                 {
                     if (q.Found)
@@ -2585,6 +2331,29 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         // Compacity
                         WriteFloatValueServer(0.0f, firtsRegister + 12);
                     }
+                }
+                else
+                {
+                    // Class
+                    WriteFloatValueServer(0.0f, firtsRegister);
+
+                    // Found
+                    WriteFloatValueServer(0.0f, firtsRegister + 2);
+
+                    // Diameter
+                    WriteFloatValueServer(0.0f, firtsRegister + 4);
+
+                    // Max Diameter
+                    WriteFloatValueServer(0.0f, firtsRegister + 6);
+
+                    // Min Diameter
+                    WriteFloatValueServer(0.0f, firtsRegister + 8);
+
+                    // Ratio
+                    WriteFloatValueServer(0.0f, firtsRegister + 10);
+
+                    // Compacity
+                    WriteFloatValueServer(0.0f, firtsRegister + 12);
                 }
             }
         }
@@ -2814,81 +2583,82 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 if (unitsNew == "inch")
                 {
                     double avgDiameter = 0;
-                    if (Double.TryParse(lblAvgDiameter.Text, out avgDiameter)) ;
+                    
+                    Double.TryParse(lblAvgDiameter.Text, out avgDiameter);
                     avgDiameter *= fact;
                     lblAvgDiameter.Text = Math.Round(avgDiameter, nUnitsInch).ToString();
 
                     if (operationMode != 2)
                     {
                         double mxDiameter = 0;
-                        if (Double.TryParse(txtMaxDiameter.Text, out mxDiameter)) ;
+                        Double.TryParse(txtMaxDiameter.Text, out mxDiameter);
                         mxDiameter *= fact;
                         txtMaxDiameter.Text = Math.Round(mxDiameter, nUnitsInch).ToString();
 
                         double mnDiameter = 0;
-                        if (Double.TryParse(txtMinDiameter.Text, out mnDiameter)) ;
+                        Double.TryParse(txtMinDiameter.Text, out mnDiameter);
                         mnDiameter *= fact;
                         txtMinDiameter.Text = Math.Round(mnDiameter, nUnitsInch).ToString();
                     }
 
                     double controlDiameter = 0;
-                    if (Double.TryParse(dplControlDiameter.Text, out controlDiameter)) ;
+                    Double.TryParse(dplControlDiameter.Text, out controlDiameter);
                     controlDiameter *= fact;
                     dplControlDiameter.Text = Math.Round(controlDiameter, nUnitsInch).ToString();
 
                     double avgMinDiameter = 0;
-                    if (Double.TryParse(lblMinDiameter.Text, out avgMinDiameter)) ;
+                    Double.TryParse(lblMinDiameter.Text, out avgMinDiameter);
                     avgMinDiameter *= fact;
                     lblMinDiameter.Text = Math.Round(avgMinDiameter, nUnitsInch).ToString();
 
                     double avgMaxDiameter = 0;
-                    if (Double.TryParse(lblMaxDiameter.Text, out avgMaxDiameter)) ;
+                    Double.TryParse(lblMaxDiameter.Text, out avgMaxDiameter);
                     avgMaxDiameter *= fact;
                     lblMaxDiameter.Text = Math.Round(avgMaxDiameter, nUnitsInch).ToString();
 
                     double equivalentDiameter = 0;
-                    if (Double.TryParse(lblSEQDiameter.Text, out equivalentDiameter)) ;
+                    Double.TryParse(lblSEQDiameter.Text, out equivalentDiameter);
                     equivalentDiameter *= fact;
                     lblSEQDiameter.Text = Math.Round(equivalentDiameter, nUnitsInch).ToString();
                 }
                 else
                 {
                     double avgDiameter = 0;
-                    if (Double.TryParse(lblAvgDiameter.Text, out avgDiameter)) ;
+                    Double.TryParse(lblAvgDiameter.Text, out avgDiameter);
                     avgDiameter *= fact;
                     lblAvgDiameter.Text = Math.Round(avgDiameter, nUnitsMm).ToString();
 
                     if (operationMode != 2)
                     {
                         double mxDiameter = 0;
-                        if (Double.TryParse(txtMaxDiameter.Text, out mxDiameter)) ;
+                        Double.TryParse(txtMaxDiameter.Text, out mxDiameter);
                         mxDiameter *= fact;
                         txtMaxDiameter.Text = Math.Round(mxDiameter, nUnitsMm).ToString();
 
                         double mnDiameter = 0;
-                        if (Double.TryParse(txtMinDiameter.Text, out mnDiameter)) ;
+                        Double.TryParse(txtMinDiameter.Text, out mnDiameter);
                         mnDiameter *= fact;
                         txtMinDiameter.Text = Math.Round(mnDiameter, nUnitsMm).ToString();
                     }
 
                     double controlDiameter = 0;
-                    if (Double.TryParse(dplControlDiameter.Text, out controlDiameter)) ;
+                    Double.TryParse(dplControlDiameter.Text, out controlDiameter);
                     controlDiameter *= fact;
 
                     dplControlDiameter.Text = Math.Round(controlDiameter, nUnitsMm).ToString();
 
                     double avgMinDiameter = 0;
-                    if (Double.TryParse(lblMinDiameter.Text, out avgMinDiameter)) ;
+                    Double.TryParse(lblMinDiameter.Text, out avgMinDiameter);
                     avgMinDiameter *= fact;
                     lblMinDiameter.Text = Math.Round(avgMinDiameter, nUnitsMm).ToString();
 
                     double avgMaxDiameter = 0;
-                    if (Double.TryParse(lblMaxDiameter.Text, out avgMaxDiameter)) ;
+                    Double.TryParse(lblMaxDiameter.Text, out avgMaxDiameter);
                     avgMaxDiameter *= fact;
                     lblMaxDiameter.Text = Math.Round(avgMaxDiameter, nUnitsMm).ToString();
 
                     double equivalentDiameter = 0;
-                    if (Double.TryParse(lblSEQDiameter.Text, out equivalentDiameter)) ;
+                    Double.TryParse(lblSEQDiameter.Text, out equivalentDiameter);
                     equivalentDiameter *= fact;
                     lblSEQDiameter.Text = Math.Round(equivalentDiameter, nUnitsMm).ToString();
                 }
@@ -3021,7 +2791,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         //*****************************************************************************************
 
         // Create new objects with acquisition information
-        [Obsolete]
+        //[Obsolete]
         public bool CreateNewObjects(AcqConfigDlg acConfigDlg, bool Restore)
         {
             if (!Restore)
@@ -3042,7 +2812,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             m_Xfer.XferNotifyContext = this;
             StatusLabelInfo.Text = "Online... Waiting grabbed images";
 
-
+            m_AcqDevice.AcqDeviceNotify += new SapAcqDeviceNotifyHandler(M_AcqDevice_AcqDeviceNotify);
 
             if (!CreateObjects())
             {
@@ -3054,6 +2824,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             m_ImageBox.OnSize();
             UpdateControls();
             return true;
+        }
+
+        private void M_AcqDevice_AcqDeviceNotify(object sender, SapAcqDeviceNotifyEventArgs e)
+        {
+            Console.WriteLine(e.ToString());
         }
 
 
@@ -3570,7 +3345,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             Blobs.Clear();
 
             minArea = (int)(((Math.Pow(minDiameter / euFactor, 2) / 4) * Math.PI) * 0.5);
-            maxArea = (int)(((Math.Pow(maxDiameter / euFactor, 2) / 4) * Math.PI) * 1.5);
+            maxArea = (int)(((Math.Pow(maxDiameter / euFactor, 2) / 4) * Math.PI) * 4);
 
             var (contours, centers, areas, perimeters, holePresent) = FindContoursWithEdgesAndCenters(image);
 
@@ -3579,7 +3354,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             double MinD = 0;
             double avgD = 0;
             double avgDIA = 0;
-            int n = 0;
+            //int n = 0;
             int nHoles = 0;
 
             List<double> diametersCV = new List<double>();
@@ -4089,7 +3864,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             if (hole && compacidad > maxCompactnessHole || (!hole && compacidad > maxCompactness))
             {
-                if (ovalidad > maxOvality && area > normalArea * 1.4)
+                if (ovalidad > maxOvality && area > normalArea * 4)
                 {
                     size = 7; // Double
                 }
@@ -4239,6 +4014,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 {
                     int iteration = 0;
                     Color pixelColor = image.GetPixel(newX, newY);
+                    Color pixelColor2 = image.GetPixel(newX, newY);
 
                     while (pixelColor.GetBrightness() != 0)
                     {
@@ -4269,9 +4045,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                     double hipotenusa = Math.Sqrt(Math.Pow(deltaX[i], 2) + Math.Pow(deltaY[i], 2));
 
-                    listXY.Add(new Point(newX, newY));
+                    //double angle = Math.Atan(deltaY[i] / (deltaX[i]+0.0000000000000001));
 
-                    radialLenght[i] = Math.Sqrt(Math.Pow((x - newX), 2) + Math.Pow((y - newY), 2)) - hipotenusa / 2; //+ correction[i];
+                    //newX = newX - (int)((deltaX[i]*Math.Cos(angle))/2);
+                    //newY = newY - (int)((deltaY[i]*Math.Sin(angle))/2);
+
+                    newX = newX - (int)(deltaX[i] / 2);
+                    newY = newY - (int)(deltaY[i] / 2);
+
+                    radialLenght[i] = Math.Sqrt(Math.Pow((x - newX), 2) + Math.Pow((y - newY), 2));// - hipotenusa / 2; //+ correction[i];
+
+                    listXY.Add(new Point(newX, newY));
 
                     avg_diameter += radialLenght[i];
                     newX = x; newY = y;
@@ -4333,6 +4117,20 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
 
             diameter = (maxDiameter + minDiameter) / 2;
+
+            if (diameter < 0)
+            {
+                diameter = 0;
+            }
+            if (maxDiameter < 0)
+            {
+                maxDiameter = 0;
+            }
+            if (minDiameter < 0)
+            {
+                minDiameter = 0;
+            }
+
             return (diameter, maxDiameter, minDiameter);
         }
 
@@ -4485,8 +4283,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             if (triggerPLC)
             {
-                
-
                 btnFreezeFrame.Enabled = true;
                 btnFreezeFrame.BackColor = Color.Silver;
                 txtPlcTrigger.BackColor = Color.LightGreen;
@@ -4825,24 +4621,31 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         {
                             // Acceder al contorno hijo en el vector de contornos
                             VectorOfPoint contornoHijo = contours[indiceHijoActual];
-                            if (CvInvoke.ContourArea(contornoHijo) > 10)
+                            double holeArea = CvInvoke.ContourArea(contornoHijo);
+                            if (holeArea > 10)
                             {
                                 hole = true;
-                                CvInvoke.DrawContours(image, contours, indiceHijoActual, new MCvScalar(0, 255, 0), -1);
+                                CvInvoke.DrawContours(image, contours, indiceHijoActual, new MCvScalar(10, 118, 209), -1);
 
                                 area -= CvInvoke.ContourArea(contornoHijo);
                                 perimeter += CvInvoke.ArcLength(contornoHijo, true);
 
-                                // Obtener el índice del siguiente hijo del contorno padre actual
-                                indiceHijoActual = Convert.ToInt32(array.GetValue(0, indiceHijoActual, 0));
+
                             }
                             else
                             {
-                                break;
+                                CvInvoke.DrawContours(image, contours, indiceHijoActual, new MCvScalar(192, 192, 192), -1);
                             }
-                            
+                            //else
+                            //{
+                            //    continue;
+                            //}
 
-                        }while (indiceHijoActual != -1); // Continuar mientras haya más hijos
+                            // Obtener el índice del siguiente hijo del contorno padre actual
+                            indiceHijoActual = Convert.ToInt32(array.GetValue(0, indiceHijoActual, 0));
+
+
+                        } while (indiceHijoActual != -1); // Continuar mientras haya más hijos
 
                         if (hole) holePresent.Add(true);
                         else holePresent.Add(false);
@@ -5744,7 +5547,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 requestModbusData();
             }
 
-            UpdateTemperatures();
+            VerifyCameraConnection();
+
+            if (!deviceLost) UpdateTemperatures();
 
             if (authenticated)
             {
@@ -5769,6 +5574,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
+        private void VerifyCameraConnection()
+        {
+            Console.WriteLine(m_AcqDevice.FeatureNames[47]);
+            
+        }
+
         private void DeviceLost()
         {
             Invoke(
@@ -5776,8 +5587,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     () => MessageBox.Show(this, $"Device Lost", Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Error)
                 )
             );
-
-            
         }
 
         private void GetDataTxt()
@@ -5825,7 +5634,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // Max diameter
             if (double.TryParse(txtMaxDiameter.Text, out maxDiameter))
             {
-                maxDiameter = maxDiameter;
+                //maxDiameter = maxDiameter;
                 settings.maxDiameter = maxDiameter;
                 CheckChangeSetPointDiameters();
             }
@@ -5836,7 +5645,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // Min Diameter
             if (double.TryParse(txtMinDiameter.Text, out minDiameter))
             {
-                minDiameter = minDiameter;
+                //minDiameter = minDiameter;
                 settings.minDiameter = minDiameter;
                 CheckChangeSetPointDiameters();
             }
@@ -5999,7 +5808,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void cmbProductUnits_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (cmbProductUnits.SelectedItem == "mm")
+            if (cmbProductUnits.SelectedItem.ToString() == "mm")
             {
                 txtMaxDProductUnits.Text = "mm";
                 txtMinDProductUnits.Text = "mm";
@@ -6020,11 +5829,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void btnLogin_Click(object sender, EventArgs e)
         {
-            //List<string> users = new List<string>();
-            //foreach (User us in usersList);
-            //{
-            //    users.Add(us.Name);
-            //}
 
             var users = usersList.Select(u => u.Name).ToList();
 
@@ -6107,11 +5911,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
             else
             {
-                //boxROI.Enabled = false;
-                //boxUnits.Enabled = false;
-                //GB_Threshold.Enabled = false;
-                //advancedPage.Enabled = false;
-                //gbShapeIndicator.Enabled = false;
                 gbOperationControls.Enabled = false;
                 configurationPage.Enabled = false;
                 advancedPage.Enabled = false;
@@ -6168,33 +5967,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             CheckAuthentication();
         }
 
-        //private void btnVideoSettings_Click(object sender, EventArgs e)
-        //{
-        //    // Set new acquisition parameters
-        //    AcqConfigDlg acConfigDlg = new AcqConfigDlg(null, "", AcqConfigDlg.ServerCategory.ServerAcqDevice, false);
-        //    if (acConfigDlg.ShowDialog() == DialogResult.OK)
-        //    {
-        //        DestroyObjects();
-        //        DisposeObjects();
-
-        //        // Update objects with new acquisition
-        //        if (!CreateNewObjects(acConfigDlg, false))
-        //        {
-        //            MessageBox.Show("New objects creation has failed. Restoring original object ");
-        //            // Recreate original objects
-        //            if (!CreateNewObjects(null, true))
-        //            {
-        //                MessageBox.Show("Original object creation has failed. Closing application ");
-        //                System.Windows.Forms.Application.Exit();
-        //            }
-        //        }
-        //    }
-        //    else
-        //    {
-        //        MessageBox.Show("No Modification in Acquisition");
-        //    }
-        //    m_ImageBox.Refresh();
-        //}
 
         private void btnRestoreProduct_Click(object sender, EventArgs e)
         {
@@ -6223,14 +5995,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void pictureBox1_Click(object sender, EventArgs e)
         {
-            //System.Diagnostics.Process.Start(new ProcessStartInfo("https://sios.sunderteck.com/") { UseShellExecute = true });
-            //MenuParameters menuParameters = new MenuParameters(usersList);
-            //var result = menuParameters.ShowDialog();
 
-            //if (result == DialogResult.OK)
-            //{
-
-            //}
         }
 
         private void btnModifyProduct_Click(object sender, EventArgs e)
@@ -6449,8 +6214,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             try
             {
-                if (true) ExportData(1);
-                else ExportData(2);
+                ExportData(1);
             }
             catch (Exception ex)
             {
@@ -6507,6 +6271,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private void txtMaxCompacity_Click(object sender, EventArgs e)
         {
             ShowInputKeyboard((TextBox)sender, 0);
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            //m_AcqDevice.SetFeatureValue("DeviceReset", true); 
+            string value = "";
+            m_AcqDevice.SetFeatureValue("flatfieldCalibrationFPN", true);
+            Console.WriteLine(value);
         }
     }
 }

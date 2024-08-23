@@ -85,6 +85,9 @@ namespace DALSA.SaperaLT.SapClassGui
                 UpdateNames();
             }
 
+            bool valid = false;
+
+
             m_init = true;
 
             foreach (var server in comboBox_Server.Items)
@@ -96,6 +99,7 @@ namespace DALSA.SaperaLT.SapClassGui
                     resourceName = SapManager.GetResourceName(server.ToString(), SapManager.ResourceType.AcqDevice, i);
                     if (resourceName == serial)
                     {
+                        valid = true;
                         comboBox_Server.SelectedIndex = comboBox_Server.FindString(server.ToString(),0);
                         break;
                     }
@@ -108,6 +112,17 @@ namespace DALSA.SaperaLT.SapClassGui
                 {
                     comboBox_Device.SelectedIndex = comboBox_Device.FindString(device.ToString(),0);
                 }
+            }
+            
+
+            if (valid)
+            {
+                if (autoClick) button_ok.PerformClick();
+            }
+            else
+            {
+                this.DialogResult = DialogResult.None;
+                this.Close();
             }
         }
 
@@ -158,7 +173,7 @@ namespace DALSA.SaperaLT.SapClassGui
             comboBox_Device.Items.Clear();
 
             int i = 0;
-            bool valid = false;
+            //bool valid = false;
             bool devicesFound = false;
             Object selectedItem = comboBox_Server.SelectedItem;
             // Add "Acq" resources (cameras) to combo
@@ -191,20 +206,7 @@ namespace DALSA.SaperaLT.SapClassGui
                 }
             }
             m_ResourceIndex = comboBox_Device.SelectedIndex;
-
             
-
-            valid = true;
-
-            if (valid)
-            {
-                if (autoClick) button_ok.PerformClick();
-            }
-            else
-            {
-                this.DialogResult = DialogResult.None;
-                this.Close();
-            }
         }
 
         private void button_browse_Click(object sender, EventArgs e)

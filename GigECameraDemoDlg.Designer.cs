@@ -37,9 +37,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GigECameraDemoDlg));
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend3 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.StatusLabel = new System.Windows.Forms.ToolStripLabel();
             this.StatusLabelInfo = new System.Windows.Forms.ToolStripLabel();
@@ -95,6 +95,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.label1 = new System.Windows.Forms.Label();
             this.controlsTabs = new System.Windows.Forms.TabControl();
             this.mainControlPage = new System.Windows.Forms.TabPage();
+            this.button1 = new System.Windows.Forms.Button();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.label16 = new System.Windows.Forms.Label();
             this.btnLogin = new System.Windows.Forms.Button();
@@ -474,7 +475,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.btnResetFrameCounter.BackColor = System.Drawing.Color.Silver;
             this.btnResetFrameCounter.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnResetFrameCounter.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnResetFrameCounter.Location = new System.Drawing.Point(141, 24);
+            this.btnResetFrameCounter.Location = new System.Drawing.Point(141, 20);
             this.btnResetFrameCounter.Name = "btnResetFrameCounter";
             this.btnResetFrameCounter.Size = new System.Drawing.Size(103, 36);
             this.btnResetFrameCounter.TabIndex = 134;
@@ -850,6 +851,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // mainControlPage
             // 
             this.mainControlPage.BackColor = System.Drawing.Color.LightSteelBlue;
+            this.mainControlPage.Controls.Add(this.button1);
             this.mainControlPage.Controls.Add(this.groupBox4);
             this.mainControlPage.Controls.Add(this.GroupSelectGrid);
             this.mainControlPage.Controls.Add(this.GroupBox8);
@@ -863,6 +865,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.mainControlPage.Size = new System.Drawing.Size(351, 828);
             this.mainControlPage.TabIndex = 0;
             this.mainControlPage.Text = "OPERATION";
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(87, 761);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 129;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Visible = false;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // groupBox4
             // 
@@ -2055,25 +2068,25 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.trendChart.BorderlineColor = System.Drawing.Color.Black;
             this.trendChart.BorderlineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Solid;
             this.trendChart.BorderlineWidth = 2;
-            chartArea3.AxisX.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Seconds;
-            chartArea3.AxisX.LabelStyle.Format = "HH:mm:ss";
-            chartArea3.AxisX.LabelStyle.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Auto;
-            chartArea3.AxisX.ScrollBar.Enabled = false;
-            chartArea3.AxisY.Maximum = 300D;
-            chartArea3.Name = "ChartArea1";
-            this.trendChart.ChartAreas.Add(chartArea3);
-            legend3.Docking = System.Windows.Forms.DataVisualization.Charting.Docking.Top;
-            legend3.Name = "Legend1";
-            this.trendChart.Legends.Add(legend3);
+            chartArea1.AxisX.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Seconds;
+            chartArea1.AxisX.LabelStyle.Format = "HH:mm:ss";
+            chartArea1.AxisX.LabelStyle.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Auto;
+            chartArea1.AxisX.ScrollBar.Enabled = false;
+            chartArea1.AxisY.Maximum = 300D;
+            chartArea1.Name = "ChartArea1";
+            this.trendChart.ChartAreas.Add(chartArea1);
+            legend1.Docking = System.Windows.Forms.DataVisualization.Charting.Docking.Top;
+            legend1.Name = "Legend1";
+            this.trendChart.Legends.Add(legend1);
             this.trendChart.Location = new System.Drawing.Point(8, 0);
             this.trendChart.Name = "trendChart";
-            series3.ChartArea = "ChartArea1";
-            series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series3.Legend = "Legend1";
-            series3.LegendText = "Max Diameter";
-            series3.Name = "MaxDiameterSerie";
-            series3.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
-            this.trendChart.Series.Add(series3);
+            series1.ChartArea = "ChartArea1";
+            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series1.Legend = "Legend1";
+            series1.LegendText = "Max Diameter";
+            series1.Name = "MaxDiameterSerie";
+            series1.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
+            this.trendChart.Series.Add(series1);
             this.trendChart.Size = new System.Drawing.Size(806, 480);
             this.trendChart.TabIndex = 0;
             this.trendChart.Text = "chart1";
@@ -2717,6 +2730,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         private GroupBox gbSeries;
         private Button btnExportData;
         internal Label label7;
+        private Button button1;
     }
 }
 
