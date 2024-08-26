@@ -16,8 +16,6 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Sockets;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Security;
@@ -188,7 +186,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         static object lockObject = new object();
 
-        Bitmap originalROIImage = new Bitmap(640, 480);
+        //Bitmap originalROIImage = new Bitmap(640, 480);
         Mat originalImageCV = new Mat();
 
         // Hasta aqui las creadas por mi
@@ -209,10 +207,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         string csvPath = "";
         string configPath = "";
+
         // Obtener el directorio de inicio del usuario actual
         string userDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-
-        string archivo = "";
 
         double targetCalibrationSize = 0;
 
@@ -234,7 +231,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         bool noCamera = false;
         bool deviceLost = false;
 
-        string CAMERA_SERIAL = "M0002101";
+        string CAMERA_SERIAL = "M0002101";// "M0001351"
         string CAMERA_SIDE = "LEFT";
 
         public GigECameraDemoDlg()
@@ -280,8 +277,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     this.Close();
                 }
 
-                
-
                 InitializeComponent();
 
                 LoadSettings();
@@ -295,8 +290,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 InitChart();
 
                 this.Text = $"STI-{CAMERA_SIDE}";
-
-                //updateLabels();
 
                 originalBuffer = new SapBuffer(1, 640, 480, SapFormat.RGBP8, SapBuffer.MemoryType.ScatterGather);
                 originalView = new SapView(originalBuffer, boxOriginal);
@@ -320,19 +313,21 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 //----------------Only for Debug, delete on production-----------------
 
                 // Agregar m_ImageBox al TabPage
-                this.m_ImageBox = new DALSA.SaperaLT.SapClassGui.ImageBox();
-                this.m_ImageBox.Location = new Point(OffsetLeft, OffsetTop);
-                this.m_ImageBox.Name = "m_ImageBox";
-                this.m_ImageBox.PixelValueDisplay = this.PixelDataValue;
-                this.m_ImageBox.Size = new Size(640, 480);
-                this.m_ImageBox.SliderEnable = true;
-                this.m_ImageBox.SliderMaximum = 10;
-                this.m_ImageBox.SliderMinimum = 0;
-                this.m_ImageBox.SliderValue = 0;
-                this.m_ImageBox.SliderVisible = false;
-                this.m_ImageBox.TabIndex = 12;
-                this.m_ImageBox.TrackerEnable = false;
-                this.m_ImageBox.View = null;
+                this.m_ImageBox = new DALSA.SaperaLT.SapClassGui.ImageBox
+                {
+                    Location = new Point(OffsetLeft, OffsetTop),
+                    Name = "m_ImageBox",
+                    PixelValueDisplay = this.PixelDataValue,
+                    Size = new Size(640, 480),
+                    SliderEnable = true,
+                    SliderMaximum = 10,
+                    SliderMinimum = 0,
+                    SliderValue = 0,
+                    SliderVisible = false,
+                    TabIndex = 12,
+                    TrackerEnable = false,
+                    View = null
+                };
                 imagePage.Controls.Add(this.m_ImageBox);
 
 
@@ -541,16 +536,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // Verificar si el archivo existe
             if (File.Exists(csvPath))
             {
-                using (var reader = new StreamReader(new FileStream(csvPath, FileMode.Open), System.Text.Encoding.UTF8))
-                using (var csvReader = new CsvReader(reader, CultureInfo.CurrentCulture))
-                {
-                    var records = csvReader.GetRecords<Product>();
-                    foreach (var record in records)
-                    {
-                        Products.Add(record);
-                        // CmbProducts.Items.Add(record.Code);
-                    }
-                }
+                LoadProducts();
             }
             else
             {
@@ -636,8 +622,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             brushes.Add(new MCvScalar(0, 0, 255));
             brushes.Add(new MCvScalar(255, 0, 0));
 
-
-
             txtMaxCompacity.KeyPress += Txt_MaxCompacity_KeyPress;
 
             if (autoThreshold)
@@ -650,34 +634,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 btnAutoThreshold.BackColor = Color.Silver;
                 btnManualThreshold.BackColor = Color.LightGreen;
             }
-        }
-
-        static bool IsPortOccupied(int port)
-        {
-            bool isOccupied = false;
-            TcpListener listener = null;
-
-            try
-            {
-                // Intentar iniciar un TcpListener en el puerto especificado
-                listener = new TcpListener(IPAddress.Any, port);
-                listener.Start();
-            }
-            catch (SocketException)
-            {
-                // Si se lanza una excepción, significa que el puerto está ocupado
-                isOccupied = true;
-            }
-            finally
-            {
-                // Asegurarse de detener el listener si fue iniciado
-                if (listener != null)
-                {
-                    listener.Stop();
-                }
-            }
-
-            return isOccupied;
         }
 
         private void InitModbus()
@@ -990,15 +946,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                         Process();
                     }
 
-                    if (calibrating)
-                    {
-                        var result = MessageBox.Show("Continue?","Is object in center?",MessageBoxButtons.OKCancel);
-                        if (result == DialogResult.OK)
-                        {
-                            Calibrate();
-                        }
-                        calibrating = false;
-                    }
                     processing = false;
 
 
@@ -1069,13 +1016,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 if (listNames.Contains(series.Name))
                 {
-                    CheckBox checkBox = new CheckBox();
-                    checkBox.Font = checkBoxFont;
-                    checkBox.Text = series.LegendText;
-                    checkBox.Checked = series.Enabled;
-                    checkBox.Top = yPos;
-                    checkBox.Left = 10;
-                    checkBox.Width = gbSeries.Width - 20;
+                    CheckBox checkBox = new CheckBox
+                    {
+                        Font = checkBoxFont,
+                        Text = series.LegendText,
+                        Checked = series.Enabled,
+                        Top = yPos,
+                        Left = 10,
+                        Width = gbSeries.Width - 20
+                    };
                     checkBox.CheckedChanged += (sender, e) =>
                     {
                         if (!checkBox.Checked && AllCheckBoxesUnchecked(gbSeries))
@@ -1111,7 +1060,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             if (!double.IsNaN(diam))
             {
-                diam = diam * euFactor;
+                diam *= euFactor;
                 double validateControl = Filtro(diam);
                 if (validateControl > maxDiameter * 3)
                 {
@@ -1127,7 +1076,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 controlDiameter = Filtro(0);
             }
-
         }
 
         private void CheckLastFrames()
@@ -1145,56 +1093,15 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
-        //private void preProcessFreezed()
-        //{
-        //    btnProcessImage.Enabled = true;
-        //    originalImageCV = new Mat();
-
-        //    string path = SaveImage();
-        //    using (Bitmap originalImage = new Bitmap(path))
-        //    {
-        //        originalImageIsDisposed = false;
-
-        //        Image<Bgr, byte> tempImage = originalImage.ToImage<Bgr, byte>();
-        //        ImageHistogram(originalImage);
-        //        originalImageIsDisposed = true;
-        //        originalImageCV = ImageCorrection(tempImage);
-
-        //    }
-
-        //    originalImageCV.Save(imagesPath + "updatedROI.bmp");
-
-        //    Quadrants = new List<Quadrant>();
-
-        //    for (int i = 1; i < 17; i++)
-        //    {
-        //        VectorOfPoint points = new VectorOfPoint();
-        //        Point centro = new Point();
-        //        Blob blb = new Blob(0, 0, points, 0, 0, centro, 0, 0, 0, 0, 0, 0, false);
-        //        Quadrant qua = new Quadrant(i, "", false, 0, 0, 0, 0, blb);
-        //        Quadrants.Add(qua);
-        //    }
-        //}
-
         private void UpdateTemperatures()
         {
             if (m_Xfer.Connected)
             {
                 double deviceTemperature = 0;
-
-                //bool succes = m_AcqDevice.SetFeatureValue("DeviceTemperatureSelector", 0);
-                //if (!succes)
-                //{
-                //    deviceLost = true;
-                //    Console.WriteLine("CATCH");
-                //    tmrMB.Enabled = false;
-                //    return;
-                //}
                 bool succes = false;
                 try
                 {
                     succes = m_AcqDevice.GetFeatureValue("DeviceTemperature", out deviceTemperature);
-
                 }
                 catch
                 {
@@ -1215,7 +1122,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
-        private void requestModbusData()
+        private void RequestModbusData()
         {
             try
             {
@@ -1231,10 +1138,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     int intValue = (registerValue[0] << 16) | registerValue[1];
                     float floatValue = BitConverter.ToSingle(BitConverter.GetBytes(intValue), 0);
                     setPoints.Add(floatValue);
-                    //Console.WriteLine(floatValue);
                 }
 
-                if (setPoints[0] < 300 && setPoints[1] > 2)
+                if (setPoints[0] < 300 && setPoints[1] > 0)
                 {
                     maxDiameter = setPoints[0];
                     settings.maxDiameter = maxDiameter;
@@ -1244,7 +1150,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                     CheckChangeSetPointDiameters();
 
-                    updateLabels();
+                    UpdateLabels();
 
                     lblPlcDataStatus.Text = "PLC Data OK";
                 }
@@ -1260,7 +1166,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
-        private void updateLabels()
+        private void UpdateLabels()
         {
             txtMaxDiameter.Text = (maxDiameter).ToString();
             txtMinDiameter.Text = (minDiameter).ToString();
@@ -1328,166 +1234,166 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
         }
 
-        private void updateImage(PictureBox pictureBox, Bitmap image)
-        {
-            // Liberar recursos de la imagen anterior, si existe
-            if (pictureBox.Image != null)
-            {
-                pictureBox.Image.Dispose();
-            }
+        //private void updateImage(PictureBox pictureBox, Bitmap image)
+        //{
+        //    // Liberar recursos de la imagen anterior, si existe
+        //    if (pictureBox.Image != null)
+        //    {
+        //        pictureBox.Image.Dispose();
+        //    }
 
-            // Actualizar la imagen en el PictureBox
-            pictureBox.Image = image;
+        //    // Actualizar la imagen en el PictureBox
+        //    pictureBox.Image = image;
 
-            // Forzar el repintado del PictureBox para reflejar los cambios
-            pictureBox.Invalidate();
-        }
+        //    // Forzar el repintado del PictureBox para reflejar los cambios
+        //    pictureBox.Invalidate();
+        //}
 
-        private void Calibrate()
-        {
-            // Cambiamos al modo de grid 3x3 para calibrar con la del centro
-            UpdateGridType(1);
+        //private void Calibrate()
+        //{
+        //    // Cambiamos al modo de grid 3x3 para calibrar con la del centro
+        //    UpdateGridType(1);
 
-            Mat binarizedImage = new Mat();
+        //    Mat binarizedImage = new Mat();
 
-            // Se binariza la imagen
-            try
-            {
-                if (autoThreshold)
-                {
-                    Mat grayImage = new Mat();
+        //    // Se binariza la imagen
+        //    try
+        //    {
+        //        if (autoThreshold)
+        //        {
+        //            Mat grayImage = new Mat();
 
-                    CvInvoke.CvtColor(originalImageCV, grayImage, ColorConversion.Bgr2Gray);
-                    threshold = (int)CvInvoke.Threshold(grayImage, binarizedImage, 0, 255, ThresholdType.Otsu);
-                    txtThreshold.Text = threshold.ToString();
-                    CvInvoke.Threshold(originalImageCV, binarizedImage, threshold, 255, ThresholdType.Binary);
+        //            CvInvoke.CvtColor(originalImageCV, grayImage, ColorConversion.Bgr2Gray);
+        //            threshold = (int)CvInvoke.Threshold(grayImage, binarizedImage, 0, 255, ThresholdType.Otsu);
+        //            txtThreshold.Text = threshold.ToString();
+        //            CvInvoke.Threshold(originalImageCV, binarizedImage, threshold, 255, ThresholdType.Binary);
 
-                }
-                else
-                {
-                    threshold = int.Parse(txtThreshold.Text);
-                    CvInvoke.Threshold(originalImageCV, binarizedImage, threshold, 255, ThresholdType.Binary);
-                }
+        //        }
+        //        else
+        //        {
+        //            threshold = int.Parse(txtThreshold.Text);
+        //            CvInvoke.Threshold(originalImageCV, binarizedImage, threshold, 255, ThresholdType.Binary);
+        //        }
 
-                originalImageCV.Dispose();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                Console.WriteLine("Binarization problem");
-                return;
-            }
+        //        originalImageCV.Dispose();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine(ex.Message);
+        //        Console.WriteLine("Binarization problem");
+        //        return;
+        //    }
 
-            //// Se extrae el ROI de la imagen binarizada
-            Mat roiImage = ExtractROI(binarizedImage);
+        //    //// Se extrae el ROI de la imagen binarizada
+        //    Mat roiImage = ExtractROI(binarizedImage);
 
-            int sectorSel = 5;
+        //    int sectorSel = 5;
 
-            // Se extrae el sector central
-            Bitmap centralSector = extractSector(roiImage.ToBitmap(), sectorSel);
+        //    // Se extrae el sector central
+        //    Bitmap centralSector = extractSector(roiImage.ToBitmap(), sectorSel);
 
-            float diametroIA = 0;
-            //double diameter = 0;
-            //double maxD = 0;
-            //double minD = 0;
-            bool calibrationValidate = false;
+        //    float diametroIA = 0;
+        //    //double diameter = 0;
+        //    //double maxD = 0;
+        //    //double minD = 0;
+        //    bool calibrationValidate = false;
 
-            minArea = (int)(((Math.Pow(minDiameter/euFactor, 2) / 4) * Math.PI) * 0.5);
-            maxArea = (int)(((Math.Pow(maxDiameter/euFactor, 2) / 4) * Math.PI) * 1.5);
+        //    minArea = (int)(((Math.Pow(minDiameter/euFactor, 2) / 4) * Math.PI) * 0.5);
+        //    maxArea = (int)(((Math.Pow(maxDiameter/euFactor, 2) / 4) * Math.PI) * 1.5);
 
-            var (contours, centers, areas, perimeters, holePresent) = FindContoursWithEdgesAndCenters(roiImage);
+        //    var (contours, centers, areas, perimeters, holePresent) = FindContoursWithEdgesAndCenters(roiImage);
 
-            // Obtener las coordenadas del centro de la imagen
-            int centroX = imageWidth / 2;
-            int centroY = imageHeight / 2;
+        //    // Obtener las coordenadas del centro de la imagen
+        //    int centroX = imageWidth / 2;
+        //    int centroY = imageHeight / 2;
 
-            Point centro = new Point();
-            Point minError = new Point(777,777);
-            double error = 99999;
+        //    Point centro = new Point();
+        //    Point minError = new Point(777,777);
+        //    double error = 99999;
 
-            for (int i = 0; i < areas.Count; i++)
-            {
-                int area = (int)areas[i];
-                centro = centers[i];
+        //    for (int i = 0; i < areas.Count; i++)
+        //    {
+        //        int area = (int)areas[i];
+        //        centro = centers[i];
 
-                int sector = CalculateSector(centro) + 1;
+        //        int sector = CalculateSector(centro) + 1;
 
-                if (sector == sectorSel)
-                {
-                    if (ItsInCenter(centralSector, centro, 10))
-                    {
-                        diametroIA = (float)CalculateDiameterFromArea(area);
+        //        if (sector == sectorSel)
+        //        {
+        //            if (ItsInCenter(centralSector, centro, 10))
+        //            {
+        //                diametroIA = (float)CalculateDiameterFromArea(area);
 
-                        calibrationValidate = true;
-                        break;
-                    }
-                    else
-                    {
-                        double hip = Math.Sqrt((Math.Pow((centro.X-centroX),2)+Math.Pow((centro.Y-centroY),2)));
-                        if (hip < error)
-                        {
-                            minError = centro;
-                            error = hip;
-                        }
-                    }
-                }
-            }
+        //                calibrationValidate = true;
+        //                break;
+        //            }
+        //            else
+        //            {
+        //                double hip = Math.Sqrt((Math.Pow((centro.X-centroX),2)+Math.Pow((centro.Y-centroY),2)));
+        //                if (hip < error)
+        //                {
+        //                    minError = centro;
+        //                    error = hip;
+        //                }
+        //            }
+        //        }
+        //    }
 
             
 
-            if (calibrationValidate)
-            {
-                double tempFactor = targetCalibrationSize / diametroIA; // unit/pixels
-                                                                        // Mostrar un MessageBox con un mensaje y botones de opción
-                DialogResult result = MessageBox.Show($"A factor of {tempFactor} was obtained. Do you want to continue?", "Warning", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
+        //    if (calibrationValidate)
+        //    {
+        //        double tempFactor = targetCalibrationSize / diametroIA; // unit/pixels
+        //                                                                // Mostrar un MessageBox con un mensaje y botones de opción
+        //        DialogResult result = MessageBox.Show($"A factor of {tempFactor} was obtained. Do you want to continue?", "Warning", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
 
-                // Verificar la opción seleccionada por el usuario
-                if (result == DialogResult.OK)
-                {
-                    // Si el usuario elige "Sí", continuar con la acción deseada
-                    // Agrega aquí el código que deseas ejecutar después de que el usuario confirme
-                    euFactor = tempFactor;
-                    settings.EUFactor = euFactor;
-                    maxDiameter = double.Parse(txtMaxDiameter.Text);
-                    minDiameter = double.Parse(txtMinDiameter.Text);
-                    settings.maxDiameter = maxDiameter;
-                    settings.minDiameter = minDiameter;
+        //        // Verificar la opción seleccionada por el usuario
+        //        if (result == DialogResult.OK)
+        //        {
+        //            // Si el usuario elige "Sí", continuar con la acción deseada
+        //            // Agrega aquí el código que deseas ejecutar después de que el usuario confirme
+        //            euFactor = tempFactor;
+        //            settings.EUFactor = euFactor;
+        //            maxDiameter = double.Parse(txtMaxDiameter.Text);
+        //            minDiameter = double.Parse(txtMinDiameter.Text);
+        //            settings.maxDiameter = maxDiameter;
+        //            settings.minDiameter = minDiameter;
 
-                    MessageBox.Show("Calibration Succesful, Factor: " + euFactor, "Succes", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                else
-                {
-                    // Si el usuario elige "No", puedes hacer algo o simplemente salir
-                    MessageBox.Show("Operation canceled.", "Cancel", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                }
-            }
-            else
-            {
-                if (minError.X != 777)
-                {
-                    Console.WriteLine(centro.X + " " + centro.Y);
-                    MessageBox.Show("Place the calibration target in the middle. Min Object Error = X:" + (minError.X + UserROI.Left - centroX) + ", Y:" + (centroY - (minError.Y + UserROI.Top)));
-                }
-                else
-                {
-                    MessageBox.Show("No objects found");
-                }
+        //            MessageBox.Show("Calibration Succesful, Factor: " + euFactor, "Succes", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        //        }
+        //        else
+        //        {
+        //            // Si el usuario elige "No", puedes hacer algo o simplemente salir
+        //            MessageBox.Show("Operation canceled.", "Cancel", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+        //        }
+        //    }
+        //    else
+        //    {
+        //        if (minError.X != 777)
+        //        {
+        //            Console.WriteLine(centro.X + " " + centro.Y);
+        //            MessageBox.Show("Place the calibration target in the middle. Min Object Error = X:" + (minError.X + UserROI.Left - centroX) + ", Y:" + (centroY - (minError.Y + UserROI.Top)));
+        //        }
+        //        else
+        //        {
+        //            MessageBox.Show("No objects found");
+        //        }
                 
-            }
+        //    }
 
-            UpdateGridType(grid);
+        //    UpdateGridType(grid);
 
-            // Liberamos las imagenes
-            binarizedImage.Dispose();
-            roiImage.Dispose();
-            centralSector.Dispose();
+        //    // Liberamos las imagenes
+        //    binarizedImage.Dispose();
+        //    roiImage.Dispose();
+        //    centralSector.Dispose();
 
-            originalImage.Dispose();
-            originalImageIsDisposed = true;
+        //    originalImage.Dispose();
+        //    originalImageIsDisposed = true;
 
-            btnProcessImage.Enabled = false;
+        //    btnProcessImage.Enabled = false;
 
-        }
+        //}
 
         public Mat ImageCorrection(Image<Bgr, byte> image)
         {
@@ -1528,55 +1434,55 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return undistortedImage;
         }
 
-        private bool ItsInCenter(Bitmap image, Point center, int margin)
-        {
-            // Obtener las coordenadas del centro de la imagen
-            int centroX = imageWidth / 2;
-            int centroY = imageHeight / 2;
+        //private bool ItsInCenter(Bitmap image, Point center, int margin)
+        //{
+        //    // Obtener las coordenadas del centro de la imagen
+        //    int centroX = imageWidth / 2;
+        //    int centroY = imageHeight / 2;
 
-            // Verificar si el punto está dentro del área central definida por el margen de error
-            if (Math.Abs(center.X + UserROI.Left - centroX) <= margin && Math.Abs(center.Y + UserROI.Top - centroY) <= margin)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
+        //    // Verificar si el punto está dentro del área central definida por el margen de error
+        //    if (Math.Abs(center.X + UserROI.Left - centroX) <= margin && Math.Abs(center.Y + UserROI.Top - centroY) <= margin)
+        //    {
+        //        return true;
+        //    }
+        //    else
+        //    {
+        //        return false;
+        //    }
+        //}
 
-        private Bitmap extractSector(Bitmap binarizedImage, int sectorSel)
-        {
-            // Calcular el tamaño de cada sector
-            int anchoSector = binarizedImage.Width / gridCols;
-            int altoSector = binarizedImage.Height / gridRows;
+        //private Bitmap extractSector(Bitmap binarizedImage, int sectorSel)
+        //{
+        //    // Calcular el tamaño de cada sector
+        //    int anchoSector = binarizedImage.Width / gridCols;
+        //    int altoSector = binarizedImage.Height / gridRows;
 
-            // Calcular las coordenadas del ROI del sector central
-            int x = 1 * anchoSector;
-            int y = 1 * altoSector;
-            int anchoROI = anchoSector;
-            int altoROI = altoSector;
+        //    // Calcular las coordenadas del ROI del sector central
+        //    int x = 1 * anchoSector;
+        //    int y = 1 * altoSector;
+        //    int anchoROI = anchoSector;
+        //    int altoROI = altoSector;
 
-            // Crear y devolver el rectángulo del ROI
-            Rectangle sectorRoi = new Rectangle(x, y, anchoROI, altoROI);
+        //    // Crear y devolver el rectángulo del ROI
+        //    Rectangle sectorRoi = new Rectangle(x, y, anchoROI, altoROI);
 
-            Bitmap roiImage = binarizedImage.Clone(sectorRoi, binarizedImage.PixelFormat);
+        //    Bitmap roiImage = binarizedImage.Clone(sectorRoi, binarizedImage.PixelFormat);
 
 
-            return roiImage;
-        }
+        //    return roiImage;
+        //}
 
-        private int calculateCentralSector()
-        {
-            // Calcular el índice del sector central
-            int indiceFilaCentral = gridRows / 2;
-            int indiceColumnaCentral = gridCols / 2;
+        //private int calculateCentralSector()
+        //{
+        //    // Calcular el índice del sector central
+        //    int indiceFilaCentral = gridRows / 2;
+        //    int indiceColumnaCentral = gridCols / 2;
 
-            // Calcular el número del sector central
-            int numeroSectorCentral = indiceFilaCentral * gridCols + indiceColumnaCentral + 1;
+        //    // Calcular el número del sector central
+        //    int numeroSectorCentral = indiceFilaCentral * gridCols + indiceColumnaCentral + 1;
 
-            return numeroSectorCentral;
-        }
+        //    return numeroSectorCentral;
+        //}
 
         private void Process()
         {
@@ -1707,7 +1613,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void SetModbusData()
         {
-            SetDataModbusAsServer();
+            SetModbusDataAsServer();
         }
 
         private void SetDataModbusAsClient()
@@ -1892,359 +1798,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             modbusClient.WriteMultipleRegisters(startingAddress, registers);
         }
 
-        private void SetDataModbusAsServer()
-        {
-            Test();
-            //// Frame Counter
-            //// Número flotante que deseas publicar
-            //float floatValue = (float)frameCounter;
-            //// Convertir el número flotante a bytes
-            //byte[] floatBytes = BitConverter.GetBytes(floatValue);
-            //// Escribir los bytes en dos registros de 16 bits (dos palabras)
-            //ushort register1 = BitConverter.ToUInt16(floatBytes, 0);
-            //ushort register2 = BitConverter.ToUInt16(floatBytes, 2);
-            //modbusServer.holdingRegisters[1] = (short)register1;
-            //modbusServer.holdingRegisters[2] = (short)register2;
+        //private void SetDataModbusAsServer()
+        //{
+        //    SetModbusDataAsServer();
+        //}
 
-            //// Mode
-            //floatValue = (float)operationMode;
-            //// Convertir el número flotante a bytes
-            //floatBytes = BitConverter.GetBytes(floatValue);
-            //// Escribir los bytes en dos registros de 16 bits (dos palabras)
-            //register1 = BitConverter.ToUInt16(floatBytes, 0);
-            //register2 = BitConverter.ToUInt16(floatBytes, 2);
-            //modbusServer.holdingRegisters[3] = (short)register1;
-            //modbusServer.holdingRegisters[4] = (short)register2;
-
-            //// GridType
-            //floatValue = (float)grid;
-            //// Convertir el número flotante a bytes
-            //floatBytes = BitConverter.GetBytes(floatValue);
-            //// Escribir los bytes en dos registros de 16 bits (dos palabras)
-            //register1 = BitConverter.ToUInt16(floatBytes, 0);
-            //register2 = BitConverter.ToUInt16(floatBytes, 2);
-            //modbusServer.holdingRegisters[5] = (short)register1;
-            //modbusServer.holdingRegisters[6] = (short)register2;
-
-            //// Max Diameter SP
-            //floatValue = (float)(maxDiameter * euFactor);
-            //// Convertir el número flotante a bytes
-            //floatBytes = BitConverter.GetBytes(floatValue);
-            //// Escribir los bytes en dos registros de 16 bits (dos palabras)
-            //register1 = BitConverter.ToUInt16(floatBytes, 0);
-            //register2 = BitConverter.ToUInt16(floatBytes, 2);
-            //modbusServer.holdingRegisters[7] = (short)register1;
-            //modbusServer.holdingRegisters[8] = (short)register2;
-
-            //// Min Diameter SP
-            //floatValue = (float)(minDiameter * euFactor);
-            //floatBytes = BitConverter.GetBytes(floatValue);
-            //// Escribir los bytes en dos registros de 16 bits (dos palabras)
-            //register1 = BitConverter.ToUInt16(floatBytes, 0);
-            //register2 = BitConverter.ToUInt16(floatBytes, 2);
-            //modbusServer.holdingRegisters[9] = (short)register1;
-            //modbusServer.holdingRegisters[10] = (short)register2;
-
-            //// Ovality SP
-            //// Número flotante que deseas publicar
-            //floatValue = (float)maxOvality;
-            //// Convertir el número flotante a bytes
-            //floatBytes = BitConverter.GetBytes(floatValue);
-            //// Escribir los bytes en dos registros de 16 bits (dos palabras)
-            //register1 = BitConverter.ToUInt16(floatBytes, 0);
-            //register2 = BitConverter.ToUInt16(floatBytes, 2);
-            //modbusServer.holdingRegisters[11] = (short)register1;
-            //modbusServer.holdingRegisters[12] = (short)register2;
-
-            //// Compacity SP
-            //// Número flotante que deseas publicar
-            //floatValue = (float)maxCompactness;
-            //floatBytes = BitConverter.GetBytes(floatValue);
-            //// Escribir los bytes en dos registros de 16 bits (dos palabras)
-            //register1 = BitConverter.ToUInt16(floatBytes, 0);
-            //register2 = BitConverter.ToUInt16(floatBytes, 2);
-            //modbusServer.holdingRegisters[13] = (short)register1;
-            //modbusServer.holdingRegisters[14] = (short)register2;
-
-            //// Número flotante que deseas publicar
-            //floatValue = (float)diameterControl;
-            //// Convertir el número flotante a bytes
-            //floatBytes = BitConverter.GetBytes(floatValue);
-            //// Escribir los bytes en dos registros de 16 bits (dos palabras)
-            //register1 = BitConverter.ToUInt16(floatBytes, 0);
-            //register2 = BitConverter.ToUInt16(floatBytes, 2);
-            //modbusServer.holdingRegisters[15] = (short)register1;
-            //modbusServer.holdingRegisters[16] = (short)register2;
-
-            //// Número flotante que deseas publicar
-            //floatValue = (float)minDiameterAvg;
-            //// Convertir el número flotante a bytes
-            //floatBytes = BitConverter.GetBytes(floatValue);
-            //// Escribir los bytes en dos registros de 16 bits (dos palabras)
-            //register1 = BitConverter.ToUInt16(floatBytes, 0);
-            //register2 = BitConverter.ToUInt16(floatBytes, 2);
-            //modbusServer.holdingRegisters[17] = (short)register1;
-            //modbusServer.holdingRegisters[18] = (short)register2;
-
-            //// Número flotante que deseas publicar
-            //floatValue = (float)maxDiameterAvg;
-            //// Convertir el número flotante a bytes
-            //floatBytes = BitConverter.GetBytes(floatValue);
-            //// Escribir los bytes en dos registros de 16 bits (dos palabras)
-            //register1 = BitConverter.ToUInt16(floatBytes, 0);
-            //register2 = BitConverter.ToUInt16(floatBytes, 2);
-            //modbusServer.holdingRegisters[19] = (short)register1;
-            //modbusServer.holdingRegisters[20] = (short)register2;
-
-            //int offset = 14;
-            //int firtsRegister = 0;
-            //foreach (Quadrant q in Quadrants)
-            //{
-            //    firtsRegister = offset * q.Number + 11;
-            //    if (gridType.QuadrantsOfInterest.Contains(q.Number))
-            //    {
-            //        if (q.Found)
-            //        {
-            //            // Class
-            //            // Número flotante que deseas publicar
-            //            floatValue = (float)q.Blob.Size;
-            //            // Convertir el número flotante a bytes
-            //            floatBytes = BitConverter.GetBytes(floatValue);
-            //            // Escribir los bytes en dos registros de 16 bits (dos palabras)
-            //            register1 = BitConverter.ToUInt16(floatBytes, 0);
-            //            register2 = BitConverter.ToUInt16(floatBytes, 2);
-            //            modbusServer.holdingRegisters[firtsRegister] = (short)register1;
-            //            modbusServer.holdingRegisters[firtsRegister + 1] = (short)register2;
-
-            //            // Found
-            //            // Número flotante que deseas publicar
-            //            floatValue = q.Found ? 1.0f : 0.0f;
-            //            // Convertir el número flotante a bytes
-            //            floatBytes = BitConverter.GetBytes(floatValue);
-            //            // Escribir los bytes en dos registros de 16 bits (dos palabras)
-            //            register1 = BitConverter.ToUInt16(floatBytes, 0);
-            //            register2 = BitConverter.ToUInt16(floatBytes, 2);
-            //            modbusServer.holdingRegisters[firtsRegister + 2] = (short)register1;
-            //            modbusServer.holdingRegisters[firtsRegister + 3] = (short)register2;
-
-            //            // Diameter
-            //            // Número flotante que deseas publicar
-            //            floatValue = (float)q.Blob.DiametroIA;
-            //            // Convertir el número flotante a bytes
-            //            floatBytes = BitConverter.GetBytes(floatValue);
-            //            // Escribir los bytes en dos registros de 16 bits (dos palabras)
-            //            register1 = BitConverter.ToUInt16(floatBytes, 0);
-            //            register2 = BitConverter.ToUInt16(floatBytes, 2);
-            //            modbusServer.holdingRegisters[firtsRegister + 4] = (short)register1;
-            //            modbusServer.holdingRegisters[firtsRegister + 5] = (short)register2;
-
-            //            // Max Diameter
-            //            // Número flotante que deseas publicar
-            //            floatValue = (float)q.Blob.DMayor;
-            //            // Convertir el número flotante a bytes
-            //            floatBytes = BitConverter.GetBytes(floatValue);
-            //            // Escribir los bytes en dos registros de 16 bits (dos palabras)
-            //            register1 = BitConverter.ToUInt16(floatBytes, 0);
-            //            register2 = BitConverter.ToUInt16(floatBytes, 2);
-            //            modbusServer.holdingRegisters[firtsRegister + 6] = (short)register1;
-            //            modbusServer.holdingRegisters[firtsRegister + 7] = (short)register2;
-
-            //            // Min Diameter
-            //            // Número flotante que deseas publicar
-            //            floatValue = (float)q.Blob.DMenor;
-            //            // Convertir el número flotante a bytes
-            //            floatBytes = BitConverter.GetBytes(floatValue);
-            //            // Escribir los bytes en dos registros de 16 bits (dos palabras)
-            //            register1 = BitConverter.ToUInt16(floatBytes, 0);
-            //            register2 = BitConverter.ToUInt16(floatBytes, 2);
-            //            modbusServer.holdingRegisters[firtsRegister + 8] = (short)register1;
-            //            modbusServer.holdingRegisters[firtsRegister + 9] = (short)register2;
-
-            //            // Ratio
-            //            // Número flotante que deseas publicar
-            //            floatValue = (float)(q.Blob.DMayor / q.Blob.DMenor);
-            //            // Convertir el número flotante a bytes
-            //            floatBytes = BitConverter.GetBytes(floatValue);
-            //            // Escribir los bytes en dos registros de 16 bits (dos palabras)
-            //            register1 = BitConverter.ToUInt16(floatBytes, 0);
-            //            register2 = BitConverter.ToUInt16(floatBytes, 2);
-            //            modbusServer.holdingRegisters[firtsRegister + 10] = (short)register1;
-            //            modbusServer.holdingRegisters[firtsRegister + 11] = (short)register2;
-
-            //            // Compacity
-            //            // Número flotante que deseas publicar
-            //            floatValue = (float)q.Blob.Compacidad;
-            //            // Convertir el número flotante a bytes
-            //            floatBytes = BitConverter.GetBytes(floatValue);
-            //            // Escribir los bytes en dos registros de 16 bits (dos palabras)
-            //            register1 = BitConverter.ToUInt16(floatBytes, 0);
-            //            register2 = BitConverter.ToUInt16(floatBytes, 2);
-            //            modbusServer.holdingRegisters[firtsRegister + 12] = (short)register1;
-            //            modbusServer.holdingRegisters[firtsRegister + 13] = (short)register2;
-            //        }
-            //        else
-            //        {
-            //            // Class
-            //            // Número flotante que deseas publicar
-            //            floatValue = 0.0f;
-            //            // Convertir el número flotante a bytes
-            //            floatBytes = BitConverter.GetBytes(floatValue);
-            //            // Escribir los bytes en dos registros de 16 bits (dos palabras)
-            //            register1 = BitConverter.ToUInt16(floatBytes, 0);
-            //            register2 = BitConverter.ToUInt16(floatBytes, 2);
-            //            modbusServer.holdingRegisters[firtsRegister] = (short)register1;
-            //            modbusServer.holdingRegisters[firtsRegister + 1] = (short)register2;
-
-            //            // Found
-            //            // Número flotante que deseas publicar
-            //            floatValue = 0.0f;
-            //            // Convertir el número flotante a bytes
-            //            floatBytes = BitConverter.GetBytes(floatValue);
-            //            // Escribir los bytes en dos registros de 16 bits (dos palabras)
-            //            register1 = BitConverter.ToUInt16(floatBytes, 0);
-            //            register2 = BitConverter.ToUInt16(floatBytes, 2);
-            //            modbusServer.holdingRegisters[firtsRegister + 2] = (short)register1;
-            //            modbusServer.holdingRegisters[firtsRegister + 3] = (short)register2;
-
-            //            // Diameter
-            //            // Número flotante que deseas publicar
-            //            floatValue = 0.0f;
-            //            // Convertir el número flotante a bytes
-            //            floatBytes = BitConverter.GetBytes(floatValue);
-            //            // Escribir los bytes en dos registros de 16 bits (dos palabras)
-            //            register1 = BitConverter.ToUInt16(floatBytes, 0);
-            //            register2 = BitConverter.ToUInt16(floatBytes, 2);
-            //            modbusServer.holdingRegisters[firtsRegister + 4] = (short)register1;
-            //            modbusServer.holdingRegisters[firtsRegister + 5] = (short)register2;
-
-            //            // Max Diameter
-            //            // Número flotante que deseas publicar
-            //            floatValue = 0.0f;
-            //            // Convertir el número flotante a bytes
-            //            floatBytes = BitConverter.GetBytes(floatValue);
-            //            // Escribir los bytes en dos registros de 16 bits (dos palabras)
-            //            register1 = BitConverter.ToUInt16(floatBytes, 0);
-            //            register2 = BitConverter.ToUInt16(floatBytes, 2);
-            //            modbusServer.holdingRegisters[firtsRegister + 6] = (short)register1;
-            //            modbusServer.holdingRegisters[firtsRegister + 7] = (short)register2;
-
-            //            // Min Diameter
-            //            // Número flotante que deseas publicar
-            //            floatValue = 0.0f;
-            //            // Convertir el número flotante a bytes
-            //            floatBytes = BitConverter.GetBytes(floatValue);
-            //            // Escribir los bytes en dos registros de 16 bits (dos palabras)
-            //            register1 = BitConverter.ToUInt16(floatBytes, 0);
-            //            register2 = BitConverter.ToUInt16(floatBytes, 2);
-            //            modbusServer.holdingRegisters[firtsRegister + 8] = (short)register1;
-            //            modbusServer.holdingRegisters[firtsRegister + 9] = (short)register2;
-
-            //            // Ratio
-            //            // Número flotante que deseas publicar
-            //            floatValue = 0.0f;
-            //            // Convertir el número flotante a bytes
-            //            floatBytes = BitConverter.GetBytes(floatValue);
-            //            // Escribir los bytes en dos registros de 16 bits (dos palabras)
-            //            register1 = BitConverter.ToUInt16(floatBytes, 0);
-            //            register2 = BitConverter.ToUInt16(floatBytes, 2);
-            //            modbusServer.holdingRegisters[firtsRegister + 10] = (short)register1;
-            //            modbusServer.holdingRegisters[firtsRegister + 11] = (short)register2;
-
-            //            // Compacity
-            //            // Número flotante que deseas publicar
-            //            floatValue = 0.0f;
-            //            // Convertir el número flotante a bytes
-            //            floatBytes = BitConverter.GetBytes(floatValue);
-            //            // Escribir los bytes en dos registros de 16 bits (dos palabras)
-            //            register1 = BitConverter.ToUInt16(floatBytes, 0);
-            //            register2 = BitConverter.ToUInt16(floatBytes, 2);
-            //            modbusServer.holdingRegisters[firtsRegister + 12] = (short)register1;
-            //            modbusServer.holdingRegisters[firtsRegister + 13] = (short)register2;
-            //        }
-            //    }
-            //    else
-            //    {
-            //        // Class
-            //        // Número flotante que deseas publicar
-            //        floatValue = (float)0.0;
-            //        // Convertir el número flotante a bytes
-            //        floatBytes = BitConverter.GetBytes(floatValue);
-            //        // Escribir los bytes en dos registros de 16 bits (dos palabras)
-            //        register1 = BitConverter.ToUInt16(floatBytes, 0);
-            //        register2 = BitConverter.ToUInt16(floatBytes, 2);
-            //        modbusServer.holdingRegisters[firtsRegister] = (short)register1;
-            //        modbusServer.holdingRegisters[firtsRegister + 1] = (short)register2;
-
-            //        // Found
-            //        // Número flotante que deseas publicar
-            //        floatValue = 0.0f;
-            //        // Convertir el número flotante a bytes
-            //        floatBytes = BitConverter.GetBytes(floatValue);
-            //        // Escribir los bytes en dos registros de 16 bits (dos palabras)
-            //        register1 = BitConverter.ToUInt16(floatBytes, 0);
-            //        register2 = BitConverter.ToUInt16(floatBytes, 2);
-            //        modbusServer.holdingRegisters[firtsRegister + 2] = (short)register1;
-            //        modbusServer.holdingRegisters[firtsRegister + 3] = (short)register2;
-
-            //        // Diameter
-            //        // Número flotante que deseas publicar
-            //        floatValue = 0.0f;
-            //        // Convertir el número flotante a bytes
-            //        floatBytes = BitConverter.GetBytes(floatValue);
-            //        // Escribir los bytes en dos registros de 16 bits (dos palabras)
-            //        register1 = BitConverter.ToUInt16(floatBytes, 0);
-            //        register2 = BitConverter.ToUInt16(floatBytes, 2);
-            //        modbusServer.holdingRegisters[firtsRegister + 4] = (short)register1;
-            //        modbusServer.holdingRegisters[firtsRegister + 5] = (short)register2;
-
-            //        // Max Diameter
-            //        // Número flotante que deseas publicar
-            //        floatValue = 0.0f;
-            //        // Convertir el número flotante a bytes
-            //        floatBytes = BitConverter.GetBytes(floatValue);
-            //        // Escribir los bytes en dos registros de 16 bits (dos palabras)
-            //        register1 = BitConverter.ToUInt16(floatBytes, 0);
-            //        register2 = BitConverter.ToUInt16(floatBytes, 2);
-            //        modbusServer.holdingRegisters[firtsRegister + 6] = (short)register1;
-            //        modbusServer.holdingRegisters[firtsRegister + 7] = (short)register2;
-
-            //        // Min Diameter
-            //        // Número flotante que deseas publicar
-            //        floatValue = 0.0f;
-            //        // Convertir el número flotante a bytes
-            //        floatBytes = BitConverter.GetBytes(floatValue);
-            //        // Escribir los bytes en dos registros de 16 bits (dos palabras)
-            //        register1 = BitConverter.ToUInt16(floatBytes, 0);
-            //        register2 = BitConverter.ToUInt16(floatBytes, 2);
-            //        modbusServer.holdingRegisters[firtsRegister + 8] = (short)register1;
-            //        modbusServer.holdingRegisters[firtsRegister + 9] = (short)register2;
-
-            //        // Ratio
-            //        // Número flotante que deseas publicar
-            //        floatValue = 0.0f;
-            //        // Convertir el número flotante a bytes
-            //        floatBytes = BitConverter.GetBytes(floatValue);
-            //        // Escribir los bytes en dos registros de 16 bits (dos palabras)
-            //        register1 = BitConverter.ToUInt16(floatBytes, 0);
-            //        register2 = BitConverter.ToUInt16(floatBytes, 2);
-            //        modbusServer.holdingRegisters[firtsRegister + 10] = (short)register1;
-            //        modbusServer.holdingRegisters[firtsRegister + 11] = (short)register2;
-
-            //        // Compacity
-            //        // Número flotante que deseas publicar
-            //        floatValue = 0.0f;
-            //        // Convertir el número flotante a bytes
-            //        floatBytes = BitConverter.GetBytes(floatValue);
-            //        // Escribir los bytes en dos registros de 16 bits (dos palabras)
-            //        register1 = BitConverter.ToUInt16(floatBytes, 0);
-            //        register2 = BitConverter.ToUInt16(floatBytes, 2);
-            //        modbusServer.holdingRegisters[firtsRegister + 12] = (short)register1;
-            //        modbusServer.holdingRegisters[firtsRegister + 13] = (short)register2;
-            //    }
-            //}
-        }
-
-        private void Test()
+        private void SetModbusDataAsServer()
         {
             // Frame Counter
             WriteFloatValueServer((float)frameCounter, 1);
@@ -2462,28 +2021,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             string selectedItem = CmbProducts.SelectedItem.ToString();
 
-            //using (var reader = new StreamReader(new FileStream(csvPath, FileMode.Open), System.Text.Encoding.UTF8))
-            //using (var csvReader = new CsvReader(reader, CultureInfo.CurrentCulture))
-            //{
-            //    var records = csvReader.GetRecords<Product>();
-            //    //records.Add(new Product { Code = 1, MaxD = 130, MinD = 110, MaxOvality = 0.5, MaxCompacity = 12 });
-            //    //csvWriter.WriteRecords(records);
-            //    foreach (var record in records)
-            //    {
-            //        if (record.Code == int.Parse(selectedItem))
-            //        {
-            //            changeProduct(record);
-            //        }
-            //    }
-            //}
-
             var product = Products.Select(p => p).
                                    Where(p => p.Code == int.Parse(selectedItem)).ToList()[0];
             ChangeProduct(product);
 
         }
 
-        private void updateROI()
+        private void UpdateROI()
         {
             //processROIBox.Visible = false;
             boxProcess.Visible = false;
@@ -2502,40 +2046,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void originalBox_MouseMove(object sender, MouseEventArgs e)
         {
-            //// Obtener la posición del ratón dentro del PictureBox
-            //Point mousePos = e.Location;
 
-            //// Obtener la imagen del PictureBox
-            //Bitmap bitmap = (Bitmap)originalBox.Image;
-
-            //if (bitmap != null && originalBox.ClientRectangle.Contains(mousePos))
-            //{
-            //    // Obtener el color del píxel en la posición del ratón
-            //    Color pixelColor = bitmap.GetPixel(mousePos.X, mousePos.Y);
-
-            //    // Mostrar la información del píxel
-            //    PixelDataValue.Text = $"  [ ax= {mousePos.X} y= {mousePos.Y}, Value: {(int)(Math.Round(pixelColor.GetBrightness(),3)*255)}]";
-            //}
-            //bitmap.Dispose();
         }
 
         private void processBox_MouseMove(object sender, MouseEventArgs e)
         {
-            //// Obtener la posición del ratón dentro del PictureBox
-            //Point mousePos = e.Location;
 
-            //// Obtener la imagen del PictureBox
-            //Bitmap bitmap = (Bitmap)processBuffer.Read();
-
-            //if (bitmap != null && boxOriginal.ClientRectangle.Contains(mousePos))
-            //{
-            //    // Obtener el color del píxel en la posición del ratón
-            //    Color pixelColor = bitmap.GetPixel(mousePos.X, mousePos.Y);
-
-            //    // Mostrar la información del píxel
-            //    PixelDataValue.Text = $"  [ bx= {mousePos.X + UserROI.Left} y= {mousePos.Y + UserROI.Top}, Value: {(int)(Math.Round(pixelColor.GetBrightness(),3)*255)}]";
-            //}
-            //bitmap.Dispose();
         }
 
         private void UpdateUnits(string unitsNew)
@@ -2582,83 +2098,69 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 if (unitsNew == "inch")
                 {
-                    double avgDiameter = 0;
-                    
-                    Double.TryParse(lblAvgDiameter.Text, out avgDiameter);
+
+                    Double.TryParse(lblAvgDiameter.Text, out double avgDiameter);
                     avgDiameter *= fact;
                     lblAvgDiameter.Text = Math.Round(avgDiameter, nUnitsInch).ToString();
 
                     if (operationMode != 2)
                     {
-                        double mxDiameter = 0;
-                        Double.TryParse(txtMaxDiameter.Text, out mxDiameter);
+                        Double.TryParse(txtMaxDiameter.Text, out double mxDiameter);
                         mxDiameter *= fact;
                         txtMaxDiameter.Text = Math.Round(mxDiameter, nUnitsInch).ToString();
 
-                        double mnDiameter = 0;
-                        Double.TryParse(txtMinDiameter.Text, out mnDiameter);
+                        Double.TryParse(txtMinDiameter.Text, out double mnDiameter);
                         mnDiameter *= fact;
                         txtMinDiameter.Text = Math.Round(mnDiameter, nUnitsInch).ToString();
                     }
 
-                    double controlDiameter = 0;
-                    Double.TryParse(dplControlDiameter.Text, out controlDiameter);
+                    Double.TryParse(dplControlDiameter.Text, out double controlDiameter);
                     controlDiameter *= fact;
                     dplControlDiameter.Text = Math.Round(controlDiameter, nUnitsInch).ToString();
 
-                    double avgMinDiameter = 0;
-                    Double.TryParse(lblMinDiameter.Text, out avgMinDiameter);
+                    Double.TryParse(lblMinDiameter.Text, out double avgMinDiameter);
                     avgMinDiameter *= fact;
                     lblMinDiameter.Text = Math.Round(avgMinDiameter, nUnitsInch).ToString();
 
-                    double avgMaxDiameter = 0;
-                    Double.TryParse(lblMaxDiameter.Text, out avgMaxDiameter);
+                    Double.TryParse(lblMaxDiameter.Text, out double avgMaxDiameter);
                     avgMaxDiameter *= fact;
                     lblMaxDiameter.Text = Math.Round(avgMaxDiameter, nUnitsInch).ToString();
 
-                    double equivalentDiameter = 0;
-                    Double.TryParse(lblSEQDiameter.Text, out equivalentDiameter);
+                    Double.TryParse(lblSEQDiameter.Text, out double equivalentDiameter);
                     equivalentDiameter *= fact;
                     lblSEQDiameter.Text = Math.Round(equivalentDiameter, nUnitsInch).ToString();
                 }
                 else
                 {
-                    double avgDiameter = 0;
-                    Double.TryParse(lblAvgDiameter.Text, out avgDiameter);
+                    Double.TryParse(lblAvgDiameter.Text, out double avgDiameter);
                     avgDiameter *= fact;
                     lblAvgDiameter.Text = Math.Round(avgDiameter, nUnitsMm).ToString();
 
                     if (operationMode != 2)
                     {
-                        double mxDiameter = 0;
-                        Double.TryParse(txtMaxDiameter.Text, out mxDiameter);
+                        Double.TryParse(txtMaxDiameter.Text, out double mxDiameter);
                         mxDiameter *= fact;
                         txtMaxDiameter.Text = Math.Round(mxDiameter, nUnitsMm).ToString();
 
-                        double mnDiameter = 0;
-                        Double.TryParse(txtMinDiameter.Text, out mnDiameter);
+                        Double.TryParse(txtMinDiameter.Text, out double mnDiameter);
                         mnDiameter *= fact;
                         txtMinDiameter.Text = Math.Round(mnDiameter, nUnitsMm).ToString();
                     }
 
-                    double controlDiameter = 0;
-                    Double.TryParse(dplControlDiameter.Text, out controlDiameter);
+                    Double.TryParse(dplControlDiameter.Text, out double controlDiameter);
                     controlDiameter *= fact;
 
                     dplControlDiameter.Text = Math.Round(controlDiameter, nUnitsMm).ToString();
 
-                    double avgMinDiameter = 0;
-                    Double.TryParse(lblMinDiameter.Text, out avgMinDiameter);
+                    Double.TryParse(lblMinDiameter.Text, out double avgMinDiameter);
                     avgMinDiameter *= fact;
                     lblMinDiameter.Text = Math.Round(avgMinDiameter, nUnitsMm).ToString();
 
-                    double avgMaxDiameter = 0;
-                    Double.TryParse(lblMaxDiameter.Text, out avgMaxDiameter);
+                    Double.TryParse(lblMaxDiameter.Text, out double avgMaxDiameter);
                     avgMaxDiameter *= fact;
                     lblMaxDiameter.Text = Math.Round(avgMaxDiameter, nUnitsMm).ToString();
 
-                    double equivalentDiameter = 0;
-                    Double.TryParse(lblSEQDiameter.Text, out equivalentDiameter);
+                    Double.TryParse(lblSEQDiameter.Text, out double equivalentDiameter);
                     equivalentDiameter *= fact;
                     lblSEQDiameter.Text = Math.Round(equivalentDiameter, nUnitsMm).ToString();
                 }
@@ -2697,7 +2199,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 {
                     // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
                     //MessageBox.Show("Data saved: " + minDiameter, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    minDiameter = minDiameter / euFactor;
+                    minDiameter /= euFactor;
                     settings.minDiameter = minDiameter / euFactor;
                     CheckChangeSetPointDiameters();
                 }
@@ -2719,7 +2221,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 {
                     // Se ha convertido exitosamente, puedes utilizar la variable threshold aquí
                     //MessageBox.Show("Data saved: " + maxDiameter, "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    maxDiameter = maxDiameter / euFactor;
+                    maxDiameter /= euFactor;
                     settings.maxDiameter = maxDiameter;
                     CheckChangeSetPointDiameters();
                 }
@@ -2832,36 +2334,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         }
 
 
-        // Create new objects with acquisition information
-        //public bool CreateNewObjects(BufferDlg dlg, bool r)
-        //{
-        //    m_AcqDevice = new SapAcqDevice(m_ServerLocation, m_ConfigFileName);
-        //    if (dlg.Count > 1)
-        //        m_Buffers = new SapBufferWithTrash(dlg.Count, m_AcqDevice, dlg.Type);
-        //    else
-        //        m_Buffers = new SapBuffer(1, m_AcqDevice, dlg.Type);
-        //    m_Xfer = new SapAcqDeviceToBuf(m_AcqDevice, m_Buffers);
-        //    m_View = new SapView(m_Buffers);
-        //    m_ImageBox.View = m_View;
-
-        //    m_Xfer.Pairs[0].EventType = SapXferPair.XferEventType.EndOfFrame;
-        //    m_Xfer.XferNotify += new SapXferNotifyHandler(xfer_XferNotify);
-        //    m_Xfer.XferNotifyContext = this;
-        //    StatusLabelInfo.Text = "Online... Waiting grabbed images";
-
-        //    if (!CreateObjects())
-        //    {
-        //        DisposeObjects();
-        //        return false;
-        //    }
-
-        //    // Resize ImagBox to take into account the size of created sapview
-        //    m_ImageBox.OnSize();
-        //    UpdateControls();
-        //    return true;
-        //}
-
-
         // Call Create Object 
         private bool CreateObjects()
         {
@@ -2954,8 +2426,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         protected override void OnResize(EventArgs argsPaint)
         {
-            if (m_ImageBox != null)
-                m_ImageBox.OnSize();
+            if (m_ImageBox != null) m_ImageBox.OnSize();
             base.OnResize(argsPaint);
         }
 
@@ -2979,139 +2450,69 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         //
         //*****************************************************************************************
 
-        private void button_Snap_Click(object sender, EventArgs e)
-        {
-            AbortDlg abort = new AbortDlg(m_Xfer);
-
-            if (m_Xfer.Snap())
-            {
-                if (abort.ShowDialog() != DialogResult.OK)
-                    m_Xfer.Abort();
-                UpdateControls();
-            }
-        }
-
-        private void button_Grab_Click(object sender, EventArgs e)
-        {
-            this.StatusLabelInfo.Text = "";
-            this.StatusLabelInfoTrash.Text = "";
-            if (m_Xfer.Grab())
-            {
-                UpdateControls();
-            }
-        }
-
-        private void button_Freeze_Click(object sender, EventArgs e)
-        {
-            AbortDlg abort = new AbortDlg(m_Xfer);
-
-            if (m_Xfer.Freeze())
-            {
-                if (abort.ShowDialog() != DialogResult.OK)
-                    m_Xfer.Abort();
-                UpdateControls();
-            }
-        }
-
-        //*****************************************************************************************
-        //
-        //					General Options
-        //
-        //*****************************************************************************************
-
-        //private void button_Buffer_Click(object sender, EventArgs e)
+        //private void button_Snap_Click(object sender, EventArgs e)
         //{
-        //    // Set new buffer parameters
-        //    BufferDlg dlg = new BufferDlg(m_Buffers, m_View.Display, true);
-        //    if (dlg.ShowDialog() == DialogResult.OK)
-        //    {
-        //        DestroyObjects();
-        //        DisposeObjects();
+        //    AbortDlg abort = new AbortDlg(m_Xfer);
 
-        //        //Update objects with new buffer
-        //        if (!CreateNewObjects(dlg))
-        //        {
-        //            MessageBox.Show("New objects creation has failed. Restoring original object ");
-        //            // Recreate original objects
-        //            if (!CreateNewObjects(null, true))
-        //            {
-        //                MessageBox.Show("Original object creation has failed. Closing application ");
-        //                System.Windows.Forms.Application.Exit();
-        //            }
-        //        }
+        //    if (m_Xfer.Snap())
+        //    {
+        //        if (abort.ShowDialog() != DialogResult.OK)
+        //            m_Xfer.Abort();
+        //        UpdateControls();
         //    }
-        //    m_ImageBox.Refresh();
         //}
 
-        private void button_View_Click(object sender, EventArgs e)
-        {
-            ViewDlg viewDialog = new ViewDlg(m_View, m_ImageBox.ViewRectangle);
-
-            if (viewDialog.ShowDialog() == DialogResult.OK)
-                m_ImageBox.OnSize();
-
-            m_ImageBox.Refresh();
-        }
-
-        //*****************************************************************************************
-        //
-        //					Acquisition Options
-        //
-        //*****************************************************************************************
-
-        //private void button_Load_Config_Click(object sender, EventArgs e)
+        //private void button_Grab_Click(object sender, EventArgs e)
         //{
-        //    // Set new acquisition parameters
-        //    AcqConfigDlg acConfigDlg = new AcqConfigDlg(null, "", AcqConfigDlg.ServerCategory.ServerAcqDevice, false);
-        //    if (acConfigDlg.ShowDialog() == DialogResult.OK)
+        //    this.StatusLabelInfo.Text = "";
+        //    this.StatusLabelInfoTrash.Text = "";
+        //    if (m_Xfer.Grab())
         //    {
-        //        DestroyObjects();
-        //        DisposeObjects();
-
-        //        // Update objects with new acquisition
-        //        if (!CreateNewObjects(acConfigDlg, false))
-        //        {
-        //            MessageBox.Show("New objects creation has failed. Restoring original object ");
-        //            // Recreate original objects
-        //            if (!CreateNewObjects(null, true))
-        //            {
-        //                MessageBox.Show("Original object creation has failed. Closing application ");
-        //                System.Windows.Forms.Application.Exit();
-        //            }
-        //        }
+        //        UpdateControls();
         //    }
-        //    else
-        //    {
-        //        MessageBox.Show("No Modification in Acquisition");
-        //    }
-        //    m_ImageBox.Refresh();
         //}
 
-        //*****************************************************************************************
-        //
-        //					General Function
-        //
-        //*****************************************************************************************
+        //private void button_Freeze_Click(object sender, EventArgs e)
+        //{
+        //    AbortDlg abort = new AbortDlg(m_Xfer);
+
+        //    if (m_Xfer.Freeze())
+        //    {
+        //        if (abort.ShowDialog() != DialogResult.OK)
+        //            m_Xfer.Abort();
+        //        UpdateControls();
+        //    }
+        //}
+
+        //private void button_View_Click(object sender, EventArgs e)
+        //{
+        //    ViewDlg viewDialog = new ViewDlg(m_View, m_ImageBox.ViewRectangle);
+
+        //    if (viewDialog.ShowDialog() == DialogResult.OK)
+        //        m_ImageBox.OnSize();
+
+        //    m_ImageBox.Refresh();
+        //}
 
         // Updates the menu items enabling/disabling the proper items depending on the stateof the application
         void UpdateControls()
         {
-            bool bAcqNoGrab = (m_Xfer != null) && (m_Xfer.Grabbing == false);
-            bool bAcqGrab = (m_Xfer != null) && (m_Xfer.Grabbing == true);
-            bool bNoGrab = (m_Xfer == null) || (m_Xfer.Grabbing == false);
+            //bool bAcqNoGrab = (m_Xfer != null) && (m_Xfer.Grabbing == false);
+            //bool bAcqGrab = (m_Xfer != null) && (m_Xfer.Grabbing == true);
+            //bool bNoGrab = (m_Xfer == null) || (m_Xfer.Grabbing == false);
 
-            //// Acquisition Control
-            //button_Grab.Enabled = bAcqNoGrab;
-            //button_Snap.Enabled = bAcqNoGrab;
-            //button_Freeze.Enabled = bAcqGrab;
+            ////// Acquisition Control
+            ////button_Grab.Enabled = bAcqNoGrab;
+            ////button_Snap.Enabled = bAcqNoGrab;
+            ////button_Freeze.Enabled = bAcqGrab;
 
-            //// File Options
-            //button_New.Enabled = bNoGrab;
-            //button_Load.Enabled = bNoGrab;
-            //button_Save.Enabled = bNoGrab;
+            ////// File Options
+            ////button_New.Enabled = bNoGrab;
+            ////button_Load.Enabled = bNoGrab;
+            ////button_Save.Enabled = bNoGrab;
 
-            //button_Load_Config.Enabled = bAcqNoGrab;
-            //button_Buffer.Enabled = bNoGrab;
+            ////button_Load_Config.Enabled = bAcqNoGrab;
+            ////button_Buffer.Enabled = bNoGrab;
         }
 
         private void SystemEvents_SessionEnded(object sender, SessionEndedEventArgs e)
@@ -3122,10 +2523,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             DisposeObjects();
         }
 
-        private void button_Exit_Click(object sender, EventArgs e)
-        {
-            System.Windows.Forms.Application.Exit();
-        }
+        //private void button_Exit_Click(object sender, EventArgs e)
+        //{
+        //    System.Windows.Forms.Application.Exit();
+        //}
 
         //*****************************************************************************************
         //
@@ -3133,29 +2534,29 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         //
         //*****************************************************************************************
 
-        private void button_New_Click(object sender, EventArgs e)
-        {
-            m_Buffers.Clear();
-            m_ImageBox.Refresh();
-        }
+        //private void button_New_Click(object sender, EventArgs e)
+        //{
+        //    m_Buffers.Clear();
+        //    m_ImageBox.Refresh();
+        //}
 
-        private void button_Load_Click(object sender, EventArgs e)
-        {
-            LoadSaveDlg newDialogLoad = new LoadSaveDlg(m_Buffers, true, false);
-            // Show the dialog and process the result
-            newDialogLoad.ShowDialog();
-            newDialogLoad.Dispose();
-            m_ImageBox.Refresh();
-        }
+        //private void button_Load_Click(object sender, EventArgs e)
+        //{
+        //    LoadSaveDlg newDialogLoad = new LoadSaveDlg(m_Buffers, true, false);
+        //    // Show the dialog and process the result
+        //    newDialogLoad.ShowDialog();
+        //    newDialogLoad.Dispose();
+        //    m_ImageBox.Refresh();
+        //}
 
-        private void button_Save_Click(object sender, EventArgs e)
-        {
-            LoadSaveDlg newDialogSave = new LoadSaveDlg(m_Buffers, false, false);
-            // Show the dialog and process the result
-            newDialogSave.ShowDialog();
-            newDialogSave.Dispose();
-            m_ImageBox.Refresh();
-        }
+        //private void button_Save_Click(object sender, EventArgs e)
+        //{
+        //    LoadSaveDlg newDialogSave = new LoadSaveDlg(m_Buffers, false, false);
+        //    // Show the dialog and process the result
+        //    newDialogSave.ShowDialog();
+        //    newDialogSave.Dispose();
+        //    m_ImageBox.Refresh();
+        //}
 
         //*****************************************************************************************
         //
@@ -3302,10 +2703,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             }
 
-            int modeNew;
-            m_AcqDevice.GetFeatureValue("TriggerMode", out modeNew);
+            m_AcqDevice.GetFeatureValue("TriggerMode", out int modeOld);
 
-            if (modeNew == 0)
+            if (modeOld == 0)
             {
                 bool succes = m_AcqDevice.SetFeatureValue("TriggerMode", 1);
                 btnTriggerMode.Enabled = true;
@@ -3490,8 +2890,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             //Agujeros
             CheckHoles(nHoles);
-
-            
 
             try
             {
@@ -3855,8 +3253,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private ushort CalculateSize(double dMayor, double dMenor, double compacidad, double ovalidad, bool hole, int area)
         {
-            dMayor = dMayor * euFactor;
-            dMenor = dMenor * euFactor;
+            dMayor *= euFactor;
+            dMenor *= euFactor;
             ushort size = 1; // Normal
             double maxOvality = maxDiameter / minDiameter;
             double avg = (dMayor + dMenor) / 2;
@@ -3890,35 +3288,35 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return size;
         }
 
-        private Mat binarizeImage(Mat image, int value)
-        {
-            try
-            {
-                if (autoThreshold)
-                {
-                    threshold = CalculateOtsuThreshold();
-                    txtThreshold.Text = threshold.ToString();
-                }
-                else
-                {
-                    threshold = int.Parse(txtThreshold.Text);
-                }
-            }
-            catch (FormatException)
-            {
+        //private Mat binarizeImage(Mat image, int value)
+        //{
+        //    try
+        //    {
+        //        if (autoThreshold)
+        //        {
+        //            threshold = CalculateOtsuThreshold();
+        //            txtThreshold.Text = threshold.ToString();
+        //        }
+        //        else
+        //        {
+        //            threshold = int.Parse(txtThreshold.Text);
+        //        }
+        //    }
+        //    catch (FormatException)
+        //    {
 
-            }
+        //    }
 
-            // Aplicar umbralización (binarización)
-            Mat imagenBinarizada = new Mat();
-            CvInvoke.Threshold(image, imagenBinarizada, threshold, 255, ThresholdType.Binary);
-            //image.Dispose();
+        //    // Aplicar umbralización (binarización)
+        //    Mat imagenBinarizada = new Mat();
+        //    CvInvoke.Threshold(image, imagenBinarizada, threshold, 255, ThresholdType.Binary);
+        //    //image.Dispose();
 
-            // Guardar la imagen binarizada
-            imagenBinarizada.Save(imagesPath + "imagen_binarizada.jpg");
+        //    // Guardar la imagen binarizada
+        //    imagenBinarizada.Save(imagesPath + "imagen_binarizada.jpg");
 
-            return imagenBinarizada;
-        }
+        //    return imagenBinarizada;
+        //}
 
         private void InitializeDataTable()
         {
@@ -4050,8 +3448,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     //newX = newX - (int)((deltaX[i]*Math.Cos(angle))/2);
                     //newY = newY - (int)((deltaY[i]*Math.Sin(angle))/2);
 
-                    newX = newX - (int)(deltaX[i] / 2);
-                    newY = newY - (int)(deltaY[i] / 2);
+                    newX -= (int)(deltaX[i] / 2);
+                    newY -= (int)(deltaY[i] / 2);
 
                     radialLenght[i] = Math.Sqrt(Math.Pow((x - newX), 2) + Math.Pow((y - newY), 2));// - hipotenusa / 2; //+ correction[i];
 
@@ -4344,43 +3742,43 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             throw new NotImplementedException();
         }
 
-        void ImageHistogram(Bitmap originalImage)
-        {
-            int x, y;
-            int BytesPerLine;
-            int PixelValue;
+        //void ImageHistogram(Bitmap originalImage)
+        //{
+        //    int x, y;
+        //    int BytesPerLine;
+        //    int PixelValue;
 
-            // Obtener BitsPerPixel y PixelPerLine
-            int bitsPerPixel = System.Drawing.Image.GetPixelFormatSize(originalImage.PixelFormat);
-            int pixelPerLine = originalImage.Width;
+        //    // Obtener BitsPerPixel y PixelPerLine
+        //    int bitsPerPixel = System.Drawing.Image.GetPixelFormatSize(originalImage.PixelFormat);
+        //    int pixelPerLine = originalImage.Width;
 
-            // Initialize Histogram array
-            for (int i = 0; i < 256; i++)
-            {
-                Histogram[i] = 0;
-            }
+        //    // Initialize Histogram array
+        //    for (int i = 0; i < 256; i++)
+        //    {
+        //        Histogram[i] = 0;
+        //    }
 
-            // Calculate the count of bytes per line using the color format and the
-            // pixels per line of the image buffer.
-            BytesPerLine = bitsPerPixel / 8 * pixelPerLine - 1;
+        //    // Calculate the count of bytes per line using the color format and the
+        //    // pixels per line of the image buffer.
+        //    BytesPerLine = bitsPerPixel / 8 * pixelPerLine - 1;
 
-            // For y = 0 To ImgBuffer.Lines - 1
-            // For x = 0 To BytesPerLine
-            for (y = UserROI.Top; y <= UserROI.Bottom; y++)
-            {
-                for (x = UserROI.Left; x <= UserROI.Right; x++)
-                {
-                    // Assuming 8 bits per pixel (grayscale)
-                    Color pixelColor = originalImage.GetPixel(x, y);
+        //    // For y = 0 To ImgBuffer.Lines - 1
+        //    // For x = 0 To BytesPerLine
+        //    for (y = UserROI.Top; y <= UserROI.Bottom; y++)
+        //    {
+        //        for (x = UserROI.Left; x <= UserROI.Right; x++)
+        //        {
+        //            // Assuming 8 bits per pixel (grayscale)
+        //            Color pixelColor = originalImage.GetPixel(x, y);
 
-                    // Get the grayscale value directly
-                    PixelValue = pixelColor.R;
+        //            // Get the grayscale value directly
+        //            PixelValue = pixelColor.R;
 
-                    Histogram[PixelValue] = Histogram[PixelValue] + 1;
-                }
-            }
-            originalImage.Dispose();
-        }
+        //            Histogram[PixelValue] = Histogram[PixelValue] + 1;
+        //        }
+        //    }
+        //    originalImage.Dispose();
+        //}
 
         // Modificar el threshold manualmente
         private void Txt_Threshold_KeyPress(object sender, KeyPressEventArgs e)
@@ -4602,7 +4000,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // Coloreamos todos los pixeles de fondo
             Array array = jerarquia.GetData();
 
-            bool hole = false;
+            bool hole;
 
             for (int i = 0; i < contours.Size; i++)
             {
@@ -4636,10 +4034,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                             {
                                 CvInvoke.DrawContours(image, contours, indiceHijoActual, new MCvScalar(192, 192, 192), -1);
                             }
-                            //else
-                            //{
-                            //    continue;
-                            //}
 
                             // Obtener el índice del siguiente hijo del contorno padre actual
                             indiceHijoActual = Convert.ToInt32(array.GetValue(0, indiceHijoActual, 0));
@@ -4673,38 +4067,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return (filteredContours, centroids, areas, perimeters, holePresent);
         }
 
-
-        static Point CalculateCenter(List<Point> contour)
-        {
-            int sumX = 0;
-            int sumY = 0;
-
-            foreach (var point in contour)
-            {
-                sumX += point.X;
-                sumY += point.Y;
-            }
-
-            int centerX = sumX / contour.Count;
-            int centerY = sumY / contour.Count;
-
-            return new Point(centerX, centerY);
-        }
-
-        //Funcion para convertir a la imagen a un formato compatible para dibujar en ella
-        public static Bitmap ConvertToCompatibleFormat(Bitmap bitmap)
-        {
-            // Crear un nuevo Bitmap con el mismo tamaño y formato compatible
-            Bitmap compatibleBitmap = new Bitmap(bitmap.Width, bitmap.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-
-            // Copiar los píxeles de la imagen original al nuevo Bitmap
-            using (Graphics g = Graphics.FromImage(compatibleBitmap))
-            {
-                g.DrawImage(bitmap, 0, 0, bitmap.Width, bitmap.Height);
-            }
-
-            return compatibleBitmap;
-        }
 
         // CLick en el boton de calibración
         private void calibrateButtom_Click(object sender, EventArgs e)
@@ -4759,7 +4121,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             if (Txt_Code.Text != "" && Txt_MaxD.Text != "" && Txt_MinD.Text != "")
             {
-                string selected = CmbProducts.SelectedItem.ToString();
+                //string selected = CmbProducts.SelectedItem.ToString();
                 int selectedItem = int.Parse(CmbProducts.SelectedItem.ToString());
 
                 UpdateProcess(selectedItem);
@@ -4828,7 +4190,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 csvWriter.WriteRecords(Products);
             }
 
-            MessageBox.Show("Product suceesfully updated", "Updated", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("Product Successfully Updated", "Updated", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void Cmd_Save_Click(object sender, EventArgs e)
@@ -4881,7 +4243,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             UpdateGridType(grid, CmbGrid.SelectedItem.ToString());
 
-            MessageBox.Show("Set Point Changed Succesfuly");
+            MessageBox.Show("Set Point Updated Successfully");
 
         }
 
@@ -4893,28 +4255,38 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             }
             else
             {
-                string selected = CmbProducts.SelectedItem.ToString();
-                int selectedItem = int.Parse(CmbProducts.SelectedItem.ToString());
+                var result = MessageBox.Show("Are you sure you want to remove this product?", "WARNING",MessageBoxButtons.OKCancel);
 
-                var newRecords = new List<Product>();
-
-                Products = Products.Select(p => p).Where(p => p.Code != selectedItem).ToList();
-
-                using (var writer = new StreamWriter(new FileStream(csvPath, FileMode.Create), System.Text.Encoding.UTF8))
-                using (var csvWriter = new CsvWriter(writer, CultureInfo.CurrentCulture))
+                if (result == DialogResult.OK)
                 {
-                    csvWriter.WriteRecords(Products);
-                }
+                    string selected = CmbProducts.SelectedItem.ToString();
+                    int selectedItem = int.Parse(CmbProducts.SelectedItem.ToString());
 
-                CmbProducts.Items.Clear();
-                foreach (var p in Products)
+                    var newRecords = new List<Product>();
+
+                    Products = Products.Select(p => p).Where(p => p.Code != selectedItem).ToList();
+
+                    using (var writer = new StreamWriter(new FileStream(csvPath, FileMode.Create), System.Text.Encoding.UTF8))
+                    using (var csvWriter = new CsvWriter(writer, CultureInfo.CurrentCulture))
+                    {
+                        csvWriter.WriteRecords(Products);
+                    }
+
+                    CmbProducts.Items.Clear();
+                    foreach (var p in Products)
+                    {
+                        CmbProducts.Items.Add(p.Code);
+                    }
+
+                    MessageBox.Show("Product deleted successfully", "Deleted", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    CmbProducts.SelectedIndex = 0;
+                }
+                else
                 {
-                    CmbProducts.Items.Add(p.Code);
+                    MessageBox.Show("Operation Cancelled");
                 }
-
-                MessageBox.Show("Product deleted succesfully", "Deleted", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                CmbProducts.SelectedIndex = 0;
+                
             }
         }
 
@@ -5138,16 +4510,16 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             if (File.Exists(imagesPath + "updatedROI.bmp"))
             {
                 int roiWidth = (UserROI.Right - UserROI.Left) + 6;
-                if (roiWidth > 630) roiWidth = (630);
+                if (roiWidth > imageWidth-10) roiWidth = (imageWidth - 10);
                 if (roiWidth % 2 == 0)
                 {
-                    UserROI.Left = 320 - roiWidth / 2;
-                    UserROI.Right = 320 + roiWidth / 2;
+                    UserROI.Left = (imageWidth/2) - roiWidth / 2;
+                    UserROI.Right = (imageWidth / 2) + roiWidth / 2;
                 }
                 else
                 {
-                    UserROI.Left = 320 - (int)(roiWidth / 2) + 1;
-                    UserROI.Right = 320 + (int)(roiWidth / 2);
+                    UserROI.Left = (imageWidth / 2) - (int)(roiWidth / 2) + 1;
+                    UserROI.Right = (imageWidth / 2) + (int)(roiWidth / 2);
                 }
 
                 if (!triggerPLC && mode == 0)
@@ -5155,7 +4527,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     settings.ROI_Left = UserROI.Left;
                     settings.ROI_Right = UserROI.Right;
                     txtRoiWidth.Text = roiWidth.ToString();
-                    updateROI();
+                    UpdateROI();
                 }
                 else
                 {
@@ -5179,13 +4551,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 if (roiWidth < 12) roiWidth = (12);
                 if (roiWidth % 2 == 0)
                 {
-                    UserROI.Left = 320 - roiWidth / 2;
-                    UserROI.Right = 320 + roiWidth / 2;
+                    UserROI.Left = (imageWidth / 2) - roiWidth / 2;
+                    UserROI.Right = (imageWidth / 2) + roiWidth / 2;
                 }
                 else
                 {
-                    UserROI.Left = 320 - (int)(roiWidth / 2) + 1;
-                    UserROI.Right = 320 + (int)(roiWidth / 2);
+                    UserROI.Left = (imageWidth / 2) - (int)(roiWidth / 2) + 1;
+                    UserROI.Right = (imageWidth / 2) + (int)(roiWidth / 2);
                 }
 
                 if (!triggerPLC && mode == 0)
@@ -5193,7 +4565,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     settings.ROI_Left = UserROI.Left;
                     settings.ROI_Right = UserROI.Right;
                     txtRoiWidth.Text = roiWidth.ToString();
-                    updateROI();
+                    UpdateROI();
                 }
                 else
                 {
@@ -5214,16 +4586,16 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             if (File.Exists(imagesPath + "updatedROI.bmp"))
             {
                 int roiHeight = (UserROI.Bottom - UserROI.Top) + 6;
-                if (roiHeight > 470) roiHeight = (470);
+                if (roiHeight > imageHeight - 10) roiHeight = (imageHeight - 10);
                 if (roiHeight % 2 == 0)
                 {
-                    UserROI.Top = 240 - roiHeight / 2;
-                    UserROI.Bottom = 240 + roiHeight / 2;
+                    UserROI.Top = (imageHeight/2) - roiHeight / 2;
+                    UserROI.Bottom = (imageHeight / 2) + roiHeight / 2;
                 }
                 else
                 {
-                    UserROI.Top = 240 - (int)(roiHeight / 2) + 1;
-                    UserROI.Bottom = 240 + (int)(roiHeight / 2);
+                    UserROI.Top = (imageHeight / 2) - (int)(roiHeight / 2) + 1;
+                    UserROI.Bottom = (imageHeight / 2) + (int)(roiHeight / 2);
                 }
 
                 if (!triggerPLC && mode == 0)
@@ -5231,7 +4603,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     settings.ROI_Top = UserROI.Top;
                     settings.ROI_Bottom = UserROI.Bottom;
                     txtRoiHeight.Text = roiHeight.ToString();
-                    updateROI();
+                    UpdateROI();
                 }
                 else
                 {
@@ -5255,13 +4627,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 if (roiHeight < 12) roiHeight = (12);
                 if (roiHeight % 2 == 0)
                 {
-                    UserROI.Top = 240 - roiHeight / 2;
-                    UserROI.Bottom = 240 + roiHeight / 2;
+                    UserROI.Top = (imageHeight / 2) - roiHeight / 2;
+                    UserROI.Bottom = (imageHeight / 2) + roiHeight / 2;
                 }
                 else
                 {
-                    UserROI.Top = 240 - (int)(roiHeight / 2) + 1;
-                    UserROI.Bottom = 240 + (int)(roiHeight / 2);
+                    UserROI.Top = (imageHeight / 2) - (int)(roiHeight / 2) + 1;
+                    UserROI.Bottom = (imageHeight / 2) + (int)(roiHeight / 2);
                 }
 
                 if (!triggerPLC && mode == 0)
@@ -5269,7 +4641,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     settings.ROI_Top = UserROI.Top;
                     settings.ROI_Bottom = UserROI.Bottom;
                     txtRoiHeight.Text = roiHeight.ToString();
-                    updateROI();
+                    UpdateROI();
                 }
                 else
                 {
@@ -5291,8 +4663,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 if (File.Exists(imagesPath + "updatedROI.jpg"))
                 {
-                    int roiWidth;
-                    if (int.TryParse(txtRoiWidth.Text, out roiWidth))
+                    if (int.TryParse(txtRoiWidth.Text, out int roiWidth))
                     {
                         if (roiWidth > 630) roiWidth = (630);
                         if (roiWidth < 12) roiWidth = (12);
@@ -5312,7 +4683,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                             settings.ROI_Left = UserROI.Left;
                             settings.ROI_Right = UserROI.Right;
                             txtRoiWidth.Text = roiWidth.ToString();
-                            updateROI();
+                            UpdateROI();
                         }
                         else
                         {
@@ -5343,8 +4714,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 if (File.Exists(imagesPath + "updatedROI.jpg"))
                 {
-                    int roiHeight;
-                    if (int.TryParse(txtRoiHeight.Text, out roiHeight))
+                    if (int.TryParse(txtRoiHeight.Text, out int roiHeight))
                     {
                         if (roiHeight > 470) roiHeight = (470);
                         if (roiHeight < 12) roiHeight = (12);
@@ -5364,7 +4734,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                             settings.ROI_Top = UserROI.Top;
                             settings.ROI_Bottom = UserROI.Bottom;
                             txtRoiHeight.Text = roiHeight.ToString();
-                            updateROI();
+                            UpdateROI();
                         }
                         else
                         {
@@ -5424,8 +4794,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             if (e.KeyChar == (char)Keys.Enter)
             {
-                float value;
-                if (float.TryParse(txtAlpha.Text, out value))
+                if (float.TryParse(txtAlpha.Text, out float value))
                 {
                     if (value >= 0 && value <= 1)
                     {
@@ -5451,8 +4820,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             if (e.KeyChar == (char)Keys.Enter)
             {
-                int value;
-                if (int.TryParse(txtMinBlobObjects.Text, out value))
+                if (int.TryParse(txtMinBlobObjects.Text, out int value))
                 {
                     if (value >= 0 && value <= 20)
                     {
@@ -5476,12 +4844,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void btnCalibrateByHeight_Click(object sender, EventArgs e)
         {
-            //if (!triggerPLC && mode == 0)
-            //{
-            //    using (var chooseCamera = new ChooseCameraDlg())
-            //    {
-            //        if (chooseCamera.ShowDialog() == DialogResult.OK)
-            //        {
             
             using (var inputForm = new InputDlg2(units,euFactor,lastCalibrationHeight,correctionFactor,lastCalibrationUnits,1))
             {
@@ -5530,21 +4892,13 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     MessageBox.Show("Operation Cancelled", "Cancel", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
-            //        }
-            //    }
-            //}
-            //else
-            //{
-            //    MessageBox.Show("Change the operation mode", "Invalid Operation", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-            //    calibrating = false;
-            //}
         }
 
         private void tmrMB_Tick(object sender, EventArgs e)
         {
             if (operationMode == 2)
             {
-                requestModbusData();
+                RequestModbusData();
             }
 
             VerifyCameraConnection();
@@ -5690,7 +5044,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 txtThreshold.Text = threshold.ToString();
             }
 
-            // Valid Frames Limir
+            // Valid Frames Limit
             if (int.TryParse(txtValidFramesLimit.Text, out validFramesLimit))
             {
             }
@@ -5699,11 +5053,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 txtValidFramesLimit.Text = validFramesLimit.ToString();
             }
-            //// ROI Width
-            //if()
-            //GetROI("W");
-            //// ROIR Height
-            //GetROI("H");
+
         }
 
         private void GetROI(string v)
@@ -5712,20 +5062,19 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 if (File.Exists(imagesPath + "updatedROI.jpg"))
                 {
-                    int roiWidth;
-                    if (int.TryParse(txtRoiWidth.Text, out roiWidth))
+                    if (int.TryParse(txtRoiWidth.Text, out int roiWidth))
                     {
-                        if (roiWidth > 630) roiWidth = (630);
+                        if (roiWidth > imageWidth-10) roiWidth = (imageWidth - 10);
                         if (roiWidth < 12) roiWidth = (12);
                         if (roiWidth % 2 == 0)
                         {
-                            UserROI.Left = 320 - roiWidth / 2;
-                            UserROI.Right = 320 + roiWidth / 2;
+                            UserROI.Left = (imageWidth/2) - roiWidth / 2;
+                            UserROI.Right = (imageWidth / 2) + roiWidth / 2;
                         }
                         else
                         {
-                            UserROI.Left = 320 - (int)(roiWidth / 2) + 1;
-                            UserROI.Right = 320 + (int)(roiWidth / 2);
+                            UserROI.Left = (imageWidth / 2) - (int)(roiWidth / 2) + 1;
+                            UserROI.Right = (imageWidth / 2) + (int)(roiWidth / 2);
                         }
 
                         if (!triggerPLC && mode == 0)
@@ -5733,7 +5082,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                             settings.ROI_Left = UserROI.Left;
                             settings.ROI_Right = UserROI.Right;
                             txtRoiWidth.Text = roiWidth.ToString();
-                            updateROI();
+                            UpdateROI();
                         }
                         else
                         {
@@ -5760,20 +5109,19 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             {
                 if (File.Exists(imagesPath + "updatedROI.jpg"))
                 {
-                    int roiHeight;
-                    if (int.TryParse(txtRoiHeight.Text, out roiHeight))
+                    if (int.TryParse(txtRoiHeight.Text, out int roiHeight))
                     {
-                        if (roiHeight > 470) roiHeight = (470);
+                        if (roiHeight > imageHeight-10) roiHeight = (imageHeight - 10);
                         if (roiHeight < 12) roiHeight = (12);
                         if (roiHeight % 2 == 0)
                         {
-                            UserROI.Top = 240 - roiHeight / 2;
-                            UserROI.Bottom = 240 + roiHeight / 2;
+                            UserROI.Top = (imageHeight/2) - roiHeight / 2;
+                            UserROI.Bottom = (imageHeight / 2) + roiHeight / 2;
                         }
                         else
                         {
-                            UserROI.Top = 240 - (int)(roiHeight / 2) + 1;
-                            UserROI.Bottom = 240 + (int)(roiHeight / 2);
+                            UserROI.Top = (imageHeight / 2) - (int)(roiHeight / 2) + 1;
+                            UserROI.Bottom = (imageHeight / 2) + (int)(roiHeight / 2);
                         }
 
                         if (!triggerPLC && mode == 0)
@@ -5781,7 +5129,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                             settings.ROI_Top = UserROI.Top;
                             settings.ROI_Bottom = UserROI.Bottom;
                             txtRoiHeight.Text = roiHeight.ToString();
-                            updateROI();
+                            UpdateROI();
                         }
                         else
                         {
@@ -6131,11 +5479,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             ShowInputKeyboard((TextBox)sender, 0);
         }
 
-        private void txtAlpha_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
         private void txtAlpha_Click(object sender, EventArgs e)
         {
             ShowInputKeyboard((TextBox)sender, 0);
@@ -6228,10 +5571,12 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             var activeSeries = trendChart.Series.Where(series => series.Enabled).Select(series => series).ToList();
             if (activeSeries != null)
             {
-                SaveFileDialog saveFileDialog = new SaveFileDialog();
-                saveFileDialog.Filter = "CSV files (*.csv)|*.csv";
-                saveFileDialog.Title = "Save series data to CSV";
-                saveFileDialog.FileName = $"Camera{camera}Data.csv";
+                SaveFileDialog saveFileDialog = new SaveFileDialog
+                {
+                    Filter = "CSV files (*.csv)|*.csv",
+                    Title = "Save series data to CSV",
+                    FileName = $"Camera{camera}Data.csv"
+                };
 
                 if (saveFileDialog.ShowDialog() == DialogResult.OK)
                 {

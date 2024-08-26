@@ -832,7 +832,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             // controlsTabs
             // 
-            this.controlsTabs.Appearance = System.Windows.Forms.TabAppearance.FlatButtons;
+            this.controlsTabs.Appearance = System.Windows.Forms.TabAppearance.Buttons;
             this.controlsTabs.Controls.Add(this.mainControlPage);
             this.controlsTabs.Controls.Add(this.configurationPage);
             this.controlsTabs.Controls.Add(this.advancedPage);
@@ -1240,7 +1240,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             this.gbParameters.Controls.Add(this.btnLinesFilter);
             this.gbParameters.Controls.Add(this.btn90DegDiameters);
-            this.gbParameters.Location = new System.Drawing.Point(6, 693);
+            this.gbParameters.Location = new System.Drawing.Point(6, 617);
             this.gbParameters.Name = "gbParameters";
             this.gbParameters.Size = new System.Drawing.Size(338, 91);
             this.gbParameters.TabIndex = 133;
@@ -1956,7 +1956,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // 
             // mainTabs
             // 
-            this.mainTabs.Appearance = System.Windows.Forms.TabAppearance.FlatButtons;
+            this.mainTabs.Appearance = System.Windows.Forms.TabAppearance.Buttons;
             this.mainTabs.Controls.Add(this.imagePage);
             this.mainTabs.Controls.Add(this.trendPage);
             this.mainTabs.Controls.Add(this.productsPage);
@@ -2257,7 +2257,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.cmbProductUnits.Items.AddRange(new object[] {
             "mm",
             "inch"});
-            this.cmbProductUnits.Location = new System.Drawing.Point(140, 215);
+            this.cmbProductUnits.Location = new System.Drawing.Point(160, 218);
             this.cmbProductUnits.Name = "cmbProductUnits";
             this.cmbProductUnits.Size = new System.Drawing.Size(121, 36);
             this.cmbProductUnits.TabIndex = 128;
@@ -2338,7 +2338,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             "3x3",
             "4x4",
             "2x1x5"});
-            this.CmbGrid.Location = new System.Drawing.Point(140, 179);
+            this.CmbGrid.Location = new System.Drawing.Point(160, 179);
             this.CmbGrid.Name = "CmbGrid";
             this.CmbGrid.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.CmbGrid.Size = new System.Drawing.Size(121, 36);
@@ -2545,7 +2545,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private SapAcqDevice m_AcqDevice;
         private SapBuffer m_Buffers;
-        private SapGraphic m_Graphic;
+        //private SapGraphic m_Graphic;
         private SapAcqDeviceToBuf m_Xfer;
         private SapView m_View;
         private SapLocation m_ServerLocation;
