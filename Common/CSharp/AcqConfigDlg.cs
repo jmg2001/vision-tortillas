@@ -117,6 +117,7 @@ namespace DALSA.SaperaLT.SapClassGui
 
             if (valid)
             {
+                // this.DialogResult = DialogResult.OK;
                 if (autoClick) button_ok.PerformClick();
             }
             else

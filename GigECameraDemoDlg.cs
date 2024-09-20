@@ -4930,7 +4930,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         private void VerifyCameraConnection()
         {
-            Console.WriteLine(m_AcqDevice.FeatureNames[47]);
+            // Console.WriteLine(m_AcqDevice.FeatureNames[47]);
             
         }
 
