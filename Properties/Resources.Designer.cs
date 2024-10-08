@@ -13,8 +13,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Properties {
     
     
     /// <summary>
-    /// Clase de recurso fuertemente tipado, para buscar cadenas traducidas,
-    /// etc.
+    ///   Clase de recurso fuertemente tipado, para buscar cadenas traducidas, etc.
     /// </summary>
     // StronglyTypedResourceBuilder generó automáticamente esta clase
     // a través de una herramienta como ResGen o Visual Studio.
@@ -34,8 +33,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Properties {
         }
         
         /// <summary>
-        /// Devuelve la instancia de ResourceManager almacenada en caché
-        /// utilizada por esta clase.
+        ///   Devuelve la instancia de ResourceManager almacenada en caché utilizada por esta clase.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
         internal static global::System.Resources.ResourceManager ResourceManager {
@@ -49,9 +47,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Properties {
         }
         
         /// <summary>
-        /// Reemplaza la propiedad CurrentUICulture del subproceso actual para
-        /// todas las búsquedas de recursos mediante esta clase de recurso
-        /// fuertemente tipado.
+        ///   Reemplaza la propiedad CurrentUICulture del subproceso actual para todas las
+        ///   búsquedas de recursos mediante esta clase de recurso fuertemente tipado.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
         internal static global::System.Globalization.CultureInfo Culture {
@@ -64,7 +61,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Properties {
         }
         
         /// <summary>
-        /// Busca un recurso adaptado de tipo System.Drawing.Bitmap.
+        ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap SIOS_LOGOTIPO_AZUL {
             get {
@@ -74,7 +71,17 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Properties {
         }
         
         /// <summary>
-        /// Busca un recurso adaptado de tipo System.Drawing.Bitmap.
+        ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap SIOS_LOGOTIPO_AZUL_INGENIERIA {
+            get {
+                object obj = ResourceManager.GetObject("SIOS-LOGOTIPO-AZUL INGENIERIA", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap SIOS_LOGOTIPO_AZUL_SIMPLE {
             get {

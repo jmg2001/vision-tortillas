@@ -56,7 +56,6 @@ C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\DALSA.SaperaLT.SapClassGui.
 C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.GigECameraDemoDlg.resources
 C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\GigECameraDemo_2019.csproj.GenerateResource.cache
 C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\GigECameraDemo_2019.csproj.CoreCompileInputs.cache
-C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\GigECameraDemo_2019.csproj.CopyComplete
 C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp.InputDlg.resources
 C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Properties.Resources.resources
 C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp.KeyBoard.resources
@@ -77,3 +76,4 @@ C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\STI-LEFT.exe.manifest
 C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\STI-LEFT.application
 C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\STI-LEFT.exe
 C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\STI-LEFT.pdb
+C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\GigECame.4EAC1E0E.Up2Date

@@ -11,6 +11,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         public int ROI_Bottom { get; set; }
         public int ROI_Left { get; set; }
         public int ROI_Right { get; set; }
+        public int OperationMode { get; set; }
         public string Units { get; set; }
         public double EUFactor { get; set; }
         public double CorrectionFactor { get; set; }
@@ -29,9 +30,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         public float alpha { get; set; }
         public int minBlobObjects { get; set; }
         public int validFramesLimit { get; set; }
-
+        public string BackgroundColor { get; set; }
         public int FH { get; set; }
         public int FFH { get; set; }
+
+        public int ThresholdOffset { get; set; }
         public float align { get; set; }
 
         public string side { get; set; }
@@ -39,6 +42,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         public Settings()
         {
+            this.OperationMode = 2;
             this.ROI_Left = 120;
             this.ROI_Right = 520;
             this.ROI_Top = 40;
@@ -64,6 +68,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.FFH = 10;
             this.align = 20;
             this.validFramesLimit = 7;
+            this.BackgroundColor = "BLACK";
+            this.ThresholdOffset = 0;
         }
 
         public static Settings Load(string side)

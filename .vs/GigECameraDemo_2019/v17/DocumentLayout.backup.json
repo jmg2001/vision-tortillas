@@ -1,0 +1,130 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Jes\u00FAs\\Documents\\vision-tortillas\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{9F4983BD-0FBD-4492-90BC-6E9F4D1E7FAB}|GigECameraDemo_2019.csproj|c:\\users\\jes\u00FAs\\documents\\vision-tortillas\\gigecamerademodlg.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9F4983BD-0FBD-4492-90BC-6E9F4D1E7FAB}|GigECameraDemo_2019.csproj|solutionrelative:gigecamerademodlg.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9F4983BD-0FBD-4492-90BC-6E9F4D1E7FAB}|GigECameraDemo_2019.csproj|C:\\Users\\Jes\u00FAs\\Documents\\vision-tortillas\\gigecamerademodlg.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{9F4983BD-0FBD-4492-90BC-6E9F4D1E7FAB}|GigECameraDemo_2019.csproj|solutionrelative:gigecamerademodlg.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9F4983BD-0FBD-4492-90BC-6E9F4D1E7FAB}|GigECameraDemo_2019.csproj|C:\\Users\\Jes\u00FAs\\Documents\\vision-tortillas\\settings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9F4983BD-0FBD-4492-90BC-6E9F4D1E7FAB}|GigECameraDemo_2019.csproj|solutionrelative:settings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{00000000-0000-0000-0000-000000000000}|\u003CSolution\u003E|GigECameraDemo_2019||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 492,
+          "SelectedChildIndex": 8,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:129:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:130:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:131:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:132:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:133:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "GigECameraDemoDlg.cs",
+              "DocumentMoniker": "C:\\Users\\Jes\u00FAs\\Documents\\vision-tortillas\\GigECameraDemoDlg.cs",
+              "RelativeDocumentMoniker": "GigECameraDemoDlg.cs",
+              "ToolTip": "C:\\Users\\Jes\u00FAs\\Documents\\vision-tortillas\\GigECameraDemoDlg.cs",
+              "RelativeToolTip": "GigECameraDemoDlg.cs",
+              "ViewState": "AgIAAI8WAAAAAAAAAAASwKAWAABBAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-06T17:29:51.463Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Settings.cs",
+              "DocumentMoniker": "C:\\Users\\Jes\u00FAs\\Documents\\vision-tortillas\\Settings.cs",
+              "RelativeDocumentMoniker": "Settings.cs",
+              "ToolTip": "C:\\Users\\Jes\u00FAs\\Documents\\vision-tortillas\\Settings.cs",
+              "RelativeToolTip": "Settings.cs",
+              "ViewState": "AgIAADsAAAAAAAAAAAAuwEcAAAAlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-25T17:03:50.261Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "GigECameraDemoDlg.cs [Dise\u00F1o]",
+              "DocumentMoniker": "C:\\Users\\Jes\u00FAs\\Documents\\vision-tortillas\\GigECameraDemoDlg.cs",
+              "RelativeDocumentMoniker": "GigECameraDemoDlg.cs",
+              "ToolTip": "C:\\Users\\Jes\u00FAs\\Documents\\vision-tortillas\\GigECameraDemoDlg.cs [Dise\u00F1o]",
+              "RelativeToolTip": "GigECameraDemoDlg.cs [Dise\u00F1o]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-25T16:59:51.017Z",
+              "EditorCaption": " [Dise\u00F1o]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "GigECameraDemo_2019",
+              "DocumentMoniker": "C:\\Users\\Jes\u00FAs\\Documents\\vision-tortillas\\GigECameraDemo_2019.csproj",
+              "RelativeDocumentMoniker": "GigECameraDemo_2019.csproj",
+              "ToolTip": "C:\\Users\\Jes\u00FAs\\Documents\\vision-tortillas\\GigECameraDemo_2019.csproj",
+              "RelativeToolTip": "GigECameraDemo_2019.csproj",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2024-08-14T16:33:14.378Z"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 148,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{eefa5220-e298-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

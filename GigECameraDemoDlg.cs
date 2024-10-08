@@ -36,6 +36,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 {
     public partial class GigECameraDemoDlg : Form
     {
+        string backgroundColor;
+
         List<string> camera1Series = new List<string>();
 
         double lastCalibrationHeight;
@@ -87,10 +89,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
         // Color de la tortilla en la imagen binarizada
         int tortillaColor = 1; // 1 - Blanco, 0 - Negro
-        int backgroundColor = 0;
 
         // Variables para el Threshold
         int threshold = 128;
+        int thresholdOffset = 0;
         bool autoThreshold = true;
 
         int nUnitsMm = 1;
@@ -505,12 +507,19 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             if (linesFilter) btnLinesFilter.BackColor = Color.LightGreen;
             else btnLinesFilter.BackColor = Color.Silver;
 
-            btnSetPointPLC.BackColor = Color.LightGreen;
-            operationMode = 2;
-            productsPage.Enabled = false;
-            GroupActualTargetSize.Enabled = false;
-            GroupSelectGrid.Enabled = false;
-            EnabledDisabledProductModification(false);
+            switch (backgroundColor)
+            {
+                case "BLUE":
+                    btnBlueBackground.BackColor = Color.LightGreen;
+                    break;
+                case "BROWN":
+                    btnBrownBackground.BackColor = Color.LightGreen;
+                    break;
+                case "BLACK":
+                    btnBlackBackground.BackColor = Color.LightGreen;
+                    break;
+            }
+            
 
             // Suscribir al evento SelectedIndexChanged del TabControl
             mainTabs.SelectedIndexChanged += TabControl2_SelectedIndexChanged;
@@ -573,6 +582,33 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             // Suscribirse al evento SelectedIndexChanged del ComboBox
             CmbProducts.SelectedIndexChanged += CmbProducts_SelectedIndexChanged;
+
+            switch (operationMode)
+            {
+                case 0:
+                    btnSetPointManual.BackColor = Color.LightGreen;
+                    productsPage.Enabled = false;
+                    GroupActualTargetSize.Enabled = true;
+                    GroupSelectGrid.Enabled = true;
+                    EnabledDisabledProductModification(false);
+                    break;
+                case 1:
+                    btnSetPointLocal.BackColor = Color.LightGreen;
+                    productsPage.Enabled = true;
+                    GroupActualTargetSize.Enabled = false;
+                    GroupSelectGrid.Enabled = false;
+                    EnabledDisabledProductModification(true);
+                    CmbProducts.SelectedIndex = 0;
+                    ChangeProductSetPoint(false);
+                    break;
+                case 2:
+                    btnSetPointPLC.BackColor = Color.LightGreen;
+                    productsPage.Enabled = false;
+                    GroupActualTargetSize.Enabled = false;
+                    GroupSelectGrid.Enabled = false;
+                    EnabledDisabledProductModification(false);
+                    break;
+            }
 
             InitModbus();
 
@@ -700,11 +736,20 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             // Valid Frames Limit
             txtValidFramesLimit.Text = validFramesLimit.ToString();
+
+            // Threshold Offset
+            txtThresholdOffset.Text = thresholdOffset.ToString();
         }
 
         private void LoadSettings()
         {
             settings = Settings.Load(CAMERA_SIDE);
+
+            // BackGround Color
+            backgroundColor = settings.BackgroundColor;
+
+            // Operation Mode
+            operationMode = settings.OperationMode;
 
             // Units
             units = settings.Units;
@@ -739,6 +784,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             //Valid Frames Limit
             validFramesLimit = settings.validFramesLimit;
+
+            //Threshold Offset
+            thresholdOffset = settings.ThresholdOffset;
         }
 
         private void InitUsers()
@@ -1512,6 +1560,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                     threshold = (int)CvInvoke.Threshold(grayImage, binarizedImage, 0, 255, ThresholdType.Otsu);
 
                     txtThreshold.Text = threshold.ToString();
+
+                    threshold += thresholdOffset;
+
                     CvInvoke.Threshold(roiImage, binarizedImage, threshold, 255, ThresholdType.Binary);
 
 
@@ -1519,9 +1570,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 else
                 {
                     threshold = int.Parse(txtThreshold.Text);
+
+                    // threshold += thresholdOffset;
+
                     CvInvoke.Threshold(roiImage, binarizedImage, threshold, 255, ThresholdType.Binary);
         
                 }
+
+                Console.WriteLine(threshold);
 
                 originalImageCV.Dispose();
 
@@ -2807,6 +2863,11 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                             }
                         }
 
+                        if (!drawFlag)
+                        {
+                            continue;
+                        }
+
 
                         bool hole = holePresent[i];
 
@@ -2886,6 +2947,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
                 // Agregamos los datos a la tabla
                 SetDataTable();
+
+                ChangeBackgroundColor(image);
             }
 
             //Agujeros
@@ -2991,6 +3054,36 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             
 
+        }
+
+        private void ChangeBackgroundColor(Mat image)
+        {
+            // Definir el color negro y el color nuevo
+            ScalarArray colorNegro = new ScalarArray(new MCvScalar(0, 0, 0)); // Negro (en formato BGR)
+            ScalarArray colorNuevo = new ScalarArray(new MCvScalar(0, 0, 0)); // CAFE
+            switch (backgroundColor)
+            {
+                case "BLUE":
+                    colorNuevo = new ScalarArray(new MCvScalar(112, 33, 12));
+                    break;
+                case "BROWN":
+                    colorNuevo = new ScalarArray(new MCvScalar(10, 86, 130));
+                    break;
+                case "BLACK":
+                    break;
+            }
+            
+
+            // Crear una máscara donde el color sea negro (exactamente 0,0,0)
+            Mat mascara = new Mat();
+            CvInvoke.InRange(image, colorNegro, colorNegro, mascara);
+
+            //// Crear una matriz para la imagen resultante
+            //Mat resultado = new Mat();
+            //image.CopyTo(resultado); // Copiar la imagen original
+
+            // Reemplazar los píxeles negros en la imagen de salida
+            image.SetTo(colorNuevo, mascara);
         }
 
         private void CheckCV(double cv)
@@ -3130,6 +3223,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             MCvScalar brush = new MCvScalar(0, 0, 255);
 
+
             // Crear el texto a mostrar
             string texto = "Hole";
 
@@ -3233,9 +3327,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             return (contours);
         }
 
-        private void DrawCenter(Point centro, int thickness, Mat image)
+        private void DrawCenter(Point centro, int radius, Mat image)
         {
-            CvInvoke.Circle(image, centro, thickness, new MCvScalar(255, 255, 0));
+            CvInvoke.Circle(image, centro, radius, new MCvScalar(255, 255, 0),-1);
         }
 
         // Función para dibujar un punto con un grosor dado
@@ -4022,13 +4116,27 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                             double holeArea = CvInvoke.ContourArea(contornoHijo);
                             if (holeArea > 10)
                             {
+                                MCvScalar brush = new MCvScalar(76,76,76);
+                                switch (backgroundColor)
+                                {
+                                    case "BLUE":
+                                        brush = new MCvScalar(112, 33, 12);
+                                        break;
+                                    case "BROWN":
+                                        brush = new MCvScalar(10, 86, 130);
+                                        break;
+                                    case "BLACK":
+                                        break;
+                                }
+
                                 hole = true;
-                                CvInvoke.DrawContours(image, contours, indiceHijoActual, new MCvScalar(10, 118, 209), -1);
+                                // Area del agujero
+                                CvInvoke.DrawContours(image, contours, indiceHijoActual, brush, -1);
+                                // Perímetro del agujero
+                                CvInvoke.DrawContours(image, contours, indiceHijoActual, new MCvScalar(255, 255, 0), 1);
 
                                 area -= CvInvoke.ContourArea(contornoHijo);
                                 perimeter += CvInvoke.ArcLength(contornoHijo, true);
-
-
                             }
                             else
                             {
@@ -4198,7 +4306,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             ChangeProductSetPoint();
         }
 
-        private void ChangeProductSetPoint()
+        private void ChangeProductSetPoint(bool dlg = true)
         {
             txtProductSetted.Text = Txt_Code.Text;
             txtMaxDiameter.Text = Txt_MaxD.Text;
@@ -4243,7 +4351,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 
             UpdateGridType(grid, CmbGrid.SelectedItem.ToString());
 
-            MessageBox.Show("Set Point Updated Successfully");
+            if (dlg) MessageBox.Show("Set Point Updated Successfully");
 
         }
 
@@ -4443,6 +4551,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             btnSetPointLocal.BackColor = Color.Silver;
 
             operationMode = 2;
+            settings.OperationMode = operationMode;
             productsPage.Enabled = false;
             GroupActualTargetSize.Enabled = false;
             GroupSelectGrid.Enabled = false;
@@ -4461,6 +4570,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             btnSetPointLocal.BackColor = Color.Silver;
 
             operationMode = 0;
+            settings.OperationMode = operationMode;
             productsPage.Enabled = false;
             GroupActualTargetSize.Enabled = true;
             GroupSelectGrid.Enabled = true;
@@ -4478,6 +4588,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             btnSetPointLocal.BackColor = Color.LightGreen;
 
             operationMode = 1;
+            settings.OperationMode = operationMode;
             productsPage.Enabled = true;
             GroupActualTargetSize.Enabled = false;
             GroupSelectGrid.Enabled = false;
@@ -4781,13 +4892,21 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             btnManualThreshold.BackColor = Color.LightGreen;
             btnAutoThreshold.BackColor = Color.Silver;
             autoThreshold = false;
+
+            txtThresholdOffset.Enabled = false;
+            btnThresholdOffsetIncrement.Enabled = false;
+            btnThresholdOffsetDecrement.Enabled = false;
         }
 
         private void btnAutoThreshold_Click(object sender, EventArgs e)
         {
             btnManualThreshold.BackColor = Color.Silver;
             btnAutoThreshold.BackColor = Color.LightGreen;
-            autoThreshold = true; ;
+            autoThreshold = true;
+
+            txtThresholdOffset.Enabled = true;
+            btnThresholdOffsetIncrement.Enabled = true;
+            btnThresholdOffsetDecrement.Enabled = true;
         }
 
         private void txtAlpha_KeyPress(object sender, KeyPressEventArgs e)
@@ -5047,12 +5166,25 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             // Valid Frames Limit
             if (int.TryParse(txtValidFramesLimit.Text, out validFramesLimit))
             {
+                settings.validFramesLimit = validFramesLimit;
             }
             else
             {
                 MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 txtValidFramesLimit.Text = validFramesLimit.ToString();
             }
+
+
+            // Threshold Offset
+            //if (int.TryParse(txtThresholdOffset.Text, out thresholdOffset))
+            //{
+            //    settings.ThresholdOffset = thresholdOffset;
+            //}
+            //else
+            //{
+            //    MessageBox.Show("Use a valid number", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //   txtThresholdOffset.Text = thresholdOffset.ToString();
+            //}
 
         }
 
@@ -5624,6 +5756,64 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             string value = "";
             m_AcqDevice.SetFeatureValue("flatfieldCalibrationFPN", true);
             Console.WriteLine(value);
+        }
+
+        private void btnBlueBackground_Click(object sender, EventArgs e)
+        {
+            btnBlueBackground.BackColor = Color.LightGreen;
+            btnBlackBackground.BackColor = Color.Silver;
+            btnBrownBackground.BackColor = Color.Silver;
+            backgroundColor = "BLUE";
+            settings.BackgroundColor = backgroundColor;
+        }
+
+        private void btnBrownBackground_Click(object sender, EventArgs e)
+        {
+            btnBlueBackground.BackColor = Color.Silver;
+            btnBlackBackground.BackColor = Color.Silver;
+            btnBrownBackground.BackColor = Color.LightGreen;
+            backgroundColor = "BROWN";
+            settings.BackgroundColor = backgroundColor;
+        }
+
+        private void btnBlackBackground_Click(object sender, EventArgs e)
+        {
+            btnBlueBackground.BackColor = Color.Silver;
+            btnBlackBackground.BackColor = Color.LightGreen;
+            btnBrownBackground.BackColor = Color.Silver;
+            backgroundColor = "BLACK";
+            settings.BackgroundColor = backgroundColor;
+        }
+
+        private void txtThresholdOffset_Click(object sender, EventArgs e)
+        {
+            //ShowInputKeyboard((TextBox)sender, 0);
+        }
+
+        private void btnThresholdOffsetIncrement_Click(object sender, EventArgs e)
+        {
+            thresholdOffset += 1;
+            if (thresholdOffset >= 20)
+            {
+                thresholdOffset = 20;
+            }
+
+            txtThresholdOffset.Text = thresholdOffset.ToString();
+
+            settings.ThresholdOffset = thresholdOffset;
+        }
+
+        private void btnThresholdOffsetDecrement_Click(object sender, EventArgs e)
+        {
+            thresholdOffset -= 1;
+            if (thresholdOffset <= -20)
+            {
+                thresholdOffset = -20;
+            }
+
+            txtThresholdOffset.Text = thresholdOffset.ToString();
+
+            settings.ThresholdOffset = thresholdOffset;
         }
     }
 }

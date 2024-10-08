@@ -75,6 +75,9 @@
     <SignManifests>false</SignManifests>
   </PropertyGroup>
   <PropertyGroup />
+  <PropertyGroup>
+    <ApplicationIcon>icon-removebg-preview.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Accessibility" />
     <Reference Include="CsvHelper, Version=31.0.0.0, Culture=neutral, PublicKeyToken=8c4959082be5c823, processorArchitecture=MSIL">
@@ -314,7 +317,9 @@
     <Content Include="cvextern.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="icon-removebg-preview.ico" />
     <Content Include="MetroFramework.txt" />
+    <None Include="Resources\SIOS-LOGOTIPO-AZUL INGENIERIA.png" />
     <None Include="Resources\SIOS-LOGOTIPO-AZUL-SIMPLE.png" />
     <None Include="Resources\SIOS-LOGOTIPO-AZUL.png" />
     <EmbeddedResource Include="Common\CSharp\AbortDlg.resx">
