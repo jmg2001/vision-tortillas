@@ -37,9 +37,9 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GigECameraDemoDlg));
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea5 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend5 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series5 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.StatusLabel = new System.Windows.Forms.ToolStripLabel();
             this.StatusLabelInfo = new System.Windows.Forms.ToolStripLabel();
@@ -109,6 +109,10 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.txtUser = new System.Windows.Forms.TextBox();
             this.configurationPage = new System.Windows.Forms.TabPage();
             this.gbThreshold = new System.Windows.Forms.GroupBox();
+            this.btnThresholdOffsetDecrement = new System.Windows.Forms.Button();
+            this.label38 = new System.Windows.Forms.Label();
+            this.btnThresholdOffsetIncrement = new System.Windows.Forms.Button();
+            this.txtThresholdOffset = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
             this.btnAutoThreshold = new System.Windows.Forms.Button();
             this.btnManualThreshold = new System.Windows.Forms.Button();
@@ -230,10 +234,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.tmrMB = new System.Windows.Forms.Timer(this.components);
-            this.txtThresholdOffset = new System.Windows.Forms.TextBox();
-            this.label38 = new System.Windows.Forms.Label();
-            this.btnThresholdOffsetDecrement = new System.Windows.Forms.Button();
-            this.btnThresholdOffsetIncrement = new System.Windows.Forms.Button();
             this.toolStrip1.SuspendLayout();
             this.gbOperationControls.SuspendLayout();
             this.groupBox15.SuspendLayout();
@@ -1073,6 +1073,57 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.gbThreshold.TabIndex = 123;
             this.gbThreshold.TabStop = false;
             this.gbThreshold.Text = "Binary Process";
+            // 
+            // btnThresholdOffsetDecrement
+            // 
+            this.btnThresholdOffsetDecrement.BackColor = System.Drawing.Color.Silver;
+            this.btnThresholdOffsetDecrement.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnThresholdOffsetDecrement.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnThresholdOffsetDecrement.Location = new System.Drawing.Point(248, 204);
+            this.btnThresholdOffsetDecrement.Name = "btnThresholdOffsetDecrement";
+            this.btnThresholdOffsetDecrement.Size = new System.Drawing.Size(62, 42);
+            this.btnThresholdOffsetDecrement.TabIndex = 136;
+            this.btnThresholdOffsetDecrement.Text = "-";
+            this.btnThresholdOffsetDecrement.UseVisualStyleBackColor = false;
+            this.btnThresholdOffsetDecrement.Click += new System.EventHandler(this.btnThresholdOffsetDecrement_Click);
+            // 
+            // label38
+            // 
+            this.label38.AutoSize = true;
+            this.label38.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label38.Location = new System.Drawing.Point(42, 188);
+            this.label38.Name = "label38";
+            this.label38.Size = new System.Drawing.Size(69, 24);
+            this.label38.TabIndex = 131;
+            this.label38.Text = "Offset:";
+            // 
+            // btnThresholdOffsetIncrement
+            // 
+            this.btnThresholdOffsetIncrement.BackColor = System.Drawing.Color.Silver;
+            this.btnThresholdOffsetIncrement.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnThresholdOffsetIncrement.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnThresholdOffsetIncrement.Location = new System.Drawing.Point(248, 161);
+            this.btnThresholdOffsetIncrement.Name = "btnThresholdOffsetIncrement";
+            this.btnThresholdOffsetIncrement.Size = new System.Drawing.Size(62, 42);
+            this.btnThresholdOffsetIncrement.TabIndex = 135;
+            this.btnThresholdOffsetIncrement.Text = "+";
+            this.btnThresholdOffsetIncrement.UseVisualStyleBackColor = false;
+            this.btnThresholdOffsetIncrement.Click += new System.EventHandler(this.btnThresholdOffsetIncrement_Click);
+            // 
+            // txtThresholdOffset
+            // 
+            this.txtThresholdOffset.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.txtThresholdOffset.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtThresholdOffset.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtThresholdOffset.Location = new System.Drawing.Point(132, 181);
+            this.txtThresholdOffset.MaxLength = 5;
+            this.txtThresholdOffset.Name = "txtThresholdOffset";
+            this.txtThresholdOffset.ReadOnly = true;
+            this.txtThresholdOffset.Size = new System.Drawing.Size(110, 44);
+            this.txtThresholdOffset.TabIndex = 130;
+            this.txtThresholdOffset.Text = "0";
+            this.txtThresholdOffset.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtThresholdOffset.Click += new System.EventHandler(this.txtThresholdOffset_Click);
             // 
             // label7
             // 
@@ -2140,25 +2191,25 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.trendChart.BorderlineColor = System.Drawing.Color.Black;
             this.trendChart.BorderlineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Solid;
             this.trendChart.BorderlineWidth = 2;
-            chartArea5.AxisX.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Seconds;
-            chartArea5.AxisX.LabelStyle.Format = "HH:mm:ss";
-            chartArea5.AxisX.LabelStyle.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Auto;
-            chartArea5.AxisX.ScrollBar.Enabled = false;
-            chartArea5.AxisY.Maximum = 300D;
-            chartArea5.Name = "ChartArea1";
-            this.trendChart.ChartAreas.Add(chartArea5);
-            legend5.Docking = System.Windows.Forms.DataVisualization.Charting.Docking.Top;
-            legend5.Name = "Legend1";
-            this.trendChart.Legends.Add(legend5);
+            chartArea1.AxisX.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Seconds;
+            chartArea1.AxisX.LabelStyle.Format = "HH:mm:ss";
+            chartArea1.AxisX.LabelStyle.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Auto;
+            chartArea1.AxisX.ScrollBar.Enabled = false;
+            chartArea1.AxisY.Maximum = 300D;
+            chartArea1.Name = "ChartArea1";
+            this.trendChart.ChartAreas.Add(chartArea1);
+            legend1.Docking = System.Windows.Forms.DataVisualization.Charting.Docking.Top;
+            legend1.Name = "Legend1";
+            this.trendChart.Legends.Add(legend1);
             this.trendChart.Location = new System.Drawing.Point(8, 0);
             this.trendChart.Name = "trendChart";
-            series5.ChartArea = "ChartArea1";
-            series5.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series5.Legend = "Legend1";
-            series5.LegendText = "Max Diameter";
-            series5.Name = "MaxDiameterSerie";
-            series5.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
-            this.trendChart.Series.Add(series5);
+            series1.ChartArea = "ChartArea1";
+            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series1.Legend = "Legend1";
+            series1.LegendText = "Max Diameter";
+            series1.Name = "MaxDiameterSerie";
+            series1.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
+            this.trendChart.Series.Add(series1);
             this.trendChart.Size = new System.Drawing.Size(806, 480);
             this.trendChart.TabIndex = 0;
             this.trendChart.Text = "chart1";
@@ -2564,57 +2615,6 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             this.tmrMB.Enabled = true;
             this.tmrMB.Interval = 1000;
             this.tmrMB.Tick += new System.EventHandler(this.tmrMB_Tick);
-            // 
-            // txtThresholdOffset
-            // 
-            this.txtThresholdOffset.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.txtThresholdOffset.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtThresholdOffset.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtThresholdOffset.Location = new System.Drawing.Point(132, 181);
-            this.txtThresholdOffset.MaxLength = 5;
-            this.txtThresholdOffset.Name = "txtThresholdOffset";
-            this.txtThresholdOffset.ReadOnly = true;
-            this.txtThresholdOffset.Size = new System.Drawing.Size(110, 44);
-            this.txtThresholdOffset.TabIndex = 130;
-            this.txtThresholdOffset.Text = "0";
-            this.txtThresholdOffset.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.txtThresholdOffset.Click += new System.EventHandler(this.txtThresholdOffset_Click);
-            // 
-            // label38
-            // 
-            this.label38.AutoSize = true;
-            this.label38.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label38.Location = new System.Drawing.Point(42, 188);
-            this.label38.Name = "label38";
-            this.label38.Size = new System.Drawing.Size(69, 24);
-            this.label38.TabIndex = 131;
-            this.label38.Text = "Offset:";
-            // 
-            // btnThresholdOffsetDecrement
-            // 
-            this.btnThresholdOffsetDecrement.BackColor = System.Drawing.Color.Silver;
-            this.btnThresholdOffsetDecrement.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnThresholdOffsetDecrement.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnThresholdOffsetDecrement.Location = new System.Drawing.Point(248, 204);
-            this.btnThresholdOffsetDecrement.Name = "btnThresholdOffsetDecrement";
-            this.btnThresholdOffsetDecrement.Size = new System.Drawing.Size(62, 42);
-            this.btnThresholdOffsetDecrement.TabIndex = 136;
-            this.btnThresholdOffsetDecrement.Text = "-";
-            this.btnThresholdOffsetDecrement.UseVisualStyleBackColor = false;
-            this.btnThresholdOffsetDecrement.Click += new System.EventHandler(this.btnThresholdOffsetDecrement_Click);
-            // 
-            // btnThresholdOffsetIncrement
-            // 
-            this.btnThresholdOffsetIncrement.BackColor = System.Drawing.Color.Silver;
-            this.btnThresholdOffsetIncrement.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnThresholdOffsetIncrement.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnThresholdOffsetIncrement.Location = new System.Drawing.Point(248, 161);
-            this.btnThresholdOffsetIncrement.Name = "btnThresholdOffsetIncrement";
-            this.btnThresholdOffsetIncrement.Size = new System.Drawing.Size(62, 42);
-            this.btnThresholdOffsetIncrement.TabIndex = 135;
-            this.btnThresholdOffsetIncrement.Text = "+";
-            this.btnThresholdOffsetIncrement.UseVisualStyleBackColor = false;
-            this.btnThresholdOffsetIncrement.Click += new System.EventHandler(this.btnThresholdOffsetIncrement_Click);
             // 
             // GigECameraDemoDlg
             // 

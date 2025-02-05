@@ -19,6 +19,7 @@ using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Security;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 
@@ -36,6 +37,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
 {
     public partial class GigECameraDemoDlg : Form
     {
+        bool pruebas = false;
         string backgroundColor;
 
         List<string> camera1Series = new List<string>();
@@ -640,14 +642,14 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 }
             }
 
-            sizes.Add("SIZE");
-            sizes.Add("OK");
-            sizes.Add("BIG");
-            sizes.Add("SMALL");
-            sizes.Add("OVAL");
-            sizes.Add("OVERSIZE");
-            sizes.Add("SHAPE");
-            sizes.Add("DOUBLE");
+            sizes.Add("SIZE");  // 0
+            sizes.Add("OK");    // 1
+            sizes.Add("BIG");   // 2
+            sizes.Add("SMALL"); // 3
+            sizes.Add("OVAL");  // 4
+            sizes.Add("OVERSIZE");  // 5
+            sizes.Add("SHAPE"); // 6
+            sizes.Add("DOUBLE");    // 7
 
             brushes.Add(new MCvScalar(0, 0, 255));
             brushes.Add(new MCvScalar(18, 193, 18));
@@ -3827,6 +3829,8 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 btnProcessImage.Text = "PROCESS FRAME";
                 btnProcessImage.Enabled = false;
                 btnProcessImage.BackColor = Color.DarkGray;
+
+                pruebas = true;
             }
 
         }
@@ -5045,6 +5049,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
                 DeviceLost();
                 tmrMB.Enabled = false;
             }
+            
         }
 
         private void VerifyCameraConnection()
@@ -5441,6 +5446,7 @@ namespace DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo
             btnLogin.BackColor = Color.Silver;
             btnLogin.Enabled = true;
 
+            currentUser = null;
             userLogged = "No logged";
             lblUserLogged.Text = userLogged;
 

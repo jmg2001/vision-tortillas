@@ -61,7 +61,6 @@ C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\DALSA.SaperaLT.Demos.NET.CS
 C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp.KeyBoard.resources
 C:\Users\Jesús\Documents\vision-tortillas\bin\Debug\MetroFramework.dll
 C:\Users\Jesús\Documents\vision-tortillas\bin\Debug\MetroFramework.Fonts.dll
-C:\Users\Jesús\Documents\vision-tortillas\bin\Debug\DALSA.SaperaLT.SapClassBasic.dll
 C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.ChooseCameraDlg.resources
 C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.InputDlg2.resources
 C:\Users\Jesús\Documents\vision-tortillas\obj\Debug\DALSA.SaperaLT.Demos.NET.CSharp.GigECameraDemo.Common.CSharp.MenuParameters.resources
